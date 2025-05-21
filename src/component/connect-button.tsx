@@ -13,16 +13,12 @@ export function ConnectButton({ wallets }: Props) {
     <PrimitiveConnectButton
       client={FlowClient}
       wallets={wallets}
-      theme={"dark"}
+      theme="dark"
       connectModal={{
         size: "compact",
         showThirdwebBranding: false,
-        title: "Connect your wallet",
-        welcomeScreen() {
-          return <span>blabla</span>;
-        },
       }}
-      connectButton={{ label: "Connect your wallet" }}
+      connectButton={{ label: "Sign in" }}
       supportedTokens={{
         "4202": [
           {
@@ -35,19 +31,19 @@ export function ConnectButton({ wallets }: Props) {
             address: "0xed875CABEE46D734F38B5ED453ED1569347c0da8",
             name: "USDC",
             symbol: "usdc",
-            // icon: lskIcon,
           },
         ],
       }}
       appMetadata={{ name: "Lisk App", description: "Lisk App" }}
-      // detailsButton={{ render: () => { return <button>Bla </button>} }} // render the details button after logged in
       signInButton={{
         label: "Sign in",
         style: { backgroundColor: "#000000", color: "#ffffff" },
       }}
-      detailsModal={{}}
+      detailsModal={{
+        showBalanceInFiat: "USD",
+      }}
       accountAbstraction={{
-        chain: liskSepolia, // replace with the chain you want
+        chain: liskSepolia,
         sponsorGas: true,
       }}
     />
