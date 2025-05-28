@@ -5,11 +5,9 @@
   "description": "Lisk Flow SDK Proof of Concept",
   "author": "Lisk Ltd <admin@lisk.com>",
   "license": "Apache-2.0",
-  "main": "dist/index.cjs",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsup",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

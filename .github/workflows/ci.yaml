@@ -34,5 +34,11 @@ jobs:
       - name: 🏗️ Build SDK
         run: pnpm --filter flow-sdk build
 
+      - name: 🔍 Lint
+        run: pnpm lint
+
+      - name: 🎨 Check formatting
+        run: pnpm format:check
+
       - name: ✅ Run Tests
         run: pnpm --filter flow-sdk test
