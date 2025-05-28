@@ -1,64 +1,79 @@
+# Flow Monorepo
 
-![tw-banner](https://github.com/thirdweb-example/vite-starter/assets/57885104/cfe2164b-b50b-4d8e-aaaa-31331da2d647)
+This is a TypeScript monorepo for developing a Flow SDK.
 
-# vite-starter
+## 📦 Packages
 
-Starter template to build onchain applications with [thirdweb](https://thirdweb.com) and [vite](https://vitejs.dev/). 
+### [`flow-sdk`](./packages/flow-sdk)
 
-## Features 
+> Wallet, transaction, chain and contract logic, including optional React components and hooks.
 
-- thirdweb & vite pre-installed and configured to reduce setup steps
-- ConnectButton to onboard users to your application
+- Written in TypeScript
+- Built with `tsup` (ESM + CJS)
+- Contains both core logic (headless) and React UI/Hooks
 
-## Installation
+---
 
-Install the template using [thirdweb create](https://portal.thirdweb.com/cli/create)
+## 🌐 Apps
 
-```bash
-  npx thirdweb create app --vite
-```
+### [`example-app`](./apps/example-app)
 
-## Environment Variables
+> Example Next.js 14 app demonstrating how to use the `flow-sdk`.
 
-To run this project, you will need to add the following environment variables to your .env file:
+- React 19+ App Router
+- Tailwind CSS
+- Consumes `flow-sdk` directly
 
-`CLIENT_ID`
+---
 
-To learn how to create a client ID, refer to the [client documentation](https://portal.thirdweb.com/typescript/v5/client). 
+## 🧰 Tooling
 
-## Run locally
+- **Monorepo:** PNPM Workspaces
+- **Build:** `tsup` (for SDK bundling)
+- **Testing:** `jest`, `ts-jest`
+- **Linting:** `eslint`, `prettier`
+- **TypeScript:** Strict mode with project references
 
-Install dependencies
+---
 
-```bash
-yarn
-```
+## 🛠 Getting Started
 
-Start development server
-
-```bash
-yarn dev
-```
-
-Create a production build
+### 1. Install Dependencies
 
 ```bash
-yarn build
+pnpm install
 ```
 
-Preview the production build
+### 2. Build SDK
 
 ```bash
-yarn preview
+pnpm --filter flow-sdk build
 ```
 
-## Additional Resources
+### 3. Run Example App
 
-- [Documentation](https://portal.thirdweb.com/typescript/v5)
-- [Templates](https://thirdweb.com/templates)
-- [YouTube](https://www.youtube.com/c/thirdweb)
-- [Blog](https://blog.thirdweb.com)
+```bash
+pnpm --filter example-app dev
+```
 
-## Need help?
+## 🧪 Test SDK
 
-For help or feedback, please [visit our support site](https://thirdweb.com/support)
+```bash
+pnpm --filter flow-sdk test
+```
+
+## 📁 Project Structure
+
+```bash
+your-monorepo/
+├── apps/
+│   └── example-app/        # Next.js app using the SDK
+├── packages/
+│   └── flow-sdk/           # Core logic + React wrappers built on thirdweb
+├── pnpm-workspace.yaml     # Workspace definitions
+├── tsconfig.json           # Base TS config
+├── jest.config.js          # Jest config for SDK testing
+├── .eslintrc.js            # Linting rules
+└── .prettierrc             # Prettier formatting
+
+```

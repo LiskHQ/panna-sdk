@@ -1,0 +1,14 @@
+{
+  "name": "flow-sdk",
+  "version": "0.1.0",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "tsup": "^7.x",
+    "typescript": "^5.x"
+  }
+}
