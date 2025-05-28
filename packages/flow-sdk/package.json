@@ -8,7 +8,7 @@
     "build": "tsup"
   },
   "devDependencies": {
-    "tsup": "^7.x",
-    "typescript": "^5.x"
+    "tsup": "^7.3.0",
+    "typescript": "^5.8.3"
   }
 }
