@@ -1,6 +1,15 @@
 {
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "flow-sdk": ["./packages/flow-sdk/src"],
+      "flow-sdk/*": ["./packages/flow-sdk/src/*"]
+    }
   },
+  "references": [
+    { "path": "./packages/flow-sdk" },
+    { "path": "./apps/example-app" }
+  ],
+  "files": [],
   "exclude": ["node_modules", "dist"]
 }
