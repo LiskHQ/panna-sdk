@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { createThirdwebClient } from 'thirdweb';
 import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
 

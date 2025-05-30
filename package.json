@@ -57,7 +57,6 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",
-    "flow-sdk": "^0.3.1",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.7",
     "thirdweb": "^5.101.1"
