@@ -1,0 +1,4 @@
+- [Bug PR Template](?expand=1&template=bug.md)
+- [Feature PR Template](?expand=1&template=feature.md)
+- [Improvement PR Template](?expand=1&template=improvement.md)
+- [Release PR Template](?expand=1&template=release.md)
