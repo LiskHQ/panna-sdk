@@ -24,4 +24,5 @@ dist-ssr
 *.sw?
 
 # secrets
-.env
+.env*
+!.env.example
