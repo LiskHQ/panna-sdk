@@ -17,7 +17,9 @@ export default [
       '@typescript-eslint': typescript
     },
     rules: {
-      '@typescript-eslint/no-unused-vars': 'error'
+      ...typescript.configs.recommended.rules,
+      '@typescript-eslint/no-unused-vars': 'error',
+      'no-undef': 'off' // TypeScript handles this
     }
   }
 ];
