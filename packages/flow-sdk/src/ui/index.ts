@@ -1,3 +1,3 @@
-export * from './flow-provider.js';
-export * from './components/index.js';
-export * from './hooks/index.js';
+export * from './flow-provider';
+export * from './components/index';
+export * from './hooks/index';
