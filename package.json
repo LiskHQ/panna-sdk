@@ -37,6 +37,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
@@ -51,6 +52,7 @@
     "jest": "^29.7.0",
     "lint-staged": "^16.1.0",
     "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.12",
     "ts-jest": "^29.3.4",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"

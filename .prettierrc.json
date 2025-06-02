@@ -3,5 +3,17 @@
   "singleQuote": true,
   "printWidth": 80,
   "tabWidth": 2,
-  "trailingComma": "none"
+  "trailingComma": "none",
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ],
+  "tailwindFunctions": ["clsx"],
+  "importOrder": [
+    "^@/app/(.*)$",
+    "^@/components/(.*)$",
+    "^@/lib/(.*)$",
+    "^@/(.*)$",
+    "^[./]"
+  ]
 }
