@@ -12,12 +12,6 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@eslint/js": "^9.28.0",
-    "@types/react": "^19.1.6",
-    "@typescript-eslint/eslint-plugin": "^8.32.1",
-    "@typescript-eslint/parser": "^8.32.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
     "thirdweb": "^5.101.1"
   },
   "peerDependencies": {
@@ -26,7 +20,13 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "eslint": "^9",
+    "@eslint/js": "^9.28.0",
+    "@types/jest": "^29.5.14",
+    "@types/react": "^19.1.6",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
+    "eslint": "^9.28.0",
+    "ts-jest": "^29.3.4",
     "tsup": "^7.3.0",
     "typescript": "^5.8.3"
   }
