@@ -12,7 +12,8 @@
     "flow-sdk": "workspace:*",
     "next": "15.3.2",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "thirdweb": "^5.102.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

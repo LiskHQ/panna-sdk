@@ -103,6 +103,9 @@ importers:
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      thirdweb:
+        specifier: ^5.102.3
+        version: 5.102.3(@hey-api/openapi-ts@0.69.2(typescript@5.8.3))(@types/react-dom@19.1.5(@types/react@19.1.6))(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -135,10 +138,10 @@ importers:
   packages/flow-sdk:
     dependencies:
       react:
-        specifier: '>=18.0.0'
+        specifier: ^18.0.0 || ^19.0.0
         version: 19.1.0
       react-dom:
-        specifier: '>=18.0.0'
+        specifier: ^18.0.0 || ^19.0.0
         version: 19.1.0(react@19.1.0)
       thirdweb:
         specifier: ^5.102.3
