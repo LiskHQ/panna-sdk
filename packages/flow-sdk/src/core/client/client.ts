@@ -5,6 +5,7 @@ import {
 } from 'thirdweb';
 
 export type CreateFlowClientOptions = CreateThirdwebClientOptions;
+export type FlowClient = ThirdwebClient;
 
 /**
  * Creates a Flow client using the provided client ID (client-side) or secret key (server-side).
@@ -21,10 +22,6 @@ export type CreateFlowClientOptions = CreateThirdwebClientOptions;
  * const client = createFlowClient({ secretKey: "your-secret-key" });
  * ```
  */
-export function createFlowClient(
-  options: CreateFlowClientOptions
-): ThirdwebClient {
+export function createFlowClient(options: CreateFlowClientOptions): FlowClient {
   return createThirdwebClient(options);
 }
-
-export type { ThirdwebClient as FlowClient };
