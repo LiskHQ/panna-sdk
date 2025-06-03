@@ -24,6 +24,13 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "dependencies": {
+    "thirdweb": "^5.101.1"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
   "peerDependenciesMeta": {
     "react": {
       "optional": true
@@ -31,11 +38,6 @@
     "react-dom": {
       "optional": true
     }
-  },
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "thirdweb": "^5.0.0"
   },
   "devDependencies": {
     "tsup": "^7.3.0",
