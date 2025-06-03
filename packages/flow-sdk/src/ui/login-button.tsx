@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
 import { createFlowClient } from '../core';
+import { liskTheme } from './theme';
 
 export type LoginButtonProps = Omit<ConnectButtonProps, 'client'>;
 
@@ -17,6 +18,7 @@ export function LoginButton(props: LoginButtonProps) {
     <ConnectButton
       client={client}
       connectButton={{ label: 'Sign in' }}
+      theme={liskTheme}
       {...props}
     />
   );
