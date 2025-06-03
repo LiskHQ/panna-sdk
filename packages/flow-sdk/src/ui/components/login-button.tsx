@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
-import { createFlowClient } from '../core';
+import { createFlowClient } from '../../core';
 
 export type LoginButtonProps = Omit<ConnectButtonProps, 'client'>;
 
