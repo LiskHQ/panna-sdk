@@ -7,7 +7,6 @@ export type FlowProviderProps = {
   clientId?: string;
 };
 
-// Create context for the Flow client
 export const FlowClientContext = createContext<FlowClient | null>(null);
 
 /**
@@ -41,8 +40,8 @@ export function FlowProvider(props: FlowProviderProps) {
   }, [clientId]);
 
   return (
-    <FlowClientContext.Provider value={client}>
+    <FlowClientContext value={client}>
       <ThirdwebProvider>{children}</ThirdwebProvider>
-    </FlowClientContext.Provider>
+    </FlowClientContext>
   );
 }
