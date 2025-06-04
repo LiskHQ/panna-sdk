@@ -9,7 +9,7 @@ import { FlowClientContext } from '../components/flow-provider';
  *
  * @example
  * ```tsx
- * const MyComponent = () => {
+ * function MyComponent() {
  *   const client = useFlowClient();
  *
  *   if (!client) {
@@ -18,7 +18,7 @@ import { FlowClientContext } from '../components/flow-provider';
  *
  *   // Use client for custom logic
  *   return <div>Connected with client ID: {client.clientId}</div>;
- * };
+ * }
  * ```
  */
 export function useFlowClient(): FlowClient | null {
