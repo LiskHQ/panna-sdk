@@ -6,6 +6,7 @@ export {
   ChainOptions,
   getRpcUrlForChain as getRPCUrlForChain,
   lisk,
+  liskEcosystemWallet,
   liskSepolia,
   getChainInfo,
   type CreateFlowClientOptions,

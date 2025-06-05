@@ -17,6 +17,7 @@ export function LoginButton(props: LoginButtonProps) {
   return (
     <ConnectButton
       client={client}
+      wallets={props.wallets}
       connectButton={{ label: 'Sign in' }}
       theme={liskTheme}
       appMetadata={{
@@ -24,7 +25,7 @@ export function LoginButton(props: LoginButtonProps) {
         logoUrl: 'https://portal-assets.lisk.com/logo/lisk-profile-w.svg'
       }}
       connectModal={{
-        titleIcon: 'https://portal-assets.lisk.com/logo/lisk-profile-w.svg'
+        showThirdwebBranding: false
       }}
       {...props}
     />
