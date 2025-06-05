@@ -51,7 +51,7 @@ export function describeChain(chainOptions: ChainOptions | number): Chain {
  * ```
  * @chain
  */
-export function getRPCUrlForChain(chain: Chain): string {
+export function getRpcUrlForChain(chain: Chain): string {
   return chain.rpc;
 }
 

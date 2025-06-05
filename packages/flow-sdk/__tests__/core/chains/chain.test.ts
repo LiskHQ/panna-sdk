@@ -1,7 +1,7 @@
 import {
   describeChain,
   getChainInfo,
-  getRPCUrlForChain
+  getRpcUrlForChain
 } from '../../../src/core/chains/chain';
 import { Chain } from '../../../src/core/chains/types';
 
@@ -42,7 +42,7 @@ describe('chains', () => {
         rpc: 'https://my-rpc.com',
         nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }
       };
-      const rpcUrl = getRPCUrlForChain(chain);
+      const rpcUrl = getRpcUrlForChain(chain);
       expect(rpcUrl).toBe('https://my-rpc.com');
     });
 
@@ -52,7 +52,7 @@ describe('chains', () => {
         nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
         rpc: 'https://my-rpc.com'
       };
-      const rpcUrl = getRPCUrlForChain(chain);
+      const rpcUrl = getRpcUrlForChain(chain);
       expect(rpcUrl).toBe('https://my-rpc.com');
     });
   });
