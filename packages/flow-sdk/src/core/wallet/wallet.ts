@@ -8,7 +8,7 @@ import {
   preAuthenticate,
   unlinkProfile
 } from 'thirdweb/wallets';
-import { type FlowClient } from '../client/client';
+import { type FlowClient } from '../client';
 import {
   type AuthParams,
   type EmailPrepareParams,

@@ -1,4 +1,4 @@
-import { type FlowClient } from '../client/client';
+import { type FlowClient } from '../client';
 
 // Enum for allowed ecosystem IDs
 export enum EcosystemId {
