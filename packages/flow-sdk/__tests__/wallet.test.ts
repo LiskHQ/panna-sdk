@@ -1,17 +1,15 @@
 import * as thirdwebWallets from 'thirdweb/wallets';
 import { type FlowClient } from '../src/core/client/client';
+import { EcosystemId, LoginStrategy } from '../src/core/wallet/types';
 import {
   login,
-  loginWithRedirect,
   prepareLogin,
   createAccount,
   getEmail,
   getPhoneNumber,
   linkAccount,
   getLinkedAccounts,
-  unlinkAccount,
-  EcosystemId,
-  LoginStrategy
+  unlinkAccount
 } from '../src/core/wallet/wallet';
 
 // Mock thirdweb/wallets module
@@ -37,7 +35,7 @@ describe('Wallet Functions - Unit Tests', () => {
       expect(LoginStrategy.PHONE).toBe('phone');
     });
 
-    it('should only have EMAIL and PHONE strategies', () => {
+    it('should have all supported strategies', () => {
       const strategies = Object.values(LoginStrategy);
       expect(strategies).toHaveLength(2);
       expect(strategies).toContain('email');
@@ -54,8 +52,9 @@ describe('Wallet Functions - Unit Tests', () => {
 
       const params = {
         client: mockClient,
-        strategy: 'google' as const,
-        mode: 'popup' as const,
+        strategy: 'email' as const,
+        email: 'test@example.com',
+        verificationCode: '123456',
         ecosystem: testEcosystem
       };
 
@@ -82,30 +81,6 @@ describe('Wallet Functions - Unit Tests', () => {
       const result = await login(params);
 
       expect(thirdwebWallets.authenticate).toHaveBeenCalledWith(params);
-      expect(result).toEqual(mockAuthResult);
-    });
-  });
-
-  describe('loginWithRedirect', () => {
-    it('should call authenticateWithRedirect with correct parameters', async () => {
-      const mockAuthResult = { success: true };
-      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
-        mockAuthResult
-      );
-
-      const params = {
-        client: mockClient,
-        strategy: 'google' as const,
-        redirectUrl: 'https://example.com/callback',
-        mode: 'redirect' as const,
-        ecosystem: testEcosystem
-      };
-
-      const result = await loginWithRedirect(params);
-
-      expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
-        params
-      );
       expect(result).toEqual(mockAuthResult);
     });
   });
@@ -172,19 +147,18 @@ describe('Wallet Functions - Unit Tests', () => {
       const mockEmail = 'test@example.com';
       (thirdwebWallets.getUserEmail as jest.Mock).mockResolvedValue(mockEmail);
 
-      const result = await getEmail(mockClient, testEcosystem);
+      const params = { client: mockClient, ecosystem: testEcosystem };
+      const result = await getEmail(params);
 
-      expect(thirdwebWallets.getUserEmail).toHaveBeenCalledWith({
-        client: mockClient,
-        ecosystem: testEcosystem
-      });
+      expect(thirdwebWallets.getUserEmail).toHaveBeenCalledWith(params);
       expect(result).toBe(mockEmail);
     });
 
     it('should return undefined when email is not available', async () => {
       (thirdwebWallets.getUserEmail as jest.Mock).mockResolvedValue(undefined);
 
-      const result = await getEmail(mockClient, testEcosystem);
+      const params = { client: mockClient, ecosystem: testEcosystem };
+      const result = await getEmail(params);
 
       expect(result).toBeUndefined();
     });
@@ -197,12 +171,10 @@ describe('Wallet Functions - Unit Tests', () => {
         mockPhone
       );
 
-      const result = await getPhoneNumber(mockClient, testEcosystem);
+      const params = { client: mockClient, ecosystem: testEcosystem };
+      const result = await getPhoneNumber(params);
 
-      expect(thirdwebWallets.getUserPhoneNumber).toHaveBeenCalledWith({
-        client: mockClient,
-        ecosystem: testEcosystem
-      });
+      expect(thirdwebWallets.getUserPhoneNumber).toHaveBeenCalledWith(params);
       expect(result).toBe(mockPhone);
     });
 
@@ -211,7 +183,8 @@ describe('Wallet Functions - Unit Tests', () => {
         undefined
       );
 
-      const result = await getPhoneNumber(mockClient, testEcosystem);
+      const params = { client: mockClient, ecosystem: testEcosystem };
+      const result = await getPhoneNumber(params);
 
       expect(result).toBeUndefined();
     });
@@ -221,7 +194,7 @@ describe('Wallet Functions - Unit Tests', () => {
     it('should link profile with correct parameters and required ecosystem', async () => {
       const mockLinkResult = [
         { type: 'email', details: { email: 'test@example.com' } },
-        { type: 'google', details: {} }
+        { type: 'phone', details: { phoneNumber: '+1234567890' } }
       ];
       (thirdwebWallets.linkProfile as jest.Mock).mockResolvedValue(
         mockLinkResult
@@ -229,8 +202,9 @@ describe('Wallet Functions - Unit Tests', () => {
 
       const params = {
         client: mockClient,
-        strategy: 'google' as const,
-        mode: 'popup' as const,
+        strategy: 'email' as const,
+        email: 'test@example.com',
+        verificationCode: '123456',
         ecosystem: testEcosystem
       };
 
@@ -245,18 +219,16 @@ describe('Wallet Functions - Unit Tests', () => {
     it('should return linked profiles with required ecosystem', async () => {
       const mockProfiles = [
         { type: 'email', details: { email: 'test@example.com' } },
-        { type: 'google', details: { email: 'google@example.com' } }
+        { type: 'phone', details: { phoneNumber: '+1234567890' } }
       ];
       (thirdwebWallets.getProfiles as jest.Mock).mockResolvedValue(
         mockProfiles
       );
 
-      const result = await getLinkedAccounts(mockClient, testEcosystem);
+      const params = { client: mockClient, ecosystem: testEcosystem };
+      const result = await getLinkedAccounts(params);
 
-      expect(thirdwebWallets.getProfiles).toHaveBeenCalledWith({
-        client: mockClient,
-        ecosystem: testEcosystem
-      });
+      expect(thirdwebWallets.getProfiles).toHaveBeenCalledWith(params);
       expect(result).toEqual(mockProfiles);
     });
 
@@ -273,12 +245,10 @@ describe('Wallet Functions - Unit Tests', () => {
         partnerId: 'custom-partner-id'
       };
 
-      const result = await getLinkedAccounts(mockClient, customEcosystem);
+      const params = { client: mockClient, ecosystem: customEcosystem };
+      const result = await getLinkedAccounts(params);
 
-      expect(thirdwebWallets.getProfiles).toHaveBeenCalledWith({
-        client: mockClient,
-        ecosystem: customEcosystem
-      });
+      expect(thirdwebWallets.getProfiles).toHaveBeenCalledWith(params);
       expect(result).toEqual(mockProfiles);
     });
   });
@@ -288,7 +258,10 @@ describe('Wallet Functions - Unit Tests', () => {
       const mockUnlinkResult = [
         { type: 'email', details: { email: 'test@example.com' } }
       ];
-      const profileToUnlink = { type: 'google' as const, details: {} };
+      const profileToUnlink = {
+        type: 'phone' as const,
+        details: { phone: '+1234567890' }
+      };
 
       (thirdwebWallets.unlinkProfile as jest.Mock).mockResolvedValue(
         mockUnlinkResult

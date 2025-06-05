@@ -1,17 +1,18 @@
 import { createFlowClient } from '../src/core/client/client';
 import {
+  EcosystemId,
+  LoginStrategy,
+  type Account
+} from '../src/core/wallet/types';
+import {
   login,
-  loginWithRedirect,
   prepareLogin,
   createAccount,
   getEmail,
   getPhoneNumber,
   linkAccount,
   getLinkedAccounts,
-  unlinkAccount,
-  EcosystemId,
-  LoginStrategy,
-  type Account
+  unlinkAccount
 } from '../src/core/wallet/wallet';
 
 /**
@@ -36,11 +37,6 @@ describe('Wallet Functions - Integration Tests', () => {
     test('login should have correct function signature', () => {
       expect(typeof login).toBe('function');
       expect(login.length).toBe(1); // Expects 1 parameter
-    });
-
-    test('loginWithRedirect should have correct function signature', () => {
-      expect(typeof loginWithRedirect).toBe('function');
-      expect(loginWithRedirect.length).toBe(1); // Expects 1 parameter
     });
   });
 
@@ -80,7 +76,10 @@ describe('Wallet Functions - Integration Tests', () => {
       expect(typeof getEmail).toBe('function');
 
       // Without authentication, this returns undefined
-      const result = await getEmail(testClient, testEcosystem);
+      const result = await getEmail({
+        client: testClient,
+        ecosystem: testEcosystem
+      });
       expect(result).toBeUndefined();
     });
 
@@ -88,7 +87,10 @@ describe('Wallet Functions - Integration Tests', () => {
       expect(typeof getPhoneNumber).toBe('function');
 
       // Without authentication, this returns undefined
-      const result = await getPhoneNumber(testClient, testEcosystem);
+      const result = await getPhoneNumber({
+        client: testClient,
+        ecosystem: testEcosystem
+      });
       expect(result).toBeUndefined();
     });
 
@@ -159,8 +161,8 @@ describe('Wallet Functions - Integration Tests', () => {
       // These functions work with the client but require authentication
       // We're just verifying they accept the client parameter
       expect(typeof login).toBe('function');
-      expect(typeof loginWithRedirect).toBe('function');
       expect(typeof prepareLogin).toBe('function');
+      expect(typeof createAccount).toBe('function');
       expect(typeof getEmail).toBe('function');
       expect(typeof getPhoneNumber).toBe('function');
       expect(typeof linkAccount).toBe('function');

@@ -12,7 +12,6 @@ export {
   type FlowClient,
   // Wallet/Account functions
   login,
-  loginWithRedirect,
   createAccount,
   getLinkedAccounts,
   getEmail,
@@ -26,6 +25,16 @@ export {
   type Account,
   type AccountConnectionOptions,
   type AccountAuth,
-  type LinkedAccount
+  type LinkedAccount,
+  // Authentication types
+  type AuthParams,
+  type SingleStepAuthParams,
+  type MultiStepAuthParams,
+  type EmailAuthParams,
+  type PhoneAuthParams,
+  type EmailPrepareParams,
+  type PhonePrepareParams,
+  type EcosystemConfig,
+  type LoginStrategyType
 } from './core';
 export * from './ui';

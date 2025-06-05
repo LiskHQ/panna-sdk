@@ -1,73 +1,30 @@
 import {
   authenticate,
-  authenticateWithRedirect,
   ecosystemWallet,
   getProfiles,
   getUserEmail,
   getUserPhoneNumber,
   linkProfile,
   preAuthenticate,
-  unlinkProfile,
-  type Wallet,
-  type Profile,
-  type InAppWalletConnectionOptions,
-  type SingleStepAuthArgsType,
-  type MultiStepAuthArgsType,
-  type InAppWalletAuth
+  unlinkProfile
 } from 'thirdweb/wallets';
 import { type FlowClient } from '../client/client';
-
-// Enum for allowed ecosystem IDs
-export enum EcosystemId {
-  LISK = 'ecosystem.lisk'
-}
-
-// Enum for login strategies
-export const LoginStrategy = {
-  EMAIL: 'email',
-  PHONE: 'phone'
-} as const;
-
-// Re-export types with web2-friendly names
-export type Account = Wallet;
-export type AccountConnectionOptions = InAppWalletConnectionOptions;
-export type AccountAuth = InAppWalletAuth;
-export type LinkedAccount = Profile;
+import {
+  type AuthParams,
+  type EmailPrepareParams,
+  type PhonePrepareParams,
+  type Account,
+  type LinkedAccount,
+  EcosystemId
+} from './types';
 
 /**
  * Login a user with various authentication methods
  * @param params - Login parameters including client and authentication method
  * @returns Authenticated result
  */
-export async function login(
-  params: (SingleStepAuthArgsType | MultiStepAuthArgsType) & {
-    client: FlowClient;
-    ecosystem: {
-      id: EcosystemId;
-      partnerId: string;
-    };
-  }
-) {
-  return authenticate(params);
-}
-
-/**
- * Login a user and redirect to a specified URL
- * @param params - Login parameters including client, redirect URL, and authentication method
- */
-export async function loginWithRedirect(params: {
-  client: FlowClient;
-  strategy: AccountAuth;
-  redirectUrl: string;
-  mode: 'redirect';
-  ecosystem: {
-    id: EcosystemId;
-    partnerId: string;
-  };
-}) {
-  return authenticateWithRedirect(
-    params as Parameters<typeof authenticateWithRedirect>[0]
-  );
+export async function login(params: AuthParams) {
+  return authenticate(params as Parameters<typeof authenticate>[0]);
 }
 
 /**
@@ -76,27 +33,9 @@ export async function loginWithRedirect(params: {
  * @returns Pre-authentication result (void)
  */
 export async function prepareLogin(
-  params:
-    | {
-        client: FlowClient;
-        strategy: typeof LoginStrategy.EMAIL;
-        email: string;
-        ecosystem: {
-          id: EcosystemId;
-          partnerId: string;
-        };
-      }
-    | {
-        client: FlowClient;
-        strategy: typeof LoginStrategy.PHONE;
-        phoneNumber: string;
-        ecosystem: {
-          id: EcosystemId;
-          partnerId: string;
-        };
-      }
+  params: EmailPrepareParams | PhonePrepareParams
 ): Promise<void> {
-  return preAuthenticate(params);
+  return preAuthenticate(params as Parameters<typeof preAuthenticate>[0]);
 }
 
 /**
@@ -114,34 +53,32 @@ export function createAccount(
 
 /**
  * Get the user's email address
- * @param client - Flow client
- * @param ecosystem - Ecosystem configuration with partner ID
+ * @param params - Parameters including client and ecosystem configuration
  * @returns User's email address or undefined if not available
  */
-export async function getEmail(
-  client: FlowClient,
+export async function getEmail(params: {
+  client: FlowClient;
   ecosystem: {
     id: EcosystemId;
     partnerId: string;
-  }
-): Promise<string | undefined> {
-  return getUserEmail({ client, ecosystem });
+  };
+}): Promise<string | undefined> {
+  return getUserEmail(params as Parameters<typeof getUserEmail>[0]);
 }
 
 /**
  * Get the user's phone number
- * @param client - Flow client
- * @param ecosystem - Ecosystem configuration with partner ID
+ * @param params - Parameters including client and ecosystem configuration
  * @returns User's phone number or undefined if not available
  */
-export async function getPhoneNumber(
-  client: FlowClient,
+export async function getPhoneNumber(params: {
+  client: FlowClient;
   ecosystem: {
     id: EcosystemId;
     partnerId: string;
-  }
-): Promise<string | undefined> {
-  return getUserPhoneNumber({ client, ecosystem });
+  };
+}): Promise<string | undefined> {
+  return getUserPhoneNumber(params as Parameters<typeof getUserPhoneNumber>[0]);
 }
 
 /**
@@ -150,31 +87,24 @@ export async function getPhoneNumber(
  * @returns Updated list of linked profiles
  */
 export async function linkAccount(
-  params: (SingleStepAuthArgsType | MultiStepAuthArgsType) & {
-    client: FlowClient;
-    ecosystem: {
-      id: EcosystemId;
-      partnerId: string;
-    };
-  }
+  params: AuthParams
 ): Promise<LinkedAccount[]> {
-  return linkProfile(params);
+  return linkProfile(params as Parameters<typeof linkProfile>[0]);
 }
 
 /**
  * Get all linked accounts for the current user
- * @param client - Flow client
- * @param ecosystem - Ecosystem configuration with partner ID
+ * @param params - Parameters including client and ecosystem configuration
  * @returns List of linked accounts
  */
-export async function getLinkedAccounts(
-  client: FlowClient,
+export async function getLinkedAccounts(params: {
+  client: FlowClient;
   ecosystem: {
     id: EcosystemId;
     partnerId: string;
-  }
-): Promise<LinkedAccount[]> {
-  return getProfiles({ client, ecosystem });
+  };
+}): Promise<LinkedAccount[]> {
+  return getProfiles(params as Parameters<typeof getProfiles>[0]);
 }
 
 /**
@@ -190,5 +120,5 @@ export async function unlinkAccount(params: {
     partnerId: string;
   };
 }): Promise<LinkedAccount[]> {
-  return unlinkProfile(params);
+  return unlinkProfile(params as Parameters<typeof unlinkProfile>[0]);
 }
