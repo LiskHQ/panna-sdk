@@ -31,7 +31,7 @@ export const LoginStrategy = {
 // Re-export types with web2-friendly names
 export type Account = Wallet;
 export type AccountConnectionOptions = InAppWalletConnectionOptions;
-export type LoginMethod = InAppWalletAuth;
+export type AccountAuth = InAppWalletAuth;
 export type LinkedAccount = Profile;
 
 /**
@@ -57,7 +57,7 @@ export async function login(
  */
 export async function loginWithRedirect(params: {
   client: FlowClient;
-  strategy: LoginMethod;
+  strategy: AccountAuth;
   redirectUrl: string;
   mode: 'redirect';
   ecosystem: {

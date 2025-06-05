@@ -25,7 +25,7 @@ export {
   LoginStrategy,
   type Account,
   type AccountConnectionOptions,
-  type LoginMethod,
+  type AccountAuth,
   type LinkedAccount
 } from './core';
 export * from './ui';
