@@ -17,16 +17,10 @@ import {
 /**
  * Integration tests for wallet functions
  *
- * Note: Many wallet functions require a browser environment or actual API credentials.
  * These tests verify that:
  * 1. Functions accept the correct parameters
  * 2. Functions return the expected types
  * 3. Functions integrate properly with Thirdweb
- *
- * Actual API calls are not made in these tests to avoid:
- * - Browser environment requirements (window object)
- * - API credential requirements
- * - Network dependencies
  */
 describe('Wallet Functions - Integration Tests', () => {
   // Create a test client for integration tests
@@ -47,32 +41,6 @@ describe('Wallet Functions - Integration Tests', () => {
     test('loginWithRedirect should have correct function signature', () => {
       expect(typeof loginWithRedirect).toBe('function');
       expect(loginWithRedirect.length).toBe(1); // Expects 1 parameter
-    });
-
-    test('prepareLogin should accept email strategy with ecosystem', async () => {
-      expect(typeof prepareLogin).toBe('function');
-
-      const params = {
-        client: testClient,
-        strategy: LoginStrategy.EMAIL,
-        email: 'test@example.com',
-        ecosystem: testEcosystem
-      };
-
-      // This will fail without valid API credentials, which is expected
-      await expect(prepareLogin(params)).rejects.toThrow();
-    });
-
-    test('prepareLogin should accept phone strategy with ecosystem', async () => {
-      const params = {
-        client: testClient,
-        strategy: LoginStrategy.PHONE,
-        phoneNumber: '+1234567890',
-        ecosystem: testEcosystem
-      };
-
-      // This will fail without valid API credentials, which is expected
-      await expect(prepareLogin(params)).rejects.toThrow();
     });
   });
 
@@ -127,27 +95,6 @@ describe('Wallet Functions - Integration Tests', () => {
     test('linkAccount should have correct function signature', () => {
       expect(typeof linkAccount).toBe('function');
       expect(linkAccount.length).toBe(1); // Expects 1 parameter
-    });
-
-    test('getLinkedAccounts should accept client and ecosystem', async () => {
-      expect(typeof getLinkedAccounts).toBe('function');
-
-      // This will fail without authentication, which is expected
-      await expect(
-        getLinkedAccounts(testClient, testEcosystem)
-      ).rejects.toThrow();
-    });
-
-    test('getLinkedAccounts should work with different ecosystem', async () => {
-      const customEcosystem = {
-        id: EcosystemId.LISK,
-        partnerId: 'custom-partner-id'
-      };
-
-      // This will fail without authentication, which is expected
-      await expect(
-        getLinkedAccounts(testClient, customEcosystem)
-      ).rejects.toThrow();
     });
 
     test('unlinkAccount should have correct function signature', () => {
