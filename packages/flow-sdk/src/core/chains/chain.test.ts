@@ -1,9 +1,5 @@
-import {
-  describeChain,
-  getChainInfo,
-  getRpcUrlForChain
-} from '../../../src/core/chains/chain';
-import { Chain } from '../../../src/core/chains/types';
+import { describeChain, getChainInfo, getRpcUrlForChain } from './chain';
+import { Chain } from './types';
 
 describe('chains', () => {
   describe('describeChain', () => {
