@@ -5,7 +5,10 @@ import typescriptParser from '@typescript-eslint/parser';
 export default [
   js.configs.recommended,
   {
-    files: ['**/*.js'],
+    ignores: ['dist/**/*']
+  },
+  {
+    files: ['*.config.js', '*.config.cjs'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'commonjs',
