@@ -1,4 +1,4 @@
-import { type FlowClient } from '../src/core/client/client';
+import { type FlowClient } from '../client/client';
 import {
   EcosystemId,
   LoginStrategy,
@@ -15,7 +15,7 @@ import {
   type LinkedAccount,
   type AccountConnectionOptions,
   type AccountAuth
-} from '../src/core/wallet/types';
+} from './types';
 
 describe('Types', () => {
   const mockClient = {} as FlowClient;

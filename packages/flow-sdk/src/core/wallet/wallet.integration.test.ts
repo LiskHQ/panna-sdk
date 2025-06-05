@@ -1,9 +1,5 @@
-import { createFlowClient } from '../src/core/client/client';
-import {
-  EcosystemId,
-  LoginStrategy,
-  type Account
-} from '../src/core/wallet/types';
+import { createFlowClient } from '../client/client';
+import { EcosystemId, type Account } from './types';
 import {
   login,
   prepareLogin,
@@ -13,7 +9,7 @@ import {
   linkAccount,
   getLinkedAccounts,
   unlinkAccount
-} from '../src/core/wallet/wallet';
+} from './wallet';
 
 /**
  * Integration tests for wallet functions

@@ -1,6 +1,6 @@
 import * as thirdwebWallets from 'thirdweb/wallets';
-import { type FlowClient } from '../src/core/client/client';
-import { EcosystemId, LoginStrategy } from '../src/core/wallet/types';
+import { type FlowClient } from '../client/client';
+import { EcosystemId, LoginStrategy } from './types';
 import {
   login,
   prepareLogin,
@@ -10,7 +10,7 @@ import {
   linkAccount,
   getLinkedAccounts,
   unlinkAccount
-} from '../src/core/wallet/wallet';
+} from './wallet';
 
 // Mock thirdweb/wallets module
 jest.mock('thirdweb/wallets');

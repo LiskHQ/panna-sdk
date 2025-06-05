@@ -2,7 +2,7 @@ import {
   createFlowClient,
   type CreateFlowClientOptions,
   type FlowClient
-} from '../src/core';
+} from '..';
 
 // Mock thirdweb module for unit tests
 jest.mock('thirdweb', () => ({
@@ -37,7 +37,7 @@ describe('createFlowClient - Unit Tests', () => {
   });
 
   test('should delegate validation to createThirdwebClient', () => {
-    const { createThirdwebClient } = require('thirdweb');
+    const { createThirdwebClient } = jest.requireMock('thirdweb');
     const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
 
     createFlowClient(options);
@@ -46,7 +46,7 @@ describe('createFlowClient - Unit Tests', () => {
   });
 
   test('should pass options directly to createThirdwebClient', () => {
-    const { createThirdwebClient } = require('thirdweb');
+    const { createThirdwebClient } = jest.requireMock('thirdweb');
     const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
 
     createFlowClient(options);

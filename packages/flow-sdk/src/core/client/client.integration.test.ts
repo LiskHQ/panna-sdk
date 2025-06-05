@@ -1,4 +1,4 @@
-import { createFlowClient, type CreateFlowClientOptions } from '../src/core';
+import { createFlowClient, type CreateFlowClientOptions } from '..';
 
 describe('createFlowClient - Integration Tests', () => {
   test('should create actual Thirdweb client with clientId', () => {
