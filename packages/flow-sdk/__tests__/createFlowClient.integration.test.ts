@@ -31,7 +31,7 @@ describe('createFlowClient - Integration Tests', () => {
     expect(client.clientId).toBe('test-capabilities');
 
     // Test that it's not our mock object
-    expect((client as any).mockClient).toBeUndefined();
+    expect((client as Record<string, unknown>).mockClient).toBeUndefined();
   });
 
   test('should handle Thirdweb validation correctly', () => {

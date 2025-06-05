@@ -1,8 +1,12 @@
-import { createFlowClient, type CreateFlowClientOptions } from '../src/core';
+import {
+  createFlowClient,
+  type CreateFlowClientOptions,
+  type FlowClient
+} from '../src/core';
 
 // Mock thirdweb module for unit tests
 jest.mock('thirdweb', () => ({
-  createThirdwebClient: jest.fn((options: any) => ({
+  createThirdwebClient: jest.fn((options: CreateFlowClientOptions) => ({
     clientId: options.clientId,
     secretKey: options.secretKey,
     mockClient: true
@@ -12,7 +16,9 @@ jest.mock('thirdweb', () => ({
 describe('createFlowClient - Unit Tests', () => {
   test('should create client with clientId', () => {
     const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
-    const client = createFlowClient(options) as any;
+    const client = createFlowClient(options) as FlowClient & {
+      mockClient: boolean;
+    };
 
     expect(client).toBeDefined();
     expect(client.clientId).toBe('test-client-id');
@@ -21,7 +27,9 @@ describe('createFlowClient - Unit Tests', () => {
 
   test('should create client with secretKey', () => {
     const options: CreateFlowClientOptions = { secretKey: 'test-secret-key' };
-    const client = createFlowClient(options) as any;
+    const client = createFlowClient(options) as FlowClient & {
+      mockClient: boolean;
+    };
 
     expect(client).toBeDefined();
     expect(client.secretKey).toBe('test-secret-key');

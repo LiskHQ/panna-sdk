@@ -147,7 +147,7 @@ describe('Wallet Functions - Integration Tests', () => {
       expect(account).toHaveProperty('subscribe');
 
       // Verify it's not a mock
-      expect((account as any).mockWallet).toBeUndefined();
+      expect((account as Record<string, unknown>).mockWallet).toBeUndefined();
     });
 
     test('client created by createFlowClient should work with wallet functions', () => {
