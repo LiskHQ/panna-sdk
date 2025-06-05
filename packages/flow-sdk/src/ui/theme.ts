@@ -6,7 +6,7 @@ export const liskTheme = darkTheme({
     borderColor: '#27272A',
     accentText: '#F3F4F6',
     separatorLine: '#27272A',
-    skeletonBg: '#OCOCOC',
+    skeletonBg: '#0C0C0C',
     primaryText: '#FFFFFF',
     secondaryText: '#D1D5DB'
   }
