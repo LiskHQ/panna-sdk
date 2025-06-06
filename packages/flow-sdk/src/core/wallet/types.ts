@@ -1,9 +1,4 @@
-import { type FlowClient } from '../client';
-
-// Enum for allowed ecosystem IDs
-export enum EcosystemId {
-  LISK = 'ecosystem.lisk'
-}
+import { type FlowClient, type EcosystemConfig } from '../client';
 
 // Enum for login strategies
 export const LoginStrategy = {
@@ -13,12 +8,6 @@ export const LoginStrategy = {
 
 export type LoginStrategyType =
   (typeof LoginStrategy)[keyof typeof LoginStrategy];
-
-// Base ecosystem configuration
-export interface EcosystemConfig {
-  id: EcosystemId;
-  partnerId: string;
-}
 
 // Base authentication parameters
 export interface BaseAuthParams {

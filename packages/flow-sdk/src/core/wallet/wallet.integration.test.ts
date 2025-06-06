@@ -1,5 +1,5 @@
-import { createFlowClient } from '../client';
-import { EcosystemId, type Account } from './types';
+import { createFlowClient, EcosystemId } from '../client';
+import { type Account } from './types';
 import {
   login,
   prepareLogin,

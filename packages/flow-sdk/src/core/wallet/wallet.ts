@@ -9,13 +9,13 @@ import {
   unlinkProfile
 } from 'thirdweb/wallets';
 import { type FlowClient } from '../client';
+import { EcosystemId } from '../client';
 import {
   type AuthParams,
   type EmailPrepareParams,
   type PhonePrepareParams,
   type Account,
-  type LinkedAccount,
-  EcosystemId
+  type LinkedAccount
 } from './types';
 
 /**
