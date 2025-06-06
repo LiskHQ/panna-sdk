@@ -9,8 +9,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
-    "declarationMap": true
+    "declarationMap": true,
+    "types": ["jest", "@testing-library/jest-dom"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "__tests__"]
+  "include": ["src/**/*", "jest.setup.ts"],
+  "exclude": ["dist", "node_modules"]
 }

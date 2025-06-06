@@ -4,11 +4,8 @@ module.exports = {
     {
       displayName: 'ui',
       testEnvironment: 'jsdom',
-      roots: ['<rootDir>/src', '<rootDir>/__tests__'],
-      testMatch: [
-        '**/__tests__/ui/**/*.test.{ts,tsx}',
-        '**/src/ui/**/*.test.{ts,tsx}'
-      ],
+      roots: ['<rootDir>/src'],
+      testMatch: ['**/src/ui/**/*.test.{ts,tsx}'],
       collectCoverageFrom: ['src/ui/**/*.{ts,tsx}', '!src/ui/**/*.d.ts'],
       moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
       transform: {
@@ -25,16 +22,14 @@ module.exports = {
     {
       displayName: 'core',
       testEnvironment: 'node',
-      roots: ['<rootDir>/src', '<rootDir>/__tests__'],
-      testMatch: [
-        '**/__tests__/core/**/*.test.{ts,tsx}',
-        '**/src/core/**/*.test.{ts,tsx}'
-      ],
-      collectCoverageFrom: ['src/core/**/*.{ts,tsx}', '!src/core/**/*.d.ts'],
-      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+      roots: ['<rootDir>/src'],
+      testMatch: ['**/src/core/**/*.test.{ts}'],
+      collectCoverageFrom: ['src/core/**/*.{ts}', '!src/core/**/*.d.ts'],
+      moduleFileExtensions: ['ts', 'js', 'json'],
       transform: {
         '^.+\\.(ts|tsx)$': 'ts-jest'
       },
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
       }

@@ -1,12 +1,8 @@
-<<<<<<<< HEAD:packages/flow-sdk/src/core/client/client.test.ts
 import {
   createFlowClient,
   type CreateFlowClientOptions,
   type FlowClient
 } from '..';
-========
-import { createFlowClient, type CreateFlowClientOptions } from '../../src/core';
->>>>>>>> b873966 (refactor(flow-sdk): restructure Jest configuration and remove obsolete tests for createFlowClient):packages/flow-sdk/__tests__/core/createFlowClient.test.ts
 
 // Mock thirdweb module for unit tests
 jest.mock('thirdweb', () => ({

@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:packages/flow-sdk/src/core/client/client.integration.test.ts
 import { createFlowClient, type CreateFlowClientOptions } from '..';
-========
-import { createFlowClient, type CreateFlowClientOptions } from '../../src/core';
->>>>>>>> b873966 (refactor(flow-sdk): restructure Jest configuration and remove obsolete tests for createFlowClient):packages/flow-sdk/__tests__/core/createFlowClient.integration.test.ts
 
 describe('createFlowClient - Integration Tests', () => {
   test('should create actual Thirdweb client with clientId', () => {

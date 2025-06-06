@@ -1,10 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React, { useContext } from 'react';
-import { createFlowClient, type FlowClient } from '../../src/core';
-import {
-  FlowProvider,
-  FlowClientContext
-} from '../../src/ui/components/flow-provider';
+import { createFlowClient, type FlowClient } from '../../core';
+import { FlowProvider, FlowClientContext } from './flow-provider';
 
 // Mock the thirdweb module
 jest.mock('thirdweb/react', () => ({
@@ -14,7 +11,7 @@ jest.mock('thirdweb/react', () => ({
 }));
 
 // Mock the createFlowClient function
-jest.mock('../../src/core', () => ({
+jest.mock('../../core', () => ({
   createFlowClient: jest.fn()
 }));
 
