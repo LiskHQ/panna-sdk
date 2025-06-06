@@ -1,2 +1,3 @@
-export * from './client/client';
+export * from './client';
 export * from './chains';
+export * from './wallet';
