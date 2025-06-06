@@ -3,13 +3,13 @@ import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
 import { type FlowClient } from '../client';
 import { type SocialProvider } from './types';
-import { accountBalance, getSocialIcon } from './wallet-utilities';
+import { accountBalance, getSocialIcon } from './utils';
 
 // Mock thirdweb modules
 jest.mock('thirdweb/wallets');
 jest.mock('thirdweb/wallets/in-app');
 
-describe('Wallet Utilities - Unit Tests', () => {
+describe('Utils - Unit Tests', () => {
   const mockClient = {} as FlowClient;
   const mockChain = { id: 1 } as Chain;
 

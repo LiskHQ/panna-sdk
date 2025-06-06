@@ -6,7 +6,7 @@ import {
   type SocialProvider
 } from './types';
 
-describe('Wallet Utilities Types', () => {
+describe('Utils Types', () => {
   describe('AccountBalanceParams', () => {
     it('should accept valid parameters', () => {
       const mockClient = {} as FlowClient;
