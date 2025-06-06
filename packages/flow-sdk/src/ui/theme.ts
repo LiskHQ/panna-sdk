@@ -1,13 +1,19 @@
 import { darkTheme } from 'thirdweb/react';
 
+const PRIMARY = '#FFFFFF';
+const LAYER_50 = '#0C0C0C';
+const ZINC_800 = '#27272A';
+const GRAY_100 = '#F3F4F6';
+const GRAY_300 = '#D1D5DB';
+
 export const liskTheme = darkTheme({
   colors: {
-    modalBg: '#0C0C0C',
-    borderColor: '#27272A',
-    accentText: '#F3F4F6',
-    separatorLine: '#27272A',
-    skeletonBg: '#0C0C0C',
-    primaryText: '#FFFFFF',
-    secondaryText: '#D1D5DB'
+    modalBg: LAYER_50,
+    borderColor: ZINC_800,
+    accentText: GRAY_100,
+    separatorLine: ZINC_800,
+    skeletonBg: LAYER_50,
+    primaryText: PRIMARY,
+    secondaryText: GRAY_300
   }
 });
