@@ -1,3 +1,5 @@
+'use client';
+
 import { LoginButton } from 'flow-sdk';
 
 export default function Home() {
