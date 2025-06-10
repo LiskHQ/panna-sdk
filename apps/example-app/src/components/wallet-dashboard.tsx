@@ -166,7 +166,7 @@ export function WalletDashboard() {
             Account Information
           </h2>
           <div className="space-y-6">
-            {connectedAccounts?.map((account: any, index: number) => (
+            {connectedAccounts?.map((account, index) => (
               <div
                 key={index}
                 className="rounded-xl border border-blue-800 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 p-6"
@@ -177,7 +177,7 @@ export function WalletDashboard() {
                       Address:
                     </span>
                     <span className="rounded-lg border border-gray-600 bg-gray-700 px-3 py-1 font-mono text-sm break-all text-gray-200">
-                      {account.getAddress?.() || account.address || 'Unknown'}
+                      {account.getAccount?.()?.address || 'Unknown'}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
@@ -185,9 +185,7 @@ export function WalletDashboard() {
                       Chain:
                     </span>
                     <span className="rounded-lg border border-green-700 bg-green-900 px-3 py-1 text-sm font-medium text-green-200">
-                      {account.getChain?.()?.name ||
-                        account.chain?.name ||
-                        'Unknown'}
+                      {account.getChain?.()?.name || 'Unknown'}
                     </span>
                   </div>
                 </div>
