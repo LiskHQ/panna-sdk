@@ -18,9 +18,6 @@ export {
   useUnlinkProfile as useUnlinkAccount,
   useSocialProfiles as useSocialAccounts,
 
-  // Authentication & Security hooks
-  useAuthToken,
-
   // UI Modal hooks
   useConnectModal as useLoginModal,
   useWalletDetailsModal as useAccountDetailsModal

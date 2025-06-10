@@ -5,7 +5,6 @@ import {
   useLogout,
   useConnectedAccounts,
   useAccountBalance,
-  useAuthToken,
   useFlowClient,
   useActiveAccount,
   lisk
@@ -24,7 +23,6 @@ export function WalletDashboard() {
       client: client!,
       chain: lisk
     });
-  const authToken = useAuthToken();
 
   const isConnected = connectedAccounts && connectedAccounts.length > 0;
   const activeConnectedAccount = connectedAccounts?.[0];
@@ -74,18 +72,6 @@ export function WalletDashboard() {
                 }`}
               >
                 {isConnected ? 'Yes' : 'No'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between rounded-lg bg-gray-700 p-3">
-              <span className="font-medium text-gray-200">Auth Token:</span>
-              <span
-                className={`rounded-full px-3 py-1 text-sm font-medium ${
-                  authToken
-                    ? 'border border-green-700 bg-green-900 text-green-200'
-                    : 'border border-gray-500 bg-gray-600 text-gray-300'
-                }`}
-              >
-                {authToken ? 'Present' : 'Missing'}
               </span>
             </div>
           </div>
