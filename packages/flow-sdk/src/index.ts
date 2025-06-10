@@ -35,6 +35,13 @@ export {
   type EmailPrepareParams,
   type PhonePrepareParams,
   type EcosystemConfig,
-  type LoginStrategyType
+  type LoginStrategyType,
+  // Utils functions
+  accountBalance,
+  getSocialIcon,
+  // Utils types
+  type AccountBalanceParams,
+  type AccountBalanceResult,
+  type SocialProvider
 } from './core';
 export * from './ui';
