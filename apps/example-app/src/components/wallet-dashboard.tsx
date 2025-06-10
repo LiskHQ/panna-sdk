@@ -1,18 +1,16 @@
 'use client';
 
 import {
-  useLogin,
   useLogout,
   useConnectedAccounts,
   useAccountBalance,
   useFlowClient,
   useActiveAccount,
-  lisk
+  lisk,
+  LoginButton
 } from 'flow-sdk';
-import { createWallet } from 'thirdweb/wallets';
 
 export function WalletDashboard() {
-  const { connect: login, isConnecting: isLoggingIn, error } = useLogin();
   const { disconnect: logout } = useLogout();
   const connectedAccounts = useConnectedAccounts();
   const activeAccount = useActiveAccount();
@@ -24,21 +22,8 @@ export function WalletDashboard() {
       chain: lisk
     });
 
-  const isConnected = connectedAccounts && connectedAccounts.length > 0;
+  const isConnected = !!activeAccount;
   const activeConnectedAccount = connectedAccounts?.[0];
-
-  const handleConnect = () => {
-    if (!client) return;
-
-    login(async () => {
-      // Create a MetaMask wallet instance
-      const metamask = createWallet('io.metamask');
-      // Trigger the connection
-      await metamask.connect({ client });
-      // Return the wallet
-      return metamask;
-    });
-  };
 
   const handleDisconnect = () => {
     if (activeConnectedAccount) {
@@ -77,18 +62,6 @@ export function WalletDashboard() {
           </div>
           <div className="space-y-3">
             <div className="flex items-center justify-between rounded-lg bg-gray-700 p-3">
-              <span className="font-medium text-gray-200">Is Connecting:</span>
-              <span
-                className={`rounded-full px-3 py-1 text-sm font-medium ${
-                  isLoggingIn
-                    ? 'border border-blue-700 bg-blue-900 text-blue-200'
-                    : 'border border-gray-500 bg-gray-600 text-gray-300'
-                }`}
-              >
-                {isLoggingIn ? 'Yes' : 'No'}
-              </span>
-            </div>
-            <div className="flex items-center justify-between rounded-lg bg-gray-700 p-3">
               <span className="font-medium text-gray-200">
                 Connected Accounts:
               </span>
@@ -98,13 +71,6 @@ export function WalletDashboard() {
             </div>
           </div>
         </div>
-        {error && (
-          <div className="mt-4 rounded-lg border border-red-700 bg-red-900 p-4">
-            <p className="text-red-200">
-              <strong>Error:</strong> {error.message}
-            </p>
-          </div>
-        )}
       </article>
 
       {/* Action Buttons */}
@@ -112,20 +78,7 @@ export function WalletDashboard() {
         <h2 className="mb-6 text-2xl font-semibold text-gray-100">Actions</h2>
         <div className="flex gap-4">
           {!isConnected ? (
-            <button
-              onClick={handleConnect}
-              disabled={isLoggingIn || !client}
-              className="flex transform items-center gap-2 rounded-xl bg-blue-600 px-8 py-4 font-medium text-white transition-all hover:scale-105 hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/25 disabled:cursor-not-allowed disabled:bg-blue-800"
-            >
-              {isLoggingIn ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-white"></div>
-                  Connecting...
-                </>
-              ) : (
-                'Connect MetaMask'
-              )}
-            </button>
+            <LoginButton />
           ) : (
             <button
               onClick={handleDisconnect}
@@ -135,14 +88,6 @@ export function WalletDashboard() {
             </button>
           )}
         </div>
-        {!client && (
-          <div className="mt-4 rounded-lg border border-yellow-700 bg-yellow-900 p-4">
-            <p className="text-yellow-200">
-              <strong>Note:</strong> Flow client is not available yet. Make sure
-              the provider is properly configured.
-            </p>
-          </div>
-        )}
       </article>
 
       {/* Account Information */}
