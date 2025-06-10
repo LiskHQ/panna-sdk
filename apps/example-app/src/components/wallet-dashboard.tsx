@@ -6,10 +6,10 @@ import {
   useConnectedAccounts,
   useAccountBalance,
   useAuthToken,
-  useFlowClient
+  useFlowClient,
+  useActiveAccount,
+  lisk
 } from 'flow-sdk';
-import { lisk } from 'flow-sdk';
-import { useActiveAccount } from 'thirdweb/react';
 import { createWallet } from 'thirdweb/wallets';
 
 export function WalletDashboard() {

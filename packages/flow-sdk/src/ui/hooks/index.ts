@@ -4,6 +4,7 @@ export {
   useDisconnect as useLogout,
   useAutoConnect as useAutoLogin,
   useConnectedWallets as useConnectedAccounts,
+  useActiveAccount,
   useSetActiveWallet as useSetActiveAccount,
 
   // Balance & Wallet Info hooks
