@@ -1,6 +1,5 @@
-import { type FlowClient } from '../client';
+import { type FlowClient, EcosystemId, type EcosystemConfig } from '../client';
 import {
-  EcosystemId,
   LoginStrategy,
   type AuthParams,
   type SingleStepAuthParams,
@@ -9,7 +8,6 @@ import {
   type PhoneAuthParams,
   type EmailPrepareParams,
   type PhonePrepareParams,
-  type EcosystemConfig,
   type LoginStrategyType,
   type Account,
   type LinkedAccount,
@@ -17,24 +15,12 @@ import {
   type AccountAuth
 } from './types';
 
-describe('Types', () => {
+describe('Wallet Types', () => {
   const mockClient = {} as FlowClient;
   const testEcosystem: EcosystemConfig = {
     id: EcosystemId.LISK,
     partnerId: 'test-partner-id'
   };
-
-  describe('EcosystemId enum', () => {
-    it('should have LISK ecosystem with correct value', () => {
-      expect(EcosystemId.LISK).toBe('ecosystem.lisk');
-    });
-
-    it('should only have LISK ecosystem', () => {
-      const ecosystems = Object.values(EcosystemId);
-      expect(ecosystems).toHaveLength(1);
-      expect(ecosystems).toContain('ecosystem.lisk');
-    });
-  });
 
   describe('LoginStrategy', () => {
     it('should have EMAIL strategy', () => {
@@ -205,18 +191,6 @@ describe('Types', () => {
 
         expect(multiStep.strategy).toBe('email');
       });
-    });
-  });
-
-  describe('EcosystemConfig', () => {
-    it('should match expected structure', () => {
-      const config: EcosystemConfig = {
-        id: EcosystemId.LISK,
-        partnerId: 'test-partner-id'
-      };
-
-      expect(config.id).toBe(EcosystemId.LISK);
-      expect(config.partnerId).toBe('test-partner-id');
     });
   });
 

@@ -1,6 +1,6 @@
 import * as thirdwebWallets from 'thirdweb/wallets';
-import { type FlowClient } from '../client';
-import { EcosystemId, LoginStrategy } from './types';
+import { type FlowClient, EcosystemId } from '../client';
+import { LoginStrategy } from './types';
 import {
   login,
   prepareLogin,
