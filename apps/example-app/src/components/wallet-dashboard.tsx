@@ -7,6 +7,8 @@ import {
   useFlowClient,
   useActiveAccount,
   lisk,
+  EcosystemId,
+  createAccount,
   LoginButton
 } from 'flow-sdk';
 
@@ -24,6 +26,9 @@ export function WalletDashboard() {
 
   const isConnected = !!activeAccount;
   const activeConnectedAccount = connectedAccounts?.[0];
+  const wallets = [
+    createAccount(EcosystemId.LISK, process.env.NEXT_PUBLIC_PARTNER_ID || '')
+  ];
 
   const handleDisconnect = () => {
     if (activeConnectedAccount) {
@@ -78,7 +83,7 @@ export function WalletDashboard() {
         <h2 className="mb-6 text-2xl font-semibold text-gray-100">Actions</h2>
         <div className="flex gap-4">
           {!isConnected ? (
-            <LoginButton />
+            <LoginButton wallets={wallets} />
           ) : (
             <button
               onClick={handleDisconnect}
