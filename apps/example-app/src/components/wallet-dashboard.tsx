@@ -1,15 +1,15 @@
 'use client';
 
 import {
-  useLogout,
-  useConnectedAccounts,
-  useAccountBalance,
-  useFlowClient,
-  useActiveAccount,
-  lisk,
-  EcosystemId,
   createAccount,
-  LoginButton
+  EcosystemId,
+  lisk,
+  LoginButton,
+  useAccountBalance,
+  useActiveAccount,
+  useConnectedAccounts,
+  useFlowClient,
+  useLogout
 } from 'flow-sdk';
 
 export function WalletDashboard() {
