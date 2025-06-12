@@ -1,5 +1,6 @@
 import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
 import { useFlowClient } from '../hooks/use-flow-client';
+import { liskTheme } from '../theme';
 
 export type LoginButtonProps = Omit<ConnectButtonProps, 'client'>;
 
@@ -32,6 +33,14 @@ export function LoginButton(props: LoginButtonProps) {
     <ConnectButton
       client={client}
       connectButton={{ label: 'Sign in' }}
+      theme={liskTheme}
+      appMetadata={{
+        name: 'Lisk Flow App',
+        logoUrl: 'https://portal-assets.lisk.com/logo/lisk-profile-w.svg'
+      }}
+      connectModal={{
+        showThirdwebBranding: false
+      }}
       {...props}
     />
   );
