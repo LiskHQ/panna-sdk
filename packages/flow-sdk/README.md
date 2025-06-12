@@ -98,7 +98,7 @@ It allows you to:
 
 - `describeChain`: Defines a chain with the given options.
 - `getRpcUrlForChain`: Retrieves the RPC information for a given chain.
-- `getChainInfo`: Retrieves the chain data for a given data.
+- `getChainInfo`: Retrieves the chain data for a given chain.
 
 ### Client management
 
