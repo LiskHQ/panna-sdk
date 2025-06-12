@@ -133,12 +133,22 @@ function App() {
 
 ## Examples
 
+### Using a UI Component
+
+```tsx
+import { LoginButton } from 'flow-sdk';
+
+<LoginButton label="Sign in with Flow" />;
+```
+
+For creating a custom UI, you can use the provided core functions to manage Flow state and interactions.
+
 ### Authenticating a User
 
 ```ts
-import { authenticate } from 'flow-sdk';
+import { login } from 'flow-sdk';
 
-const session = await authenticate({
+const session = await login({
   strategy: 'email',
   email: 'user@email.com',
   verificationCode: '123456'
@@ -155,14 +165,6 @@ const result = await linkAccount({
   phoneNumber: '+1234567890',
   verificationCode: '123456'
 });
-```
-
-### Using a UI Component
-
-```tsx
-import { LoginButton } from 'flow-sdk';
-
-<LoginButton label="Sign in with Flow" />;
 ```
 
 ---
