@@ -32,6 +32,36 @@ The Lisk Flow SDK is designed to simplify development on the Lisk blockchain by 
 
 ---
 
+## Getting Started
+
+To get started with the Flow SDK, follow these steps:
+
+1. **Install the SDK**:
+   ```bash
+   npm install flow-sdk
+   ```
+2. **Import the SDK in your project**:
+   ```ts
+   import { createFlowClient } from 'flow-sdk';
+   ```
+3. **Initialize the client**:
+   ```ts
+   const client = createFlowClient({
+     partnerId: process.env.NEXT_PUBLIC_PARTNER_ID || ''
+   });
+   ```
+4. **Integrate UI components**:
+
+   ```tsx
+   import { LoginButton } from 'flow-sdk';
+
+   function App() {
+     return <LoginButton label="Sign in with Flow" client={client} />;
+   }
+   ```
+
+---
+
 ## Core Concepts
 
 ### Lisk Blockchain
@@ -118,14 +148,10 @@ UI components are organized for reusability and maintainability:
 To use a UI component, import it from the SDK and include it in your React application. For example:
 
 ```tsx
-import { LoginButton, createAccount, EcosystemId } from 'flow-sdk';
+import { LoginButton } from 'flow-sdk';
 
 function App() {
-  const wallets = [
-    createAccount(EcosystemId.LISK, process.env.NEXT_PUBLIC_PARTNER_ID || '')
-  ];
-
-  return <LoginButton wallets={wallets} />;
+  return <LoginButton />;
 }
 ```
 
