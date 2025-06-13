@@ -42,9 +42,9 @@ export function AppHeader() {
   const sectionTitle = currentRoute.section;
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-gray-800 bg-gray-900/50 px-4">
+    <header className="border-border bg-card/50 flex h-16 shrink-0 items-center justify-between gap-4 border-b px-4">
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-1 text-gray-300" />
+        <SidebarTrigger className="text-muted-foreground -ml-1" />
         <Separator
           orientation="vertical"
           className="mr-2 data-[orientation=vertical]:h-4"
@@ -52,13 +52,13 @@ export function AppHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#" className="text-gray-400">
+              <BreadcrumbLink href="#" className="text-muted-foreground">
                 {sectionTitle}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage className="font-medium text-gray-200">
+              <BreadcrumbPage className="text-foreground font-medium">
                 {pageTitle}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -66,14 +66,14 @@ export function AppHeader() {
         </Breadcrumb>
       </div>
 
-      {!isConnected && (
-        <aside className="flex items-center gap-4">
+      <aside className="flex items-center gap-4">
+        {!isConnected && (
           <Typography variant="muted">
             Get started by connecting your wallet
           </Typography>
-          <LoginButton />
-        </aside>
-      )}
+        )}
+        <LoginButton />
+      </aside>
     </header>
   );
 }

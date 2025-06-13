@@ -58,7 +58,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <RocketIcon className="!size-5" />
-                <span className="text-base font-semibold">Lisk Flow</span>
+                <span className="text-base font-semibold">
+                  Lisk Flow Example
+                </span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
