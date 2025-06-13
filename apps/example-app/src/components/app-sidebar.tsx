@@ -1,4 +1,5 @@
 import { RocketIcon, User, Settings, HelpCircle } from 'lucide-react';
+import Link from 'next/link';
 import * as React from 'react';
 import {
   Sidebar,
@@ -57,12 +58,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <Link href="/">
                 <LiskIsotypeIcon size={32} />
                 <span className="text-small font-semibold">
                   Lisk Flow Example
                 </span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
