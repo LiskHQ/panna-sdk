@@ -126,29 +126,45 @@ export default function Homepage() {
 
   return (
     <section className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-4 md:p-6">
+      {/* Header with logout button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="rounded-full bg-blue-900/30 p-3">
+            <User className="size-6 text-blue-600" />
+          </div>
+          <div>
+            <Typography variant="h3" className="text-white">
+              Account Overview
+            </Typography>
+            <Typography variant="small" className="text-gray-400">
+              Connected account details and information
+            </Typography>
+          </div>
+        </div>
+        <Button
+          onClick={handleDisconnect}
+          variant="outline"
+          size="sm"
+          className="border-destructive text-destructive hover:bg-destructive/20 gap-2"
+        >
+          <LogOut className="size-4" />
+          Logout
+        </Button>
+      </div>
+
+      {/* Wallet Details Card */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="size-5" />
-            Account Details
+            <Wallet className="size-5" />
+            Wallet Details
             <Badge className="bg-blue-500 text-white dark:bg-blue-600">
               <CheckCircle className="size-4" /> Active
             </Badge>
           </CardTitle>
-
-          <Button
-            onClick={handleDisconnect}
-            variant="outline"
-            size="sm"
-            className="border-destructive text-destructive hover:bg-destructive/20 gap-2"
-          >
-            <LogOut className="size-4" />
-            Logout
-          </Button>
         </CardHeader>
-
-        <CardContent className="flex flex-col gap-8">
-          {/* Address */}
+        <CardContent className="flex flex-col gap-6">
+          {/* Wallet Address */}
           <div className="flex flex-col gap-4">
             <Typography variant="small">Wallet Address</Typography>
             <div className="border-input flex h-10 w-full items-center gap-2 border bg-transparent px-3 py-2 shadow-xs">
@@ -174,154 +190,7 @@ export default function Homepage() {
             )}
           </div>
 
-          {/* User Email */}
-          {(userEmail || isLoadingProfiles) && (
-            <div className="flex flex-col gap-4">
-              <Typography variant="small" className="flex items-center gap-2">
-                Email
-              </Typography>
-              <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
-                {isLoadingProfiles ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
-                    <Typography
-                      variant="small"
-                      className="text-muted-foreground text-base md:text-sm"
-                    >
-                      Loading email...
-                    </Typography>
-                  </div>
-                ) : userEmail ? (
-                  <Typography
-                    variant="small"
-                    className="text-foreground text-base font-medium md:text-sm"
-                  >
-                    {userEmail}
-                  </Typography>
-                ) : null}
-              </div>
-            </div>
-          )}
-
-          {/* User Phone */}
-          {(userPhone || isLoadingProfiles) && (
-            <div className="flex flex-col gap-4">
-              <Typography variant="small" className="flex items-center gap-2">
-                Phone Number
-              </Typography>
-              <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
-                {isLoadingProfiles ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
-                    <Typography
-                      variant="small"
-                      className="text-muted-foreground text-base md:text-sm"
-                    >
-                      Loading phone...
-                    </Typography>
-                  </div>
-                ) : userPhone ? (
-                  <Typography
-                    variant="small"
-                    className="text-foreground text-base font-medium md:text-sm"
-                  >
-                    {userPhone}
-                  </Typography>
-                ) : null}
-              </div>
-            </div>
-          )}
-
-          {/* Social Profiles */}
-          {(socialProfiles?.length || isLoadingSocialProfiles) && (
-            <div className="flex flex-col gap-4">
-              <Typography variant="small" className="flex items-center gap-2">
-                Social Profiles
-              </Typography>
-              <div className="border-input min-h-10 w-full border bg-transparent px-3 py-2 shadow-xs">
-                {isLoadingSocialProfiles ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
-                    <Typography
-                      variant="small"
-                      className="text-muted-foreground text-base md:text-sm"
-                    >
-                      Loading social profiles...
-                    </Typography>
-                  </div>
-                ) : socialProfiles?.length ? (
-                  <div className="flex flex-col gap-2">
-                    {farcasterProfile && (
-                      <div className="flex items-center gap-2">
-                        <LinkIcon className="size-4 text-purple-500" />
-                        <Typography
-                          variant="small"
-                          className="font-medium text-purple-500"
-                        >
-                          Farcaster
-                        </Typography>
-                        {farcasterProfile.name && (
-                          <Typography
-                            variant="small"
-                            className="text-foreground"
-                          >
-                            {farcasterProfile.name}
-                          </Typography>
-                        )}
-                      </div>
-                    )}
-                    {lensProfile && (
-                      <div className="flex items-center gap-2">
-                        <LinkIcon className="size-4 text-green-500" />
-                        <Typography
-                          variant="small"
-                          className="font-medium text-green-500"
-                        >
-                          Lens Protocol
-                        </Typography>
-                        {lensProfile.name && (
-                          <Typography
-                            variant="small"
-                            className="text-foreground"
-                          >
-                            {lensProfile.name}
-                          </Typography>
-                        )}
-                      </div>
-                    )}
-                    {ensProfile && (
-                      <div className="flex items-center gap-2">
-                        <LinkIcon className="size-4 text-blue-500" />
-                        <Typography
-                          variant="small"
-                          className="font-medium text-blue-500"
-                        >
-                          ENS
-                        </Typography>
-                        {ensProfile.name && (
-                          <Typography
-                            variant="small"
-                            className="text-foreground"
-                          >
-                            {ensProfile.name}
-                          </Typography>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Typography
-                    variant="small"
-                    className="text-muted-foreground text-base md:text-sm"
-                  >
-                    No social profiles found
-                  </Typography>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Chain */}
+          {/* Network */}
           <div className="flex flex-col gap-4">
             <Typography variant="small">Network</Typography>
             <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
@@ -367,6 +236,195 @@ export default function Homepage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Account Information Card */}
+      {(userEmail || userPhone || isLoadingProfiles) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="size-5" />
+              Account Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            {/* User Email */}
+            {(userEmail || isLoadingProfiles) && (
+              <div className="flex flex-col gap-4">
+                <Typography variant="small" className="flex items-center gap-2">
+                  <Mail className="size-4" />
+                  Email
+                </Typography>
+                <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
+                  {isLoadingProfiles ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+                      <Typography
+                        variant="small"
+                        className="text-muted-foreground text-base md:text-sm"
+                      >
+                        Loading email...
+                      </Typography>
+                    </div>
+                  ) : userEmail ? (
+                    <Typography
+                      variant="small"
+                      className="text-foreground text-base font-medium md:text-sm"
+                    >
+                      {userEmail}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      variant="small"
+                      className="text-muted-foreground text-base md:text-sm"
+                    >
+                      No email available
+                    </Typography>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* User Phone */}
+            {(userPhone || isLoadingProfiles) && (
+              <div className="flex flex-col gap-4">
+                <Typography variant="small" className="flex items-center gap-2">
+                  <Phone className="size-4" />
+                  Phone Number
+                </Typography>
+                <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
+                  {isLoadingProfiles ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+                      <Typography
+                        variant="small"
+                        className="text-muted-foreground text-base md:text-sm"
+                      >
+                        Loading phone...
+                      </Typography>
+                    </div>
+                  ) : userPhone ? (
+                    <Typography
+                      variant="small"
+                      className="text-foreground text-base font-medium md:text-sm"
+                    >
+                      {userPhone}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      variant="small"
+                      className="text-muted-foreground text-base md:text-sm"
+                    >
+                      No phone number available
+                    </Typography>
+                  )}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Social Profiles Card */}
+      {(socialProfiles?.length || isLoadingSocialProfiles) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="size-5" />
+              Social Profiles
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="border-input min-h-16 w-full border bg-transparent px-3 py-3 shadow-xs">
+              {isLoadingSocialProfiles ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
+                  <Typography
+                    variant="small"
+                    className="text-muted-foreground text-base md:text-sm"
+                  >
+                    Loading social profiles...
+                  </Typography>
+                </div>
+              ) : socialProfiles?.length ? (
+                <div className="flex flex-col gap-3">
+                  {farcasterProfile && (
+                    <div className="flex items-center gap-3 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2">
+                      <LinkIcon className="size-5 text-purple-500" />
+                      <div className="flex flex-col">
+                        <Typography
+                          variant="small"
+                          className="font-medium text-purple-500"
+                        >
+                          Farcaster
+                        </Typography>
+                        {farcasterProfile.name && (
+                          <Typography
+                            variant="small"
+                            className="text-foreground text-xs"
+                          >
+                            {farcasterProfile.name}
+                          </Typography>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {lensProfile && (
+                    <div className="flex items-center gap-3 rounded-lg border border-green-500/20 bg-green-500/10 p-2">
+                      <LinkIcon className="size-5 text-green-500" />
+                      <div className="flex flex-col">
+                        <Typography
+                          variant="small"
+                          className="font-medium text-green-500"
+                        >
+                          Lens Protocol
+                        </Typography>
+                        {lensProfile.name && (
+                          <Typography
+                            variant="small"
+                            className="text-foreground text-xs"
+                          >
+                            {lensProfile.name}
+                          </Typography>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {ensProfile && (
+                    <div className="flex items-center gap-3 rounded-lg border border-blue-500/20 bg-blue-500/10 p-2">
+                      <LinkIcon className="size-5 text-blue-500" />
+                      <div className="flex flex-col">
+                        <Typography
+                          variant="small"
+                          className="font-medium text-blue-500"
+                        >
+                          ENS
+                        </Typography>
+                        {ensProfile.name && (
+                          <Typography
+                            variant="small"
+                            className="text-foreground text-xs"
+                          >
+                            {ensProfile.name}
+                          </Typography>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex h-12 items-center justify-center">
+                  <Typography
+                    variant="small"
+                    className="text-muted-foreground text-base md:text-sm"
+                  >
+                    No social profiles connected
+                  </Typography>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 }
