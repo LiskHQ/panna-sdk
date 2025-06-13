@@ -7,9 +7,7 @@ import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-  BreadcrumbSeparator
+  BreadcrumbPage
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -17,18 +15,9 @@ import { buttonVariants } from './ui/button';
 import { Typography } from './ui/typography';
 
 const navigationData = {
-  '/': {
-    title: 'Dashboard',
-    section: 'Account'
-  },
-  '/documentation': {
-    title: 'SDK Documentation',
-    section: 'Resources'
-  },
-  '/settings': {
-    title: 'Settings',
-    section: 'Resources'
-  }
+  '/': 'Account',
+  '/documentation': 'SDK Documentation',
+  '/settings': 'Settings'
 };
 
 export function AppHeader() {
@@ -39,27 +28,23 @@ export function AppHeader() {
   const currentRoute =
     navigationData[pathname as keyof typeof navigationData] ||
     navigationData['/'];
-  const pageTitle = currentRoute.title;
-  const sectionTitle = currentRoute.section;
+  const pageTitle = currentRoute;
 
   return (
-    <header className="border-border bg-card/50 flex h-16 shrink-0 items-center justify-between gap-4 border-b px-4">
+    <header
+      data-slot="app-header"
+      className="bg-sidebar text-sidebar-foreground border-sidebar-border flex h-16 shrink-0 items-center justify-between gap-4 border-b px-4"
+    >
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="text-muted-foreground -ml-1" />
+        <SidebarTrigger className="text-sidebar-foreground/70 -ml-1" />
         <Separator
           orientation="vertical"
-          className="mr-2 data-[orientation=vertical]:h-4"
+          className="bg-sidebar-border mr-2 data-[orientation=vertical]:h-4"
         />
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#" className="text-muted-foreground">
-                {sectionTitle}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage className="text-foreground font-medium">
+              <BreadcrumbPage className="text-sidebar-foreground font-medium">
                 {pageTitle}
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -69,7 +54,7 @@ export function AppHeader() {
 
       <aside className="flex items-center gap-4">
         {!isConnected && (
-          <Typography variant="muted">
+          <Typography variant="muted" className="text-sidebar-foreground/70">
             Get started by connecting your wallet
           </Typography>
         )}

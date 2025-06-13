@@ -16,10 +16,10 @@ import {
 const data = {
   navMain: [
     {
-      title: 'Account',
+      title: 'Main',
       items: [
         {
-          title: 'Dashboard',
+          title: 'Account',
           url: '/',
           icon: User,
           isActive: true

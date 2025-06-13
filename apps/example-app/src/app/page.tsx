@@ -8,8 +8,9 @@ import {
   useActiveAccount,
   lisk
 } from 'flow-sdk';
-import { LogOut, User, Wallet, Copy } from 'lucide-react';
+import { LogOut, Wallet, Copy, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
@@ -50,7 +51,7 @@ export default function Homepage() {
       <section className="mx-auto w-full max-w-2xl flex-1 p-4 md:p-6">
         <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
           <div className="mb-6 rounded-full bg-blue-900/30 p-6">
-            <Wallet className="size-12 text-blue-400" />
+            <Wallet className="size-12 text-blue-600" />
           </div>
 
           <Typography variant="h2" className="mb-2 text-white">
@@ -75,14 +76,13 @@ export default function Homepage() {
 
   return (
     <section className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-4 md:p-6">
-      {/* User Account Card */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             Logged in Account
-            <span className="rounded-full bg-green-900 px-2 py-1 text-xs text-green-200">
-              Active
-            </span>
+            <Badge className="bg-blue-500 text-white dark:bg-blue-600">
+              <CheckCircle className="size-4" /> Active
+            </Badge>
           </CardTitle>
 
           <Button
@@ -96,16 +96,14 @@ export default function Homepage() {
           </Button>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="flex flex-col gap-4">
           {/* Address */}
-          <div className="space-y-2">
-            <Typography variant="small" className="text-gray-400">
-              Wallet Address
-            </Typography>
-            <div className="flex items-center gap-2 rounded-lg bg-gray-800 p-3">
+          <div className="flex flex-col gap-2">
+            <Typography variant="small">Wallet Address</Typography>
+            <div className="border-input dark:bg-input/30 flex h-9 w-full items-center gap-2 rounded-md border bg-transparent px-3 py-1 shadow-xs">
               <Typography
-                variant="inline-code"
-                className="flex-1 text-gray-200"
+                variant="small"
+                className="text-foreground flex-1 text-base md:text-sm"
               >
                 {activeAccount?.address}
               </Typography>
@@ -126,39 +124,44 @@ export default function Homepage() {
           </div>
 
           {/* Chain */}
-          <div className="space-y-2">
-            <Typography variant="small" className="text-gray-400">
-              Network
-            </Typography>
-            <div className="rounded-lg border border-blue-800 bg-blue-900/20 p-3">
-              <Typography variant="small" className="font-medium text-blue-200">
+          <div className="flex flex-col gap-2">
+            <Typography variant="small">Network</Typography>
+            <div className="border-input dark:bg-input/30 flex h-9 w-full items-center rounded-md border bg-transparent px-3 py-1 shadow-xs">
+              <Typography
+                variant="small"
+                className="text-foreground text-base font-medium md:text-sm"
+              >
                 {activeConnectedAccount?.getChain?.()?.name || 'Lisk Network'}
               </Typography>
             </div>
           </div>
 
           {/* Balance */}
-          <div className="space-y-2">
-            <Typography variant="small" className="text-gray-400">
-              Balance
-            </Typography>
-            <div className="rounded-lg border border-green-800 bg-green-900/20 p-3">
+          <div className="flex flex-col gap-2">
+            <Typography variant="small">Balance</Typography>
+            <div className="border-input dark:bg-input/30 flex h-9 w-full items-center rounded-md border bg-transparent px-3 py-1 shadow-xs">
               {isLoadingBalance ? (
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-green-400"></div>
-                  <Typography variant="small" className="text-green-200">
+                  <div className="border-muted-foreground h-4 w-4 animate-spin rounded-full border-b-2"></div>
+                  <Typography
+                    variant="small"
+                    className="text-muted-foreground text-base md:text-sm"
+                  >
                     Loading balance...
                   </Typography>
                 </div>
               ) : accountBalance ? (
                 <Typography
                   variant="small"
-                  className="font-medium text-green-200"
+                  className="text-foreground text-base font-medium md:text-sm"
                 >
                   {accountBalance.displayValue} {accountBalance.symbol}
                 </Typography>
               ) : (
-                <Typography variant="small" className="text-red-400">
+                <Typography
+                  variant="small"
+                  className="text-destructive text-base md:text-sm"
+                >
                   Unable to fetch balance
                 </Typography>
               )}
