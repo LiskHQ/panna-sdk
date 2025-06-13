@@ -96,11 +96,11 @@ export default function Homepage() {
           </Button>
         </CardHeader>
 
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-8">
           {/* Address */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Typography variant="small">Wallet Address</Typography>
-            <div className="border-input dark:bg-input/30 flex h-9 w-full items-center gap-2 rounded-md border bg-transparent px-3 py-1 shadow-xs">
+            <div className="border-input flex h-10 w-full items-center gap-2 border bg-transparent px-3 py-2 shadow-xs">
               <Typography
                 variant="small"
                 className="text-foreground flex-1 text-base md:text-sm"
@@ -124,9 +124,9 @@ export default function Homepage() {
           </div>
 
           {/* Chain */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Typography variant="small">Network</Typography>
-            <div className="border-input dark:bg-input/30 flex h-9 w-full items-center rounded-md border bg-transparent px-3 py-1 shadow-xs">
+            <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
               <Typography
                 variant="small"
                 className="text-foreground text-base font-medium md:text-sm"
@@ -137,9 +137,9 @@ export default function Homepage() {
           </div>
 
           {/* Balance */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <Typography variant="small">Balance</Typography>
-            <div className="border-input dark:bg-input/30 flex h-9 w-full items-center rounded-md border bg-transparent px-3 py-1 shadow-xs">
+            <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
               {isLoadingBalance ? (
                 <div className="flex items-center gap-2">
                   <div className="border-muted-foreground h-4 w-4 animate-spin rounded-full border-b-2"></div>

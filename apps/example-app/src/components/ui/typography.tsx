@@ -18,7 +18,7 @@ const typographyVariants = cva('', {
         'relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
       lead: 'text-xl text-muted-foreground',
       large: 'text-lg font-semibold',
-      small: 'text-sm font-medium leading-none',
+      small: 'text-sm font-normal leading-none',
       muted: 'text-sm text-muted-foreground'
     }
   },
