@@ -8,7 +8,7 @@ import {
   useActiveAccount,
   lisk
 } from 'flow-sdk';
-import { LogOut, Wallet, Copy, CheckCircle } from 'lucide-react';
+import { LogOut, Wallet, Copy, CheckCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -142,7 +142,7 @@ export default function Homepage() {
             <div className="border-input flex h-10 w-full items-center border bg-transparent px-3 py-2 shadow-xs">
               {isLoadingBalance ? (
                 <div className="flex items-center gap-2">
-                  <div className="border-muted-foreground h-4 w-4 animate-spin rounded-full border-b-2"></div>
+                  <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
                   <Typography
                     variant="small"
                     className="text-muted-foreground text-base md:text-sm"
