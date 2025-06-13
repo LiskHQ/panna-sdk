@@ -1,8 +1,8 @@
-export {
-  FlowProvider,
-  type FlowProviderProps
-} from './components/flow-provider';
+// Components
+export * from './components';
 
-export { LoginButton, type LoginButtonProps } from './components/login-button';
-
+// Hooks
 export * from './hooks';
+
+// Utils
+export * from './utils';

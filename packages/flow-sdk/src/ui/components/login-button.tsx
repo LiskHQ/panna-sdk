@@ -22,6 +22,17 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  *   <LoginButton />
  * </FlowProvider>
  * ```
+ *
+ * @example Custom styling (user styles override defaults)
+ * ```tsx
+ * <LoginButton
+ *   connectButton={{
+ *     label: "Custom Label",
+ *     className: "custom-styles-here", // These will be applied after defaults
+ *     style: { backgroundColor: 'red' } // These will override default styles
+ *   }}
+ * />
+ * ```
  */
 export function LoginButton(props: LoginButtonProps) {
   const client = useFlowClient();

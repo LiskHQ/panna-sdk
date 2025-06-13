@@ -162,12 +162,18 @@ importers:
 
   packages/flow-sdk:
     dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: '>=18.0.0'
         version: 19.1.0
       react-dom:
         specifier: '>=18.0.0'
         version: 19.1.0(react@19.1.0)
+      tailwind-merge:
+        specifier: ^3.3.1
+        version: 3.3.1
       thirdweb:
         specifier: ^5.101.1
         version: 5.101.1(@hey-api/openapi-ts@0.67.6(typescript@5.8.3))(@types/react-dom@19.1.5(@types/react@19.1.6))(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(typescript@5.8.3)
