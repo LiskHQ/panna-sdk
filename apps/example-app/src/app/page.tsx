@@ -78,28 +78,21 @@ export default function Homepage() {
       {/* User Account Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-green-900/30 p-2">
-              <User className="size-5 text-green-400" />
-            </div>
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                Connected Account
-                <span className="rounded-full bg-green-900 px-2 py-1 text-xs text-green-200">
-                  Active
-                </span>
-              </CardTitle>
-            </div>
-          </div>
+          <CardTitle className="flex items-center gap-2">
+            Logged in Account
+            <span className="rounded-full bg-green-900 px-2 py-1 text-xs text-green-200">
+              Active
+            </span>
+          </CardTitle>
 
           <Button
             onClick={handleDisconnect}
             variant="outline"
             size="sm"
-            className="gap-2 border-red-700 text-red-300 hover:bg-red-900/20"
+            className="border-destructive text-destructive hover:bg-destructive/20 gap-2"
           >
             <LogOut className="size-4" />
-            Disconnect
+            Logout
           </Button>
         </CardHeader>
 
@@ -170,38 +163,6 @@ export default function Homepage() {
                 </Typography>
               )}
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* SDK Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle>SDK Integration</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm">
-            <p className="text-gray-400">
-              This demo showcases the Lisk Flow SDK with minimal configuration:
-            </p>
-            <ul className="space-y-2 text-gray-300">
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                Wallet connection with LoginButton component
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                Real-time account balance tracking
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                Automatic chain detection and management
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                Clean disconnect functionality
-              </li>
-            </ul>
           </div>
         </CardContent>
       </Card>
