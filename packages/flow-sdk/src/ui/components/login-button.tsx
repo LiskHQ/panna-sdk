@@ -34,7 +34,7 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  * />
  * ```
  */
-export function LoginButton(props: LoginButtonProps) {
+export function LoginButton({ connectButton, ...props }: LoginButtonProps) {
   const client = useFlowClient();
 
   if (!client) {
@@ -47,7 +47,7 @@ export function LoginButton(props: LoginButtonProps) {
   return (
     <ConnectButton
       client={client}
-      connectButton={{ label: 'Sign in' }}
+      connectButton={{ label: 'Sign in', ...connectButton }}
       theme={liskTheme}
       appMetadata={{
         name: 'Lisk Flow App',
