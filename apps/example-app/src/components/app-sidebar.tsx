@@ -1,4 +1,4 @@
-import { RocketIcon } from 'lucide-react';
+import { RocketIcon, User, Settings, HelpCircle } from 'lucide-react';
 import * as React from 'react';
 import {
   Sidebar,
@@ -16,91 +16,30 @@ import {
 const data = {
   navMain: [
     {
-      title: 'Wallet',
-      url: '#',
+      title: 'Account',
       items: [
         {
           title: 'Dashboard',
           url: '/',
+          icon: User,
           isActive: true
-        },
-        {
-          title: 'Connect Wallet',
-          url: '#'
-        },
-        {
-          title: 'Account Details',
-          url: '#'
-        },
-        {
-          title: 'Balance',
-          url: '#'
         }
       ]
     },
     {
-      title: 'Transactions',
-      url: '#',
-      items: [
-        {
-          title: 'Send',
-          url: '#'
-        },
-        {
-          title: 'Receive',
-          url: '#'
-        },
-        {
-          title: 'History',
-          url: '#'
-        },
-        {
-          title: 'Pending',
-          url: '#'
-        }
-      ]
-    },
-    {
-      title: 'Lisk Network',
-      url: '#',
-      items: [
-        {
-          title: 'Network Status',
-          url: '#'
-        },
-        {
-          title: 'Chain Explorer',
-          url: '#'
-        },
-        {
-          title: 'Validators',
-          url: '#'
-        },
-        {
-          title: 'Staking',
-          url: '#'
-        }
-      ]
-    },
-    {
-      title: 'Developer',
-      url: '#',
+      title: 'Resources',
       items: [
         {
           title: 'SDK Documentation',
-          url: '#'
+          url: '#',
+          icon: HelpCircle,
+          isActive: false
         },
         {
-          title: 'API Reference',
-          url: '#'
-        },
-        {
-          title: 'Examples',
-          url: '#'
-        },
-        {
-          title: 'Testing',
-          url: '#'
+          title: 'Settings',
+          url: '#',
+          icon: Settings,
+          isActive: false
         }
       ]
     }
@@ -119,22 +58,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <RocketIcon className="!size-5" />
-                <span className="text-base font-semibold">Lisk Flow Demo</span>
+                <span className="text-base font-semibold">Lisk Flow</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+        {data.navMain.map((group) => (
+          <SidebarGroup key={group.title}>
+            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {item.items.map((item) => (
+                {group.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                      <a href={item.url} className="flex items-center gap-2">
+                        <item.icon className="size-4" />
+                        {item.title}
+                      </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

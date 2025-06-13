@@ -6,9 +6,10 @@ import {
   useAccountBalance,
   useFlowClient,
   useActiveAccount,
-  lisk,
-  LoginButton
+  lisk
 } from 'flow-sdk';
+import { LogOut, User, Wallet, Copy } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Typography } from '@/components/ui/typography';
@@ -18,6 +19,8 @@ export default function Homepage() {
   const connectedAccounts = useConnectedAccounts();
   const activeAccount = useActiveAccount();
   const client = useFlowClient();
+  const [copied, setCopied] = useState(false);
+
   const { data: accountBalance, isLoading: isLoadingBalance } =
     useAccountBalance({
       address: activeAccount?.address || '',
@@ -34,145 +37,174 @@ export default function Homepage() {
     }
   };
 
+  const handleCopyAddress = async () => {
+    if (activeAccount?.address) {
+      await navigator.clipboard.writeText(activeAccount.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  if (!isConnected) {
+    return (
+      <section className="mx-auto w-full max-w-2xl flex-1 p-4 md:p-6">
+        <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+          <div className="mb-6 rounded-full bg-blue-900/30 p-6">
+            <Wallet className="size-12 text-blue-400" />
+          </div>
+
+          <Typography variant="h2" className="mb-2 text-white">
+            Welcome to Lisk Flow SDK
+          </Typography>
+
+          <Typography variant="lead" className="mb-8 max-w-lg text-gray-400">
+            Connect your wallet to get started with the Lisk Flow SDK demo.
+            Experience seamless blockchain interactions with minimal
+            configuration.
+          </Typography>
+
+          <div className="space-y-4 text-left text-sm text-gray-400">
+            <p>✨ Simple wallet connection</p>
+            <p>⚡ Real-time balance updates</p>
+            <p>🔧 Minimal SDK configuration</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-4 md:p-6">
-      <header className="text-center">
-        <Typography variant="h2" className="text-white">
-          Lisk Flow SDK Demo
-        </Typography>
-        <Typography variant="lead" className="text-gray-300">
-          Simple demo of the Lisk Flow SDK
-        </Typography>
-      </header>
-
-      {/* Connection Status */}
+      {/* User Account Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Connection Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg bg-gray-700 p-3">
-                <Typography variant="small" className="text-gray-200">
-                  Connected:
-                </Typography>
-                <span
-                  className={`rounded-full px-3 py-1 text-sm font-medium ${
-                    isConnected
-                      ? 'border border-green-700 bg-green-900 text-green-200'
-                      : 'border border-red-700 bg-red-900 text-red-200'
-                  }`}
-                >
-                  {isConnected ? 'Yes' : 'No'}
-                </span>
-              </div>
+        <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-green-900/30 p-2">
+              <User className="size-5 text-green-400" />
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between rounded-lg bg-gray-700 p-3">
-                <Typography variant="small" className="text-gray-200">
-                  Connected Accounts:
-                </Typography>
-                <span className="rounded-full border border-blue-700 bg-blue-900 px-3 py-1 text-sm font-medium text-blue-200">
-                  {connectedAccounts?.length || 0}
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                Connected Account
+                <span className="rounded-full bg-green-900 px-2 py-1 text-xs text-green-200">
+                  Active
                 </span>
-              </div>
+              </CardTitle>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Action Buttons */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Actions</CardTitle>
+          <Button
+            onClick={handleDisconnect}
+            variant="outline"
+            size="sm"
+            className="gap-2 border-red-700 text-red-300 hover:bg-red-900/20"
+          >
+            <LogOut className="size-4" />
+            Disconnect
+          </Button>
         </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            {!isConnected ? (
-              <LoginButton />
-            ) : (
-              <Button
-                onClick={handleDisconnect}
-                variant="destructive"
-                size="lg"
+
+        <CardContent className="space-y-4">
+          {/* Address */}
+          <div className="space-y-2">
+            <Typography variant="small" className="text-gray-400">
+              Wallet Address
+            </Typography>
+            <div className="flex items-center gap-2 rounded-lg bg-gray-800 p-3">
+              <Typography
+                variant="inline-code"
+                className="flex-1 text-gray-200"
               >
-                Disconnect
+                {activeAccount?.address}
+              </Typography>
+              <Button
+                onClick={handleCopyAddress}
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              >
+                <Copy className="size-4" />
               </Button>
+            </div>
+            {copied && (
+              <Typography variant="small" className="text-green-400">
+                ✓ Address copied to clipboard
+              </Typography>
             )}
           </div>
+
+          {/* Chain */}
+          <div className="space-y-2">
+            <Typography variant="small" className="text-gray-400">
+              Network
+            </Typography>
+            <div className="rounded-lg border border-blue-800 bg-blue-900/20 p-3">
+              <Typography variant="small" className="font-medium text-blue-200">
+                {activeConnectedAccount?.getChain?.()?.name || 'Lisk Network'}
+              </Typography>
+            </div>
+          </div>
+
+          {/* Balance */}
+          <div className="space-y-2">
+            <Typography variant="small" className="text-gray-400">
+              Balance
+            </Typography>
+            <div className="rounded-lg border border-green-800 bg-green-900/20 p-3">
+              {isLoadingBalance ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-green-400"></div>
+                  <Typography variant="small" className="text-green-200">
+                    Loading balance...
+                  </Typography>
+                </div>
+              ) : accountBalance ? (
+                <Typography
+                  variant="small"
+                  className="font-medium text-green-200"
+                >
+                  {accountBalance.displayValue} {accountBalance.symbol}
+                </Typography>
+              ) : (
+                <Typography variant="small" className="text-red-400">
+                  Unable to fetch balance
+                </Typography>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Account Information */}
-      {isConnected && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {connectedAccounts?.map((account, index) => (
-                <div
-                  key={index}
-                  className="rounded-xl border border-blue-800 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 p-6"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <Typography variant="small" className="text-gray-200">
-                        Address:
-                      </Typography>
-                      <Typography
-                        variant="inline-code"
-                        className="break-all text-gray-200"
-                      >
-                        {account.getAccount?.()?.address || 'Unknown'}
-                      </Typography>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Typography variant="small" className="text-gray-200">
-                        Chain:
-                      </Typography>
-                      <span className="rounded-lg border border-green-700 bg-green-900 px-3 py-1 text-sm font-medium text-green-200">
-                        {account.getChain?.()?.name || 'Unknown'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {activeAccount && (
-                <div className="rounded-xl border border-green-800 bg-gradient-to-r from-green-900/30 to-emerald-900/30 p-6">
-                  <div className="flex items-center gap-3">
-                    <Typography variant="small" className="text-gray-200">
-                      Balance:
-                    </Typography>
-                    <div className="flex items-center gap-2">
-                      {isLoadingBalance ? (
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-green-400"></div>
-                          <Typography variant="muted">Loading...</Typography>
-                        </div>
-                      ) : accountBalance ? (
-                        <Typography
-                          variant="inline-code"
-                          className="text-gray-200"
-                        >
-                          {accountBalance.displayValue} {accountBalance.symbol}
-                        </Typography>
-                      ) : (
-                        <Typography variant="small" className="text-red-400">
-                          Unable to fetch balance
-                        </Typography>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* SDK Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle>SDK Integration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3 text-sm">
+            <p className="text-gray-400">
+              This demo showcases the Lisk Flow SDK with minimal configuration:
+            </p>
+            <ul className="space-y-2 text-gray-300">
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                Wallet connection with LoginButton component
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                Real-time account balance tracking
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                Automatic chain detection and management
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
+                Clean disconnect functionality
+              </li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }
