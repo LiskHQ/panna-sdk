@@ -1,4 +1,4 @@
-import { RocketIcon, User, Settings, HelpCircle } from 'lucide-react';
+import { User, Settings, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import {

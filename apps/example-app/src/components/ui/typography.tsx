@@ -27,29 +27,28 @@ const typographyVariants = cva('', {
   }
 });
 
-export interface TypographyProps
-  extends React.HTMLAttributes<HTMLElement>,
-    VariantProps<typeof typographyVariants> {
-  as?:
-    | 'h1'
-    | 'h2'
-    | 'h3'
-    | 'h4'
-    | 'h5'
-    | 'h6'
-    | 'p'
-    | 'span'
-    | 'div'
-    | 'blockquote'
-    | 'code'
-    | 'ul'
-    | 'li'
-    | 'small';
-}
+type TypographyProps = React.HTMLAttributes<HTMLElement> &
+  VariantProps<typeof typographyVariants> & {
+    as?:
+      | 'h1'
+      | 'h2'
+      | 'h3'
+      | 'h4'
+      | 'h5'
+      | 'h6'
+      | 'p'
+      | 'span'
+      | 'div'
+      | 'blockquote'
+      | 'code'
+      | 'ul'
+      | 'li'
+      | 'small';
+  };
 
 function Typography({ className, variant, as, ...props }: TypographyProps) {
   // Auto-select the HTML element based on variant if 'as' is not provided
-  const getDefaultElement = (variant: string | null | undefined): string => {
+  const getDefaultElement = (variant: string | null | undefined) => {
     switch (variant) {
       case 'h1':
         return 'h1';
@@ -81,13 +80,12 @@ function Typography({ className, variant, as, ...props }: TypographyProps) {
     }
   };
 
-  const Component = (as ||
-    getDefaultElement(variant)) as keyof React.JSX.IntrinsicElements;
+  const Component = as || getDefaultElement(variant);
 
   return (
     <Component
       className={cn(typographyVariants({ variant, className }))}
-      {...(props as any)}
+      {...(props as React.HTMLAttributes<HTMLElement>)}
     />
   );
 }
