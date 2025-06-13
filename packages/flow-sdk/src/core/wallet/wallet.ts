@@ -48,7 +48,7 @@ export function createAccount({
   ecosystemId = EcosystemId.LISK,
   partnerId
 }: {
-  ecosystemId?: EcosystemId;
+  ecosystemId?: EcosystemId | `ecosystem.${string}`;
   partnerId: string;
 }): Account {
   return ecosystemWallet(ecosystemId, { partnerId });

@@ -2,13 +2,13 @@ import * as thirdwebWallets from 'thirdweb/wallets';
 import { type FlowClient, EcosystemId } from '../client';
 import { LoginStrategy } from './types';
 import {
-  login,
-  prepareLogin,
   createAccount,
   getEmail,
+  getLinkedAccounts,
   getPhoneNumber,
   linkAccount,
-  getLinkedAccounts,
+  login,
+  prepareLogin,
   unlinkAccount
 } from './wallet';
 
@@ -130,12 +130,34 @@ describe('Wallet Functions - Unit Tests', () => {
         mockEcosystemWallet
       );
 
-      const result = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const result = createAccount({
+        partnerId: 'test-partner-id'
+      });
 
       expect(thirdwebWallets.ecosystemWallet).toHaveBeenCalledWith(
         EcosystemId.LISK,
         {
           partnerId: 'test-partner-id'
+        }
+      );
+      expect(result).toEqual(mockEcosystemWallet);
+    });
+
+    it('should create ecosystem wallet with custom ecosystem ID and custom partner ID', () => {
+      const mockEcosystemWallet = { type: 'ecosystem' };
+      (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+        mockEcosystemWallet
+      );
+
+      const result = createAccount({
+        ecosystemId: 'ecosystem.org123',
+        partnerId: 'custom-partner-id'
+      });
+
+      expect(thirdwebWallets.ecosystemWallet).toHaveBeenCalledWith(
+        'ecosystem.org123',
+        {
+          partnerId: 'custom-partner-id'
         }
       );
       expect(result).toEqual(mockEcosystemWallet);
