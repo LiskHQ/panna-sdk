@@ -12,6 +12,7 @@ import {
   SidebarMenuItem,
   SidebarRail
 } from '@/components/ui/sidebar';
+import LiskIsotypeIcon from './ui/lisk-isotype-icon';
 
 const data = {
   navMain: [
@@ -57,8 +58,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <RocketIcon className="!size-5" />
-                <span className="text-base font-semibold">
+                <LiskIsotypeIcon size={32} />
+                <span className="text-small font-semibold">
                   Lisk Flow Example
                 </span>
               </a>
