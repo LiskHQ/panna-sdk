@@ -12,6 +12,7 @@ import { EcosystemId, type FlowClient } from '../client';
 import {
   type Account,
   type AuthParams,
+  type CreateAccountOptions,
   type EmailPrepareParams,
   type LinkedAccount,
   type PhonePrepareParams
@@ -47,10 +48,7 @@ export async function prepareLogin(
 export function createAccount({
   ecosystemId = EcosystemId.LISK,
   partnerId
-}: {
-  ecosystemId?: EcosystemId | `ecosystem.${string}`;
-  partnerId: string;
-}): Account {
+}: CreateAccountOptions): Account {
   return ecosystemWallet(ecosystemId, { partnerId });
 }
 
