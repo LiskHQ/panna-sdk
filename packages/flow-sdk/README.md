@@ -1,4 +1,4 @@
-# Flow SDK Documentation
+# Lisk Flow SDK Documentation
 
 The Lisk Flow SDK is a comprehensive toolkit for building high quality decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. Lisk Flow SDK enables web3 integrations such as wallet creation, gas fee management, fiat onramps, loyalty programs, and more in a single toolkit, enabling a seamless user experience. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
 
@@ -33,7 +33,7 @@ The Lisk Flow SDK is designed to simplify development on the Lisk blockchain by 
 
 ## Getting Started
 
-To get started with the Flow SDK, follow these steps:
+To get started with the Lisk Flow SDK, follow these steps:
 
 1. **Install the SDK**:
 
@@ -73,7 +73,7 @@ To get started with the Flow SDK, follow these steps:
 
 ## Core Functionality
 
-The core functionality of the Flow SDK is organized into several modules, each serving a specific purpose in interacting with the Lisk blockchain.
+The core functionality of the Lisk Flow SDK is organized into several modules, each serving a specific purpose in interacting with the Lisk blockchain.
 
 ### Chain management
 
