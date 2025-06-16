@@ -1,6 +1,6 @@
 # Flow SDK Documentation
 
-The Lisk Flow SDK is a comprehensive toolkit for building decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
+The Lisk Flow SDK is a comprehensive toolkit for building high quality decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. Lisk Flow SDK enables web3 integrations such as wallet creation, gas fee management, fiat onramps, loyalty programs, and more in a single toolkit, enabling a seamless user experience. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
 
 ---
 
@@ -58,10 +58,14 @@ To get started with the Flow SDK, follow these steps:
 4. **Integrate UI components**:
 
    ```tsx
-   import { LoginButton } from 'flow-sdk';
+   import { FlowProvider, LoginButton } from 'flow-sdk';
 
    function App() {
-     return <LoginButton label="Sign in with Flow" client={client} />;
+     return (
+       <FlowProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>
+         <LoginButton label="Sign in with Flow" />
+       </FlowProvider>
+     );
    }
    ```
 
@@ -124,9 +128,8 @@ The `src/ui` directory contains all UI-related code, including:
 
 UI components are organized for reusability and maintainability:
 
-- `/components`: Reusable UI elements (login button, transaction button, pay embed, etc)
+- `/components`: Reusable UI elements (flow provider, login button, transaction button, pay embed, etc)
 - `/hooks`: Custom React hooks for Flow interactions
-- `/context`: React context providers for Flow state
 
 ### Usage
 
