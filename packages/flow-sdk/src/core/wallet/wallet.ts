@@ -8,14 +8,14 @@ import {
   preAuthenticate,
   unlinkProfile
 } from 'thirdweb/wallets';
-import { type FlowClient } from '../client';
-import { EcosystemId } from '../client';
+import { EcosystemId, type FlowClient } from '../client';
 import {
-  type AuthParams,
-  type EmailPrepareParams,
-  type PhonePrepareParams,
   type Account,
-  type LinkedAccount
+  type AuthParams,
+  type CreateAccountOptions,
+  type EmailPrepareParams,
+  type LinkedAccount,
+  type PhonePrepareParams
 } from './types';
 
 /**
@@ -40,14 +40,15 @@ export async function prepareLogin(
 
 /**
  * Create a new user account (Lisk ecosystem wallet)
- * @param ecosystemId - The ecosystem ID (defaults to EcosystemId.LISK)
- * @param partnerId - Partner ID for the dApp
+ * @param options - The account configuration options
+ * @param [options.ecosystemId] - The ecosystem ID (defaults to EcosystemId.LISK)
+ * @param options.partnerId - Partner ID for the dApp
  * @returns New user account
  */
-export function createAccount(
-  ecosystemId: EcosystemId = EcosystemId.LISK,
-  partnerId: string
-): Account {
+export function createAccount({
+  ecosystemId = EcosystemId.LISK,
+  partnerId
+}: CreateAccountOptions): Account {
   return ecosystemWallet(ecosystemId, { partnerId });
 }
 

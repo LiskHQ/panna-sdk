@@ -1,4 +1,4 @@
-import { type FlowClient, type EcosystemConfig } from '../client';
+import { type EcosystemConfig, EcosystemId, type FlowClient } from '../client';
 
 // Enum for login strategies
 export const LoginStrategy = {
@@ -39,6 +39,11 @@ export interface PhonePrepareParams extends BaseAuthParams {
   phoneNumber: string;
 }
 
+export type CreateAccountOptions = {
+  ecosystemId?: EcosystemId | `ecosystem.${string}`;
+  partnerId: string;
+};
+
 // Combined types for different authentication flows
 export type SingleStepAuthParams = EmailAuthParams | PhoneAuthParams;
 
@@ -49,7 +54,7 @@ export type AuthParams = SingleStepAuthParams | MultiStepAuthParams;
 // Re-export types with web2-friendly names
 export type {
   Wallet as Account,
-  Profile as LinkedAccount,
+  InAppWalletAuth as AccountAuth,
   InAppWalletConnectionOptions as AccountConnectionOptions,
-  InAppWalletAuth as AccountAuth
+  Profile as LinkedAccount
 } from 'thirdweb/wallets';
