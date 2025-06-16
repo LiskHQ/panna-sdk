@@ -1,13 +1,12 @@
 # Flow SDK Documentation
 
-The Lisk Flow SDK is a comprehensive toolkit for interacting with the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. This documentation covers the SDK's concepts, core modules, and usage examples to help you get started quickly and effectively.
+The Lisk Flow SDK is a comprehensive toolkit for building decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
 
 ---
 
 ## Table of Contents
 
 - [Overview](#overview)
-- [Core Concepts](#core-concepts)
 - [Core Functionality](#core-functionality)
   - [Chain management](#chain-management)
   - [Client management](#client-management)
@@ -26,7 +25,7 @@ The Lisk Flow SDK is a comprehensive toolkit for interacting with the Lisk block
 
 The Lisk Flow SDK is designed to simplify development on the Lisk blockchain by providing:
 
-- A robust client for interacting with the blockchain (querying, sending transactions, etc.)
+- A robust client for interacting with the blockchain (querying, sending transactions, on-ramping, etc.)
 - Authentication and user management utilities
 - A set of reusable React UI components for building blockchain-enabled interfaces
 
@@ -37,19 +36,25 @@ The Lisk Flow SDK is designed to simplify development on the Lisk blockchain by 
 To get started with the Flow SDK, follow these steps:
 
 1. **Install the SDK**:
+
    ```bash
    npm install flow-sdk
    ```
+
 2. **Import the SDK in your project**:
+
    ```ts
    import { createFlowClient } from 'flow-sdk';
    ```
+
 3. **Initialize the client**:
+
    ```ts
    const client = createFlowClient({
      partnerId: process.env.NEXT_PUBLIC_PARTNER_ID || ''
    });
    ```
+
 4. **Integrate UI components**:
 
    ```tsx
@@ -59,26 +64,6 @@ To get started with the Flow SDK, follow these steps:
      return <LoginButton label="Sign in with Flow" client={client} />;
    }
    ```
-
----
-
-## Core Concepts
-
-### Lisk Blockchain
-
-Lisk is a fast, decentralized, and developer-friendly blockchain designed for consumer applications, games, and digital assets. The SDK abstracts many of the complexities of interacting with Lisk, making it easier to build secure and scalable dApps.
-
-### Chain management
-
-The SDK provides a client abstraction that manages communication with the Lisk blockchain, including storing and retrieving chain information.
-
-### Client management
-
-The client is the primary interface for interacting with the Lisk blockchain. It handles RPC calls and manages connections.
-
-### Wallet management
-
-Carrying out transactions and interacting on Flow involves signing and accessing user information. Authentication is essential for signing transactions and verifying user identity. The SDK includes utilities for creating authenticated sessions, managing cryptographic keys, wallet information and linking/unlinking profiles.
 
 ---
 
