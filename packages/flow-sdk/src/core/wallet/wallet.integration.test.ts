@@ -1,13 +1,13 @@
 import { createFlowClient, EcosystemId } from '../client';
 import { type Account } from './types';
 import {
-  login,
-  prepareLogin,
   createAccount,
   getEmail,
+  getLinkedAccounts,
   getPhoneNumber,
   linkAccount,
-  getLinkedAccounts,
+  login,
+  prepareLogin,
   unlinkAccount
 } from './wallet';
 
@@ -38,7 +38,7 @@ describe('Wallet Functions - Integration Tests', () => {
 
   describe('createAccount', () => {
     test('should create actual ecosystem wallet with default ecosystem ID and partner ID', () => {
-      const account = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const account = createAccount({ partnerId: 'test-partner-id' });
 
       // Test that we get a real Wallet object
       expect(account).toBeDefined();
@@ -51,7 +51,21 @@ describe('Wallet Functions - Integration Tests', () => {
     });
 
     test('should create ecosystem wallet with default ecosystem ID and custom partner ID', () => {
-      const account = createAccount(EcosystemId.LISK, 'custom-partner-id');
+      const account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'custom-partner-id'
+      });
+
+      expect(account).toBeDefined();
+      expect(account.id).toBeDefined();
+      expect(account.id).toContain('ecosystem');
+    });
+
+    test('should create ecosystem wallet with custom ecosystem ID and custom partner ID', () => {
+      const account = createAccount({
+        ecosystemId: 'ecosystem.custom',
+        partnerId: 'custom-partner-id'
+      });
 
       expect(account).toBeDefined();
       expect(account.id).toBeDefined();
@@ -59,7 +73,10 @@ describe('Wallet Functions - Integration Tests', () => {
     });
 
     test('should expose real wallet methods', async () => {
-      const account = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'test-partner-id'
+      });
 
       expect(typeof account.connect).toBe('function');
       expect(typeof account.disconnect).toBe('function');
@@ -104,21 +121,27 @@ describe('Wallet Functions - Integration Tests', () => {
   describe('Type exports', () => {
     test('should export Account type', () => {
       // Test that Account type works with wallet functions
-      const account: Account = createAccount(
-        EcosystemId.LISK,
-        'test-partner-id'
-      );
+      const account: Account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'test-partner-id'
+      });
       expect(account).toBeDefined();
     });
 
     test('should use EcosystemId enum', () => {
       // Test that EcosystemId enum is used
-      const account = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'test-partner-id'
+      });
       expect(account).toBeDefined();
     });
 
     test('should enforce ecosystem ID format', () => {
-      const account = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'test-partner-id'
+      });
       expect(account.id).toContain('ecosystem');
     });
 
@@ -127,14 +150,20 @@ describe('Wallet Functions - Integration Tests', () => {
       expect(EcosystemId.LISK).toBe('ecosystem.lisk');
 
       // Verify it works with functions
-      const account = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'test-partner-id'
+      });
       expect(account).toBeDefined();
     });
   });
 
   describe('Integration with Thirdweb', () => {
     test('createAccount should return a real Thirdweb wallet', () => {
-      const account = createAccount(EcosystemId.LISK, 'test-partner-id');
+      const account = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId: 'test-partner-id'
+      });
 
       // Verify it's a real Thirdweb wallet by checking its structure
       expect(account).toHaveProperty('id');

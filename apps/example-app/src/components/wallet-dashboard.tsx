@@ -2,7 +2,6 @@
 
 import {
   createAccount,
-  EcosystemId,
   lisk,
   LoginButton,
   useAccountBalance,
@@ -27,7 +26,7 @@ export function WalletDashboard() {
   const isConnected = !!activeAccount;
   const activeConnectedAccount = connectedAccounts?.[0];
   const wallets = [
-    createAccount(EcosystemId.LISK, process.env.NEXT_PUBLIC_PARTNER_ID || '')
+    createAccount({ partnerId: process.env.NEXT_PUBLIC_PARTNER_ID || '' })
   ];
 
   const handleDisconnect = () => {
