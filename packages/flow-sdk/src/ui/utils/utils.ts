@@ -1,9 +1,9 @@
 import { Chain } from 'thirdweb';
 import { getDefaultToken, SupportedTokens, TokenInfo } from 'thirdweb/react';
-import { lisk } from '../../core';
+import { lisk, liskSepolia } from '../../core';
 
 const liskTokenConfig: SupportedTokens = {
-  '1135': [
+  [lisk.id]: [
     {
       address: '0xac485391EB2d7D88253a7F1eF18C37f4242D1A24',
       name: 'Lisk',
@@ -14,7 +14,7 @@ const liskTokenConfig: SupportedTokens = {
 };
 
 const liskSepoliaTokenConfig: SupportedTokens = {
-  '4202': [
+  [liskSepolia.id]: [
     {
       address: '0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D',
       name: 'Lisk',
@@ -25,6 +25,9 @@ const liskSepoliaTokenConfig: SupportedTokens = {
       address: '0xed875CABEE46D734F38B5ED453ED1569347c0da8',
       name: 'USDC',
       symbol: 'USDC',
+      // The USDC token is part of the default tokens provided by thirdweb
+      // So we intentionally specify the Ethereum network details in order
+      // to get the correct icon for USDC
       icon: (
         getDefaultToken(
           {

@@ -11,6 +11,9 @@ jest.mock('thirdweb/react', () => ({
 jest.mock('../../core', () => ({
   lisk: {
     id: 1135
+  },
+  liskSepolia: {
+    id: 4202
   }
 }));
 
