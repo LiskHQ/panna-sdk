@@ -2,6 +2,7 @@ import {
   ConnectButton,
   ConnectButtonProps,
   getDefaultToken,
+  TokenInfo,
   useActiveWalletChain
 } from 'thirdweb/react';
 import { lisk, liskSepolia } from '../../core';
@@ -76,13 +77,15 @@ export function LoginButton(props: LoginButtonProps) {
                   address: '0xed875CABEE46D734F38B5ED453ED1569347c0da8',
                   name: 'USDC',
                   symbol: 'usdc',
-                  icon: getDefaultToken(
-                    {
-                      id: 1,
-                      rpc: 'https://cloudflare-eth.com'
-                    },
-                    'USDC'
-                  )!.icon
+                  icon: (
+                    getDefaultToken(
+                      {
+                        id: 1,
+                        rpc: 'https://cloudflare-eth.com'
+                      },
+                      'USDC'
+                    ) as TokenInfo
+                  ).icon
                 }
               ]
             }
