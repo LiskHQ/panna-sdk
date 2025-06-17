@@ -1,8 +1,8 @@
 import { Chain } from 'thirdweb';
-import { getDefaultToken, TokenInfo } from 'thirdweb/react';
+import { getDefaultToken, SupportedTokens, TokenInfo } from 'thirdweb/react';
 import { lisk } from '../../core';
 
-const liskTokenConfig = {
+const liskTokenConfig: SupportedTokens = {
   '1135': [
     {
       address: '0xac485391EB2d7D88253a7F1eF18C37f4242D1A24',
@@ -13,7 +13,7 @@ const liskTokenConfig = {
   ]
 };
 
-const liskSepoliaTokenConfig = {
+const liskSepoliaTokenConfig: SupportedTokens = {
   '4202': [
     {
       address: '0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D',
