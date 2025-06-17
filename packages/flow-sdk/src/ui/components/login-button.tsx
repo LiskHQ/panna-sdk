@@ -76,7 +76,7 @@ export function LoginButton(props: LoginButtonProps) {
                 {
                   address: '0xed875CABEE46D734F38B5ED453ED1569347c0da8',
                   name: 'USDC',
-                  symbol: 'usdc',
+                  symbol: 'USDC',
                   icon: (
                     getDefaultToken(
                       {
