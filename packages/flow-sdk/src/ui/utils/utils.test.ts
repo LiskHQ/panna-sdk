@@ -1,9 +1,6 @@
 import { Chain } from 'thirdweb';
-import {
-  getSupportedTokens,
-  liskSepoliaTokenConfig,
-  liskTokenConfig
-} from './utils';
+import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
+import { getSupportedTokens } from './utils';
 
 jest.mock('../../core', () => ({
   lisk: {
