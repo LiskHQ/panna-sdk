@@ -1,4 +1,3 @@
-import { Chain } from 'thirdweb';
 import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
 import { getSupportedTokens } from './utils';
 
@@ -17,35 +16,23 @@ describe('utils', () => {
       jest.clearAllMocks();
     });
 
-    it('should return liskTokenConfig when chain id matches lisk.id', () => {
-      const mockChain: Chain = {
-        id: 1135,
-        name: 'Lisk',
-        rpc: 'https://rpc.lisk.com'
-      };
+    it('should return liskSepoliaTokenConfig when testing status is true', () => {
+      const result = getSupportedTokens(true);
 
-      const result = getSupportedTokens(mockChain);
+      expect(result).toEqual(liskSepoliaTokenConfig);
+    });
+
+    it('should return liskTokenConfig when testing status is false', () => {
+      const result = getSupportedTokens(false);
 
       expect(result).toEqual(liskTokenConfig);
     });
 
-    it('should return liskSepoliaTokenConfig when chain id does not match lisk.id', () => {
-      const mockChain: Chain = {
-        id: 4202,
-        name: 'Lisk Sepolia',
-        rpc: 'https://rpc.lisk-sepolia.com'
-      };
-
-      const result = getSupportedTokens(mockChain);
-
-      expect(result).toEqual(liskSepoliaTokenConfig);
-    });
-
-    it('should return liskSepoliaTokenConfig when chain is undefined', () => {
+    it('should return liskSepoliaTokenConfig when testing status is undefined', () => {
       const result = getSupportedTokens(undefined);
 
-      expect(result).toEqual(liskSepoliaTokenConfig);
-      expect(result['4202']).toHaveLength(2);
+      expect(result).toEqual(liskTokenConfig);
+      expect(result['1135']).toHaveLength(1);
     });
   });
 });
