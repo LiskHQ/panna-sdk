@@ -1,6 +1,6 @@
 # Lisk Flow SDK Documentation
 
-The Lisk Flow SDK is a comprehensive toolkit for building high quality decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. Lisk Flow SDK enables web3 integrations such as wallet creation, gas fee management, fiat onramps, loyalty programs, and more in a single toolkit, enabling a seamless user experience. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
+The Lisk Flow SDK is a comprehensive toolkit for building high quality decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. Lisk Flow SDK enables web3 integrations such as wallet creation using social logins like email, gmail, phone number, etc, gas-less transactions, fiat onramps, and more in a single toolkit, enabling a seamless user experience. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
 
 ---
 
@@ -51,7 +51,7 @@ To get started with the Lisk Flow SDK, follow these steps:
 
    ```ts
    const client = createFlowClient({
-     partnerId: process.env.NEXT_PUBLIC_PARTNER_ID || ''
+     partnerId: process.env.PARTNER_ID || ''
    });
    ```
 
@@ -62,7 +62,7 @@ To get started with the Lisk Flow SDK, follow these steps:
 
    function App() {
      return (
-       <FlowProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>
+       <FlowProvider clientId={process.env.CLIENT_ID}>
          <LoginButton label="Sign in with Flow" />
        </FlowProvider>
      );
@@ -95,7 +95,7 @@ Client management utilities help with creating and managing client information. 
 
 #### Key Functions
 
-- `createFlowClient`: Creates a Flow client using the provided ID or secret key.
+- `createFlowClient`: Creates a Flow client using the provided client ID.
 
 ### Wallet management
 
@@ -148,6 +148,8 @@ function App() {
 ## Examples
 
 ### Using a UI Component
+
+The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
 
 ```tsx
 import { LoginButton } from 'flow-sdk';
@@ -206,3 +208,9 @@ A: Add your component to the appropriate directory in `src/ui/components` and ex
 ---
 
 For more details, see the source code and inline documentation in each module.
+
+---
+
+## Support
+
+To request partner details, please contact us at [kirill.tiufanov@onchain.org](mailto:kirill.tiufanov@onchain.org).
