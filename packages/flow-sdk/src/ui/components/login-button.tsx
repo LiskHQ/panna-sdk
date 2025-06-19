@@ -1,14 +1,11 @@
-import {
-  ConnectButton,
-  ConnectButtonProps,
-  useActiveWalletChain
-} from 'thirdweb/react';
-import { lisk, liskSepolia } from '../../core';
+import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
 import { useFlowClient } from '../hooks/use-flow-client';
 import { liskTheme } from '../theme';
-import { getSupportedTokens } from '../utils';
+import { getAAChain, getChain, getSupportedTokens } from '../utils';
 
-export type LoginButtonProps = Omit<ConnectButtonProps, 'client'>;
+export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
+  testing?: boolean;
+};
 
 /**
  * A login button component that connects users to their wallets using the Flow client from context.
@@ -27,7 +24,6 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'>;
  */
 export function LoginButton(props: LoginButtonProps) {
   const client = useFlowClient();
-  const currentChain = useActiveWalletChain();
 
   if (!client) {
     throw new Error(
@@ -48,11 +44,12 @@ export function LoginButton(props: LoginButtonProps) {
       connectModal={{
         showThirdwebBranding: false
       }}
+      chain={getChain(props.testing)}
       accountAbstraction={{
-        chain: currentChain?.id === lisk.id ? lisk : liskSepolia,
+        chain: getAAChain(props.testing),
         sponsorGas: true
       }}
-      supportedTokens={getSupportedTokens(currentChain)}
+      supportedTokens={getSupportedTokens(props.testing)}
       {...props}
     />
   );
