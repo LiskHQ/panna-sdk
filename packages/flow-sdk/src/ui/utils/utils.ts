@@ -25,5 +25,5 @@ export function getChain(testingStatus?: boolean | undefined) {
  * @returns The account abstraction settings for the given chain
  */
 export function getAAChain(testingStatus?: boolean | undefined) {
-  return testingStatus ? liskSepolia : lisk;
+  return getChain(testingStatus);
 }

@@ -1,5 +1,6 @@
+import { lisk, liskSepolia } from '../../core';
 import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
-import { getSupportedTokens } from './utils';
+import { getAAChain, getChain, getSupportedTokens } from './utils';
 
 jest.mock('../../core', () => ({
   lisk: {
@@ -28,11 +29,51 @@ describe('utils', () => {
       expect(result).toEqual(liskTokenConfig);
     });
 
-    it('should return liskSepoliaTokenConfig when testing status is undefined', () => {
+    it('should return liskTokenConfig when testing status is undefined', () => {
       const result = getSupportedTokens(undefined);
 
       expect(result).toEqual(liskTokenConfig);
       expect(result['1135']).toHaveLength(1);
+    });
+  });
+
+  describe('getChain', () => {
+    it('should return liskSepolia when testing status is true', () => {
+      const result = getChain(true);
+
+      expect(result).toEqual(liskSepolia);
+    });
+
+    it('should return lisk when testing status is false', () => {
+      const result = getChain(false);
+
+      expect(result).toEqual(lisk);
+    });
+
+    it('should return lisk when testing status is undefined', () => {
+      const result = getChain(undefined);
+
+      expect(result).toEqual(lisk);
+    });
+  });
+
+  describe('getAAChain', () => {
+    it('should return liskSepolia when testing status is true', () => {
+      const result = getAAChain(true);
+
+      expect(result).toEqual(liskSepolia);
+    });
+
+    it('should return lisk when testing status is false', () => {
+      const result = getAAChain(false);
+
+      expect(result).toEqual(lisk);
+    });
+
+    it('should return lisk when testing status is undefined', () => {
+      const result = getAAChain(undefined);
+
+      expect(result).toEqual(lisk);
     });
   });
 });
