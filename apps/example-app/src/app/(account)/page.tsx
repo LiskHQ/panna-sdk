@@ -11,12 +11,12 @@ import {
   lisk
 } from 'flow-sdk';
 import { LogOut, User } from 'lucide-react';
-import { AccountInformationCard } from '@/app/(account)/components/account-information-card';
-import { NotConnectedView } from '@/app/(account)/components/not-connected-view';
-import { SocialProfilesCard } from '@/app/(account)/components/social-profiles-card';
-import { WalletDetailsCard } from '@/app/(account)/components/wallet-details-card';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
+import { AccountInformationCard } from './components/account-information-card';
+import { NotConnectedView } from './components/not-connected-view';
+import { SocialProfilesCard } from './components/social-profiles-card';
+import { WalletDetailsCard } from './components/wallet-details-card';
 
 export default function Homepage() {
   const { disconnect: logout } = useLogout();
