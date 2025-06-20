@@ -18,7 +18,7 @@ import { NotConnectedView } from './components/not-connected-view';
 import { SocialProfilesCard } from './components/social-profiles-card';
 import { WalletDetailsCard } from './components/wallet-details-card';
 
-export default function Homepage() {
+export default function AccountPage() {
   const { disconnect: logout } = useLogout();
   const connectedAccounts = useConnectedAccounts();
   const activeAccount = useActiveAccount();
