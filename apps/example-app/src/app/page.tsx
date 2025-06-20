@@ -82,6 +82,25 @@ export default function Homepage() {
   );
   const ensProfile = socialProfiles?.find((profile) => profile.type === 'ens');
 
+  // Social platform configuration
+  const socialPlatforms = [
+    {
+      profile: farcasterProfile,
+      title: 'Farcaster',
+      color: 'purple-500'
+    },
+    {
+      profile: lensProfile,
+      title: 'Lens Protocol',
+      color: 'green-500'
+    },
+    {
+      profile: ensProfile,
+      title: 'ENS',
+      color: 'blue-500'
+    }
+  ];
+
   const handleDisconnect = () => {
     if (activeConnectedAccount) {
       logout(activeConnectedAccount);
@@ -347,68 +366,34 @@ export default function Homepage() {
                 </div>
               ) : socialProfiles?.length ? (
                 <div className="flex flex-col gap-3">
-                  {farcasterProfile && (
-                    <div className="flex items-center gap-3 rounded-lg border border-purple-500/20 bg-purple-500/10 p-2">
-                      <LinkIcon className="size-5 text-purple-500" />
-                      <div className="flex flex-col">
-                        <Typography
-                          variant="small"
-                          className="font-medium text-purple-500"
+                  {socialPlatforms.map(
+                    (platform) =>
+                      platform.profile && (
+                        <div
+                          key={platform.title}
+                          className={`flex items-center gap-3 rounded-lg border border-${platform.color}/20 bg-${platform.color}/10 p-2`}
                         >
-                          Farcaster
-                        </Typography>
-                        {farcasterProfile.name && (
-                          <Typography
-                            variant="small"
-                            className="text-foreground text-xs"
-                          >
-                            {farcasterProfile.name}
-                          </Typography>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {lensProfile && (
-                    <div className="flex items-center gap-3 rounded-lg border border-green-500/20 bg-green-500/10 p-2">
-                      <LinkIcon className="size-5 text-green-500" />
-                      <div className="flex flex-col">
-                        <Typography
-                          variant="small"
-                          className="font-medium text-green-500"
-                        >
-                          Lens Protocol
-                        </Typography>
-                        {lensProfile.name && (
-                          <Typography
-                            variant="small"
-                            className="text-foreground text-xs"
-                          >
-                            {lensProfile.name}
-                          </Typography>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  {ensProfile && (
-                    <div className="flex items-center gap-3 rounded-lg border border-blue-500/20 bg-blue-500/10 p-2">
-                      <LinkIcon className="size-5 text-blue-500" />
-                      <div className="flex flex-col">
-                        <Typography
-                          variant="small"
-                          className="font-medium text-blue-500"
-                        >
-                          ENS
-                        </Typography>
-                        {ensProfile.name && (
-                          <Typography
-                            variant="small"
-                            className="text-foreground text-xs"
-                          >
-                            {ensProfile.name}
-                          </Typography>
-                        )}
-                      </div>
-                    </div>
+                          <LinkIcon
+                            className={`size-5 text-${platform.color}`}
+                          />
+                          <div className="flex flex-col">
+                            <Typography
+                              variant="small"
+                              className={`font-medium text-${platform.color}`}
+                            >
+                              {platform.title}
+                            </Typography>
+                            {platform.profile.name && (
+                              <Typography
+                                variant="small"
+                                className="text-foreground text-xs"
+                              >
+                                {platform.profile.name}
+                              </Typography>
+                            )}
+                          </div>
+                        </div>
+                      )
                   )}
                 </div>
               ) : (
