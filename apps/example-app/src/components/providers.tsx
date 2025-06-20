@@ -5,7 +5,10 @@ import { SidebarProvider } from './ui/sidebar';
 
 export function Providers(props: { children: React.ReactNode }) {
   return (
-    <FlowProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>
+    <FlowProvider
+      clientId={process.env.NEXT_PUBLIC_CLIENT_ID}
+      partnerId={process.env.NEXT_PUBLIC_PARTNER_ID}
+    >
       <SidebarProvider>{props.children}</SidebarProvider>
     </FlowProvider>
   );

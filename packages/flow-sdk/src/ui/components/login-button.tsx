@@ -1,5 +1,6 @@
 import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
-import { useFlowClient } from '../hooks/use-flow-client';
+import { createAccount } from '../../core/wallet';
+import { useFlow } from '../hooks/use-flow';
 import { liskTheme } from '../theme';
 import { getAAChain, getChain, getSupportedTokens } from '../utils';
 
@@ -11,6 +12,7 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  * A login button component that connects users to their wallets using the Flow client from context.
  *
  * This component must be used within a FlowProvider that provides the Flow client via context.
+ * It automatically configures the Lisk ecosystem wallet and defaults to the Lisk chain.
  *
  * @param props - All ConnectButtonProps except 'client' (which comes from FlowProvider context)
  * @param {boolean} [props.isTesting] - Optional flag to use the testing chain (default is false)
@@ -18,7 +20,7 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  *
  * @example
  * ```tsx
- * <FlowProvider clientId="your-client-id">
+ * <FlowProvider clientId="your-client-id" partnerId="your-partner-id">
  *   <LoginButton />
  * </FlowProvider>
  * ```
@@ -35,14 +37,9 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  * ```
  */
 export function LoginButton({ connectButton, ...props }: LoginButtonProps) {
-  const client = useFlowClient();
+  const { client, partnerId } = useFlow();
 
-  if (!client) {
-    throw new Error(
-      'LoginButton requires a Flow client from FlowProvider context. ' +
-        'Make sure to wrap your app with <FlowProvider clientId="your-client-id">.'
-    );
-  }
+  const liskEcosystemWallet = createAccount({ partnerId });
 
   return (
     <ConnectButton
@@ -62,6 +59,7 @@ export function LoginButton({ connectButton, ...props }: LoginButtonProps) {
         sponsorGas: true
       }}
       supportedTokens={getSupportedTokens(props.isTesting)}
+      wallets={[liskEcosystemWallet]}
       {...props}
     />
   );
