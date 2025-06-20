@@ -213,4 +213,4 @@ For more details, see the source code and inline documentation in each module.
 
 ## Support
 
-To request partner details, please contact us at [kirill.tiufanov@onchain.org](mailto:kirill.tiufanov@onchain.org).
+To request partner details, please contact us at [support@lisk.com](mailto:support@lisk.com).
