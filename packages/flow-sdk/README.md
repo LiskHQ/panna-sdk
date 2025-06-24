@@ -39,7 +39,7 @@ Lisk Flow is designed to make Web3 app development as smooth and intuitive as po
 - **Plug-and-play Web3 features**: social login, fiat onramps, and transaction handling
 - **Composable React UI components**: rapidly build polished Web3-enabled interfaces
 
-By streamlining both the developer experience and the user journey, Lisk Flow enables teams to ship modern, production-ready dApps—without the usual complexity of Web3 developmen
+By streamlining both the developer experience and the user journey, Lisk Flow enables teams to ship modern, production-ready dApps—without the usual complexity of Web3 development.
 
 ---
 
