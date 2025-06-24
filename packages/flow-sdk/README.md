@@ -1,33 +1,45 @@
 # Lisk Flow SDK Documentation
 
-The Lisk Flow SDK is a comprehensive toolkit for building high quality decentralized applications on the Lisk blockchain, providing both core blockchain utilities and a set of user interface (UI) components for seamless integration into web applications. Lisk Flow SDK enables web3 integrations such as wallet creation using social logins like email, gmail, phone number, etc, gas-less transactions, fiat onramps, and more in a single toolkit, enabling a seamless user experience. This documentation covers the SDK's overview, core modules, and usage examples to help you get started quickly and effectively.
+Lisk Flow SDK is a developer-first toolkit for building seamless, user-friendly decentralized applications. It combines essential Web3 infrastructure with pre-built UI components to help developers create apps that feel like Web2. With features like social login wallets (email, Google, phone number), gasless transactions, and fiat onramps, Lisk Flow eliminates the typical friction of blockchain onboarding—making Web3 invisible to users while giving developers full control.
 
 ---
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Core Functionality](#core-functionality)
-  - [Chain management](#chain-management)
-  - [Client management](#client-management)
-  - [Wallet management](#wallet-management)
-- [UI Components](#ui-components)
-  - [Purpose](#purpose)
-  - [Structure](#structure)
-  - [Usage](#usage)
-- [Examples](#examples)
-- [Best Practices](#best-practices)
-- [FAQ](#faq)
+- [Lisk Flow SDK Documentation](#lisk-flow-sdk-documentation)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+  - [Getting Started](#getting-started)
+  - [Core Functionality](#core-functionality)
+    - [Chain management](#chain-management)
+      - [Key Functions](#key-functions)
+    - [Client management](#client-management)
+      - [Key Functions](#key-functions-1)
+    - [Wallet management](#wallet-management)
+      - [Key Functions](#key-functions-2)
+  - [UI Components](#ui-components)
+    - [Purpose](#purpose)
+    - [Structure](#structure)
+    - [Usage](#usage)
+  - [Examples](#examples)
+    - [Using a UI Component](#using-a-ui-component)
+    - [Authenticating a User](#authenticating-a-user)
+    - [Linking an account](#linking-an-account)
+  - [Best Practices](#best-practices)
+  - [FAQ](#faq)
+  - [Support](#support)
 
 ---
 
 ## Overview
 
-The Lisk Flow SDK is designed to simplify development on the Lisk blockchain by providing:
+Lisk Flow is designed to make Web3 app development as smooth and intuitive as possible by offering:
 
-- A robust client for interacting with the blockchain (querying, sending transactions, on-ramping, etc.)
-- Authentication and user management utilities
-- A set of reusable React UI components for building blockchain-enabled interfaces
+- **Invisible Web3 for users**: abstract away wallets, gas fees, and onboarding complexity
+- **Plug-and-play Web3 features**: social login, fiat onramps, and transaction handling
+- **Composable React UI components**: rapidly build polished Web3-enabled interfaces
+
+By streamlining both the developer experience and the user journey, Lisk Flow enables teams to ship modern, production-ready dApps—without the usual complexity of Web3 developmen
 
 ---
 
