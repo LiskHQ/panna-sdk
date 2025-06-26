@@ -1,4 +1,4 @@
-import { User, Settings, HelpCircle } from 'lucide-react';
+import { User, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import {
@@ -35,12 +35,6 @@ const data = {
           title: 'SDK Documentation',
           url: '#',
           icon: HelpCircle,
-          isActive: false
-        },
-        {
-          title: 'Settings',
-          url: '#',
-          icon: Settings,
           isActive: false
         }
       ]
