@@ -12,7 +12,7 @@ describe('lisk chain definition', () => {
 
     it('should have the correct RPC URL', () => {
       const rpcUrl = lisk.rpc;
-      expect(rpcUrl).toBe('https://rpc.lisk.com');
+      expect(rpcUrl).toBe('https://rpc.api.lisk.com');
     });
 
     it('should have the correct block explorer URL', () => {

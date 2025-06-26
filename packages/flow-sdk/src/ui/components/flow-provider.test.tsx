@@ -21,13 +21,13 @@ const mockCreateFlowClient = createFlowClient as jest.MockedFunction<
 
 // Test component to consume the context
 const TestConsumer: React.FC = () => {
-  const client = useContext(FlowClientContext);
+  const context = useContext(FlowClientContext);
   return (
     <div>
       <span data-testid="client-status">
-        {client ? 'client-available' : 'client-null'}
+        {context?.client ? 'client-available' : 'client-null'}
       </span>
-      <span data-testid="client-value">{JSON.stringify(client)}</span>
+      <span data-testid="client-value">{JSON.stringify(context)}</span>
     </div>
   );
 };
@@ -237,10 +237,10 @@ describe('FlowProvider', () => {
       mockCreateFlowClient.mockReturnValue(mockClient);
 
       const NestedConsumer: React.FC = () => {
-        const client = useContext(FlowClientContext);
+        const context = useContext(FlowClientContext);
         return (
           <div data-testid="nested-consumer">
-            {client ? 'nested-has-client' : 'nested-no-client'}
+            {context?.client ? 'nested-has-client' : 'nested-no-client'}
           </div>
         );
       };

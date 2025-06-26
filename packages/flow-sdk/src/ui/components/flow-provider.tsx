@@ -5,9 +5,22 @@ import { createFlowClient, type FlowClient } from '../../core';
 export type FlowProviderProps = {
   children?: ReactNode;
   clientId?: string;
+  partnerId?: string;
 };
 
-export const FlowClientContext = createContext<FlowClient | null>(null);
+export type FlowContextValue = {
+  client: FlowClient;
+  partnerId: string;
+};
+
+type InternalFlowContextValue = {
+  client: FlowClient | null;
+  partnerId: string;
+};
+
+export const FlowClientContext = createContext<InternalFlowContextValue | null>(
+  null
+);
 
 /**
  * Framework-agnostic Flow Provider that wraps Thirdweb functionality.
@@ -30,17 +43,18 @@ export const FlowClientContext = createContext<FlowClient | null>(null);
  * ```
  */
 export function FlowProvider(props: FlowProviderProps) {
-  const { clientId, children } = props;
+  const { clientId, partnerId, children } = props;
 
-  const client = useMemo(() => {
-    if (clientId) {
-      return createFlowClient({ clientId });
-    }
-    return null;
-  }, [clientId]);
+  const contextValue = useMemo(() => {
+    const client = clientId ? createFlowClient({ clientId }) : null;
+    return {
+      client,
+      partnerId: partnerId ?? ''
+    };
+  }, [clientId, partnerId]);
 
   return (
-    <FlowClientContext value={client}>
+    <FlowClientContext value={contextValue}>
       <ThirdwebProvider>{children}</ThirdwebProvider>
     </FlowClientContext>
   );
