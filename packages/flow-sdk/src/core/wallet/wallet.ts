@@ -1,5 +1,6 @@
 import {
   authenticate,
+  authenticateWithRedirect,
   ecosystemWallet,
   getProfiles,
   getUserEmail,
@@ -15,7 +16,8 @@ import {
   type CreateAccountOptions,
   type EmailPrepareParams,
   type LinkedAccount,
-  type PhonePrepareParams
+  type PhonePrepareParams,
+  type SocialLoginParams
 } from './types';
 
 /**
@@ -25,6 +27,17 @@ import {
  */
 export async function login(params: AuthParams) {
   return authenticate(params as Parameters<typeof authenticate>[0]);
+}
+
+/**
+ * Login a user using social authentication providers with redirect flow
+ * @param params - Social login parameters including client, provider strategy and redirect URL
+ * @returns Promise that resolves when redirect is initiated
+ */
+export async function socialLogin(params: SocialLoginParams): Promise<void> {
+  return authenticateWithRedirect(
+    params as Parameters<typeof authenticateWithRedirect>[0]
+  );
 }
 
 /**
