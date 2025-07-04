@@ -6,7 +6,7 @@ FROM node:$NODE_VERSION-alpine AS base
 
 ## Stage 2
 
-FROM base as builder-base
+FROM base AS builder-base
 RUN apk add --no-cache libc6-compat
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -18,29 +18,25 @@ RUN corepack enable && \
 FROM builder-base AS builder
 WORKDIR /app
 COPY . .
+ARG BUILD_APP=example-app
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile && \
-    pnpm --recursive build && \
-    pnpm deploy --filter=example-app --prod /prod/example-app
+    pnpm --recursive build
 
 ## Stage 4
 
 FROM base AS runner
 WORKDIR /app
 
+ARG BUILD_APP=example-app
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN echo "NODE_ENV=${NODE_ENV}" && \
-    addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs && \
-    mkdir .next && \
-    chown nextjs:nodejs .next
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-COPY --from=builder --chown=nextjs:nodejs /prod/example-app/public ./apps/example-app/public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/example-app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/apps/example-app/.next/static ./apps/example-app/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/${BUILD_APP}/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/${BUILD_APP}/public ./apps/${BUILD_APP}/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/${BUILD_APP}/.next/static ./apps/${BUILD_APP}/.next/static
 
 USER nextjs
 
@@ -48,4 +44,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "apps/example-app/server.js"]
+ENV SERVER_FILEPATH="apps/${BUILD_APP}/server.js"
+CMD ["sh", "-c", "node ${SERVER_FILEPATH}"]
