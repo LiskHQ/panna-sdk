@@ -4,24 +4,26 @@ import {
   type CreateThirdwebClientOptions
 } from 'thirdweb';
 
-export type CreateFlowClientOptions = CreateThirdwebClientOptions;
-export type FlowClient = ThirdwebClient;
+export type CreatePannaClientOptions = CreateThirdwebClientOptions;
+export type PannaClient = ThirdwebClient;
 
 /**
- * Creates a Flow client using the provided client ID (client-side) or secret key (server-side).
+ * Creates a Panna client using the provided client ID (client-side) or secret key (server-side).
  *
- * @param options - Configuration options for the Flow client
- * @returns The created Flow client.
+ * @param options - Configuration options for the Panna client
+ * @returns The created Panna client.
  *
  * @example
  * ```typescript
  * // Client-side usage
- * const client = createFlowClient({ clientId: "your-client-id" });
+ * const client = createPannaClient({ clientId: "your-client-id" });
  *
  * // Server-side usage
- * const client = createFlowClient({ secretKey: "your-secret-key" });
+ * const client = createPannaClient({ secretKey: "your-secret-key" });
  * ```
  */
-export function createFlowClient(options: CreateFlowClientOptions): FlowClient {
+export function createPannaClient(
+  options: CreatePannaClientOptions
+): PannaClient {
   return createThirdwebClient(options);
 }

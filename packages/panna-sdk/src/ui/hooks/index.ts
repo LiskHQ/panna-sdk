@@ -23,4 +23,4 @@ export {
   useWalletDetailsModal as useAccountDetailsModal
 } from 'thirdweb/react';
 
-export { usePanna as useFlow } from './use-panna';
+export { usePanna as usePanna } from './use-panna';

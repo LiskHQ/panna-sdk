@@ -1,5 +1,5 @@
 import * as thirdwebWallets from 'thirdweb/wallets';
-import { type FlowClient, EcosystemId } from '../client';
+import { type PannaClient, EcosystemId } from '../client';
 import { LoginStrategy } from './types';
 import {
   createAccount,
@@ -17,7 +17,7 @@ import {
 jest.mock('thirdweb/wallets');
 
 describe('Wallet Functions - Unit Tests', () => {
-  const mockClient = {} as FlowClient;
+  const mockClient = {} as PannaClient;
   const testEcosystem = {
     id: EcosystemId.LISK,
     partnerId: 'test-partner-id'

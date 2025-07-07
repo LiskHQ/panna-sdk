@@ -56,13 +56,13 @@ To get started with the Panna SDK, follow these steps:
 2. **Import the SDK in your project**:
 
    ```ts
-   import { createFlowClient } from 'panna-sdk';
+   import { createPannaClient } from 'panna-sdk';
    ```
 
 3. **Initialize the client**:
 
    ```ts
-   const client = createFlowClient({
+   const client = createPannaClient({
      partnerId: process.env.PARTNER_ID || ''
    });
    ```
@@ -70,13 +70,13 @@ To get started with the Panna SDK, follow these steps:
 4. **Integrate UI components**:
 
    ```tsx
-   import { FlowProvider, LoginButton } from 'panna-sdk';
+   import { PannaProvider, LoginButton } from 'panna-sdk';
 
    function App() {
      return (
-       <FlowProvider clientId={process.env.CLIENT_ID}>
-         <LoginButton label="Sign in with Flow" />
-       </FlowProvider>
+       <PannaProvider clientId={process.env.CLIENT_ID}>
+         <LoginButton label="Sign in with Panna" />
+       </PannaProvider>
      );
    }
    ```
@@ -107,7 +107,7 @@ Client management utilities help with creating and managing client information. 
 
 #### Key Functions
 
-- `createFlowClient`: Creates a Flow client using the provided client ID.
+- `createPannaClient`: Creates a Panna client using the provided client ID.
 
 ### Wallet management
 
@@ -132,16 +132,16 @@ The SDK includes a set of React components and utilities for building user inter
 
 The `src/ui` directory contains all UI-related code, including:
 
-- React components for Flow interactions (e.g., login, transaction, pay embed, etc)
+- React components for Panna interactions (e.g., login, transaction, pay embed, etc)
 - React hooks for blockchain operations
-- Flow-specific hooks and context providers
+- Panna-specific hooks and context providers
 
 ### Structure
 
 UI components are organized for reusability and maintainability:
 
 - `/components`: Reusable UI elements (panna provider, login button, transaction button, pay embed, etc)
-- `/hooks`: Custom React hooks for Flow interactions
+- `/hooks`: Custom React hooks for Panna interactions
 
 ### Usage
 
@@ -166,10 +166,10 @@ The login button uses the sign in strategy chosen by the builder to handle authe
 ```tsx
 import { LoginButton } from 'panna-sdk';
 
-<LoginButton label="Sign in with Flow" />;
+<LoginButton label="Sign in with Panna" />;
 ```
 
-For creating a custom UI, you can use the provided core functions to manage Flow state and interactions.
+For creating a custom UI, you can use the provided core functions to manage Panna state and interactions.
 
 ### Authenticating a User
 
@@ -200,7 +200,7 @@ const result = await linkAccount({
 ## Best Practices
 
 - Always validate user input before sending transactions.
-- Use context providers to manage Flow state in your React app.
+- Use context providers to manage Panna state in your React app.
 - Handle errors gracefully and provide user feedback.
 - Keep your dependencies up to date for security and compatibility.
 
@@ -208,7 +208,7 @@ const result = await linkAccount({
 
 ## FAQ
 
-**Q: How do I connect to a Flow testnet or mainnet?**
+**Q: How do I connect to a Panna testnet or mainnet?**
 A: Configure the client with the appropriate network endpoint when initializing.
 
 **Q: Can I use the SDK in a Node.js backend?**

@@ -1,4 +1,4 @@
-import { type FlowClient, EcosystemId, type EcosystemConfig } from '../client';
+import { type PannaClient, EcosystemId, type EcosystemConfig } from '../client';
 import {
   LoginStrategy,
   type AuthParams,
@@ -16,7 +16,7 @@ import {
 } from './types';
 
 describe('Wallet Types', () => {
-  const mockClient = {} as FlowClient;
+  const mockClient = {} as PannaClient;
   const testEcosystem: EcosystemConfig = {
     id: EcosystemId.LISK,
     partnerId: 'test-partner-id'

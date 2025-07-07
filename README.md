@@ -1,6 +1,6 @@
-# Flow Monorepo
+# Panna Monorepo
 
-This is a TypeScript monorepo for developing a Flow SDK.
+This is a TypeScript monorepo for developing a Panna SDK.
 
 ## 📦 Packages
 

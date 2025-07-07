@@ -9,20 +9,20 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
 };
 
 /**
- * A login button component that connects users to their wallets using the Flow client from context.
+ * A login button component that connects users to their wallets using the Panna client from context.
  *
- * This component must be used within a FlowProvider that provides the Flow client via context.
+ * This component must be used within a PannaProvider that provides the Panna client via context.
  * It automatically configures the Lisk ecosystem wallet and defaults to the Lisk chain.
  *
- * @param props - All ConnectButtonProps except 'client' (which comes from FlowProvider context)
+ * @param props - All ConnectButtonProps except 'client' (which comes from PannaProvider context)
  * @param {boolean} [props.isTesting] - Optional flag to use the testing chain (default is false)
- * @throws {Error} When used outside of FlowProvider context or when no client is available
+ * @throws {Error} When used outside of PannaProvider context or when no client is available
  *
  * @example
  * ```tsx
- * <FlowProvider clientId="your-client-id" partnerId="your-partner-id">
+ * <PannaProvider clientId="your-client-id" partnerId="your-partner-id">
  *   <LoginButton />
- * </FlowProvider>
+ * </PannaProvider>
  * ```
  *
  * @example Custom styling (user styles override defaults)

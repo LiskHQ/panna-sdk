@@ -1,7 +1,7 @@
 import { type Chain } from 'thirdweb';
 import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
-import { type FlowClient } from '../client';
+import { type PannaClient } from '../client';
 import { type SocialProvider } from './types';
 import { accountBalance, getSocialIcon } from './utils';
 
@@ -10,7 +10,7 @@ jest.mock('thirdweb/wallets');
 jest.mock('thirdweb/wallets/in-app');
 
 describe('Utils - Unit Tests', () => {
-  const mockClient = {} as FlowClient;
+  const mockClient = {} as PannaClient;
   const mockChain = { id: 1 } as Chain;
 
   beforeEach(() => {

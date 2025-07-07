@@ -5,7 +5,7 @@ import {
   useLogout,
   useConnectedAccounts,
   useAccountBalance,
-  useFlow,
+  usePanna,
   useActiveAccount,
   useUserProfiles,
   useSocialAccounts,
@@ -22,7 +22,7 @@ export default function AccountPage() {
   const { disconnect: logout } = useLogout();
   const connectedAccounts = useConnectedAccounts();
   const activeAccount = useActiveAccount();
-  const { client } = useFlow();
+  const { client } = usePanna();
 
   const { data: accountBalance, isLoading: isLoadingBalance } =
     useAccountBalance({

@@ -1,4 +1,4 @@
-name: Flow SDK Build CI
+name: Panna SDK Build CI
 
 on:
   push:

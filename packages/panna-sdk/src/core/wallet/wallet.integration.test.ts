@@ -1,4 +1,4 @@
-import { createFlowClient, EcosystemId } from '../client';
+import { createPannaClient, EcosystemId } from '../client';
 import { type Account } from './types';
 import {
   createAccount,
@@ -21,7 +21,7 @@ import {
  */
 describe('Wallet Functions - Integration Tests', () => {
   // Create a test client for integration tests
-  const testClient = createFlowClient({
+  const testClient = createPannaClient({
     clientId: 'test-wallet-integration-id'
   });
   const testEcosystem = {
@@ -177,8 +177,8 @@ describe('Wallet Functions - Integration Tests', () => {
       expect((account as Record<string, unknown>).mockWallet).toBeUndefined();
     });
 
-    test('client created by createFlowClient should work with wallet functions', () => {
-      const client = createFlowClient({ clientId: 'integration-test' });
+    test('client created by createPannaClient should work with wallet functions', () => {
+      const client = createPannaClient({ clientId: 'integration-test' });
 
       // Verify that the client is created successfully
       expect(client).toBeDefined();

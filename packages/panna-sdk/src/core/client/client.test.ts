@@ -1,22 +1,22 @@
 import {
-  createFlowClient,
-  type CreateFlowClientOptions,
-  type FlowClient
+  createPannaClient,
+  type CreatePannaClientOptions,
+  type PannaClient
 } from '..';
 
 // Mock thirdweb module for unit tests
 jest.mock('thirdweb', () => ({
-  createThirdwebClient: jest.fn((options: CreateFlowClientOptions) => ({
+  createThirdwebClient: jest.fn((options: CreatePannaClientOptions) => ({
     clientId: options.clientId,
     secretKey: options.secretKey,
     mockClient: true
   }))
 }));
 
-describe('createFlowClient - Unit Tests', () => {
+describe('createPannaClient - Unit Tests', () => {
   test('should create client with clientId', () => {
-    const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
-    const client = createFlowClient(options) as FlowClient & {
+    const options: CreatePannaClientOptions = { clientId: 'test-client-id' };
+    const client = createPannaClient(options) as PannaClient & {
       mockClient: boolean;
     };
 
@@ -26,8 +26,8 @@ describe('createFlowClient - Unit Tests', () => {
   });
 
   test('should create client with secretKey', () => {
-    const options: CreateFlowClientOptions = { secretKey: 'test-secret-key' };
-    const client = createFlowClient(options) as FlowClient & {
+    const options: CreatePannaClientOptions = { secretKey: 'test-secret-key' };
+    const client = createPannaClient(options) as PannaClient & {
       mockClient: boolean;
     };
 
@@ -38,18 +38,18 @@ describe('createFlowClient - Unit Tests', () => {
 
   test('should delegate validation to createThirdwebClient', () => {
     const { createThirdwebClient } = jest.requireMock('thirdweb');
-    const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
+    const options: CreatePannaClientOptions = { clientId: 'test-client-id' };
 
-    createFlowClient(options);
+    createPannaClient(options);
 
     expect(createThirdwebClient).toHaveBeenCalledWith(options);
   });
 
   test('should pass options directly to createThirdwebClient', () => {
     const { createThirdwebClient } = jest.requireMock('thirdweb');
-    const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
+    const options: CreatePannaClientOptions = { clientId: 'test-client-id' };
 
-    createFlowClient(options);
+    createPannaClient(options);
 
     expect(createThirdwebClient).toHaveBeenCalledWith(options);
   });
