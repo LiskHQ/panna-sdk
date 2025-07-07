@@ -2,7 +2,7 @@ import { use } from 'react';
 import {
   FlowClientContext,
   FlowContextValue
-} from '../components/flow-provider';
+} from '../components/panna-provider';
 
 /**
  * Hook to access the Flow context

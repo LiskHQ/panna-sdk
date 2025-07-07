@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React, { useContext } from 'react';
 import { createFlowClient, type FlowClient } from '../../core';
-import { FlowProvider, FlowClientContext } from './flow-provider';
+import { FlowProvider, FlowClientContext } from './panna-provider';
 
 // Mock the thirdweb module
 jest.mock('thirdweb/react', () => ({

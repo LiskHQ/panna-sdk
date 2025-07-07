@@ -1,6 +1,6 @@
 'use client';
 
-import { FlowProvider } from 'flow-sdk';
+import { FlowProvider } from 'panna-sdk';
 import { SidebarProvider } from './ui/sidebar';
 
 export function Providers(props: { children: React.ReactNode }) {

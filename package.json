@@ -1,5 +1,5 @@
 {
-  "name": "lisk-flow-poc",
+  "name": "lisk-panna-sdk",
   "version": "1.0.0",
   "private": true,
   "description": "Lisk Flow SDK Proof of Concept",
@@ -32,7 +32,7 @@
   "packageManager": "pnpm@10.10.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LiskHQ/lisk-flow-poc.git"
+    "url": "git+https://github.com/LiskHQ/lisk-panna-sdk.git"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

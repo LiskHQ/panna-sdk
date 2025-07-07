@@ -5,7 +5,7 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './pages/**/*.{ts,tsx}',
-    '../../packages/flow-sdk/src/**/*.{ts,tsx}'
+    '../../packages/panna-sdk/src/**/*.{ts,tsx}'
   ],
   theme: {
     extend: {

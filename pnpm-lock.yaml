@@ -111,9 +111,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      flow-sdk:
+      panna-sdk:
         specifier: workspace:^
-        version: link:../../packages/flow-sdk
+        version: link:../../packages/panna-sdk
       lucide-react:
         specifier: ^0.514.0
         version: 0.514.0(react@19.1.0)
@@ -161,7 +161,7 @@ importers:
         specifier: ^5
         version: 5.8.3
 
-  packages/flow-sdk:
+  packages/panna-sdk:
     dependencies:
       clsx:
         specifier: ^2.1.1

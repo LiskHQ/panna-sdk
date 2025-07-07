@@ -6,7 +6,7 @@ Lisk Flow SDK is a developer-first toolkit for building seamless, user-friendly 
 
 ## Table of Contents
 
-- [Lisk Flow SDK Documentation](#lisk-flow-sdk-documentation)
+- [Lisk Flow SDK Documentation](#lisk-panna-sdk-documentation)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Getting Started](#getting-started)
@@ -50,13 +50,13 @@ To get started with the Lisk Flow SDK, follow these steps:
 1. **Install the SDK**:
 
    ```bash
-   npm install flow-sdk
+   npm install panna-sdk
    ```
 
 2. **Import the SDK in your project**:
 
    ```ts
-   import { createFlowClient } from 'flow-sdk';
+   import { createFlowClient } from 'panna-sdk';
    ```
 
 3. **Initialize the client**:
@@ -70,7 +70,7 @@ To get started with the Lisk Flow SDK, follow these steps:
 4. **Integrate UI components**:
 
    ```tsx
-   import { FlowProvider, LoginButton } from 'flow-sdk';
+   import { FlowProvider, LoginButton } from 'panna-sdk';
 
    function App() {
      return (
@@ -140,7 +140,7 @@ The `src/ui` directory contains all UI-related code, including:
 
 UI components are organized for reusability and maintainability:
 
-- `/components`: Reusable UI elements (flow provider, login button, transaction button, pay embed, etc)
+- `/components`: Reusable UI elements (panna provider, login button, transaction button, pay embed, etc)
 - `/hooks`: Custom React hooks for Flow interactions
 
 ### Usage
@@ -148,7 +148,7 @@ UI components are organized for reusability and maintainability:
 To use a UI component, import it from the SDK and include it in your React application. For example:
 
 ```tsx
-import { LoginButton } from 'flow-sdk';
+import { LoginButton } from 'panna-sdk';
 
 function App() {
   return <LoginButton />;
@@ -161,10 +161,10 @@ function App() {
 
 ### Using a UI Component
 
-The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
+The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login pannas as needed, using the provided core functions.
 
 ```tsx
-import { LoginButton } from 'flow-sdk';
+import { LoginButton } from 'panna-sdk';
 
 <LoginButton label="Sign in with Flow" />;
 ```
@@ -174,7 +174,7 @@ For creating a custom UI, you can use the provided core functions to manage Flow
 ### Authenticating a User
 
 ```ts
-import { login } from 'flow-sdk';
+import { login } from 'panna-sdk';
 
 const session = await login({
   strategy: 'email',
@@ -186,7 +186,7 @@ const session = await login({
 ### Linking an account
 
 ```ts
-import { linkAccount } from 'flow-sdk';
+import { linkAccount } from 'panna-sdk';
 
 const result = await linkAccount({
   strategy: 'phone',

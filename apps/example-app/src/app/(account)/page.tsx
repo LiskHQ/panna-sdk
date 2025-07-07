@@ -9,7 +9,7 @@ import {
   useUserProfiles,
   useSocialAccounts,
   lisk
-} from 'flow-sdk';
+} from 'panna-sdk';
 import { LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
