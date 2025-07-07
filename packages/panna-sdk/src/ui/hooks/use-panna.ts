@@ -20,7 +20,7 @@ import {
  * }
  * ```
  */
-export function useFlow(): FlowContextValue {
+export function usePanna(): FlowContextValue {
   const context = use(FlowClientContext);
 
   if (!context) {

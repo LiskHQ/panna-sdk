@@ -1,6 +1,6 @@
 import { ConnectButton, ConnectButtonProps } from 'thirdweb/react';
 import { createAccount } from '../../core/wallet';
-import { useFlow } from '../hooks/use-flow';
+import { usePanna } from '../hooks/use-panna';
 import { liskTheme } from '../theme';
 import { getAAChain, getChain, getSupportedTokens } from '../utils';
 
@@ -37,7 +37,7 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  * ```
  */
 export function LoginButton({ connectButton, ...props }: LoginButtonProps) {
-  const { client, partnerId } = useFlow();
+  const { client, partnerId } = usePanna();
 
   const liskEcosystemWallet = createAccount({ partnerId });
 

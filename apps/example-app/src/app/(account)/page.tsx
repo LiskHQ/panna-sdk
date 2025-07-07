@@ -1,5 +1,6 @@
 'use client';
 
+import { LogOut, User } from 'lucide-react';
 import {
   useLogout,
   useConnectedAccounts,
@@ -10,7 +11,6 @@ import {
   useSocialAccounts,
   lisk
 } from 'panna-sdk';
-import { LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
 import { AccountInformationCard } from './components/account-information-card';
