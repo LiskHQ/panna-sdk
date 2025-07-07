@@ -55,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link href="/">
                 <LiskIsotypeIcon size={32} />
                 <span className="text-small font-semibold">
-                  Lisk Flow Example
+                  Panna Example
                 </span>
               </Link>
             </SidebarMenuButton>

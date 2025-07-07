@@ -1,12 +1,12 @@
-# Lisk Flow SDK Documentation
+# Panna SDK Documentation
 
-Lisk Flow SDK is a developer-first toolkit for building seamless, user-friendly decentralized applications. It combines essential Web3 infrastructure with pre-built UI components to help developers create apps that feel like Web2. With features like social login wallets (email, Google, phone number), gasless transactions, and fiat onramps, Lisk Flow eliminates the typical friction of blockchain onboarding—making Web3 invisible to users while giving developers full control.
+Panna SDK is a developer-first toolkit for building seamless, user-friendly decentralized applications. It combines essential Web3 infrastructure with pre-built UI components to help developers create apps that feel like Web2. With features like social login wallets (email, Google, phone number), gasless transactions, and fiat onramps, Panna eliminates the typical friction of blockchain onboarding—making Web3 invisible to users while giving developers full control.
 
 ---
 
 ## Table of Contents
 
-- [Lisk Flow SDK Documentation](#lisk-panna-sdk-documentation)
+- [Panna SDK Documentation](#lisk-panna-sdk-documentation)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Getting Started](#getting-started)
@@ -33,19 +33,19 @@ Lisk Flow SDK is a developer-first toolkit for building seamless, user-friendly 
 
 ## Overview
 
-Lisk Flow is designed to make Web3 app development as smooth and intuitive as possible by offering:
+Panna is designed to make Web3 app development as smooth and intuitive as possible by offering:
 
 - **Invisible Web3 for users**: abstract away wallets, gas fees, and onboarding complexity
 - **Plug-and-play Web3 features**: social login, fiat onramps, and transaction handling
 - **Composable React UI components**: rapidly build polished Web3-enabled interfaces
 
-By streamlining both the developer experience and the user journey, Lisk Flow enables teams to ship modern, production-ready dApps—without the usual complexity of Web3 development.
+By streamlining both the developer experience and the user journey, Panna enables teams to ship modern, production-ready dApps—without the usual complexity of Web3 development.
 
 ---
 
 ## Getting Started
 
-To get started with the Lisk Flow SDK, follow these steps:
+To get started with the Panna SDK, follow these steps:
 
 1. **Install the SDK**:
 
@@ -85,7 +85,7 @@ To get started with the Lisk Flow SDK, follow these steps:
 
 ## Core Functionality
 
-The core functionality of the Lisk Flow SDK is organized into several modules, each serving a specific purpose in interacting with the Lisk blockchain.
+The core functionality of the Panna SDK is organized into several modules, each serving a specific purpose in interacting with the Lisk blockchain.
 
 ### Chain management
 

@@ -12,11 +12,11 @@ export function NotConnectedView() {
         </div>
 
         <Typography variant="h2" className="mb-2 text-white">
-          Welcome to Lisk Flow SDK
+          Welcome to Panna SDK
         </Typography>
 
         <Typography variant="lead" className="mb-8 max-w-lg text-gray-400">
-          Connect your wallet to get started with the Lisk Flow SDK demo.
+          Connect your wallet to get started with the Panna SDK demo.
           Experience seamless blockchain interactions with minimal
           configuration.
         </Typography>

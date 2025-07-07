@@ -47,7 +47,7 @@ export function LoginButton({ connectButton, ...props }: LoginButtonProps) {
       connectButton={{ label: 'Sign in', ...connectButton }}
       theme={liskTheme}
       appMetadata={{
-        name: 'Lisk Flow App',
+        name: 'Panna App',
         logoUrl: 'https://portal-assets.lisk.com/logo/lisk-profile-w.svg'
       }}
       connectModal={{

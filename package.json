@@ -2,7 +2,7 @@
   "name": "lisk-panna-sdk",
   "version": "1.0.0",
   "private": true,
-  "description": "Lisk Flow SDK Proof of Concept",
+  "description": "Panna SDK Proof of Concept",
   "author": "Lisk Ltd <admin@lisk.com>",
   "license": "Apache-2.0",
   "scripts": {
