@@ -6,7 +6,7 @@ Panna SDK is a developer-first toolkit for building seamless, user-friendly dece
 
 ## Table of Contents
 
-- [Panna SDK Documentation](#lisk-panna-sdk-documentation)
+- [Panna SDK Documentation](#panna-sdk-documentation)
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Getting Started](#getting-started)
