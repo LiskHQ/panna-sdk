@@ -9,6 +9,7 @@ import {
   linkAccount,
   login,
   prepareLogin,
+  socialLogin,
   unlinkAccount
 } from './wallet';
 
@@ -299,6 +300,116 @@ describe('Wallet Functions - Unit Tests', () => {
 
       expect(thirdwebWallets.unlinkProfile).toHaveBeenCalledWith(params);
       expect(result).toEqual(mockUnlinkResult);
+    });
+  });
+
+  describe('socialLogin', () => {
+    it('should initiate social login with Google provider', async () => {
+      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      const params = {
+        client: mockClient,
+        strategy: 'google' as const,
+        mode: 'redirect' as const,
+        redirectUrl: 'https://example.com/callback',
+        ecosystem: testEcosystem
+      };
+
+      const result = await socialLogin(params);
+
+      expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+        params
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should work with various social providers', async () => {
+      const providers = [
+        'apple',
+        'discord',
+        'github',
+        'facebook',
+        'x',
+        'twitch'
+      ] as const;
+
+      for (const provider of providers) {
+        (
+          thirdwebWallets.authenticateWithRedirect as jest.Mock
+        ).mockResolvedValue(undefined);
+
+        const params = {
+          client: mockClient,
+          strategy: provider,
+          mode: 'redirect' as const,
+          redirectUrl: 'https://example.com/auth',
+          ecosystem: testEcosystem
+        };
+
+        const result = await socialLogin(params);
+
+        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+          params
+        );
+        expect(result).toBeUndefined();
+      }
+    });
+
+    it('should work with different redirect URLs', async () => {
+      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      const redirectUrls = [
+        'https://localhost:3000/auth',
+        'https://staging.example.com/callback',
+        'https://production.app.com/oauth/return'
+      ];
+
+      for (const redirectUrl of redirectUrls) {
+        const params = {
+          client: mockClient,
+          strategy: 'google' as const,
+          mode: 'redirect' as const,
+          redirectUrl,
+          ecosystem: testEcosystem
+        };
+
+        const result = await socialLogin(params);
+
+        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+          params
+        );
+        expect(result).toBeUndefined();
+      }
+    });
+
+    it('should work with custom ecosystem configuration', async () => {
+      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      const customEcosystem = {
+        id: EcosystemId.LISK,
+        partnerId: 'custom-partner-id'
+      };
+
+      const params = {
+        client: mockClient,
+        strategy: 'google' as const,
+        mode: 'redirect' as const,
+        redirectUrl: 'https://example.com/callback',
+        ecosystem: customEcosystem
+      };
+
+      const result = await socialLogin(params);
+
+      expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+        params
+      );
+      expect(result).toBeUndefined();
     });
   });
 });
