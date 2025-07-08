@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Lisk Flow Example App',
-  description: 'Simple example app showcasing the Lisk Flow SDK'
+  title: 'Panna Example App',
+  description: 'Simple example app showcasing the Panna SDK'
 };
 
 export default function RootLayout({

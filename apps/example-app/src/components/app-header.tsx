@@ -1,7 +1,7 @@
 'use client';
 
-import { LoginButton, useActiveAccount } from 'flow-sdk';
 import { usePathname } from 'next/navigation';
+import { LoginButton, useActiveAccount } from 'panna-sdk';
 import {
   Breadcrumb,
   BreadcrumbList,

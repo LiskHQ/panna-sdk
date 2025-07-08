@@ -1,4 +1,4 @@
-import { type EcosystemConfig, EcosystemId, type FlowClient } from '../client';
+import { type EcosystemConfig, EcosystemId, type PannaClient } from '../client';
 import { type SocialProvider } from '../utils/types';
 
 // Enum for login strategies
@@ -12,7 +12,7 @@ export type LoginStrategyType =
 
 // Base authentication parameters
 export interface BaseAuthParams {
-  client: FlowClient;
+  client: PannaClient;
   ecosystem: EcosystemConfig;
 }
 

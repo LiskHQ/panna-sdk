@@ -1,4 +1,4 @@
-name: Flow SDK Build CI
+name: Panna SDK Build CI
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
         run: pnpm install
 
       - name: 🏗️ Build SDK
-        run: pnpm --filter flow-sdk build
+        run: pnpm --filter panna-sdk build
 
       - name: 🔍 Lint
         run: pnpm lint
@@ -41,4 +41,4 @@ jobs:
         run: pnpm format:check
 
       - name: ✅ Run Tests
-        run: pnpm --filter flow-sdk test
+        run: pnpm --filter panna-sdk test

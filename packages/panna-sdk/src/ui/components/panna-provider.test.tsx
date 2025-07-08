@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React, { useContext } from 'react';
-import { createFlowClient, type FlowClient } from '../../core';
-import { FlowProvider, FlowClientContext } from './flow-provider';
+import { createPannaClient, type PannaClient } from '../../core';
+import { PannaProvider, PannaClientContext } from './panna-provider';
 
 // Mock the thirdweb module
 jest.mock('thirdweb/react', () => ({
@@ -10,18 +10,18 @@ jest.mock('thirdweb/react', () => ({
   )
 }));
 
-// Mock the createFlowClient function
+// Mock the createPannaClient function
 jest.mock('../../core', () => ({
-  createFlowClient: jest.fn()
+  createPannaClient: jest.fn()
 }));
 
-const mockCreateFlowClient = createFlowClient as jest.MockedFunction<
-  typeof createFlowClient
+const mockCreatePannaClient = createPannaClient as jest.MockedFunction<
+  typeof createPannaClient
 >;
 
 // Test component to consume the context
 const TestConsumer: React.FC = () => {
-  const context = useContext(FlowClientContext);
+  const context = useContext(PannaClientContext);
   return (
     <div>
       <span data-testid="client-status">
@@ -32,7 +32,7 @@ const TestConsumer: React.FC = () => {
   );
 };
 
-describe('FlowProvider', () => {
+describe('PannaProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -40,9 +40,9 @@ describe('FlowProvider', () => {
   describe('rendering', () => {
     it('should render children without crashing', () => {
       render(
-        <FlowProvider>
+        <PannaProvider>
           <div data-testid="test-child">Test Child</div>
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('test-child')).toBeInTheDocument();
@@ -50,9 +50,9 @@ describe('FlowProvider', () => {
 
     it('should wrap children with ThirdwebProvider', () => {
       render(
-        <FlowProvider>
+        <PannaProvider>
           <div data-testid="test-child">Test Child</div>
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('thirdweb-provider')).toBeInTheDocument();
@@ -63,57 +63,57 @@ describe('FlowProvider', () => {
   describe('client creation and context', () => {
     it('should provide null client when no clientId is provided', () => {
       render(
-        <FlowProvider>
+        <PannaProvider>
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-null'
       );
-      expect(mockCreateFlowClient).not.toHaveBeenCalled();
+      expect(mockCreatePannaClient).not.toHaveBeenCalled();
     });
 
     it('should provide null client when clientId is undefined', () => {
       render(
-        <FlowProvider clientId={undefined}>
+        <PannaProvider clientId={undefined}>
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-null'
       );
-      expect(mockCreateFlowClient).not.toHaveBeenCalled();
+      expect(mockCreatePannaClient).not.toHaveBeenCalled();
     });
 
     it('should provide null client when clientId is empty string', () => {
       render(
-        <FlowProvider clientId="">
+        <PannaProvider clientId="">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-null'
       );
-      expect(mockCreateFlowClient).not.toHaveBeenCalled();
+      expect(mockCreatePannaClient).not.toHaveBeenCalled();
     });
 
     it('should create and provide client when valid clientId is provided', () => {
-      const mockClient = { id: 'test-client' } as unknown as FlowClient;
-      mockCreateFlowClient.mockReturnValue(mockClient);
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
 
       render(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
-      expect(mockCreateFlowClient).toHaveBeenCalledWith({
+      expect(mockCreatePannaClient).toHaveBeenCalledWith({
         clientId: 'test-client-id'
       });
-      expect(mockCreateFlowClient).toHaveBeenCalledTimes(1);
+      expect(mockCreatePannaClient).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-available'
       );
@@ -122,67 +122,67 @@ describe('FlowProvider', () => {
 
   describe('client memoization', () => {
     it('should not recreate client when clientId remains the same', () => {
-      const mockClient = { id: 'test-client' } as unknown as FlowClient;
-      mockCreateFlowClient.mockReturnValue(mockClient);
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
 
       const { rerender } = render(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
-      expect(mockCreateFlowClient).toHaveBeenCalledTimes(1);
+      expect(mockCreatePannaClient).toHaveBeenCalledTimes(1);
 
       // Re-render with same clientId
       rerender(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
-      // Should not call createFlowClient again
-      expect(mockCreateFlowClient).toHaveBeenCalledTimes(1);
+      // Should not call createPannaClient again
+      expect(mockCreatePannaClient).toHaveBeenCalledTimes(1);
     });
 
     it('should recreate client when clientId changes', () => {
-      const mockClient1 = { id: 'test-client-1' } as unknown as FlowClient;
-      const mockClient2 = { id: 'test-client-2' } as unknown as FlowClient;
-      mockCreateFlowClient
+      const mockClient1 = { id: 'test-client-1' } as unknown as PannaClient;
+      const mockClient2 = { id: 'test-client-2' } as unknown as PannaClient;
+      mockCreatePannaClient
         .mockReturnValueOnce(mockClient1)
         .mockReturnValueOnce(mockClient2);
 
       const { rerender } = render(
-        <FlowProvider clientId="test-client-id-1">
+        <PannaProvider clientId="test-client-id-1">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
-      expect(mockCreateFlowClient).toHaveBeenCalledWith({
+      expect(mockCreatePannaClient).toHaveBeenCalledWith({
         clientId: 'test-client-id-1'
       });
-      expect(mockCreateFlowClient).toHaveBeenCalledTimes(1);
+      expect(mockCreatePannaClient).toHaveBeenCalledTimes(1);
 
       // Re-render with different clientId
       rerender(
-        <FlowProvider clientId="test-client-id-2">
+        <PannaProvider clientId="test-client-id-2">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
-      expect(mockCreateFlowClient).toHaveBeenCalledWith({
+      expect(mockCreatePannaClient).toHaveBeenCalledWith({
         clientId: 'test-client-id-2'
       });
-      expect(mockCreateFlowClient).toHaveBeenCalledTimes(2);
+      expect(mockCreatePannaClient).toHaveBeenCalledTimes(2);
     });
 
     it('should change from client to null when clientId is removed', () => {
-      const mockClient = { id: 'test-client' } as unknown as FlowClient;
-      mockCreateFlowClient.mockReturnValue(mockClient);
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
 
       const { rerender } = render(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
@@ -191,9 +191,9 @@ describe('FlowProvider', () => {
 
       // Re-render without clientId
       rerender(
-        <FlowProvider>
+        <PannaProvider>
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
@@ -202,13 +202,13 @@ describe('FlowProvider', () => {
     });
 
     it('should change from null to client when clientId is added', () => {
-      const mockClient = { id: 'test-client' } as unknown as FlowClient;
-      mockCreateFlowClient.mockReturnValue(mockClient);
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
 
       const { rerender } = render(
-        <FlowProvider>
+        <PannaProvider>
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
@@ -217,15 +217,15 @@ describe('FlowProvider', () => {
 
       // Re-render with clientId
       rerender(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <TestConsumer />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-available'
       );
-      expect(mockCreateFlowClient).toHaveBeenCalledWith({
+      expect(mockCreatePannaClient).toHaveBeenCalledWith({
         clientId: 'test-client-id'
       });
     });
@@ -233,11 +233,11 @@ describe('FlowProvider', () => {
 
   describe('integration', () => {
     it('should work with multiple nested consumers', () => {
-      const mockClient = { id: 'test-client' } as unknown as FlowClient;
-      mockCreateFlowClient.mockReturnValue(mockClient);
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
 
       const NestedConsumer: React.FC = () => {
-        const context = useContext(FlowClientContext);
+        const context = useContext(PannaClientContext);
         return (
           <div data-testid="nested-consumer">
             {context?.client ? 'nested-has-client' : 'nested-no-client'}
@@ -246,12 +246,12 @@ describe('FlowProvider', () => {
       };
 
       render(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <TestConsumer />
           <div>
             <NestedConsumer />
           </div>
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
@@ -263,8 +263,8 @@ describe('FlowProvider', () => {
     });
 
     it('should maintain context across re-renders with dynamic children', () => {
-      const mockClient = { id: 'test-client' } as unknown as FlowClient;
-      mockCreateFlowClient.mockReturnValue(mockClient);
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
 
       const DynamicChildren: React.FC<{ showExtra: boolean }> = ({
         showExtra
@@ -276,9 +276,9 @@ describe('FlowProvider', () => {
       );
 
       const { rerender } = render(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <DynamicChildren showExtra={false} />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
@@ -287,9 +287,9 @@ describe('FlowProvider', () => {
       expect(screen.queryByTestId('extra-content')).not.toBeInTheDocument();
 
       rerender(
-        <FlowProvider clientId="test-client-id">
+        <PannaProvider clientId="test-client-id">
           <DynamicChildren showExtra={true} />
-        </FlowProvider>
+        </PannaProvider>
       );
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(

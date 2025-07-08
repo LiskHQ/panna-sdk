@@ -1,10 +1,10 @@
-# Flow Monorepo
+# Panna Monorepo
 
-This is a TypeScript monorepo for developing a Flow SDK.
+This is a TypeScript monorepo for developing a Panna SDK.
 
 ## 📦 Packages
 
-### [`flow-sdk`](./packages/flow-sdk)
+### [`panna-sdk`](./packages/panna-sdk)
 
 > Wallet, transaction, chain and contract logic, including optional React components and hooks.
 
@@ -18,11 +18,11 @@ This is a TypeScript monorepo for developing a Flow SDK.
 
 ### [`example-app`](./apps/example-app)
 
-> Example Next.js 14 app demonstrating how to use the `flow-sdk`.
+> Example Next.js 14 app demonstrating how to use the `panna-sdk`.
 
 - React 19+ App Router
 - Tailwind CSS
-- Consumes `flow-sdk` directly
+- Consumes `panna-sdk` directly
 
 ---
 
@@ -47,7 +47,7 @@ pnpm install
 ### 2. Build SDK
 
 ```bash
-pnpm --filter flow-sdk build
+pnpm --filter panna-sdk build
 ```
 
 ### 3. Run Example App
@@ -59,7 +59,7 @@ pnpm --filter example-app dev
 ## 🧪 Test SDK
 
 ```bash
-pnpm --filter flow-sdk test
+pnpm --filter panna-sdk test
 ```
 
 ## 📁 Project Structure
@@ -69,7 +69,7 @@ your-monorepo/
 ├── apps/
 │   └── example-app/        # Next.js app using the SDK
 ├── packages/
-│   └── flow-sdk/           # Core logic + React wrappers built on thirdweb
+│   └── panna-sdk/           # Core logic + React wrappers built on thirdweb
 ├── pnpm-workspace.yaml     # Workspace definitions
 ├── tsconfig.json           # Base TS config
 ├── jest.config.js          # Jest config for SDK testing

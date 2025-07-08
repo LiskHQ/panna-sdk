@@ -2,6 +2,6 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^flow-sdk(.*)$': '<rootDir>/packages/flow-sdk/src$1'
+    '^panna-sdk(.*)$': '<rootDir>/packages/panna-sdk/src$1'
   }
 };
