@@ -1,4 +1,5 @@
 import { type EcosystemConfig, EcosystemId, type FlowClient } from '../client';
+import { type SocialProvider } from '../utils/types';
 
 // Enum for login strategies
 export const LoginStrategy = {
@@ -43,6 +44,13 @@ export type CreateAccountOptions = {
   ecosystemId?: EcosystemId | `ecosystem.${string}`;
   partnerId: string;
 };
+
+// Social login parameters for redirect flow
+export interface SocialLoginParams extends BaseAuthParams {
+  strategy: SocialProvider;
+  mode: 'redirect';
+  redirectUrl: string;
+}
 
 // Combined types for different authentication flows
 export type SingleStepAuthParams = EmailAuthParams | PhoneAuthParams;
