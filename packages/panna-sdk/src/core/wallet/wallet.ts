@@ -9,7 +9,7 @@ import {
   preAuthenticate,
   unlinkProfile
 } from 'thirdweb/wallets';
-import { EcosystemId, type FlowClient } from '../client';
+import { EcosystemId, type PannaClient } from '../client';
 import {
   type Account,
   type AuthParams,
@@ -71,7 +71,7 @@ export function createAccount({
  * @returns User's email address or undefined if not available
  */
 export async function getEmail(params: {
-  client: FlowClient;
+  client: PannaClient;
   ecosystem: {
     id: EcosystemId;
     partnerId: string;
@@ -86,7 +86,7 @@ export async function getEmail(params: {
  * @returns User's phone number or undefined if not available
  */
 export async function getPhoneNumber(params: {
-  client: FlowClient;
+  client: PannaClient;
   ecosystem: {
     id: EcosystemId;
     partnerId: string;
@@ -112,7 +112,7 @@ export async function linkAccount(
  * @returns List of linked accounts
  */
 export async function getLinkedAccounts(params: {
-  client: FlowClient;
+  client: PannaClient;
   ecosystem: {
     id: EcosystemId;
     partnerId: string;
@@ -127,7 +127,7 @@ export async function getLinkedAccounts(params: {
  * @returns Updated list of profiles
  */
 export async function unlinkAccount(params: {
-  client: FlowClient;
+  client: PannaClient;
   profileToUnlink: LinkedAccount;
   ecosystem: {
     id: EcosystemId;

@@ -1,9 +1,9 @@
-import { createFlowClient, type CreateFlowClientOptions } from '..';
+import { createPannaClient, type CreatePannaClientOptions } from '..';
 
-describe('createFlowClient - Integration Tests', () => {
+describe('createPannaClient - Integration Tests', () => {
   test('should create actual Thirdweb client with clientId', () => {
-    const options: CreateFlowClientOptions = { clientId: 'test-client-id' };
-    const client = createFlowClient(options);
+    const options: CreatePannaClientOptions = { clientId: 'test-client-id' };
+    const client = createPannaClient(options);
 
     // Test that we get a real ThirdwebClient object
     expect(client).toBeDefined();
@@ -14,8 +14,8 @@ describe('createFlowClient - Integration Tests', () => {
   });
 
   test('should create actual Thirdweb client with secretKey', () => {
-    const options: CreateFlowClientOptions = { secretKey: 'test-secret-key' };
-    const client = createFlowClient(options);
+    const options: CreatePannaClientOptions = { secretKey: 'test-secret-key' };
+    const client = createPannaClient(options);
 
     expect(client).toBeDefined();
     expect(typeof client).toBe('object');
@@ -23,7 +23,7 @@ describe('createFlowClient - Integration Tests', () => {
   });
 
   test('should expose Thirdweb client as a real object', () => {
-    const client = createFlowClient({ clientId: 'test-capabilities' });
+    const client = createPannaClient({ clientId: 'test-capabilities' });
 
     // Test that we get a real object, not a mock
     expect(client).toBeDefined();
@@ -37,12 +37,12 @@ describe('createFlowClient - Integration Tests', () => {
   test('should handle Thirdweb validation correctly', () => {
     // Test that invalid options are handled properly by Thirdweb
     expect(() => {
-      createFlowClient({} as CreateFlowClientOptions);
+      createPannaClient({} as CreatePannaClientOptions);
     }).toThrow();
   });
 
   test('should preserve all client properties', () => {
-    const client = createFlowClient({
+    const client = createPannaClient({
       clientId: 'test-properties'
     });
 
@@ -55,7 +55,7 @@ describe('createFlowClient - Integration Tests', () => {
   });
 
   test('should be usable with Thirdweb functions', () => {
-    const client = createFlowClient({ clientId: 'test-usage' });
+    const client = createPannaClient({ clientId: 'test-usage' });
 
     // Test that the client can be used in typical Thirdweb patterns
     expect(client).toBeDefined();

@@ -2,12 +2,12 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "flow-sdk": ["./packages/flow-sdk/src"],
-      "flow-sdk/*": ["./packages/flow-sdk/src/*"]
+      "panna-sdk": ["./packages/panna-sdk/src"],
+      "panna-sdk/*": ["./packages/panna-sdk/src/*"]
     }
   },
   "references": [
-    { "path": "./packages/flow-sdk" },
+    { "path": "./packages/panna-sdk" },
     { "path": "./apps/example-app" }
   ],
   "files": [],

@@ -1,16 +1,16 @@
 'use client';
 
+import { LogOut, User } from 'lucide-react';
 import {
   useLogout,
   useConnectedAccounts,
   useAccountBalance,
-  useFlow,
+  usePanna,
   useActiveAccount,
   useUserProfiles,
   useSocialAccounts,
   lisk
-} from 'flow-sdk';
-import { LogOut, User } from 'lucide-react';
+} from 'panna-sdk';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
 import { AccountInformationCard } from './components/account-information-card';
@@ -22,7 +22,7 @@ export default function AccountPage() {
   const { disconnect: logout } = useLogout();
   const connectedAccounts = useConnectedAccounts();
   const activeAccount = useActiveAccount();
-  const { client } = useFlow();
+  const { client } = usePanna();
 
   const { data: accountBalance, isLoading: isLoadingBalance } =
     useAccountBalance({

@@ -1,5 +1,5 @@
 import { type Chain } from 'thirdweb';
-import { type FlowClient } from '../client';
+import { type PannaClient } from '../client';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -9,7 +9,7 @@ import {
 describe('Utils Types', () => {
   describe('AccountBalanceParams', () => {
     it('should accept valid parameters', () => {
-      const mockClient = {} as FlowClient;
+      const mockClient = {} as PannaClient;
       const mockChain = { id: 1 } as Chain;
 
       const params: AccountBalanceParams = {
@@ -25,7 +25,7 @@ describe('Utils Types', () => {
     });
 
     it('should accept optional tokenAddress', () => {
-      const mockClient = {} as FlowClient;
+      const mockClient = {} as PannaClient;
       const mockChain = { id: 1 } as Chain;
 
       const params: AccountBalanceParams = {

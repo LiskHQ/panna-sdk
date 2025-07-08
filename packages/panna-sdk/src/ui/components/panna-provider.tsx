@@ -1,29 +1,28 @@
 import { ReactNode, createContext, useMemo } from 'react';
 import { ThirdwebProvider } from 'thirdweb/react';
-import { createFlowClient, type FlowClient } from '../../core';
+import { createPannaClient, type PannaClient } from '../../core';
 
-export type FlowProviderProps = {
+export type PannaProviderProps = {
   children?: ReactNode;
   clientId?: string;
   partnerId?: string;
 };
 
-export type FlowContextValue = {
-  client: FlowClient;
+export type PannaContextValue = {
+  client: PannaClient;
   partnerId: string;
 };
 
-type InternalFlowContextValue = {
-  client: FlowClient | null;
+type InternalPannaContextValue = {
+  client: PannaClient | null;
   partnerId: string;
 };
 
-export const FlowClientContext = createContext<InternalFlowContextValue | null>(
-  null
-);
+export const PannaClientContext =
+  createContext<InternalPannaContextValue | null>(null);
 
 /**
- * Framework-agnostic Flow Provider that wraps Thirdweb functionality.
+ * Framework-agnostic Panna Provider that wraps Thirdweb functionality.
  *
  * For SSR frameworks (like Next.js), wrap this component in a client-only boundary
  * at the application level to prevent hydration mismatches.
@@ -31,22 +30,22 @@ export const FlowClientContext = createContext<InternalFlowContextValue | null>(
  * @example
  * ```tsx
  * // Framework agnostic usage
- * <FlowProvider clientId="your-client-id">
+ * <PannaProvider clientId="your-client-id">
  *   <App />
- * </FlowProvider>
+ * </PannaProvider>
  *
  * // Next.js App Router - wrap in 'use client' component
  * 'use client';
  * export function ClientProviders({ children }) {
- *   return <FlowProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>{children}</FlowProvider>;
+ *   return <PannaProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>{children}</PannaProvider>;
  * }
  * ```
  */
-export function FlowProvider(props: FlowProviderProps) {
+export function PannaProvider(props: PannaProviderProps) {
   const { clientId, partnerId, children } = props;
 
   const contextValue = useMemo(() => {
-    const client = clientId ? createFlowClient({ clientId }) : null;
+    const client = clientId ? createPannaClient({ clientId }) : null;
     return {
       client,
       partnerId: partnerId ?? ''
@@ -54,8 +53,8 @@ export function FlowProvider(props: FlowProviderProps) {
   }, [clientId, partnerId]);
 
   return (
-    <FlowClientContext value={contextValue}>
+    <PannaClientContext value={contextValue}>
       <ThirdwebProvider>{children}</ThirdwebProvider>
-    </FlowClientContext>
+    </PannaClientContext>
   );
 }

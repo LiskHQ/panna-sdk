@@ -1,8 +1,8 @@
 {
-  "name": "lisk-flow-poc",
+  "name": "panna-sdk",
   "version": "1.0.0",
   "private": true,
-  "description": "Lisk Flow SDK Proof of Concept",
+  "description": "Panna SDK Proof of Concept",
   "author": "Lisk Ltd <admin@lisk.com>",
   "license": "Apache-2.0",
   "scripts": {
@@ -14,7 +14,8 @@
   },
   "keywords": [
     "lisk",
-    "blockchain"
+    "blockchain",
+    "panna"
   ],
   "lint-staged": {
     "src/**/*.(ts|tsx|js|jsx)": [
@@ -32,7 +33,7 @@
   "packageManager": "pnpm@10.10.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LiskHQ/lisk-flow-poc.git"
+    "url": "git+https://github.com/LiskHQ/panna-sdk.git"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",

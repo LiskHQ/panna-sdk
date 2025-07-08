@@ -1,5 +1,5 @@
 export {
-  createFlowClient,
+  createPannaClient as createPannaClient,
   describeChain,
   ChainMetadata,
   Chain,
@@ -8,8 +8,8 @@ export {
   lisk,
   liskSepolia,
   getChainInfo,
-  type CreateFlowClientOptions,
-  type FlowClient,
+  type CreatePannaClientOptions as CreatePannaClientOptions,
+  type PannaClient as PannaClient,
   // Wallet/Account functions
   login,
   createAccount,

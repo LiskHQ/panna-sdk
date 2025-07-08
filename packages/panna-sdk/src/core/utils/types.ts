@@ -1,10 +1,10 @@
 import { type Chain } from 'thirdweb';
-import { type FlowClient } from '../client';
+import { type PannaClient } from '../client';
 
 // Parameters for getting account balance
 export interface AccountBalanceParams {
   address: string;
-  client: FlowClient;
+  client: PannaClient;
   chain: Chain;
   tokenAddress?: string;
 }
