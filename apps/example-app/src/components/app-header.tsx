@@ -1,11 +1,11 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { LoginButton, useActiveAccount } from 'panna-sdk';
+import { ConnectButton, LoginButton, useActiveAccount } from 'panna-sdk';
 import {
   Breadcrumb,
-  BreadcrumbList,
   BreadcrumbItem,
+  BreadcrumbList,
   BreadcrumbPage
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
@@ -57,6 +57,7 @@ export function AppHeader() {
             Get started by connecting your wallet
           </Typography>
         )}
+        <ConnectButton />
         <LoginButton
           connectButton={{
             className: buttonVariants({ variant: 'default' }),

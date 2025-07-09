@@ -2,14 +2,14 @@
 
 import { LogOut, User } from 'lucide-react';
 import {
-  useLogout,
-  useConnectedAccounts,
+  lisk,
   useAccountBalance,
-  usePanna,
   useActiveAccount,
-  useUserProfiles,
+  useConnectedAccounts,
+  useLogout,
+  usePanna,
   useSocialAccounts,
-  lisk
+  useUserProfiles
 } from 'panna-sdk';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';

@@ -10,8 +10,12 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "declarationMap": true,
-    "types": ["jest", "@testing-library/jest-dom"]
+    "types": ["jest", "@testing-library/jest-dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/ui/*"]
+    }
   },
-  "include": ["src/**/*", "jest.setup.ts"],
+  "include": ["src/**/*", "jest.setup.ts", "tailwind.config.js"],
   "exclude": ["dist", "node_modules"]
 }
