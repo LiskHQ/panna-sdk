@@ -20,6 +20,8 @@ WORKDIR /app
 COPY . .
 ARG NEXT_PUBLIC_CLIENT_ID=""
 ENV NEXT_PUBLIC_CLIENT_ID=${NEXT_PUBLIC_CLIENT_ID}
+ARG NEXT_PUBLIC_PARTNER_ID=""
+ENV NEXT_PUBLIC_PARTNER_ID=${NEXT_PUBLIC_PARTNER_ID}
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile && \
     pnpm --recursive build
 

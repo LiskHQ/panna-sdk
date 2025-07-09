@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - development
+      - LISK-2273-Create-AWS-infra-for-deploying-demo-app
 
 jobs:
   deployment:
@@ -45,6 +46,7 @@ jobs:
             "NODE_ENV=${{ vars.NODE_ENV }}"
             "BUILD_APP=${{ vars.BUILD_APP }}"
             "NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }}"
+            "NEXT_PUBLIC_PARTNER_ID=${{ secrets.NEXT_PUBLIC_PARTNER_ID }}"
 
       - name: Download task definition
         run: |
