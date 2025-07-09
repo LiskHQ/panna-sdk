@@ -27,8 +27,10 @@ jobs:
 
       - name: Build SDK
         run: pnpm --filter @liskhq/panna-sdk build
+
       - name: Version packages
         run: pnpm changeset version
+
       - name: Publish updated packages
         run: pnpm changeset publish
         env:
