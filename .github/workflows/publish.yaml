@@ -15,6 +15,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 8
+          run_install: false
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
@@ -26,9 +27,9 @@ jobs:
 
       - name: Build SDK
         run: pnpm --filter @liskhq/panna-sdk build
-
-      - name: Publish SDK 🚀
-        shell: bash
-        run: pnpm publish --filter @liskhq/panna-sdk --access public
+      - name: Version packages
+        run: pnpm changeset version
+      - name: Publish updated packages
+        run: pnpm changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
