@@ -4,18 +4,18 @@
   "rsc": true,
   "tsx": true,
   "tailwind": {
-    "config": "tailwind.config.js",
+    "config": "",
     "css": "src/ui/globals.css",
     "baseColor": "gray",
     "cssVariables": true,
     "prefix": ""
   },
   "aliases": {
-    "components": "@/components",
-    "utils": "@/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
+    "components": "panna-sdk/ui/components",
+    "utils": "panna-sdk/ui/utils",
+    "ui": "panna-sdk/ui/components/ui",
+    "lib": "panna-sdk/ui/lib",
+    "hooks": "panna-sdk/ui/hooks"
   },
   "iconLibrary": "lucide"
 }
