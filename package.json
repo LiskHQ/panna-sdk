@@ -10,7 +10,9 @@
     "lint": "pnpm -r run lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "changeset",
+    "ci:publish:sdk": "pnpm --filter panna-sdk build && changeset publish --access public"
   },
   "keywords": [
     "lisk",
