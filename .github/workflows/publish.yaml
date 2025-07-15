@@ -32,6 +32,9 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
+          version: pnpm changeset:version
+          commit: 'chore: update versions'
+          title: 'chore: update versions'
           publish: pnpm ci:publish:sdk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

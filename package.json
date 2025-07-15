@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "release": "changeset",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
     "ci:publish:sdk": "pnpm --filter panna-sdk build && changeset publish --access public"
   },
   "keywords": [
