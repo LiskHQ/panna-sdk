@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "panna-sdk/ui/components",
-    "utils": "panna-sdk/ui/utils",
-    "ui": "panna-sdk/ui/components/ui",
-    "lib": "panna-sdk/ui/lib",
-    "hooks": "panna-sdk/ui/hooks"
+    "components": "@/components",
+    "utils": "@/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
   },
   "iconLibrary": "lucide"
 }
