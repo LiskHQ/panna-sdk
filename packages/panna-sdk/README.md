@@ -161,7 +161,7 @@ function App() {
 
 ### Using a UI Component
 
-The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login pannas as needed, using the provided core functions.
+The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
 
 ```tsx
 import { LoginButton } from 'panna-sdk';
