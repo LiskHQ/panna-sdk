@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import 'panna-sdk/styles.css';
 
 @custom-variant dark (&:is(.dark *));
 
