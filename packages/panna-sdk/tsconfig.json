@@ -10,7 +10,16 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "declarationMap": true,
-    "types": ["jest", "@testing-library/jest-dom"]
+    "types": ["jest", "@testing-library/jest-dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/react/components/*"],
+      "@/ui/*": ["./src/react/components/ui/*"],
+      "@/utils/*": ["./src/react/utils/*"],
+      "@/hooks/*": ["./src/react/hooks/*"],
+      "@/lib/*": ["./src/react/utils/*"]
+    }
   },
   "include": ["src/**/*", "jest.setup.ts"],
   "exclude": ["dist", "node_modules"]
