@@ -13,7 +13,7 @@
     "types": ["jest", "@testing-library/jest-dom"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/ui/*"]
+      "@/*": ["./src/react/*"]
     }
   },
   "include": ["src/**/*", "jest.setup.ts", "tailwind.config.js"],

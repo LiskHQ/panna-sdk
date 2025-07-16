@@ -5,7 +5,7 @@
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i src/ui/globals.css -o dist/ui/globals.css --minify",
+    "build:css": "npx @tailwindcss/cli -i src/react/globals.css -o dist/react/globals.css --minify",
     "build": "tsup && pnpm build:css",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",

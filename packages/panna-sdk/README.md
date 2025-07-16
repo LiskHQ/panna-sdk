@@ -130,7 +130,7 @@ The SDK includes a set of React components and utilities for building user inter
 
 ### Purpose
 
-The `src/ui` directory contains all UI-related code, including:
+The `src/react` directory contains all UI-related code, including:
 
 - React components for Panna interactions (e.g., login, transaction, pay embed, etc)
 - React hooks for blockchain operations
@@ -215,7 +215,7 @@ A: Configure the client with the appropriate network endpoint when initializing.
 A: Yes, core utilities are platform-agnostic, but UI components are React-specific.
 
 **Q: How do I add a new UI component?**
-A: Add your component to the appropriate directory in `src/ui/components` and export it from `src/ui/index.ts`.
+A: Add your component to the appropriate directory in `src/react/components` and export it from `src/react/index.ts`.
 
 ---
 

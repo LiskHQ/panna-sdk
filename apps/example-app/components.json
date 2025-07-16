@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "../../packages/panna-sdk/src/ui/globals.css",
+    "css": "../../packages/panna-sdk/src/react/globals.css",
     "baseColor": "gray",
     "cssVariables": true,
     "prefix": ""

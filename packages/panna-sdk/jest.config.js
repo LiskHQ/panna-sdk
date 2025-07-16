@@ -6,7 +6,7 @@ module.exports = {
       testEnvironment: 'jsdom',
       roots: ['<rootDir>/src'],
       testMatch: ['**/src/**/*.test.{ts,tsx}'],
-      collectCoverageFrom: ['src/ui/**/*.{ts,tsx}', '!src/ui/**/*.d.ts'],
+      collectCoverageFrom: ['src/react/**/*.{ts,tsx}', '!src/react/**/*.d.ts'],
       moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
       transform: {
         '^.+\\.(ts|tsx)$': 'ts-jest'
