@@ -1,3 +1,4 @@
+import { LoginForm } from './login-form';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -9,8 +10,6 @@ import {
 } from './ui/dialog';
 import { Typography } from './ui/typography';
 
-// import { Form, FormControl } from "./ui/form";
-
 export function ConnectButton() {
   return (
     <Dialog>
@@ -18,11 +17,14 @@ export function ConnectButton() {
         <Button>Connect Wallet</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Welcome to Connectify</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-24">
-          <DialogFooter className="">
+        <div className="flex flex-col gap-6">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              Welcome to Connectify
+            </DialogTitle>
+          </DialogHeader>
+          <LoginForm />
+          <DialogFooter className="flex flex-col justify-center! text-xs text-neutral-400">
             <Typography>Powered by Panna</Typography>
           </DialogFooter>
         </div>
