@@ -5,7 +5,8 @@ import {
   isValidPhoneNumber,
   parsePhoneNumberWithError
 } from 'libphonenumber-js';
-import { MoveRightIcon, PhoneIcon } from 'lucide-react';
+import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   EcosystemId,
@@ -60,6 +61,8 @@ export function LoginForm() {
     }
   });
   const { client, partnerId } = usePanna();
+  const [showEmailSubmit, setShowEmailSubmit] = useState(true);
+  const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
@@ -105,13 +108,26 @@ export function LoginForm() {
             <FormItem>
               <FormControl>
                 <Input
-                  placeholder="Email address"
-                  endAdornment={
-                    <Button className="hover:bg-layer-200 bg-transparent">
-                      <MoveRightIcon className="text-neutral-400" />
-                    </Button>
-                  }
                   {...field}
+                  placeholder="Email address"
+                  startAdornment={
+                    !showEmailSubmit && (
+                      <MailIcon className="h-5 w-5" color="#7C3AED" />
+                    )
+                  }
+                  endAdornment={
+                    showEmailSubmit && (
+                      <Button className="hover:bg-layer-200 bg-transparent">
+                        <MoveRightIcon className="text-neutral-400" />
+                      </Button>
+                    )
+                  }
+                  onFocus={() => {
+                    setShowEmailSubmit(true);
+                  }}
+                  onBlur={() => {
+                    setShowEmailSubmit(false);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -125,11 +141,26 @@ export function LoginForm() {
             <FormItem>
               <FormControl>
                 <Input
+                  {...field}
                   placeholder="Phone number"
                   startAdornment={
-                    <PhoneIcon className="h-5 w-5" color="#7C3AED" />
+                    !showPhoneSubmit && (
+                      <PhoneIcon className="h-5 w-5" color="#7C3AED" />
+                    )
                   }
-                  {...field}
+                  endAdornment={
+                    showPhoneSubmit && (
+                      <Button className="hover:bg-layer-200 bg-transparent">
+                        <MoveRightIcon className="text-neutral-400" />
+                      </Button>
+                    )
+                  }
+                  onFocus={() => {
+                    setShowPhoneSubmit(true);
+                  }}
+                  onBlur={() => {
+                    setShowPhoneSubmit(false);
+                  }}
                 />
               </FormControl>
               <FormMessage />

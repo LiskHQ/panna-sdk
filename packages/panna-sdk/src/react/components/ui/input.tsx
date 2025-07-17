@@ -6,7 +6,7 @@ export interface InputProps
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
 }
-// : React.ComponentProps<'input'>
+
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
