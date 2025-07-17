@@ -75,7 +75,6 @@ export default function AccountPage() {
 
   return (
     <section className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-4 md:p-6">
-      <AccountDialog />
       {/* Header with logout button */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
