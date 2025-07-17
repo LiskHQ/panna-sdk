@@ -9,8 +9,7 @@ import {
   useActiveAccount,
   useUserProfiles,
   useSocialAccounts,
-  lisk,
-  AccountDialog
+  lisk
 } from 'panna-sdk';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
