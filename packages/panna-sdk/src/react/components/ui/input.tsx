@@ -63,7 +63,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {endAdornment && (
-          <div className="hover:bg-layer-200 absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+          <div className="absolute inset-y-0 right-0 flex items-center text-gray-400">
             {endAdornment}
           </div>
         )}

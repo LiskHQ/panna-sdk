@@ -7,6 +7,12 @@ import {
 } from 'libphonenumber-js';
 import { MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import {
+  EcosystemId,
+  LoginStrategy,
+  prepareLogin,
+  socialLogin
+} from 'src/core';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +23,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { usePanna } from '@/hooks/use-panna';
 
 const formSchema = z
   .object({
@@ -25,7 +32,7 @@ const formSchema = z
       .min(7, { message: 'This field has to be filled.' })
       .email('This is not a valid email.')
       .optional(),
-    phone: z
+    phoneNumber: z
       .string()
       .min(10, { message: 'Phone number must be at least 10 digits' })
       .refine(isValidPhoneNumber, {
@@ -35,7 +42,7 @@ const formSchema = z
       .optional()
   })
   .superRefine((data, ctx) => {
-    if (!data.email && !data.phone) {
+    if (!data.email && !data.phoneNumber) {
       ctx.addIssue({
         code: 'custom',
         message: 'a or b is required'
@@ -48,15 +55,39 @@ export function LoginForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: ''
+      email: '',
+      phoneNumber: ''
     }
   });
+  const { client, partnerId } = usePanna();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
     console.log(values);
+    await prepareLogin({
+      client,
+      ecosystem: {
+        id: EcosystemId.LISK,
+        partnerId
+      },
+      strategy: LoginStrategy.EMAIL,
+      email: values.email!
+    });
   }
+
+  const handleGoogleLogin = async () => {
+    await socialLogin({
+      client,
+      ecosystem: {
+        id: EcosystemId.LISK,
+        partnerId
+      },
+      strategy: 'google',
+      mode: 'redirect',
+      redirectUrl: 'https://localhost:3000'
+    });
+  };
 
   return (
     <Form {...form}>
@@ -64,7 +95,9 @@ export function LoginForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4"
       >
-        <Button type="button">Continue with Google</Button>
+        <Button type="button" onClick={handleGoogleLogin}>
+          Continue with Google
+        </Button>
         <FormField
           control={form.control}
           name="email"
@@ -74,10 +107,9 @@ export function LoginForm() {
                 <Input
                   placeholder="Email address"
                   endAdornment={
-                    <MoveRightIcon
-                      className="bg-transparent text-neutral-400"
-                      onClick={() => alert('Clicked')}
-                    />
+                    <Button className="hover:bg-layer-200 bg-transparent">
+                      <MoveRightIcon className="text-neutral-400" />
+                    </Button>
                   }
                   {...field}
                 />
@@ -88,7 +120,7 @@ export function LoginForm() {
         />
         <FormField
           control={form.control}
-          name="phone"
+          name="phoneNumber"
           render={({ field }) => (
             <FormItem>
               <FormControl>
