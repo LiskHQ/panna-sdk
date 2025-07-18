@@ -7,6 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Local dependencies & builds
 node_modules
 dist
 dist-ssr
@@ -23,6 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 
-# secrets
+# Secrets
 .env*
 !.env.example
