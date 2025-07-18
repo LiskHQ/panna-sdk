@@ -15,8 +15,13 @@ import {
   InputOTPGroup,
   InputOTPSlot
 } from '@/components/ui/input-otp';
+import { DialogStepperContextValue } from './dialog-stepper';
 import { Button } from './ui/button';
 import { Typography } from './ui/typography';
+
+type InputOTPFormProps = {
+  next: DialogStepperContextValue['next'];
+};
 
 const formSchema = z.object({
   code: z
@@ -27,7 +32,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function InputOTPForm() {
+export function InputOTPForm({ next }: InputOTPFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,6 +43,7 @@ export function InputOTPForm() {
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     // Handle form submission
     await new Promise((resolve) => setTimeout(resolve, 5000));
+    next();
   };
 
   const { code } = form.watch();

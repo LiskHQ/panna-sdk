@@ -25,6 +25,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { usePanna } from '@/hooks/use-panna';
+import { DialogStepperContextValue } from './dialog-stepper';
+
+type LoginFormProps = {
+  next: DialogStepperContextValue['next'];
+};
 
 const formSchema = z
   .object({
@@ -52,7 +57,7 @@ const formSchema = z
     }
   });
 
-export function LoginForm() {
+export function LoginForm({ next }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -77,6 +82,7 @@ export function LoginForm() {
       strategy: LoginStrategy.EMAIL,
       email: values.email!
     });
+    next();
   }
 
   const handleGoogleLogin = async () => {
