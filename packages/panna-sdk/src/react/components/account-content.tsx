@@ -2,7 +2,12 @@ import { AccountDialogFooter } from './account-dialog-footer';
 import { DialogStepper, useDialogStepper } from './dialog-stepper';
 import { InputOTPForm } from './input-otp-form';
 import { LoginForm } from './login-form';
-import { DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import {
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from './ui/dialog';
 
 export function AccountContent() {
   return (
@@ -18,6 +23,9 @@ const LoginFormDialog = () => {
 
   return (
     <DialogContent>
+      <DialogDescription className="sr-only">
+        Login form dialog
+      </DialogDescription>
       <div className="flex flex-col gap-6">
         <DialogHeader>
           <DialogTitle className="text-center">
@@ -32,15 +40,16 @@ const LoginFormDialog = () => {
 };
 
 const InputOTPFormDialog = () => {
-  const { next } = useDialogStepper();
+  const { next, stepData } = useDialogStepper();
 
   return (
     <DialogContent>
+      <DialogDescription className="sr-only">OTP form dialog</DialogDescription>
       <div className="flex flex-col gap-6">
         <DialogHeader>
           <DialogTitle className="text-center">6-digit code</DialogTitle>
         </DialogHeader>
-        <InputOTPForm next={next} />
+        <InputOTPForm next={next} data={stepData} />
         <AccountDialogFooter />
       </div>
     </DialogContent>

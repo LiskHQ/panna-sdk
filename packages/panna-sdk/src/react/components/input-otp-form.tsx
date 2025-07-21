@@ -22,6 +22,7 @@ import { Typography } from './ui/typography';
 
 type InputOTPFormProps = {
   next: DialogStepperContextValue['next'];
+  data: DialogStepperContextValue['stepData'];
 };
 
 const formSchema = z.object({
@@ -33,7 +34,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function InputOTPForm({ next }: InputOTPFormProps) {
+export function InputOTPForm({ next, data }: InputOTPFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,7 +61,9 @@ export function InputOTPForm({ next }: InputOTPFormProps) {
           <Typography className="text-neutral-400">
             Enter the verification code sent to
           </Typography>
-          <Typography className="mt-0!">cnguyen@gmail.com</Typography>
+          <Typography className="mt-0!">
+            {(data?.email ?? data?.phoneNumber) as string}
+          </Typography>
         </div>
         <div className="flex flex-col gap-4">
           <FormField
