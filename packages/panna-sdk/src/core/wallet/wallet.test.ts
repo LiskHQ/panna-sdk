@@ -312,7 +312,8 @@ describe('Wallet Functions - Unit Tests', () => {
       const params = {
         client: mockClient,
         strategy: 'google' as const,
-        mode: 'popup' as const,
+        mode: 'redirect' as const,
+        redirectUrl: 'https://example.com/callback',
         ecosystem: testEcosystem
       };
 
@@ -342,7 +343,37 @@ describe('Wallet Functions - Unit Tests', () => {
         const params = {
           client: mockClient,
           strategy: provider,
-          mode: 'popup' as const,
+          mode: 'redirect' as const,
+          redirectUrl: 'https://example.com/auth',
+          ecosystem: testEcosystem
+        };
+
+        const result = await socialLogin(params);
+
+        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+          params
+        );
+        expect(result).toBeUndefined();
+      }
+    });
+
+    it('should work with different redirect URLs', async () => {
+      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
+        undefined
+      );
+
+      const redirectUrls = [
+        'https://localhost:3000/auth',
+        'https://staging.example.com/callback',
+        'https://production.app.com/oauth/return'
+      ];
+
+      for (const redirectUrl of redirectUrls) {
+        const params = {
+          client: mockClient,
+          strategy: 'google' as const,
+          mode: 'redirect' as const,
+          redirectUrl,
           ecosystem: testEcosystem
         };
 
@@ -368,7 +399,8 @@ describe('Wallet Functions - Unit Tests', () => {
       const params = {
         client: mockClient,
         strategy: 'google' as const,
-        mode: 'popup' as const,
+        mode: 'redirect' as const,
+        redirectUrl: 'https://example.com/callback',
         ecosystem: customEcosystem
       };
 

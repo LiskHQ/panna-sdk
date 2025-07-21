@@ -48,7 +48,8 @@ export type CreateAccountOptions = {
 // Social login parameters for redirect flow
 export interface SocialLoginParams extends BaseAuthParams {
   strategy: SocialProvider;
-  mode: 'popup';
+  mode: 'redirect';
+  redirectUrl: string;
 }
 
 // Combined types for different authentication flows
