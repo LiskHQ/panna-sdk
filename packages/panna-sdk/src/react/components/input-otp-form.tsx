@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { AuthParams, EcosystemId, login, LoginStrategy } from 'src/core';
 import z from 'zod';
 import {
   Form,
@@ -16,6 +17,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp';
+import { usePanna } from '@/hooks';
 import { DialogStepperContextValue } from './dialog-stepper';
 import { Button } from './ui/button';
 import { Typography } from './ui/typography';
@@ -41,10 +43,21 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
       code: ''
     }
   });
+  const { client, partnerId } = usePanna();
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
-    // Handle form submission
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    const res = await login({
+      client,
+      ecosystem: {
+        id: EcosystemId.LISK,
+        partnerId
+      },
+      ...(data.email
+        ? { strategy: LoginStrategy.EMAIL, email: data.email }
+        : { strategy: LoginStrategy.PHONE, phoneNumber: data.phoneNumber }),
+      verificationCode: values.code
+    } as AuthParams);
+    console.log({ res });
     next();
   };
 
