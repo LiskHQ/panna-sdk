@@ -93,8 +93,7 @@ export function LoginForm({ next }: LoginFormProps) {
         partnerId
       },
       strategy: 'google',
-      mode: 'redirect',
-      redirectUrl: 'https://localhost:3000'
+      mode: 'popup'
     });
   };
 
