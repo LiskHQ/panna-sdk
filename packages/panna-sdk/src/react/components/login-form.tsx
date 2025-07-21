@@ -31,13 +31,16 @@ type LoginFormProps = {
   next: DialogStepperContextValue['next'];
 };
 
+const notBlank = (val?: string) => !!val && val.trim() !== '';
+
 const formSchema = z
   .object({
     email: z
       .string()
-      .min(7, { message: 'This field has to be filled.' })
+      .min(7, { message: 'Email should be filled.' })
       .email('This is not a valid email.')
-      .optional(),
+      .optional()
+      .or(z.literal('')),
     phoneNumber: z
       .string()
       .min(10, { message: 'Phone number must be at least 10 digits' })
@@ -46,16 +49,20 @@ const formSchema = z
       })
       .transform((value) => parsePhoneNumberWithError(value).number.toString())
       .optional()
+      .or(z.literal(''))
   })
-  .superRefine((data, ctx) => {
-    if (!data.email && !data.phoneNumber) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'a or b is required'
-        // input: ctx
-      });
+  .refine(
+    (data) => {
+      const emailFilled = notBlank(data.email);
+      const phoneFilled = notBlank(data.phoneNumber);
+      // Only ONE of the fields must be filled
+      return (emailFilled && !phoneFilled) || (!emailFilled && phoneFilled);
+    },
+    {
+      message: 'You must provide either an email OR a phone number—never both.',
+      path: ['email', 'phoneNumber']
     }
-  });
+  );
 
 export function LoginForm({ next }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,20 +76,41 @@ export function LoginForm({ next }: LoginFormProps) {
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
 
+  const handleFormSubmit = async (field: keyof z.infer<typeof formSchema>) => {
+    const isFieldValid = await form.trigger(field);
+    if (isFieldValid) {
+      form.handleSubmit(onSubmit)();
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
-    await prepareLogin({
-      client,
-      ecosystem: {
-        id: EcosystemId.LISK,
-        partnerId
-      },
-      strategy: LoginStrategy.EMAIL,
-      email: values.email!
-    });
-    next();
+    if (values.email) {
+      await prepareLogin({
+        client,
+        ecosystem: {
+          id: EcosystemId.LISK,
+          partnerId
+        },
+        strategy: LoginStrategy.EMAIL,
+        email: values.email
+      });
+      next({
+        email: values.email
+      });
+    } else if (values.phoneNumber) {
+      await prepareLogin({
+        client,
+        ecosystem: {
+          id: EcosystemId.LISK,
+          partnerId
+        },
+        strategy: LoginStrategy.PHONE,
+        phoneNumber: values.phoneNumber
+      });
+      next({
+        phoneNumber: values.phoneNumber
+      });
+    }
   }
 
   const handleGoogleLogin = async () => {
@@ -122,7 +150,10 @@ export function LoginForm({ next }: LoginFormProps) {
                   }
                   endAdornment={
                     showEmailSubmit && (
-                      <Button className="hover:bg-layer-200 bg-transparent">
+                      <Button
+                        className="hover:bg-layer-200 z-50 bg-transparent"
+                        onClick={() => handleFormSubmit('email')}
+                      >
                         <MoveRightIcon className="text-neutral-400" />
                       </Button>
                     )
@@ -155,7 +186,10 @@ export function LoginForm({ next }: LoginFormProps) {
                   }
                   endAdornment={
                     showPhoneSubmit && (
-                      <Button className="hover:bg-layer-200 bg-transparent">
+                      <Button
+                        className="hover:bg-layer-200 bg-transparent"
+                        onClick={() => handleFormSubmit('phoneNumber')}
+                      >
                         <MoveRightIcon className="text-neutral-400" />
                       </Button>
                     )
