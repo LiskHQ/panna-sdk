@@ -8,12 +8,8 @@ import {
 import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import {
-  EcosystemId,
-  LoginStrategy,
-  prepareLogin,
-  socialLogin
-} from 'src/core';
+import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
+import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,6 +71,9 @@ export function LoginForm({ next }: LoginFormProps) {
   const { client, partnerId } = usePanna();
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
+  const wallet = ecosystemWallet(EcosystemId.LISK, {
+    partnerId
+  });
 
   const handleFormSubmit = async (field: keyof z.infer<typeof formSchema>) => {
     const isFieldValid = await form.trigger(field);
@@ -114,15 +113,11 @@ export function LoginForm({ next }: LoginFormProps) {
   }
 
   const handleGoogleLogin = async () => {
-    await socialLogin({
+    const res = await wallet.connect({
       client,
-      ecosystem: {
-        id: EcosystemId.LISK,
-        partnerId
-      },
-      strategy: 'google',
-      mode: 'popup'
+      strategy: 'google'
     });
+    console.log('Google login response:', res);
   };
 
   return (
