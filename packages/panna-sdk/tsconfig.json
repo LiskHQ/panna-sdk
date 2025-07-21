@@ -16,9 +16,9 @@
       "@/*": ["./src/*"],
       "@/components/*": ["./src/react/components/*"],
       "@/ui/*": ["./src/react/components/ui/*"],
+      "@/utils": ["./src/react/utils"],
       "@/utils/*": ["./src/react/utils/*"],
-      "@/hooks/*": ["./src/react/hooks/*"],
-      "@/lib/*": ["./src/react/utils/*"]
+      "@/hooks/*": ["./src/react/hooks/*"]
     }
   },
   "include": ["src/**/*", "jest.setup.ts"],
