@@ -45,4 +45,4 @@ export {
   type SocialProvider
 } from './core';
 
-export * from './ui';
+export * from './react';
