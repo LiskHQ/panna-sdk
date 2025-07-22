@@ -3,6 +3,7 @@ import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { AuthParams, EcosystemId, login, LoginStrategy } from 'src/core';
+import { AuthStoredTokenWithCookieReturnType } from 'thirdweb/dist/types/wallets/in-app/core/authentication/types';
 import z from 'zod';
 import {
   Form,
@@ -18,6 +19,7 @@ import {
   InputOTPSlot
 } from '@/components/ui/input-otp';
 import { usePanna } from '@/hooks';
+import { useAuth } from './auth-provider';
 import { DialogStepperContextValue } from './dialog-stepper';
 import { Button } from './ui/button';
 import { Typography } from './ui/typography';
@@ -36,6 +38,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const LAST_AUTH_PROVIDER = 'lastAuthProvider';
+const WALLET_TOKEN = 'walletToken';
+const USER_CONTACT = 'userContact'; // This is used to store the email or phone number
+const USER_ADDRESS = 'userAddress';
+
+type AuthDetailsFull =
+  AuthStoredTokenWithCookieReturnType['storedToken']['authDetails'] & {
+    email?: string;
+    phoneNumber?: string;
+    walletAddress: string;
+  };
+
 export function InputOTPForm({ next, data }: InputOTPFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,6 +58,7 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
     }
   });
   const { client, partnerId } = usePanna();
+  const { setUserAddress } = useAuth();
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     const res = await login({
@@ -57,8 +72,26 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
         : { strategy: LoginStrategy.PHONE, phoneNumber: data.phoneNumber }),
       verificationCode: values.code
     } as AuthParams);
-    console.log({ res });
+
+    if (res.storedToken) {
+      const isBrowser = typeof window !== 'undefined';
+      if (isBrowser) {
+        localStorage.setItem(LAST_AUTH_PROVIDER, res.storedToken.authProvider);
+        localStorage.setItem(WALLET_TOKEN, res.storedToken.jwtToken);
+        const authDetails = res.storedToken.authDetails as AuthDetailsFull;
+
+        if (authDetails.email) {
+          localStorage.setItem(USER_CONTACT, authDetails.email);
+        } else if (authDetails.phoneNumber) {
+          localStorage.setItem(USER_CONTACT, authDetails.phoneNumber);
+        }
+        localStorage.setItem(USER_ADDRESS, authDetails.walletAddress);
+        setUserAddress(authDetails.walletAddress);
+      }
+    }
     next();
+    // @todo: reset then close dialog to unmount
+    // reset()
   };
 
   const { code } = form.watch();

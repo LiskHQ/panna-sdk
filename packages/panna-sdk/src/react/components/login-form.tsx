@@ -144,14 +144,12 @@ export function LoginForm({ next }: LoginFormProps) {
                     )
                   }
                   endAdornment={
-                    showEmailSubmit && (
-                      <Button
-                        className="hover:bg-layer-200 z-50 bg-transparent"
-                        onClick={() => handleFormSubmit('email')}
-                      >
-                        <MoveRightIcon className="text-neutral-400" />
-                      </Button>
-                    )
+                    <Button
+                      className="hover:bg-layer-200 z-50 bg-transparent"
+                      onClick={() => handleFormSubmit('email')}
+                    >
+                      <MoveRightIcon className="text-neutral-400" />
+                    </Button>
                   }
                   onFocus={() => {
                     setShowEmailSubmit(true);
@@ -180,14 +178,12 @@ export function LoginForm({ next }: LoginFormProps) {
                     )
                   }
                   endAdornment={
-                    showPhoneSubmit && (
-                      <Button
-                        className="hover:bg-layer-200 bg-transparent"
-                        onClick={() => handleFormSubmit('phoneNumber')}
-                      >
-                        <MoveRightIcon className="text-neutral-400" />
-                      </Button>
-                    )
+                    <Button
+                      className="hover:bg-layer-200 bg-transparent"
+                      onClick={() => handleFormSubmit('phoneNumber')}
+                    >
+                      <MoveRightIcon className="text-neutral-400" />
+                    </Button>
                   }
                   onFocus={() => {
                     setShowPhoneSubmit(true);
