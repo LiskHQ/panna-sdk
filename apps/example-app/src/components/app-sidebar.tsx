@@ -1,4 +1,4 @@
-import { User, HelpCircle, Scale } from 'lucide-react';
+import { User, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import {
@@ -35,12 +35,6 @@ const data = {
           title: 'SDK Documentation',
           url: 'https://github.com/LiskHQ/panna-sdk/tree/main/packages/panna-sdk#panna-sdk-documentation',
           icon: HelpCircle,
-          isActive: false
-        },
-        {
-          title: 'License',
-          url: 'https://github.com/LiskHQ/lisk-node/blob/main/LICENSE',
-          icon: Scale,
           isActive: false
         }
       ]
