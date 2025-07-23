@@ -140,7 +140,7 @@ export function LoginForm({ next }: LoginFormProps) {
                   placeholder="Email address"
                   startAdornment={
                     !showEmailSubmit && (
-                      <MailIcon className="h-5 w-5" color="#7C3AED" />
+                      <MailIcon className="h-5 w-5" color="#FAFAFA" />
                     )
                   }
                   endAdornment={
@@ -174,12 +174,12 @@ export function LoginForm({ next }: LoginFormProps) {
                   placeholder="Phone number"
                   startAdornment={
                     !showPhoneSubmit && (
-                      <PhoneIcon className="h-5 w-5" color="#7C3AED" />
+                      <PhoneIcon className="h-5 w-5" color="#FAFAFA" />
                     )
                   }
                   endAdornment={
                     <Button
-                      className="hover:bg-layer-200 bg-transparent"
+                      className="hover:bg-background bg-transparent"
                       onClick={() => handleFormSubmit('phoneNumber')}
                     >
                       <MoveRightIcon className="text-neutral-400" />

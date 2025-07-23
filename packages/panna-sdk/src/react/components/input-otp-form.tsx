@@ -137,7 +137,7 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
           <Typography className="text-neutral-400">
             Enter the verification code sent to
           </Typography>
-          <Typography className="mt-0!">
+          <Typography className="text-foreground mt-0!">
             {(data?.email ?? data?.phoneNumber) as string}
           </Typography>
         </div>
@@ -179,7 +179,7 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
               Didn't receive the code?{' '}
             </Typography>
             {formattedTime ? (
-              <Typography variant="small" color="primary" className="text-sm">
+              <Typography variant="small" className="text-foreground text-sm">
                 Resend in {formattedTime}
               </Typography>
             ) : (
