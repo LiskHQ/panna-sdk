@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { ConnectButton, LoginButton, useActiveAccount } from 'panna-sdk';
+import { LoginButton, useActiveAccount } from 'panna-sdk';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { buttonVariants } from './ui/button';
 import { Typography } from './ui/typography';
 
 const navigationData = {
@@ -57,18 +56,7 @@ export function AppHeader() {
             Get started by connecting your wallet
           </Typography>
         )}
-        <ConnectButton />
-        <LoginButton
-          connectButton={{
-            className: buttonVariants({ variant: 'default' }),
-            style: {
-              height: '36px',
-              minWidth: 'auto',
-              fontSize: '14px',
-              padding: '8px 16px'
-            }
-          }}
-        />
+        <LoginButton />
       </aside>
     </header>
   );
