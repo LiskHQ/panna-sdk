@@ -1,2 +1,2 @@
-export * from './tw-utils';
+export * from './cn';
 export * from './utils';
