@@ -4,7 +4,7 @@ import { usePanna } from '../hooks/use-panna';
 import { liskTheme } from '../theme';
 import { getAAChain, getChain, getSupportedTokens } from '../utils';
 
-export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
+export type ThirdWebLoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
   isTesting?: boolean;
 };
 
@@ -36,7 +36,10 @@ export type LoginButtonProps = Omit<ConnectButtonProps, 'client'> & {
  * />
  * ```
  */
-export function LoginButton({ connectButton, ...props }: LoginButtonProps) {
+export function ThirdWebLoginButton({
+  connectButton,
+  ...props
+}: ThirdWebLoginButtonProps) {
   const { client, partnerId } = usePanna();
 
   const liskEcosystemWallet = createAccount({ partnerId });
