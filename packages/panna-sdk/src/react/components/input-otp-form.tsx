@@ -2,7 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { AuthParams, EcosystemId, login, LoginStrategy } from 'src/core';
+import {
+  AuthParams,
+  EcosystemId,
+  login,
+  LoginStrategy,
+  prepareLogin
+} from 'src/core';
 import { AuthStoredTokenWithCookieReturnType } from 'thirdweb/dist/types/wallets/in-app/core/authentication/types';
 import z from 'zod';
 import {
@@ -19,6 +25,7 @@ import {
   InputOTPSlot
 } from '@/components/ui/input-otp';
 import { usePanna } from '@/hooks';
+import { useCountdown } from '@/hooks/use-countdown';
 import { useAuth } from './auth-provider';
 import { DialogStepperContextValue } from './dialog-stepper';
 import { Button } from './ui/button';
@@ -41,7 +48,7 @@ type FormValues = z.infer<typeof formSchema>;
 const LAST_AUTH_PROVIDER = 'lastAuthProvider';
 const WALLET_TOKEN = 'walletToken';
 const USER_CONTACT = 'userContact'; // This is used to store the email or phone number
-const USER_ADDRESS = 'userAddress';
+export const USER_ADDRESS = 'userAddress';
 
 type AuthDetailsFull =
   AuthStoredTokenWithCookieReturnType['storedToken']['authDetails'] & {
@@ -59,6 +66,9 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
   });
   const { client, partnerId } = usePanna();
   const { setUserAddress } = useAuth();
+  const [resendTimer, resetResendTimer] = useCountdown(45);
+  const formattedTime =
+    resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     const res = await login({
@@ -96,6 +106,26 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
 
   const { code } = form.watch();
   const isInputIncomplete = code.length < 6;
+
+  const handleResend = async () => {
+    await prepareLogin({
+      client,
+      ecosystem: {
+        id: EcosystemId.LISK,
+        partnerId
+      },
+      ...(data.email
+        ? {
+            strategy: LoginStrategy.PHONE,
+            phoneNumber: data.phoneNumber as string
+          }
+        : {
+            strategy: LoginStrategy.EMAIL,
+            email: data.email as string
+          })
+    });
+    resetResendTimer();
+  };
 
   return (
     <Form {...form}>
@@ -148,9 +178,21 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
             <Typography variant="small" className="text-neutral-400">
               Didn't receive the code?{' '}
             </Typography>
-            <Typography variant="small" color="primary">
-              Resend in 0:45
-            </Typography>
+            {formattedTime ? (
+              <Typography variant="small" color="primary" className="text-sm">
+                Resend in {formattedTime}
+              </Typography>
+            ) : (
+              <Button
+                variant="link"
+                size="sm"
+                className="h-3.5 p-0"
+                type="button"
+                onClick={handleResend}
+              >
+                Resend
+              </Button>
+            )}
           </div>
         </div>
         <Button type="submit" className="w-full" disabled={isInputIncomplete}>
