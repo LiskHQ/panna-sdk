@@ -33,7 +33,7 @@ const data = {
       items: [
         {
           title: 'SDK Documentation',
-          url: 'https://github.com/LiskHQ/panna-sdk',
+          url: 'https://github.com/LiskHQ/panna-sdk/tree/main/packages/panna-sdk#panna-sdk-documentation',
           icon: HelpCircle,
           isActive: false
         }
