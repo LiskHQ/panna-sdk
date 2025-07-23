@@ -9,7 +9,7 @@ import {
   DialogTitle
 } from './ui/dialog';
 
-export function AccountContent() {
+export function AuthenticationFlow() {
   return (
     <DialogStepper>
       <LoginFormDialog />
