@@ -29,12 +29,14 @@ describe('useDialog', () => {
     const { result } = renderHook(() => useDialog());
     act(() => {
       result.current.onOpen();
+    });
+    act(() => {
       result.current.onClose();
     });
     expect(result.current.isOpen).toBe(false);
   });
 
-  it('should not set isOpen to false if already closed', () => {
+  it('should keep isOpen as false when onClose is called while already closed', () => {
     const { result } = renderHook(() => useDialog());
     act(() => {
       result.current.onClose();
