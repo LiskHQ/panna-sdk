@@ -1,5 +1,16 @@
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { lisk, liskSepolia } from '../../core';
 import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
+
+/**
+ * Utility function to merge class names with Tailwind CSS classes
+ * @param inputs - Class names to merge
+ * @returns Merged class names
+ */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 /**
  * Get the supported tokens for a given chain.

@@ -49,4 +49,4 @@ export {
   type FiatCurrency
 } from './core';
 
-export * from './ui';
+export * from './react';
