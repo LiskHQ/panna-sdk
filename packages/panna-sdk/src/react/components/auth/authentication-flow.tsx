@@ -1,15 +1,15 @@
 import { useDialog } from '@/hooks/use-dialog';
-import { DialogStepper, useDialogStepper } from './dialog-stepper';
-import { InputOTPForm } from './input-otp-form';
-import { LoginForm } from './login-form';
 import {
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
-} from './ui/dialog';
-import { Typography } from './ui/typography';
+} from '../ui/dialog';
+import { DialogStepper, useDialogStepper } from '../ui/dialog-stepper';
+import { Typography } from '../ui/typography';
+import { InputOTPForm } from './input-otp-form';
+import { LoginForm } from './login-form';
 
 type AuthDialogProps = {
   title?: string;

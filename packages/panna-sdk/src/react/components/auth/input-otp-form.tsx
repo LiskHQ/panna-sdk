@@ -26,10 +26,10 @@ import {
 } from '@/components/ui/input-otp';
 import { usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
+import { DialogStepperContextValue } from '../dialog-stepper';
+import { Button } from '../ui/button';
+import { Typography } from '../ui/typography';
 import { useAuth } from './auth-provider';
-import { DialogStepperContextValue } from './dialog-stepper';
-import { Button } from './ui/button';
-import { Typography } from './ui/typography';
 
 type InputOTPFormProps = {
   data: DialogStepperContextValue['stepData'];

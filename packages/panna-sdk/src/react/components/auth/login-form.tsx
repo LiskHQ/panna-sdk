@@ -21,8 +21,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { usePanna } from '@/hooks/use-panna';
+import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { useAuth } from './auth-provider';
-import { DialogStepperContextValue } from './dialog-stepper';
 import { LAST_AUTH_PROVIDER, USER_ADDRESS } from './input-otp-form';
 
 type LoginFormProps = {
