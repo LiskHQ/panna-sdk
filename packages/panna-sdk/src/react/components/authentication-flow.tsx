@@ -1,3 +1,4 @@
+import { useDialog } from '@/hooks/use-dialog';
 import { AccountDialogFooter } from './account-dialog-footer';
 import { DialogStepper, useDialogStepper } from './dialog-stepper';
 import { InputOTPForm } from './input-otp-form';
@@ -40,7 +41,8 @@ const LoginFormDialog = () => {
 };
 
 const InputOTPFormDialog = () => {
-  const { next, stepData } = useDialogStepper();
+  const { reset, stepData } = useDialogStepper();
+  const { onClose } = useDialog();
 
   return (
     <DialogContent>
@@ -49,7 +51,7 @@ const InputOTPFormDialog = () => {
         <DialogHeader>
           <DialogTitle className="text-center">6-digit code</DialogTitle>
         </DialogHeader>
-        <InputOTPForm next={next} data={stepData} />
+        <InputOTPForm data={stepData} reset={reset} onClose={onClose} />
         <AccountDialogFooter />
       </div>
     </DialogContent>

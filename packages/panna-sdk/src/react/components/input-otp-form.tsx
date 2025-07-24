@@ -32,8 +32,9 @@ import { Button } from './ui/button';
 import { Typography } from './ui/typography';
 
 type InputOTPFormProps = {
-  next: DialogStepperContextValue['next'];
   data: DialogStepperContextValue['stepData'];
+  reset: DialogStepperContextValue['reset'];
+  onClose: () => void;
 };
 
 const formSchema = z.object({
@@ -57,7 +58,7 @@ type AuthDetailsFull =
     walletAddress: string;
   };
 
-export function InputOTPForm({ next, data }: InputOTPFormProps) {
+export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -99,9 +100,8 @@ export function InputOTPForm({ next, data }: InputOTPFormProps) {
         setUserAddress(authDetails.walletAddress);
       }
     }
-    next();
-    // @todo: reset then close dialog to unmount
-    // reset()
+    reset();
+    onClose();
   };
 
   const { code } = form.watch();
