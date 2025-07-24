@@ -39,10 +39,15 @@ export {
   // Utils functions
   accountBalance,
   getSocialIcon,
+  getFiatPrice,
+  isValidAddress,
   // Utils types
   type AccountBalanceParams,
   type AccountBalanceResult,
-  type SocialProvider
+  type SocialProvider,
+  type GetFiatPriceParams,
+  type GetFiatPriceResult,
+  type FiatCurrency
 } from './core';
 
 export * from './react';
