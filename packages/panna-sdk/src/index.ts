@@ -40,6 +40,7 @@ export {
   accountBalance,
   getSocialIcon,
   getFiatPrice,
+  isValidAddress,
   // Utils types
   type AccountBalanceParams,
   type AccountBalanceResult,

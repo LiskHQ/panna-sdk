@@ -6,7 +6,12 @@ import * as thirdwebInApp from 'thirdweb/wallets/in-app';
 import { lisk } from '../chains/chain-definitions/lisk';
 import { type PannaClient } from '../client';
 import { type FiatCurrency, type SocialProvider } from './types';
-import { accountBalance, getFiatPrice, getSocialIcon } from './utils';
+import {
+  accountBalance,
+  getFiatPrice,
+  getSocialIcon,
+  isValidAddress
+} from './utils';
 
 // Mock thirdweb modules
 jest.mock('thirdweb');
@@ -126,6 +131,31 @@ describe('Utils - Unit Tests', () => {
 
       expect(result).toEqual(mockBalance);
       expect(result.value).toBe(BigInt('0'));
+    });
+
+    it('should throw error for invalid address', async () => {
+      const params = {
+        address: '0xinvalid',
+        client: mockClient,
+        chain: mockChain
+      };
+
+      await expect(accountBalance(params)).rejects.toThrow(
+        'Invalid address format'
+      );
+    });
+
+    it('should throw error for invalid token address', async () => {
+      const params = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain,
+        tokenAddress: 'not-an-address'
+      };
+
+      await expect(accountBalance(params)).rejects.toThrow(
+        'Invalid token address format'
+      );
     });
   });
 
@@ -430,6 +460,132 @@ describe('Utils - Unit Tests', () => {
       const result = await getFiatPrice(params);
 
       expect(result.price).toBe(0);
+    });
+
+    it('should throw error for invalid token address', async () => {
+      const params = {
+        client: mockClient,
+        tokenAddress: 'invalid-address',
+        amount: 1
+      };
+
+      await expect(getFiatPrice(params)).rejects.toThrow(
+        'Invalid token address format'
+      );
+    });
+
+    it('should accept undefined token address (for native token)', async () => {
+      const mockResult = {
+        result: 3000.5
+      };
+
+      (thirdwebPay.convertCryptoToFiat as jest.Mock).mockResolvedValue(
+        mockResult
+      );
+
+      const params = {
+        client: mockClient,
+        amount: 1
+      };
+
+      const result = await getFiatPrice(params);
+
+      expect(result.price).toBe(3000.5);
+      expect(thirdwebPay.convertCryptoToFiat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fromTokenAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+        })
+      );
+    });
+  });
+
+  describe('isValidAddress', () => {
+    it('should return true for valid checksummed addresses', () => {
+      expect(isValidAddress('0x1234567890123456789012345678901234567890')).toBe(
+        true
+      );
+      expect(isValidAddress('0xAbCdEf1234567890123456789012345678901234')).toBe(
+        true
+      );
+      expect(isValidAddress('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')).toBe(
+        true
+      );
+    });
+
+    it('should return true for valid non-checksummed addresses', () => {
+      expect(isValidAddress('0xabcdef1234567890123456789012345678901234')).toBe(
+        true
+      );
+      expect(isValidAddress('0xffffffffffffffffffffffffffffffffffffffff')).toBe(
+        true
+      );
+    });
+
+    it('should return true for zero address', () => {
+      expect(isValidAddress('0x0000000000000000000000000000000000000000')).toBe(
+        true
+      );
+    });
+
+    it('should return false for addresses with wrong length', () => {
+      expect(isValidAddress('0x123')).toBe(false);
+      expect(
+        isValidAddress('0x12345678901234567890123456789012345678901')
+      ).toBe(false); // 41 chars
+      expect(isValidAddress('0x123456789012345678901234567890123456789')).toBe(
+        false
+      ); // 39 chars
+    });
+
+    it('should return false for addresses without 0x prefix', () => {
+      expect(isValidAddress('1234567890123456789012345678901234567890')).toBe(
+        false
+      );
+      expect(isValidAddress('abcdef1234567890123456789012345678901234')).toBe(
+        false
+      );
+    });
+
+    it('should return false for addresses with invalid characters', () => {
+      expect(isValidAddress('0xGGGG567890123456789012345678901234567890')).toBe(
+        false
+      );
+      expect(isValidAddress('0x123456789012345678901234567890123456789Z')).toBe(
+        false
+      );
+      expect(isValidAddress('0x!@#$567890123456789012345678901234567890')).toBe(
+        false
+      );
+    });
+
+    it('should return false for empty or invalid inputs', () => {
+      expect(isValidAddress('')).toBe(false);
+      expect(isValidAddress(null as unknown as string)).toBe(false);
+      expect(isValidAddress(undefined as unknown as string)).toBe(false);
+      expect(isValidAddress(123 as unknown as string)).toBe(false);
+      expect(isValidAddress({} as unknown as string)).toBe(false);
+      expect(isValidAddress([] as unknown as string)).toBe(false);
+    });
+
+    it('should return false for addresses with spaces', () => {
+      expect(
+        isValidAddress(' 0x1234567890123456789012345678901234567890')
+      ).toBe(false);
+      expect(
+        isValidAddress('0x1234567890123456789012345678901234567890 ')
+      ).toBe(false);
+      expect(
+        isValidAddress('0x12345678 90123456789012345678901234567890')
+      ).toBe(false);
+    });
+
+    it('should handle mixed case in hex part', () => {
+      expect(isValidAddress('0xaAbBcCdDeEfF1234567890123456789012345678')).toBe(
+        true
+      );
+      expect(isValidAddress('0xAABBCCDDEEFF1234567890123456789012345678')).toBe(
+        true
+      );
     });
   });
 });

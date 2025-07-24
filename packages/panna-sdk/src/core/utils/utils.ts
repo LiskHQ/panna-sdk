@@ -12,13 +12,40 @@ import {
 } from './types';
 
 /**
+ * Validates if a string is a valid Ethereum address
+ * @param address - The address to validate
+ * @returns true if valid, false otherwise
+ * @example
+ * ```ts
+ * isValidAddress('0x1234567890123456789012345678901234567890'); // true
+ * isValidAddress('0x123'); // false
+ * isValidAddress('not an address'); // false
+ * ```
+ */
+export function isValidAddress(address: string): boolean {
+  if (!address || typeof address !== 'string') {
+    return false;
+  }
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
+/**
  * Get the balance of an account
  * @param params - Parameters for getting account balance
  * @returns Account balance information
+ * @throws Error if address or token address are invalid
  */
 export async function accountBalance(
   params: AccountBalanceParams
 ): Promise<AccountBalanceResult> {
+  if (!isValidAddress(params.address)) {
+    throw new Error('Invalid address format');
+  }
+
+  if (params.tokenAddress && !isValidAddress(params.tokenAddress)) {
+    throw new Error('Invalid token address format');
+  }
+
   const result = await getWalletBalance({
     address: params.address,
     client: params.client,
@@ -48,6 +75,7 @@ export function getSocialIcon(provider: SocialProvider): string {
  * Get the fiat value for a specific amount of tokens
  * @param params - Parameters for getting the fiat price
  * @returns An object containing the price and currency
+ * @throws Error if token address is invalid or client is not provided
  * @example
  * ```ts
  * // Get value of 1 ETH (defaults to USD)
@@ -73,6 +101,10 @@ export async function getFiatPrice(
 ): Promise<GetFiatPriceResult> {
   if (!params.client) {
     throw new Error('Client is required for getFiatPrice');
+  }
+
+  if (params.tokenAddress && !isValidAddress(params.tokenAddress)) {
+    throw new Error('Invalid token address format');
   }
 
   const result = await convertCryptoToFiat({
