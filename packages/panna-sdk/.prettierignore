@@ -1,0 +1,17 @@
+# Build output
+dist/
+*.d.ts
+*.d.mts
+
+# Dependencies
+node_modules/
+
+# Coverage
+coverage/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
