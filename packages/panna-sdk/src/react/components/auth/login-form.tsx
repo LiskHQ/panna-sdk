@@ -151,6 +151,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                 <Input
                   {...field}
                   placeholder="Email address"
+                  className="focus-within:[&_button]:bg-primary"
                   startAdornment={
                     !showEmailSubmit && (
                       <MailIcon className="h-5 w-5" color="#FAFAFA" />
@@ -158,7 +159,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                   }
                   endAdornment={
                     <Button
-                      className="hover:bg-layer-200 z-50 bg-transparent"
+                      className="hover:bg-primary/90! bg-transparent"
                       onClick={() => handleFormSubmit('email')}
                     >
                       <MoveRightIcon className="text-neutral-400" />
@@ -185,6 +186,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                 <Input
                   {...field}
                   placeholder="Phone number"
+                  className="focus-within:[&_button]:bg-primary"
                   startAdornment={
                     !showPhoneSubmit && (
                       <PhoneIcon className="h-5 w-5" color="#FAFAFA" />
@@ -192,7 +194,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                   }
                   endAdornment={
                     <Button
-                      className="hover:bg-background bg-transparent"
+                      className="hover:bg-primary/90! bg-transparent"
                       onClick={() => handleFormSubmit('phoneNumber')}
                     >
                       <MoveRightIcon className="text-neutral-400" />
