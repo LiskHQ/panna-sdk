@@ -21,6 +21,7 @@ export function AuthenticationFlow() {
 
 const LoginFormDialog = () => {
   const { next } = useDialogStepper();
+  const { onClose } = useDialog();
 
   return (
     <DialogContent>
@@ -33,7 +34,7 @@ const LoginFormDialog = () => {
             Welcome to Connectify
           </DialogTitle>
         </DialogHeader>
-        <LoginForm next={next} />
+        <LoginForm next={next} onClose={onClose} />
         <AccountDialogFooter />
       </div>
     </DialogContent>

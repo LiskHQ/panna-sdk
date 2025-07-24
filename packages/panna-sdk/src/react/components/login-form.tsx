@@ -21,10 +21,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { usePanna } from '@/hooks/use-panna';
+import { useAuth } from './auth-provider';
 import { DialogStepperContextValue } from './dialog-stepper';
+import { LAST_AUTH_PROVIDER, USER_ADDRESS } from './input-otp-form';
 
 type LoginFormProps = {
   next: DialogStepperContextValue['next'];
+  onClose?: () => void;
 };
 
 const notBlank = (val?: string) => !!val && val.trim() !== '';
@@ -60,7 +63,7 @@ const formSchema = z
     }
   );
 
-export function LoginForm({ next }: LoginFormProps) {
+export function LoginForm({ next, onClose }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,6 +72,7 @@ export function LoginForm({ next }: LoginFormProps) {
     }
   });
   const { client, partnerId } = usePanna();
+  const { setUserAddress } = useAuth();
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
   const wallet = ecosystemWallet(EcosystemId.LISK, {
@@ -117,7 +121,16 @@ export function LoginForm({ next }: LoginFormProps) {
       client,
       strategy: 'google'
     });
-    console.log('Google login response:', res);
+
+    if (res) {
+      const isBrowser = typeof window !== 'undefined';
+      if (isBrowser) {
+        localStorage.setItem(LAST_AUTH_PROVIDER, 'Email');
+        localStorage.setItem(USER_ADDRESS, res.address);
+        setUserAddress(res.address);
+      }
+      onClose?.();
+    }
   };
 
   return (

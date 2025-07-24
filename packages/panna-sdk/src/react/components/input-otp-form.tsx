@@ -46,7 +46,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const LAST_AUTH_PROVIDER = 'lastAuthProvider';
+export const LAST_AUTH_PROVIDER = 'lastAuthProvider';
 const WALLET_TOKEN = 'walletToken';
 const USER_CONTACT = 'userContact'; // This is used to store the email or phone number
 export const USER_ADDRESS = 'userAddress';
@@ -124,6 +124,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
             email: data.email as string
           })
     });
+    // @todo: Implement feedback for wrong OTP
     resetResendTimer();
   };
 
