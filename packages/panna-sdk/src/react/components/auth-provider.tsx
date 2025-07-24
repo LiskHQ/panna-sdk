@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, use, useState } from 'react';
 
 type AuthContextType = {
   userAddress: string | null;
@@ -15,14 +15,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [userAddress, setUserAddress] = useState<string | null>(null);
 
   return (
-    <AuthContext.Provider value={{ userAddress, setUserAddress }}>
+    <AuthContext value={{ userAddress, setUserAddress }}>
       {children}
-    </AuthContext.Provider>
+    </AuthContext>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

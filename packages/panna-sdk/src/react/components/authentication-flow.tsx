@@ -1,60 +1,80 @@
 import { useDialog } from '@/hooks/use-dialog';
-import { AccountDialogFooter } from './account-dialog-footer';
 import { DialogStepper, useDialogStepper } from './dialog-stepper';
 import { InputOTPForm } from './input-otp-form';
 import { LoginForm } from './login-form';
 import {
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle
 } from './ui/dialog';
+import { Typography } from './ui/typography';
+
+type AuthDialogProps = {
+  title?: string;
+  description?: string;
+};
 
 export function AuthenticationFlow() {
   return (
     <DialogStepper>
-      <LoginFormDialog />
+      <LoginFormDialog title="Welcome to Connectify" />
       <InputOTPFormDialog />
     </DialogStepper>
   );
 }
 
-const LoginFormDialog = () => {
+function LoginFormDialog(
+  { title, description }: AuthDialogProps = {
+    title: 'Login',
+    description: 'Login form dialog'
+  }
+) {
   const { next } = useDialogStepper();
   const { onClose } = useDialog();
 
   return (
     <DialogContent>
-      <DialogDescription className="sr-only">
-        Login form dialog
-      </DialogDescription>
+      <DialogDescription className="sr-only">{description}</DialogDescription>
       <div className="flex flex-col gap-6">
         <DialogHeader>
-          <DialogTitle className="text-center">
-            Welcome to Connectify
-          </DialogTitle>
+          <DialogTitle className="text-center">{title}</DialogTitle>
         </DialogHeader>
         <LoginForm next={next} onClose={onClose} />
         <AccountDialogFooter />
       </div>
     </DialogContent>
   );
-};
+}
 
-const InputOTPFormDialog = () => {
+function InputOTPFormDialog(
+  { title, description }: AuthDialogProps = {
+    title: '6-digit code',
+    description: 'OTP form dialog'
+  }
+) {
   const { reset, stepData } = useDialogStepper();
   const { onClose } = useDialog();
 
   return (
     <DialogContent>
-      <DialogDescription className="sr-only">OTP form dialog</DialogDescription>
+      <DialogDescription className="sr-only">{description}</DialogDescription>
       <div className="flex flex-col gap-6">
         <DialogHeader>
-          <DialogTitle className="text-center">6-digit code</DialogTitle>
+          <DialogTitle className="text-center">{title}</DialogTitle>
         </DialogHeader>
         <InputOTPForm data={stepData} reset={reset} onClose={onClose} />
         <AccountDialogFooter />
       </div>
     </DialogContent>
   );
-};
+}
+
+function AccountDialogFooter() {
+  return (
+    <DialogFooter className="text-muted-foreground flex flex-col justify-center! text-xs">
+      <Typography>Powered by Panna</Typography>
+    </DialogFooter>
+  );
+}

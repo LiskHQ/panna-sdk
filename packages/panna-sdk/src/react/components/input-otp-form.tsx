@@ -116,12 +116,12 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       },
       ...(data.email
         ? {
-            strategy: LoginStrategy.PHONE,
-            phoneNumber: data.phoneNumber as string
-          }
-        : {
             strategy: LoginStrategy.EMAIL,
             email: data.email as string
+          }
+        : {
+            strategy: LoginStrategy.PHONE,
+            phoneNumber: data.phoneNumber as string
           })
     });
     // @todo: Implement feedback for wrong OTP

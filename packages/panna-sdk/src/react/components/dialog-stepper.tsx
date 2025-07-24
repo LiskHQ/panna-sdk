@@ -4,8 +4,8 @@ import {
   createContext,
   Fragment,
   ReactElement,
+  use,
   useCallback,
-  useContext,
   useState
 } from 'react';
 
@@ -52,9 +52,9 @@ export function DialogStepper({ children }: DialogStepperProps) {
 
   return (
     <>
-      <DialogStepperContext.Provider value={{ next, prev, reset, stepData }}>
+      <DialogStepperContext value={{ next, prev, reset, stepData }}>
         {renderChildren()[step]}
-      </DialogStepperContext.Provider>
+      </DialogStepperContext>
     </>
   );
 }
@@ -62,7 +62,7 @@ export function DialogStepper({ children }: DialogStepperProps) {
 const DialogStepperContext = createContext({} as DialogStepperContextValue);
 
 export function useDialogStepper() {
-  const context = useContext(DialogStepperContext);
+  const context = use(DialogStepperContext);
   if (!context) {
     throw new Error(
       'useDialogStepperContext must be used within a DialogStepperProvider'
