@@ -3,7 +3,7 @@
 import { useDialog } from '@/hooks/use-dialog';
 import { Button } from '../ui/button';
 import { Dialog, DialogTrigger } from '../ui/dialog';
-import { AuthenticationFlow } from './authentication-flow';
+import { AuthFlow } from './auth-flow';
 
 export function ConnectButton() {
   const { isOpen, setIsOpen } = useDialog();
@@ -12,7 +12,7 @@ export function ConnectButton() {
       <DialogTrigger asChild>
         <Button>Connect Wallet</Button>
       </DialogTrigger>
-      <AuthenticationFlow />
+      <AuthFlow />
     </Dialog>
   );
 }

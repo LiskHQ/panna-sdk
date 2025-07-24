@@ -16,7 +16,7 @@ type AuthDialogProps = {
   description?: string;
 };
 
-export function AuthenticationFlow() {
+export function AuthFlow() {
   return (
     <DialogStepper>
       <LoginFormDialog title="Welcome to Connectify" />
