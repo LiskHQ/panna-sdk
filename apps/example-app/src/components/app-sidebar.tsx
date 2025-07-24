@@ -33,7 +33,7 @@ const data = {
       items: [
         {
           title: 'SDK Documentation',
-          url: '#',
+          url: 'https://github.com/LiskHQ/panna-sdk/tree/main/packages/panna-sdk#panna-sdk-documentation',
           icon: HelpCircle,
           isActive: false
         }
@@ -66,16 +66,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url} className="flex items-center gap-2">
-                        <item.icon className="size-4" />
-                        {item.title}
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {group.items.map((item) => {
+                  const isExternal = item.url.startsWith('http');
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild isActive={item.isActive}>
+                        {isExternal ? (
+                          <a
+                            href={item.url}
+                            className="flex items-center gap-2"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <item.icon className="size-4" />
+                            {item.title}
+                          </a>
+                        ) : (
+                          <Link
+                            href={item.url}
+                            className="flex items-center gap-2"
+                          >
+                            <item.icon className="size-4" />
+                            {item.title}
+                          </Link>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
