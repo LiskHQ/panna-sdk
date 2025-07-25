@@ -6,6 +6,13 @@ import {
   XIcon
 } from 'lucide-react';
 import { useState } from 'react';
+import { lisk } from '../../../core';
+import {
+  useActiveAccount,
+  useAccountBalance,
+  usePanna,
+  useFiatBalance
+} from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { CollectiblesList } from '../collectibles/collectibles-list';
@@ -28,7 +35,48 @@ type AccountView = 'main' | 'settings';
 export function AccountDialog() {
   const [activeView, setActiveView] = useState<AccountView>('main');
 
-  const balanceUsd = 0;
+  const activeAccount = useActiveAccount();
+  const { client } = usePanna();
+
+  const { data: accountBalance, isLoading: isLoadingBalance } =
+    useAccountBalance({
+      address: activeAccount?.address || '',
+      client: client!,
+      chain: lisk
+    });
+
+  const { fiatBalance: balanceUsd, isLoading: isLoadingUsdBalance } =
+    useFiatBalance({
+      balance: accountBalance?.displayValue,
+      chain: lisk,
+      currency: 'USD'
+    });
+
+  if (!activeAccount) {
+    return (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline">Account</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md" showCloseButton={false}>
+          <DialogHeader className="items-center">
+            <div className="flex w-full items-center justify-end gap-2">
+              <DialogClose>
+                <XIcon
+                  size={20}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                />
+              </DialogClose>
+            </div>
+            <DialogTitle>No Account Connected</DialogTitle>
+            <DialogDescription>
+              Connect your wallet to view account information
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const renderHeader = (view: AccountView) => {
     switch (view) {
@@ -49,7 +97,11 @@ export function AccountDialog() {
                 />
               </DialogClose>
             </div>
-            <DialogTitle className="text-5xl">${balanceUsd}</DialogTitle>
+            <DialogTitle className="text-5xl">
+              {isLoadingBalance || isLoadingUsdBalance
+                ? '...'
+                : `$${balanceUsd.toFixed(2)}`}
+            </DialogTitle>
             <DialogDescription>Total value</DialogDescription>
           </DialogHeader>
         );
