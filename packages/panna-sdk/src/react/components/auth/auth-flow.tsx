@@ -25,14 +25,11 @@ export function AuthFlow() {
   );
 }
 
-function LoginFormDialog(
-  { title, description }: AuthDialogProps = {
-    title: 'Login',
-    description: 'Login form dialog'
-  }
-) {
+function LoginFormDialog(props: AuthDialogProps) {
   const { next } = useDialogStepper();
   const { onClose } = useDialog();
+  const title = props.title ?? 'Login';
+  const description = props.description ?? 'Login form dialog';
 
   return (
     <DialogContent>
@@ -48,14 +45,11 @@ function LoginFormDialog(
   );
 }
 
-function InputOTPFormDialog(
-  { title, description }: AuthDialogProps = {
-    title: '6-digit code',
-    description: 'OTP form dialog'
-  }
-) {
+function InputOTPFormDialog(props: AuthDialogProps) {
   const { reset, stepData } = useDialogStepper();
   const { onClose } = useDialog();
+  const title = props.title ?? '6-digit code';
+  const description = props.description ?? 'OTP form dialog';
 
   return (
     <DialogContent>

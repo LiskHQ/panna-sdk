@@ -26,8 +26,8 @@ import {
 } from '@/components/ui/input-otp';
 import { usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
-import { DialogStepperContextValue } from '../dialog-stepper';
 import { Button } from '../ui/button';
+import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 import { useAuth } from './auth-provider';
 
@@ -147,7 +147,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
             control={form.control}
             name="code"
             render={({ field }) => (
-              <FormItem className="flex w-full flex-col items-center">
+              <FormItem className="text-primary flex w-full flex-col items-center">
                 <FormControl>
                   <InputOTP
                     autoFocus

@@ -1,4 +1,6 @@
 import { SendIcon, TagIcon } from 'lucide-react';
+import { truncateAddress } from '@/utils/address';
+import { USER_ADDRESS } from './auth/input-otp-form';
 import { Button } from './ui/button';
 import {
   Dialog,
@@ -12,11 +14,13 @@ import { Separator } from './ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 export function AccountDialog() {
+  const lsUserAddress = localStorage.getItem(USER_ADDRESS);
   const balanceUsd = 32;
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Account</Button>
+        <Button variant="outline">{truncateAddress(lsUserAddress!)}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="items-center">
