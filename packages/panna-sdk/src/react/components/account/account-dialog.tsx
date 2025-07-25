@@ -6,6 +6,9 @@ import {
   XIcon
 } from 'lucide-react';
 import { useState } from 'react';
+import { ActivityList } from '../activity/activity-list';
+import { TokensList } from '../balance/tokens-list';
+import { CollectiblesList } from '../collectibles/collectibles-list';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -95,9 +98,15 @@ export function AccountDialog() {
                 <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
-              <TabsContent value="balance">Balance</TabsContent>
-              <TabsContent value="collectibles">Collectibles</TabsContent>
-              <TabsContent value="activity">Activity</TabsContent>
+              <TabsContent value="balance">
+                <TokensList className="py-4" />
+              </TabsContent>
+              <TabsContent value="collectibles">
+                <CollectiblesList className="py-4" />
+              </TabsContent>
+              <TabsContent value="activity">
+                <ActivityList className="py-4" />
+              </TabsContent>
             </Tabs>
           </div>
         );
