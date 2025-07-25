@@ -10,15 +10,11 @@ type UseDialogHook = {
 export function useDialog(): UseDialogHook {
   const [isOpen, setIsOpen] = useState(false);
   const onOpen = () => {
-    if (!isOpen) {
-      setIsOpen(true);
-    }
+    setIsOpen(true);
   };
 
   const onClose = () => {
-    if (isOpen) {
-      setIsOpen(false);
-    }
+    setIsOpen(false);
   };
 
   return { isOpen, onOpen, onClose, setIsOpen };
