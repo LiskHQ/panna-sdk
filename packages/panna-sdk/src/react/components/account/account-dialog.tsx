@@ -28,7 +28,7 @@ type AccountView = 'main' | 'settings';
 export function AccountDialog() {
   const [activeView, setActiveView] = useState<AccountView>('main');
 
-  const balanceUsd = 32;
+  const balanceUsd = 0;
 
   const renderHeader = (view: AccountView) => {
     switch (view) {
