@@ -1,6 +1,6 @@
 import { SendIcon, TagIcon } from 'lucide-react';
+import { USER_ADDRESS } from '@/consts';
 import { truncateAddress } from '@/utils/address';
-import { USER_ADDRESS } from './auth/input-otp-form';
 import { Button } from './ui/button';
 import {
   Dialog,

@@ -24,6 +24,12 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp';
+import {
+  LAST_AUTH_PROVIDER,
+  USER_ADDRESS,
+  USER_CONTACT,
+  WALLET_TOKEN
+} from '@/consts';
 import { usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { Button } from '../ui/button';
@@ -45,11 +51,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-export const LAST_AUTH_PROVIDER = 'lastAuthProvider';
-const WALLET_TOKEN = 'walletToken';
-const USER_CONTACT = 'userContact'; // This is used to store the email or phone number
-export const USER_ADDRESS = 'userAddress';
 
 type AuthDetailsFull =
   AuthStoredTokenWithCookieReturnType['storedToken']['authDetails'] & {

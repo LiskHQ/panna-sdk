@@ -20,10 +20,10 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { LAST_AUTH_PROVIDER, USER_ADDRESS } from '@/consts';
 import { usePanna } from '@/hooks/use-panna';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { useAuth } from './auth-provider';
-import { LAST_AUTH_PROVIDER, USER_ADDRESS } from './input-otp-form';
 
 type LoginFormProps = {
   next: DialogStepperContextValue['next'];

@@ -1,7 +1,7 @@
+import { USER_ADDRESS } from '@/consts';
 import { AccountDialog } from '../account-dialog';
 import { AuthProvider, useAuth } from './auth-provider';
 import { ConnectButton } from './connect-button';
-import { USER_ADDRESS } from './input-otp-form';
 
 /**
  * A login button component that connects users to their wallets using the Panna client from context.

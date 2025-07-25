@@ -28,3 +28,8 @@ export const liskSepoliaTokenConfig: SupportedTokens = {
     }
   ]
 };
+
+export const LAST_AUTH_PROVIDER = 'lastAuthProvider';
+export const WALLET_TOKEN = 'walletToken';
+export const USER_CONTACT = 'userContact'; // This is used to store the email or phone number
+export const USER_ADDRESS = 'userAddress';
