@@ -44,11 +44,11 @@ export function DialogStepper({ children }: DialogStepperProps) {
     setStepData({});
   }, [setStep, setStepData]);
 
-  const renderChildren = () => {
+  const renderChildren = useCallback(() => {
     return Children.map(children, (child, index) => {
       return cloneElement(<Fragment key={index}>{child}</Fragment>);
     });
-  };
+  }, [children]);
 
   return (
     <>
