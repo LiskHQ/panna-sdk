@@ -38,3 +38,28 @@ export type SocialProvider =
   | 'phone'
   | 'passkey'
   | 'wallet';
+
+// Supported fiat currencies
+export type FiatCurrency =
+  | 'USD'
+  | 'EUR'
+  | 'GBP'
+  | 'CAD'
+  | 'AUD'
+  | 'JPY'
+  | 'NZD';
+
+// Parameters for getting fiat price
+export interface GetFiatPriceParams {
+  client: PannaClient;
+  chain?: Chain;
+  tokenAddress?: string;
+  amount: number;
+  currency?: FiatCurrency;
+}
+
+// Result of fiat price query
+export interface GetFiatPriceResult {
+  price: number;
+  currency: FiatCurrency;
+}

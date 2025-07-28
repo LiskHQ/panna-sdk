@@ -3,6 +3,9 @@ import { type PannaClient } from '../client';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
+  type FiatCurrency,
+  type GetFiatPriceParams,
+  type GetFiatPriceResult,
   type SocialProvider
 } from './types';
 
@@ -88,6 +91,118 @@ describe('Utils Types', () => {
       });
 
       expect(validProviders).toHaveLength(18);
+    });
+  });
+
+  describe('FiatCurrency', () => {
+    it('should accept all valid fiat currencies', () => {
+      const validCurrencies: FiatCurrency[] = [
+        'USD',
+        'EUR',
+        'GBP',
+        'CAD',
+        'AUD',
+        'JPY',
+        'NZD'
+      ];
+
+      validCurrencies.forEach((currency) => {
+        const testCurrency: FiatCurrency = currency;
+        expect(testCurrency).toBe(currency);
+      });
+
+      expect(validCurrencies).toHaveLength(7);
+    });
+  });
+
+  describe('GetFiatPriceParams', () => {
+    it('should accept valid parameters with all fields', () => {
+      const mockClient = {} as PannaClient;
+      const mockChain = { id: 1 } as Chain;
+
+      const params: GetFiatPriceParams = {
+        client: mockClient,
+        chain: mockChain,
+        tokenAddress: '0x1234567890123456789012345678901234567890',
+        amount: 100,
+        currency: 'USD'
+      };
+
+      expect(params.client).toBe(mockClient);
+      expect(params.chain).toBe(mockChain);
+      expect(params.tokenAddress).toBe(
+        '0x1234567890123456789012345678901234567890'
+      );
+      expect(params.amount).toBe(100);
+      expect(params.currency).toBe('USD');
+    });
+
+    it('should accept parameters with only required fields', () => {
+      const mockClient = {} as PannaClient;
+
+      const params: GetFiatPriceParams = {
+        client: mockClient,
+        amount: 1
+      };
+
+      expect(params.client).toBe(mockClient);
+      expect(params.amount).toBe(1);
+      expect(params.chain).toBeUndefined();
+      expect(params.tokenAddress).toBeUndefined();
+      expect(params.currency).toBeUndefined();
+    });
+
+    it('should accept fractional amounts', () => {
+      const mockClient = {} as PannaClient;
+
+      const params: GetFiatPriceParams = {
+        client: mockClient,
+        amount: 0.0001
+      };
+
+      expect(params.amount).toBe(0.0001);
+    });
+  });
+
+  describe('GetFiatPriceResult', () => {
+    it('should have all required properties', () => {
+      const result: GetFiatPriceResult = {
+        price: 3000.5,
+        currency: 'USD'
+      };
+
+      expect(result.price).toBe(3000.5);
+      expect(result.currency).toBe('USD');
+    });
+
+    it('should accept different currencies', () => {
+      const currencies: FiatCurrency[] = [
+        'USD',
+        'EUR',
+        'GBP',
+        'CAD',
+        'AUD',
+        'JPY',
+        'NZD'
+      ];
+
+      currencies.forEach((currency) => {
+        const result: GetFiatPriceResult = {
+          price: 1000,
+          currency
+        };
+
+        expect(result.currency).toBe(currency);
+      });
+    });
+
+    it('should accept fractional prices', () => {
+      const result: GetFiatPriceResult = {
+        price: 0.0003,
+        currency: 'USD'
+      };
+
+      expect(result.price).toBe(0.0003);
     });
   });
 });
