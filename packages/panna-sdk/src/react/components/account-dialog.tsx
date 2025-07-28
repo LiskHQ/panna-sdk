@@ -1,4 +1,5 @@
 import { SendIcon, TagIcon } from 'lucide-react';
+import { Address } from 'thirdweb';
 import { USER_ADDRESS } from '@/consts';
 import { truncateAddress } from '@/utils/address';
 import { Button } from './ui/button';
@@ -14,7 +15,7 @@ import { Separator } from './ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 export function AccountDialog() {
-  const lsUserAddress = localStorage.getItem(USER_ADDRESS) as string;
+  const lsUserAddress = localStorage.getItem(USER_ADDRESS) as Address;
   const balanceUsd = 32;
 
   return (
