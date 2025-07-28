@@ -1,5 +1,7 @@
+import { ChevronLeftIcon, XIcon } from 'lucide-react';
 import { useDialog } from '@/hooks/use-dialog';
 import {
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -46,17 +48,35 @@ function LoginFormDialog(props: AuthDialogProps) {
 }
 
 function InputOTPFormDialog(props: AuthDialogProps) {
-  const { reset, stepData } = useDialogStepper();
+  const { reset, stepData, prev } = useDialogStepper();
   const { onClose } = useDialog();
   const title = props.title ?? '6-digit code';
   const description = props.description ?? 'OTP form dialog';
 
+  const handleClose = () => {
+    reset();
+    onClose();
+  };
+
   return (
-    <DialogContent>
+    <DialogContent showCloseButton={false}>
       <DialogDescription className="sr-only">{description}</DialogDescription>
       <div className="flex flex-col gap-6">
         <DialogHeader>
-          <DialogTitle className="text-center">{title}</DialogTitle>
+          <DialogTitle className="flex justify-between text-center">
+            <ChevronLeftIcon
+              className="text-muted-foreground hover:text-primary left-4"
+              onClick={() => prev()}
+            />
+            <Typography variant="h4">{title}</Typography>
+            <DialogClose>
+              <XIcon
+                size={20}
+                className="text-muted-foreground hover:text-primary right-4 transition-colors"
+                onClick={handleClose}
+              />
+            </DialogClose>
+          </DialogTitle>
         </DialogHeader>
         <InputOTPForm data={stepData} reset={reset} onClose={onClose} />
         <AccountDialogFooter />
