@@ -2,10 +2,10 @@ import {
   Children,
   cloneElement,
   createContext,
-  Fragment,
   ReactElement,
   use,
   useCallback,
+  useMemo,
   useState
 } from 'react';
 
@@ -44,16 +44,16 @@ export function DialogStepper({ children }: DialogStepperProps) {
     setStepData({});
   }, [setStep, setStepData]);
 
-  const renderChildren = useCallback(() => {
+  const memoizedChildren = useMemo(() => {
     return Children.map(children, (child, index) => {
-      return cloneElement(<Fragment key={index}>{child}</Fragment>);
+      return cloneElement(child, { key: index });
     });
   }, [children]);
 
   return (
     <>
       <DialogStepperContext value={{ next, prev, reset, stepData }}>
-        {renderChildren()[step]}
+        {memoizedChildren[step]}
       </DialogStepperContext>
     </>
   );

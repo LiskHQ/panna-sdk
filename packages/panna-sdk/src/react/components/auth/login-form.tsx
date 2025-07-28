@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { LAST_AUTH_PROVIDER, USER_ADDRESS } from '@/consts';
 import { usePanna } from '@/hooks/use-panna';
+import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { useAuth } from './auth-provider';
 
@@ -139,7 +140,12 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4"
       >
-        <Button type="button" onClick={handleGoogleLogin}>
+        <Button
+          type="button"
+          className="flex gap-3"
+          onClick={handleGoogleLogin}
+        >
+          <GoogleIcon />
           Continue with Google
         </Button>
         <FormField

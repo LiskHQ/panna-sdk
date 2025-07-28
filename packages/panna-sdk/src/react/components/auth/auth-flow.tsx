@@ -68,7 +68,9 @@ function InputOTPFormDialog(props: AuthDialogProps) {
               className="text-muted-foreground hover:text-primary left-4"
               onClick={() => prev()}
             />
-            <Typography variant="h4">{title}</Typography>
+            <Typography variant="h4" as="p">
+              {title}
+            </Typography>
             <DialogClose>
               <XIcon
                 size={20}
