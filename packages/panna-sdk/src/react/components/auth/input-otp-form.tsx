@@ -109,6 +109,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       reset();
       onClose();
     } catch (error) {
+      console.error('Error during OTP verification:', error);
       form.setError('code', {
         type: 'manual',
         message: 'Invalid verification code.'
