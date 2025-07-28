@@ -73,36 +73,47 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
-    const res = await login({
-      client,
-      ecosystem: {
-        id: EcosystemId.LISK,
-        partnerId
-      },
-      ...(data.email
-        ? { strategy: LoginStrategy.EMAIL, email: data.email }
-        : { strategy: LoginStrategy.PHONE, phoneNumber: data.phoneNumber }),
-      verificationCode: values.code
-    } as AuthParams);
+    try {
+      form.clearErrors('code');
+      const res = await login({
+        client,
+        ecosystem: {
+          id: EcosystemId.LISK,
+          partnerId
+        },
+        ...(data.email
+          ? { strategy: LoginStrategy.EMAIL, email: data.email }
+          : { strategy: LoginStrategy.PHONE, phoneNumber: data.phoneNumber }),
+        verificationCode: values.code
+      } as AuthParams);
 
-    if (res.storedToken) {
-      const isBrowser = typeof window !== 'undefined';
-      if (isBrowser) {
-        localStorage.setItem(LAST_AUTH_PROVIDER, res.storedToken.authProvider);
-        localStorage.setItem(WALLET_TOKEN, res.storedToken.jwtToken);
-        const authDetails = res.storedToken.authDetails as AuthDetailsFull;
+      if (res.storedToken) {
+        const isBrowser = typeof window !== 'undefined';
+        if (isBrowser) {
+          localStorage.setItem(
+            LAST_AUTH_PROVIDER,
+            res.storedToken.authProvider
+          );
+          localStorage.setItem(WALLET_TOKEN, res.storedToken.jwtToken);
+          const authDetails = res.storedToken.authDetails as AuthDetailsFull;
 
-        if (authDetails.email) {
-          localStorage.setItem(USER_CONTACT, authDetails.email);
-        } else if (authDetails.phoneNumber) {
-          localStorage.setItem(USER_CONTACT, authDetails.phoneNumber);
+          if (authDetails.email) {
+            localStorage.setItem(USER_CONTACT, authDetails.email);
+          } else if (authDetails.phoneNumber) {
+            localStorage.setItem(USER_CONTACT, authDetails.phoneNumber);
+          }
+          localStorage.setItem(USER_ADDRESS, authDetails.walletAddress);
+          setUserAddress(authDetails.walletAddress);
         }
-        localStorage.setItem(USER_ADDRESS, authDetails.walletAddress);
-        setUserAddress(authDetails.walletAddress);
       }
+      reset();
+      onClose();
+    } catch (error) {
+      form.setError('code', {
+        type: 'manual',
+        message: 'Invalid verification code.'
+      });
     }
-    reset();
-    onClose();
   };
 
   const { code } = form.watch();
@@ -125,7 +136,6 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
             phoneNumber: data.phoneNumber as string
           })
     });
-    // @todo: Implement feedback for wrong OTP
     resetResendTimer();
   };
 

@@ -14,13 +14,13 @@ import { Separator } from './ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 export function AccountDialog() {
-  const lsUserAddress = localStorage.getItem(USER_ADDRESS);
+  const lsUserAddress = localStorage.getItem(USER_ADDRESS) as string;
   const balanceUsd = 32;
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">{truncateAddress(lsUserAddress!)}</Button>
+        <Button variant="outline">{truncateAddress(lsUserAddress)}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="items-center">
