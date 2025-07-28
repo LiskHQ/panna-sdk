@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { LoginButton, useActiveAccount } from 'panna-sdk';
+import { ConnectButton, useActiveAccount } from 'panna-sdk';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -56,7 +56,7 @@ export function AppHeader() {
             Get started by connecting your wallet
           </Typography>
         )}
-        <LoginButton />
+        <ConnectButton />
       </aside>
     </header>
   );
