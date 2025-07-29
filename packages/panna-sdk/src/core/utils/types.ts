@@ -67,7 +67,7 @@ export interface GetFiatPriceResult {
   currency: FiatCurrency;
 }
 
-// Parameters for getting accpount fiat balance
+// Parameters for getting account fiat balance
 export interface AccountBalanceInFiatParams {
   address: string;
   client: PannaClient;
