@@ -51,3 +51,6 @@ export {
 } from './core';
 
 export * from './react';
+
+// React Query integration
+export { QueryClient } from '@tanstack/react-query';

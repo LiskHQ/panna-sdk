@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { getFiatPrice } from '../..';
 import { lisk } from '../../core';
 import type { Chain } from '../../core/chains/types';
@@ -11,79 +11,47 @@ type UseFiatBalanceParams = {
   currency?: FiatCurrency;
 };
 
-type UseFiatBalanceResult = {
-  fiatBalance: number;
-  isLoading: boolean;
-  error: string | null;
-};
-
 /**
  * Hook to convert crypto balance to fiat currency
  * @param params - Parameters for fiat conversion
- * @returns Object containing fiat balance, loading state, and error
+ * @returns React Query result with fiat balance data
  */
 export function useFiatBalance({
   balance,
   chain = lisk,
   currency = 'USD'
-}: UseFiatBalanceParams): UseFiatBalanceResult {
-  const [fiatBalance, setFiatBalance] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
+}: UseFiatBalanceParams): UseQueryResult<number, Error> {
   const { client } = usePanna();
 
-  useEffect(() => {
-    const convertToFiat = async () => {
-      // Reset previous error
-      setError(null);
+  const numericBalance = balance ? parseFloat(balance) : 0;
+  const hasValidBalance = numericBalance > 0 && !isNaN(numericBalance);
 
-      // If no balance or client, reset to 0
-      if (!balance || !client) {
-        setFiatBalance(0);
-        setIsLoading(false);
-        return;
+  return useQuery({
+    queryKey: ['fiat-balance', balance, chain.id, currency],
+    queryFn: async (): Promise<number> => {
+      if (!client || !balance || !hasValidBalance) {
+        return 0;
       }
 
-      const numericBalance = parseFloat(balance);
+      const fiatValue = await getFiatPrice({
+        client,
+        chain,
+        amount: numericBalance,
+        currency
+      });
 
-      // If balance is 0 or invalid, no need to convert
-      if (numericBalance <= 0 || isNaN(numericBalance)) {
-        setFiatBalance(0);
-        setIsLoading(false);
-        return;
+      return fiatValue.price;
+    },
+    enabled: !!(client && balance && hasValidBalance),
+    staleTime: 30 * 1000, // 30 seconds (prices change frequently)
+    refetchInterval: 60 * 1000, // Refetch every minute when component is focused
+    retry: (failureCount) => {
+      // Don't retry on client/validation errors
+      if (!client || !hasValidBalance) {
+        return false;
       }
-
-      try {
-        setIsLoading(true);
-
-        const fiatValue = await getFiatPrice({
-          client,
-          chain,
-          amount: numericBalance,
-          currency
-        });
-
-        setFiatBalance(fiatValue.price);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : 'Failed to convert balance to fiat';
-        console.error('Failed to convert balance to fiat:', err);
-        setError(errorMessage);
-        setFiatBalance(0);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    convertToFiat();
-  }, [balance, chain, currency, client]);
-
-  return {
-    fiatBalance,
-    isLoading,
-    error
-  };
+      return failureCount < 2; // Retry less for price data
+    },
+    retryDelay: 1000 // 1 second delay between retries
+  });
 }

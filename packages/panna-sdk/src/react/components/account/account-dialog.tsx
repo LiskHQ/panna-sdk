@@ -44,7 +44,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
       chain: lisk
     });
 
-  const { fiatBalance: balanceUsd, isLoading: isLoadingUsdBalance } =
+  const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useFiatBalance({
       balance: accountBalance?.displayValue,
       chain: lisk,
