@@ -1,65 +1,52 @@
 import { MailIcon } from 'lucide-react';
-import {
-  useLogout,
-  useConnectedAccounts,
-  useUserProfiles,
-  usePanna
-} from '../../hooks';
+import { useAccount } from '../../hooks';
 import { useAuth } from '../auth/auth-provider';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
+import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
-type UserProfile = {
-  type: string;
-  details?: {
-    email?: string;
-  };
-};
-
 export function AccountSettingsView() {
-  const { disconnect: thirdwebLogout } = useLogout();
   const { logout } = useAuth();
-  const connectedAccounts = useConnectedAccounts();
-  const { client } = usePanna();
+  const { data, isLoading, isError, error } = useAccount();
 
-  const { data: userProfiles } = useUserProfiles({
-    client: client!
-  });
+  const handleLogout = () => logout();
 
-  const activeConnectedAccount = connectedAccounts?.[0];
-
-  const emailProfile = userProfiles?.find(
-    (profile: UserProfile) =>
-      profile.type === 'email' ||
-      profile.type === 'google' ||
-      profile.type === 'discord' ||
-      profile.type === 'apple' ||
-      profile.type === 'facebook'
-  );
-
-  const userEmail = emailProfile?.details?.email;
-
-  const handleLogout = () => {
-    logout();
-
-    if (activeConnectedAccount) {
-      thirdwebLogout(activeConnectedAccount);
+  const renderData = () => {
+    if (isLoading) {
+      return (
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-4 w-6 rounded-sm" />
+          <Skeleton className="h-4 flex-1 rounded-sm" />
+        </div>
+      );
     }
+
+    if (isError || !data) {
+      return (
+        <Typography as="span" variant="small" className="text-destructive">
+          Error: {error?.message}
+        </Typography>
+      );
+    }
+
+    return (
+      <>
+        <div className="flex items-center gap-3">
+          <MailIcon size={16} />
+          <Typography as="span" variant="small">
+            {data.email}
+          </Typography>
+        </div>
+      </>
+    );
   };
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <Label>Account</Label>
-        {userEmail && (
-          <div className="flex items-center gap-3">
-            <MailIcon size={16} />
-            <Typography as="span" variant="small">
-              {userEmail}
-            </Typography>
-          </div>
-        )}
+        {renderData()}
       </div>
 
       <Button onClick={handleLogout} variant="destructive" className="w-full">
