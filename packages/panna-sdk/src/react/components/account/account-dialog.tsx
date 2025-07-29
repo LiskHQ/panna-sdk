@@ -6,6 +6,7 @@ import {
   XIcon
 } from 'lucide-react';
 import { useState } from 'react';
+import { truncateAddress } from '@/utils/address';
 import { lisk } from '../../../core';
 import { useAccountBalance, usePanna, useFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
@@ -142,7 +143,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">Account</Button>
+        <Button variant="outline">{truncateAddress(address)}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         {renderHeader(activeView)}

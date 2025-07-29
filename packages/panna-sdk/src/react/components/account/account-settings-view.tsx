@@ -19,7 +19,7 @@ type UserProfile = {
 
 export function AccountSettingsView() {
   const { disconnect: thirdwebLogout } = useLogout();
-  const { logout: authLogout } = useAuth();
+  const { logout } = useAuth();
   const connectedAccounts = useConnectedAccounts();
   const { client } = usePanna();
 
@@ -41,10 +41,8 @@ export function AccountSettingsView() {
   const userEmail = emailProfile?.details?.email;
 
   const handleLogout = () => {
-    // Clear our custom auth state
-    authLogout();
+    logout();
 
-    // Also disconnect from thirdweb
     if (activeConnectedAccount) {
       thirdwebLogout(activeConnectedAccount);
     }
