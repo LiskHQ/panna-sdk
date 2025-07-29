@@ -3,6 +3,8 @@ import { type PannaClient } from '../client';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
+  type AccountBalanceInFiatParams,
+  type AccountBalanceInFiatResult,
   type FiatCurrency,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
@@ -203,6 +205,104 @@ describe('Utils Types', () => {
       };
 
       expect(result.price).toBe(0.0003);
+    });
+  });
+
+  describe('AccountBalanceInFiatParams', () => {
+    it('should accept valid parameters with all fields', () => {
+      const mockClient = {} as PannaClient;
+      const mockChain = { id: 1 } as Chain;
+
+      const params: AccountBalanceInFiatParams = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain,
+        tokenAddress: '0x1234567890123456789012345678901234567890',
+        currency: 'USD'
+      };
+
+      expect(params.address).toBe('0x1234567890123456789012345678901234567890');
+      expect(params.client).toBe(mockClient);
+      expect(params.chain).toBe(mockChain);
+      expect(params.tokenAddress).toBe(
+        '0x1234567890123456789012345678901234567890'
+      );
+      expect(params.currency).toBe('USD');
+    });
+
+    it('should accept parameters with only required fields', () => {
+      const mockClient = {} as PannaClient;
+
+      const params: AccountBalanceInFiatParams = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient
+      };
+
+      expect(params.address).toBe('0x1234567890123456789012345678901234567890');
+      expect(params.client).toBe(mockClient);
+      expect(params.chain).toBeUndefined();
+      expect(params.tokenAddress).toBeUndefined();
+      expect(params.currency).toBeUndefined();
+    });
+  });
+
+  describe('AccountBalanceInFiatResult', () => {
+    it('should have all required properties', () => {
+      const result: AccountBalanceInFiatResult = {
+        token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+        tokenBalance: { value: BigInt(10e18), displayValue: '1' },
+        fiatBalance: { amount: 3000.5, currency: 'USD' }
+      };
+
+      expect(result).not.toBeNull();
+
+      expect(result).toHaveProperty('token');
+      expect(result.token).not.toBeNull();
+      expect(result.token.symbol).toBe('ETH');
+      expect(result.token.name).toBe('Ethereum');
+      expect(result.token.decimals).toBe(18);
+
+      expect(result).toHaveProperty('tokenBalance');
+      expect(result.tokenBalance).not.toBeNull();
+      expect(result.tokenBalance.value).toBe(BigInt(10e18));
+      expect(result.tokenBalance.displayValue).toBe('1');
+
+      expect(result).toHaveProperty('fiatBalance');
+      expect(result.fiatBalance).not.toBeNull();
+      expect(result.fiatBalance.amount).toBeCloseTo(3000.5);
+      expect(result.fiatBalance.currency).toBe('USD');
+    });
+
+    it('should accept different currencies', () => {
+      const currencies: FiatCurrency[] = [
+        'USD',
+        'EUR',
+        'GBP',
+        'CAD',
+        'AUD',
+        'JPY',
+        'NZD'
+      ];
+
+      currencies.forEach((currency) => {
+        const result: AccountBalanceInFiatResult = {
+          token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+          tokenBalance: { value: BigInt(10e18), displayValue: '1' },
+          fiatBalance: { amount: 1000, currency }
+        };
+
+        expect(result.fiatBalance.currency).toBe(currency);
+      });
+    });
+
+    it('should accept fractional prices', () => {
+      const result: AccountBalanceInFiatResult = {
+        token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+        tokenBalance: { value: BigInt(10e11), displayValue: '0.0000001' },
+        fiatBalance: { amount: 0.0003, currency: 'USD' }
+      };
+
+      expect(result.fiatBalance.amount).toBeCloseTo(0.0003);
     });
   });
 });
