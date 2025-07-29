@@ -1,4 +1,3 @@
-import { USER_ADDRESS } from '@/consts';
 import { AccountDialog } from '../account/account-dialog';
 import { AuthProvider, useAuth } from './auth-provider';
 import { LoginButton } from './login-button';
@@ -40,10 +39,15 @@ export function ConnectButton() {
 }
 
 function ConnectButtonInner() {
-  const { userAddress: contextUserAddress } = useAuth();
-  const isBrowser = typeof window !== 'undefined';
-  const lsUserAddress = isBrowser ? localStorage.getItem(USER_ADDRESS) : null;
-  const userAddress = contextUserAddress || lsUserAddress;
+  const { userAddress, isHydrated } = useAuth();
 
-  return <>{userAddress ? <AccountDialog /> : <LoginButton />}</>;
+  if (!isHydrated) {
+    return <LoginButton />;
+  }
+
+  return (
+    <>
+      {userAddress ? <AccountDialog address={userAddress} /> : <LoginButton />}
+    </>
+  );
 }

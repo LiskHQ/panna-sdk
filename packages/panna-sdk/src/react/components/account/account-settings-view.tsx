@@ -5,6 +5,7 @@ import {
   useUserProfiles,
   usePanna
 } from '../../hooks';
+import { useAuth } from '../auth/auth-provider';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Typography } from '../ui/typography';
@@ -17,7 +18,8 @@ type UserProfile = {
 };
 
 export function AccountSettingsView() {
-  const { disconnect: logout } = useLogout();
+  const { disconnect: thirdwebLogout } = useLogout();
+  const { logout: authLogout } = useAuth();
   const connectedAccounts = useConnectedAccounts();
   const { client } = usePanna();
 
@@ -39,8 +41,12 @@ export function AccountSettingsView() {
   const userEmail = emailProfile?.details?.email;
 
   const handleLogout = () => {
+    // Clear our custom auth state
+    authLogout();
+
+    // Also disconnect from thirdweb
     if (activeConnectedAccount) {
-      logout(activeConnectedAccount);
+      thirdwebLogout(activeConnectedAccount);
     }
   };
 

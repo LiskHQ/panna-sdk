@@ -7,12 +7,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { lisk } from '../../../core';
-import {
-  useActiveAccount,
-  useAccountBalance,
-  usePanna,
-  useFiatBalance
-} from '../../hooks';
+import { useAccountBalance, usePanna, useFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { CollectiblesList } from '../collectibles/collectibles-list';
@@ -32,15 +27,18 @@ import { AccountSettingsView } from './account-settings-view';
 
 type AccountView = 'main' | 'settings';
 
-export function AccountDialog() {
+type AccountDialogProps = {
+  address: string;
+};
+
+export function AccountDialog({ address }: AccountDialogProps) {
   const [activeView, setActiveView] = useState<AccountView>('main');
 
-  const activeAccount = useActiveAccount();
   const { client } = usePanna();
 
   const { data: accountBalance, isLoading: isLoadingBalance } =
     useAccountBalance({
-      address: activeAccount?.address || '',
+      address,
       client: client!,
       chain: lisk
     });
@@ -51,32 +49,6 @@ export function AccountDialog() {
       chain: lisk,
       currency: 'USD'
     });
-
-  if (!activeAccount) {
-    return (
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="outline">Account</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md" showCloseButton={false}>
-          <DialogHeader className="items-center">
-            <div className="flex w-full items-center justify-end gap-2">
-              <DialogClose>
-                <XIcon
-                  size={20}
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                />
-              </DialogClose>
-            </div>
-            <DialogTitle>No Account Connected</DialogTitle>
-            <DialogDescription>
-              Connect your wallet to view account information
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-    );
-  }
 
   const renderHeader = (view: AccountView) => {
     switch (view) {
