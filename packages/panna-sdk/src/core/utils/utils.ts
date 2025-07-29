@@ -141,7 +141,11 @@ export const getFiatPrice = async function (
  *   client: pannaClient,
  *   chain: customChain,
  * });
- * // result: { price: 105.50, currency: 'USD' }
+ * // result: {
+ * //   token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+ * //   tokenBalance: { value: BigInt(10e11), displayValue: '0.0000001' },
+ * //   fiatBalance: { amount: 0.0003, currency: 'USD' }
+ * // }
  *
  * // Get value for the specified user's ERC20 token balance in EUR
  * const result = await accountBalanceInFiat({
@@ -151,7 +155,11 @@ export const getFiatPrice = async function (
  *   tokenAddress: '0x...',
  *   currency: 'EUR'
  * });
- * // result: { price: 1050.00, currency: 'EUR' }
+ * // result: {
+ * //   token: { symbol: 'USDC.e', name: 'USD Coin', decimals: 6 },
+ * //   tokenBalance: { value: BigInt('100000132'), displayValue: '100.000132' },
+ * //   fiatBalance: { amount: 86.7, currency: 'EUR' }
+ * // }
  * ```
  */
 export const accountBalanceInFiat = async function (
@@ -165,22 +173,37 @@ export const accountBalanceInFiat = async function (
     throw new Error('Invalid token address format');
   }
 
-  const balance = await accountBalance({
+  const tokenBalance = await accountBalance({
     address: params.address,
     client: params.client,
     chain: params.chain || lisk,
     tokenAddress: params.tokenAddress
   });
 
-  const balanceInFiat = await getFiatPrice({
+  const fiatBalance = await getFiatPrice({
     client: params.client,
     chain: params.chain,
     tokenAddress: params.tokenAddress,
-    amount: Number(balance.displayValue),
+    amount: Number(tokenBalance.displayValue),
     currency: params.currency
   });
 
-  return {
-    ...balanceInFiat
+  const result: AccountBalanceInFiatResult = {
+    token: {
+      address: params.tokenAddress,
+      symbol: tokenBalance.symbol,
+      name: tokenBalance.name,
+      decimals: tokenBalance.decimals
+    },
+    tokenBalance: {
+      value: tokenBalance.value,
+      displayValue: tokenBalance.displayValue
+    },
+    fiatBalance: {
+      amount: fiatBalance.price,
+      currency: fiatBalance.currency
+    }
   };
+
+  return result;
 };

@@ -9,13 +9,16 @@ export interface AccountBalanceParams {
   tokenAddress?: string;
 }
 
-// Result of account balance query
-export interface AccountBalanceResult {
+interface MinimalTokenBalance {
   value: bigint;
+  displayValue: string;
+}
+
+// Result of account balance query
+export interface AccountBalanceResult extends MinimalTokenBalance {
   decimals: number;
   symbol: string;
   name: string;
-  displayValue: string;
 }
 
 // Supported social authentication providers
@@ -73,5 +76,21 @@ export interface AccountBalanceInFiatParams {
   currency?: FiatCurrency;
 }
 
+interface Token {
+  address?: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+}
+
+interface AccountFiatBalance {
+  amount: number;
+  currency: FiatCurrency;
+}
+
 // Result of account fiat balance query
-export type AccountBalanceInFiatResult = GetFiatPriceResult;
+export interface AccountBalanceInFiatResult {
+  token: Token;
+  tokenBalance: MinimalTokenBalance;
+  fiatBalance: AccountFiatBalance;
+}

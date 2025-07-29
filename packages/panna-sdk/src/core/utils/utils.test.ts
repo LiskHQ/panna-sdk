@@ -638,7 +638,10 @@ describe('Utils - Unit Tests', () => {
         currency: undefined
       });
 
-      expect(result).toEqual(mockFiatPrice);
+      expect(result.fiatBalance).toEqual({
+        amount: mockFiatPrice.price,
+        currency: mockFiatPrice.currency
+      });
     });
 
     it('should call accountBalance with token address when provided', async () => {
@@ -683,7 +686,10 @@ describe('Utils - Unit Tests', () => {
         currency: undefined
       });
 
-      expect(result).toEqual(mockFiatPrice);
+      expect(result.fiatBalance).toEqual({
+        amount: mockFiatPrice.price,
+        currency: mockFiatPrice.currency
+      });
     });
 
     it('should handle errors from accountBalance', async () => {
@@ -725,8 +731,11 @@ describe('Utils - Unit Tests', () => {
 
       const result = await accountBalanceInFiat(params);
 
-      expect(result).toEqual(mockFiatPrice);
-      expect(result.price).toBe(0);
+      expect(result.fiatBalance).toEqual({
+        amount: mockFiatPrice.price,
+        currency: mockFiatPrice.currency
+      });
+      expect(result.fiatBalance.amount).toBe(0);
     });
 
     it('should throw error for invalid address', async () => {
