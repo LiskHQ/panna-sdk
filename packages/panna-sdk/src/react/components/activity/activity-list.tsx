@@ -1,4 +1,4 @@
-import { cn } from '@/react/utils';
+import { cn } from '@/utils';
 import { Typography } from '../ui/typography';
 
 type ActivityListProps = {

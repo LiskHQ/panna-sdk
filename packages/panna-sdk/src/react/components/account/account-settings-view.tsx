@@ -9,12 +9,12 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Typography } from '../ui/typography';
 
-interface UserProfile {
+type UserProfile = {
   type: string;
   details?: {
     email?: string;
   };
-}
+};
 
 export function AccountSettingsView() {
   const { disconnect: logout } = useLogout();
