@@ -1,5 +1,5 @@
 import { USER_ADDRESS } from '@/consts';
-import { AccountDialog } from '../account-dialog';
+import { AccountDialog } from '../account/account-dialog';
 import { AuthProvider, useAuth } from './auth-provider';
 import { LoginButton } from './login-button';
 
