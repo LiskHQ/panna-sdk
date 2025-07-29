@@ -24,12 +24,12 @@ import {
  * isValidAddress('not an address'); // false
  * ```
  */
-export function isValidAddress(address: string): boolean {
+export const isValidAddress = function (address: string): boolean {
   if (!address || typeof address !== 'string') {
     return false;
   }
   return /^0x[a-fA-F0-9]{40}$/.test(address);
-}
+};
 
 /**
  * Get the balance of an account
@@ -37,7 +37,7 @@ export function isValidAddress(address: string): boolean {
  * @returns Account balance information
  * @throws Error if address or token address are invalid
  */
-export async function accountBalance(
+export const accountBalance = async function (
   params: AccountBalanceParams
 ): Promise<AccountBalanceResult> {
   if (!isValidAddress(params.address)) {
@@ -62,16 +62,16 @@ export async function accountBalance(
     name: result.name,
     displayValue: result.displayValue
   };
-}
+};
 
 /**
  * Get the icon URI for a social authentication provider
  * @param provider - The social provider name
  * @returns The icon URI string
  */
-export function getSocialIcon(provider: SocialProvider): string {
+export const getSocialIcon = function (provider: SocialProvider): string {
   return thirdwebGetSocialIcon(provider);
-}
+};
 
 /**
  * Get the fiat value for a specific amount of tokens
@@ -98,7 +98,7 @@ export function getSocialIcon(provider: SocialProvider): string {
  * // result: { price: 105.00, currency: 'EUR' }
  * ```
  */
-export async function getFiatPrice(
+export const getFiatPrice = async function (
   params: GetFiatPriceParams
 ): Promise<GetFiatPriceResult> {
   if (!params.client) {
@@ -121,7 +121,7 @@ export async function getFiatPrice(
     price: result.result,
     currency: params.currency || 'USD'
   };
-}
+};
 
 /**
  * Get the fiat balance of an account
@@ -154,7 +154,7 @@ export async function getFiatPrice(
  * // result: { price: 1050.00, currency: 'EUR' }
  * ```
  */
-export async function accountBalanceInFiat(
+export const accountBalanceInFiat = async function (
   params: AccountBalanceInFiatParams
 ): Promise<AccountBalanceInFiatResult> {
   if (!isValidAddress(params.address)) {
@@ -183,4 +183,4 @@ export async function accountBalanceInFiat(
   return {
     ...balanceInFiat
   };
-}
+};
