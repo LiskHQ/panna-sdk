@@ -38,12 +38,15 @@ export {
   type LoginStrategyType,
   // Utils functions
   accountBalance,
+  accountBalanceInFiat,
   getSocialIcon,
   getFiatPrice,
   isValidAddress,
   // Utils types
   type AccountBalanceParams,
   type AccountBalanceResult,
+  type AccountBalanceInFiatParams,
+  type AccountBalanceInFiatResult,
   type SocialProvider,
   type GetFiatPriceParams,
   type GetFiatPriceResult,

@@ -3,6 +3,8 @@ import { type PannaClient } from '../client';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
+  type AccountBalanceInFiatParams,
+  type AccountBalanceInFiatResult,
   type FiatCurrency,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
@@ -203,6 +205,86 @@ describe('Utils Types', () => {
       };
 
       expect(result.price).toBe(0.0003);
+    });
+  });
+
+  describe('AccountBalanceInFiatParams', () => {
+    it('should accept valid parameters with all fields', () => {
+      const mockClient = {} as PannaClient;
+      const mockChain = { id: 1 } as Chain;
+
+      const params: AccountBalanceInFiatParams = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain,
+        tokenAddress: '0x1234567890123456789012345678901234567890',
+        currency: 'USD'
+      };
+
+      expect(params.address).toBe('0x1234567890123456789012345678901234567890');
+      expect(params.client).toBe(mockClient);
+      expect(params.chain).toBe(mockChain);
+      expect(params.tokenAddress).toBe(
+        '0x1234567890123456789012345678901234567890'
+      );
+      expect(params.currency).toBe('USD');
+    });
+
+    it('should accept parameters with only required fields', () => {
+      const mockClient = {} as PannaClient;
+
+      const params: AccountBalanceInFiatParams = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient
+      };
+
+      expect(params.address).toBe('0x1234567890123456789012345678901234567890');
+      expect(params.client).toBe(mockClient);
+      expect(params.chain).toBeUndefined();
+      expect(params.tokenAddress).toBeUndefined();
+      expect(params.currency).toBeUndefined();
+    });
+  });
+
+  describe('AccountBalanceInFiatResult', () => {
+    it('should have all required properties', () => {
+      const result: AccountBalanceInFiatResult = {
+        price: 3000.5,
+        currency: 'USD'
+      };
+
+      expect(result.price).toBeCloseTo(3000.5);
+      expect(result.currency).toBe('USD');
+    });
+
+    it('should accept different currencies', () => {
+      const currencies: FiatCurrency[] = [
+        'USD',
+        'EUR',
+        'GBP',
+        'CAD',
+        'AUD',
+        'JPY',
+        'NZD'
+      ];
+
+      currencies.forEach((currency) => {
+        const result: AccountBalanceInFiatResult = {
+          price: 1000,
+          currency
+        };
+
+        expect(result.currency).toBe(currency);
+      });
+    });
+
+    it('should accept fractional prices', () => {
+      const result: AccountBalanceInFiatResult = {
+        price: 0.0003,
+        currency: 'USD'
+      };
+
+      expect(result.price).toBeCloseTo(0.0003);
     });
   });
 });

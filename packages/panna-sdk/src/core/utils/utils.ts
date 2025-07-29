@@ -6,6 +6,8 @@ import { lisk } from '../chains/chain-definitions/lisk';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
+  type AccountBalanceInFiatParams,
+  type AccountBalanceInFiatResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type SocialProvider
@@ -118,5 +120,67 @@ export async function getFiatPrice(
   return {
     price: result.result,
     currency: params.currency || 'USD'
+  };
+}
+
+/**
+ * Get the fiat balance of an account
+ * @param params - Parameters for getting account balance
+ * @param params.address - The address for which to retrieve the balance.
+ * @param params.client - The Panna client to use for the request.
+ * @param params.chain - (Optional) The chain for which to retrieve the balance. If not provided, it will default to Lisk Mainnet.
+ * @param params.tokenAddress - (Optional) The address of the token to retrieve the balance for. If not provided, the balance of the native token will be retrieved.
+ * @param params.currency - (Optional) The currency in which the fiat value is determined. If not provided, the fiat value will be returned in USD.
+ * @returns Account balance information
+ * @throws Error if address or token address are invalid
+ * @example
+ * ```ts
+ * // Get value for the specified user's native token balance in USD
+ * const result = await accountBalanceInFiat({
+ *   address: userAddress,
+ *   client: pannaClient,
+ *   chain: customChain,
+ * });
+ * // result: { price: 105.50, currency: 'USD' }
+ *
+ * // Get value for the specified user's ERC20 token balance in EUR
+ * const result = await accountBalanceInFiat({
+ *   address: userAddress,
+ *   client: pannaClient,
+ *   chain: customChain,
+ *   tokenAddress: '0x...',
+ *   currency: 'EUR'
+ * });
+ * // result: { price: 1050.00, currency: 'EUR' }
+ * ```
+ */
+export async function accountBalanceInFiat(
+  params: AccountBalanceInFiatParams
+): Promise<AccountBalanceInFiatResult> {
+  if (!isValidAddress(params.address)) {
+    throw new Error('Invalid address format');
+  }
+
+  if (params.tokenAddress && !isValidAddress(params.tokenAddress)) {
+    throw new Error('Invalid token address format');
+  }
+
+  const balance = await accountBalance({
+    address: params.address,
+    client: params.client,
+    chain: params.chain || lisk,
+    tokenAddress: params.tokenAddress
+  });
+
+  const balanceInFiat = await getFiatPrice({
+    client: params.client,
+    chain: params.chain,
+    tokenAddress: params.tokenAddress,
+    amount: Number(balance.displayValue),
+    currency: params.currency
+  });
+
+  return {
+    ...balanceInFiat
   };
 }
