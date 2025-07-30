@@ -70,6 +70,14 @@ export {
   DEFAULT_CURRENCY,
   DEFAULT_CHAIN,
   NATIVE_TOKEN_ADDRESS
+  // Wallet Event types and API service
+  type AccountEventPayload,
+  type OnConnectEventData,
+  type DisconnectEventData,
+  type AccountUpdateEventData,
+  PannaApiService,
+  pannaApiService,
+  type PannaApiConfig
 } from './core';
 
 export * from './react';

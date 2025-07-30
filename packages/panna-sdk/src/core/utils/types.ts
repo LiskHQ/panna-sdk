@@ -118,3 +118,32 @@ export interface AccountBalancesInFiatResult {
   tokenBalances: AccountBalanceInFiatResult[];
   errors?: TokenBalanceError[];
 }
+// Account event types for Panna dashboard API
+export type AccountEventPayload = {
+  eventType: 'onConnect' | 'disconnect' | 'accountUpdate';
+  timestamp: string;
+  address: string;
+  ecosystemId: string;
+  partnerId: string;
+  chainId: string;
+  eventData: OnConnectEventData | DisconnectEventData | AccountUpdateEventData;
+};
+
+export type OnConnectEventData = {
+  smartAccount: {
+    chain: string;
+    factoryAddress: string;
+    entrypointAddress: string;
+    sponsorGas: boolean;
+  };
+  social?: {
+    type: 'email' | 'phone' | 'google';
+    data: string;
+  };
+};
+
+export type DisconnectEventData = Record<string, never>;
+
+export type AccountUpdateEventData = {
+  updatedFields?: Record<string, unknown>;
+};
