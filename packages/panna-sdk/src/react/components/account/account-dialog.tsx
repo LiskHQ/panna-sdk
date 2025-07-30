@@ -119,20 +119,20 @@ export function AccountDialog({ address }: AccountDialogProps) {
               </Button>
             </div>
             <Separator orientation="horizontal" />
-            <Tabs defaultValue="balance" className="w-full items-center">
+            <Tabs defaultValue="balance" className="w-full items-center gap-6">
               <TabsList>
                 <TabsTrigger value="balance">Balance</TabsTrigger>
                 <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
               <TabsContent value="balance">
-                <TokensList className="py-4" />
+                <TokensList />
               </TabsContent>
               <TabsContent value="collectibles">
-                <CollectiblesList className="py-4" />
+                <CollectiblesList />
               </TabsContent>
               <TabsContent value="activity">
-                <ActivityList className="py-4" />
+                <ActivityList />
               </TabsContent>
             </Tabs>
           </div>
