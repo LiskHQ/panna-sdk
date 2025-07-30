@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 import { cn } from '@/utils';
 
-const typographyVariants = cva('', {
+const typographyVariants = cva('text-foreground', {
   variants: {
     variant: {
       h1: 'scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl',
