@@ -1008,7 +1008,7 @@ describe('Utils - Unit Tests', () => {
       );
     });
 
-    it('should throw error for invalid token address', async () => {
+    it('should return error for invalid token address', async () => {
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
         client: mockClient,
@@ -1016,9 +1016,16 @@ describe('Utils - Unit Tests', () => {
         tokens: [{ address: 'invalid-token-address' }]
       };
 
-      await expect(accountBalancesInFiat(params)).rejects.toThrow(
-        'Invalid token address format: invalid-token-address'
-      );
+      const result = await accountBalancesInFiat(params);
+
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors![0]).toEqual({
+        token: { address: 'invalid-token-address' },
+        error: 'Invalid token address format: invalid-token-address'
+      });
+      expect(result.tokenBalances).toHaveLength(0);
+      expect(result.totalValue.amount).toBe(0);
     });
 
     it('should handle errors from balance fetching with context', async () => {
@@ -1032,9 +1039,17 @@ describe('Utils - Unit Tests', () => {
         tokens: [{ address: '0x0987654321098765432109876543210987654321' }]
       };
 
-      await expect(accountBalancesInFiat(params)).rejects.toThrow(
-        'Failed to get balance for 0x0987654321098765432109876543210987654321: Network error'
-      );
+      const result = await accountBalancesInFiat(params);
+
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors![0]).toEqual({
+        token: { address: '0x0987654321098765432109876543210987654321' },
+        error:
+          'Failed to get balance for 0x0987654321098765432109876543210987654321: Network error'
+      });
+      expect(result.tokenBalances).toHaveLength(0);
+      expect(result.totalValue.amount).toBe(0);
     });
 
     it('should handle errors for native token with proper context', async () => {
@@ -1048,9 +1063,16 @@ describe('Utils - Unit Tests', () => {
         tokens: [{}] // Native token
       };
 
-      await expect(accountBalancesInFiat(params)).rejects.toThrow(
-        'Failed to get balance for native token: RPC error'
-      );
+      const result = await accountBalancesInFiat(params);
+
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors![0]).toEqual({
+        token: {},
+        error: 'Failed to get balance for native token: RPC error'
+      });
+      expect(result.tokenBalances).toHaveLength(0);
+      expect(result.totalValue.amount).toBe(0);
     });
 
     it('should calculate correct total with fractional amounts', async () => {
@@ -1106,6 +1128,212 @@ describe('Utils - Unit Tests', () => {
       const result = await accountBalancesInFiat(params);
 
       expect(result.totalValue.amount).toBe(7006.25); // 4500.75 + 2505.5
+    });
+
+    it('should handle mixed success and failure scenarios', async () => {
+      const mockResults = [
+        // Success
+        {
+          token: {
+            address: undefined,
+            symbol: 'ETH',
+            name: 'Ethereum',
+            decimals: 18
+          },
+          tokenBalance: {
+            value: BigInt('1000000000000000000'),
+            displayValue: '1.0'
+          },
+          fiatBalance: {
+            amount: 3000.0,
+            currency: 'USD' as FiatCurrency
+          }
+        },
+        // This will fail
+        null,
+        // Success
+        {
+          token: {
+            address: '0x1111111111111111111111111111111111111111',
+            symbol: 'USDT',
+            name: 'Tether',
+            decimals: 6
+          },
+          tokenBalance: {
+            value: BigInt('500000000'),
+            displayValue: '500.0'
+          },
+          fiatBalance: {
+            amount: 500.0,
+            currency: 'USD' as FiatCurrency
+          }
+        }
+      ];
+
+      let callCount = 0;
+      jest.spyOn(utils, 'accountBalanceInFiat').mockImplementation(() => {
+        const result = mockResults[callCount];
+        callCount++;
+        if (callCount === 2) {
+          // Second call fails
+          return Promise.reject(new Error('Token not found'));
+        }
+        return Promise.resolve(result!);
+      });
+
+      const params: AccountBalancesInFiatParams = {
+        address: validAddress,
+        client: mockClient,
+        chain: mockChain,
+        tokens: [
+          {}, // Native token - succeeds
+          { address: '0x0987654321098765432109876543210987654321' }, // Fails
+          { address: '0x1111111111111111111111111111111111111111' } // Succeeds
+        ]
+      };
+
+      const result = await accountBalancesInFiat(params);
+
+      // Should have 2 successful balances
+      expect(result.tokenBalances).toHaveLength(2);
+      expect(result.tokenBalances[0].fiatBalance.amount).toBe(3000.0);
+      expect(result.tokenBalances[1].fiatBalance.amount).toBe(500.0);
+
+      // Should have 1 error
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors![0]).toEqual({
+        token: { address: '0x0987654321098765432109876543210987654321' },
+        error:
+          'Failed to get balance for 0x0987654321098765432109876543210987654321: Token not found'
+      });
+
+      // Total should only include successful balances
+      expect(result.totalValue.amount).toBe(3500.0); // 3000 + 500
+    });
+
+    it('should handle all tokens failing', async () => {
+      jest
+        .spyOn(utils, 'accountBalanceInFiat')
+        .mockRejectedValue(new Error('Service unavailable'));
+
+      const params: AccountBalancesInFiatParams = {
+        address: validAddress,
+        client: mockClient,
+        chain: mockChain,
+        tokens: [
+          {},
+          { address: '0x0987654321098765432109876543210987654321' },
+          { address: '0x1111111111111111111111111111111111111111' }
+        ]
+      };
+
+      const result = await accountBalancesInFiat(params);
+
+      // No successful balances
+      expect(result.tokenBalances).toHaveLength(0);
+      expect(result.totalValue.amount).toBe(0);
+
+      // All should be errors
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(3);
+      expect(result.errors![0].error).toContain(
+        'Failed to get balance for native token'
+      );
+      expect(result.errors![1].error).toContain(
+        'Failed to get balance for 0x0987654321098765432109876543210987654321'
+      );
+      expect(result.errors![2].error).toContain(
+        'Failed to get balance for 0x1111111111111111111111111111111111111111'
+      );
+    });
+
+    it('should handle mix of invalid addresses and API failures', async () => {
+      jest.spyOn(utils, 'accountBalanceInFiat').mockImplementation((params) => {
+        // Only native token succeeds
+        if (!params.tokenAddress) {
+          return Promise.resolve({
+            token: {
+              address: undefined,
+              symbol: 'ETH',
+              name: 'Ethereum',
+              decimals: 18
+            },
+            tokenBalance: {
+              value: BigInt('2000000000000000000'),
+              displayValue: '2.0'
+            },
+            fiatBalance: {
+              amount: 6000.0,
+              currency: 'USD' as FiatCurrency
+            }
+          });
+        }
+        return Promise.reject(new Error('API timeout'));
+      });
+
+      const params: AccountBalancesInFiatParams = {
+        address: validAddress,
+        client: mockClient,
+        chain: mockChain,
+        tokens: [
+          {}, // Native token - succeeds
+          { address: 'not-valid' }, // Invalid address
+          { address: '0x0987654321098765432109876543210987654321' } // Valid but API fails
+        ]
+      };
+
+      const result = await accountBalancesInFiat(params);
+
+      // Only native token succeeds
+      expect(result.tokenBalances).toHaveLength(1);
+      expect(result.tokenBalances[0].fiatBalance.amount).toBe(6000.0);
+
+      // 2 errors
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(2);
+      expect(result.errors![0]).toEqual({
+        token: { address: 'not-valid' },
+        error: 'Invalid token address format: not-valid'
+      });
+      expect(result.errors![1].error).toContain('API timeout');
+
+      expect(result.totalValue.amount).toBe(6000.0);
+    });
+
+    it('should not include errors property when all succeed', async () => {
+      const mockResult = {
+        token: {
+          address: undefined,
+          symbol: 'ETH',
+          name: 'Ethereum',
+          decimals: 18
+        },
+        tokenBalance: {
+          value: BigInt('1000000000000000000'),
+          displayValue: '1.0'
+        },
+        fiatBalance: {
+          amount: 3000.0,
+          currency: 'USD' as FiatCurrency
+        }
+      };
+
+      jest.spyOn(utils, 'accountBalanceInFiat').mockResolvedValue(mockResult);
+
+      const params: AccountBalancesInFiatParams = {
+        address: validAddress,
+        client: mockClient,
+        chain: mockChain,
+        tokens: [{}]
+      };
+
+      const result = await accountBalancesInFiat(params);
+
+      // Should not have errors property
+      expect(result.errors).toBeUndefined();
+      expect(result.tokenBalances).toHaveLength(1);
+      expect(result.totalValue.amount).toBe(3000.0);
     });
   });
 });

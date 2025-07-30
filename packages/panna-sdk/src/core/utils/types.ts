@@ -106,8 +106,15 @@ export interface AccountBalancesInFiatParams
   tokens: Array<{ address?: string }>;
 }
 
+// Error result for failed token balance fetch
+export interface TokenBalanceError {
+  token: { address?: string };
+  error: string;
+}
+
 // Result of multiple account balances calculation
 export interface AccountBalancesInFiatResult {
   totalValue: AccountFiatBalance;
   tokenBalances: AccountBalanceInFiatResult[];
+  errors?: TokenBalanceError[];
 }

@@ -10,7 +10,8 @@ import {
   type FiatCurrency,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
-  type SocialProvider
+  type SocialProvider,
+  type TokenBalanceError
 } from './types';
 
 describe('Utils Types', () => {
@@ -571,6 +572,185 @@ describe('Utils Types', () => {
 
       expect(result.totalValue.amount).toBe(calculatedTotal);
       expect(result.totalValue.amount).toBe(7006.25);
+    });
+
+    it('should accept optional errors property', () => {
+      const result: AccountBalancesInFiatResult = {
+        totalValue: {
+          amount: 3000.0,
+          currency: 'USD'
+        },
+        tokenBalances: [
+          {
+            token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+            tokenBalance: {
+              value: BigInt('1000000000000000000'),
+              displayValue: '1.0'
+            },
+            fiatBalance: { amount: 3000.0, currency: 'USD' }
+          }
+        ],
+        errors: [
+          {
+            token: { address: '0x0987654321098765432109876543210987654321' },
+            error:
+              'Failed to get balance for 0x0987654321098765432109876543210987654321: Network error'
+          }
+        ]
+      };
+
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors![0].token.address).toBe(
+        '0x0987654321098765432109876543210987654321'
+      );
+      expect(result.errors![0].error).toContain('Network error');
+    });
+
+    it('should work without errors property', () => {
+      const result: AccountBalancesInFiatResult = {
+        totalValue: {
+          amount: 3000.0,
+          currency: 'USD'
+        },
+        tokenBalances: [
+          {
+            token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+            tokenBalance: {
+              value: BigInt('1000000000000000000'),
+              displayValue: '1.0'
+            },
+            fiatBalance: { amount: 3000.0, currency: 'USD' }
+          }
+        ]
+      };
+
+      expect(result.errors).toBeUndefined();
+      expect(result.tokenBalances).toHaveLength(1);
+      expect(result.totalValue.amount).toBe(3000.0);
+    });
+
+    it('should handle empty errors array', () => {
+      const result: AccountBalancesInFiatResult = {
+        totalValue: {
+          amount: 3000.0,
+          currency: 'USD'
+        },
+        tokenBalances: [
+          {
+            token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+            tokenBalance: {
+              value: BigInt('1000000000000000000'),
+              displayValue: '1.0'
+            },
+            fiatBalance: { amount: 3000.0, currency: 'USD' }
+          }
+        ],
+        errors: []
+      };
+
+      expect(result.errors).toBeDefined();
+      expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  describe('TokenBalanceError', () => {
+    it('should have all required properties for ERC20 token error', () => {
+      const error: TokenBalanceError = {
+        token: { address: '0x0987654321098765432109876543210987654321' },
+        error:
+          'Failed to get balance for 0x0987654321098765432109876543210987654321: Token not found'
+      };
+
+      expect(error.token).toBeDefined();
+      expect(error.token.address).toBe(
+        '0x0987654321098765432109876543210987654321'
+      );
+      expect(error.error).toBe(
+        'Failed to get balance for 0x0987654321098765432109876543210987654321: Token not found'
+      );
+    });
+
+    it('should have all required properties for native token error', () => {
+      const error: TokenBalanceError = {
+        token: {},
+        error: 'Failed to get balance for native token: RPC error'
+      };
+
+      expect(error.token).toBeDefined();
+      expect(error.token.address).toBeUndefined();
+      expect(error.error).toBe(
+        'Failed to get balance for native token: RPC error'
+      );
+    });
+
+    it('should accept token with undefined address for native token', () => {
+      const error: TokenBalanceError = {
+        token: { address: undefined },
+        error: 'Failed to get balance for native token: Network timeout'
+      };
+
+      expect(error.token.address).toBeUndefined();
+      expect(error.error).toContain('native token');
+    });
+
+    it('should handle validation errors', () => {
+      const error: TokenBalanceError = {
+        token: { address: 'invalid-address' },
+        error: 'Invalid token address format: invalid-address'
+      };
+
+      expect(error.token.address).toBe('invalid-address');
+      expect(error.error).toContain('Invalid token address format');
+    });
+
+    it('should handle API errors', () => {
+      const error: TokenBalanceError = {
+        token: { address: '0x1234567890123456789012345678901234567890' },
+        error:
+          'Failed to get balance for 0x1234567890123456789012345678901234567890: Service unavailable'
+      };
+
+      expect(error.token.address).toBe(
+        '0x1234567890123456789012345678901234567890'
+      );
+      expect(error.error).toContain('Service unavailable');
+    });
+
+    it('should handle generic error messages', () => {
+      const error: TokenBalanceError = {
+        token: { address: '0x1234567890123456789012345678901234567890' },
+        error:
+          'Failed to get balance for 0x1234567890123456789012345678901234567890: Unknown error'
+      };
+
+      expect(error.error).toContain('Unknown error');
+    });
+
+    it('should allow various error message formats', () => {
+      const errors: TokenBalanceError[] = [
+        {
+          token: {},
+          error: 'Network timeout'
+        },
+        {
+          token: { address: '0x123' },
+          error: 'Rate limit exceeded'
+        },
+        {
+          token: { address: '0x456' },
+          error: 'Contract not found'
+        }
+      ];
+
+      errors.forEach((error) => {
+        expect(error.token).toBeDefined();
+        expect(error.error).toBeDefined();
+        expect(typeof error.error).toBe('string');
+        expect(error.error.length).toBeGreaterThan(0);
+      });
+
+      expect(errors).toHaveLength(3);
     });
   });
 });

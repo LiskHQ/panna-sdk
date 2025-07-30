@@ -12,7 +12,8 @@ import {
   type AccountBalancesInFiatResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
-  type SocialProvider
+  type SocialProvider,
+  type TokenBalanceError
 } from './types';
 
 /**
@@ -213,8 +214,8 @@ export const accountBalanceInFiat = async function (
 /**
  * Get the total fiat value of multiple tokens and individual token balances
  * @param params - Parameters for getting multiple account balances
- * @returns Total value and individual token balances with fiat values
- * @throws Error if address is invalid or if any token fetch fails
+ * @returns Total value and individual token balances with fiat values, plus any errors
+ * @throws Error if address is invalid
  * @example
  * ```ts
  * // Get portfolio value for multiple tokens
@@ -231,7 +232,8 @@ export const accountBalanceInFiat = async function (
  * });
  * // result: {
  * //   totalValue: { amount: 5250.75, currency: 'USD' },
- * //   tokenBalances: [...]
+ * //   tokenBalances: [...],
+ * //   errors: [{ token: { address: '0x...' }, error: 'Failed to get balance...' }]
  * // }
  * ```
  */
@@ -244,43 +246,84 @@ export async function accountBalancesInFiat(
 
   const currency = params.currency || 'USD';
 
-  // Create array of promises for parallel execution
+  // Create array of promises for parallel execution with wrapped context
   const balancePromises = params.tokens.map((tokenInfo) => {
     // Validate token address upfront
     if (tokenInfo.address && !isValidAddress(tokenInfo.address)) {
-      throw new Error(`Invalid token address format: ${tokenInfo.address}`);
+      // Return a rejected promise wrapped with context
+      return Promise.resolve({
+        status: 'rejected' as const,
+        tokenInfo,
+        error: `Invalid token address format: ${tokenInfo.address}`
+      });
     }
 
-    // Return promise with error handling
+    // Return promise that captures the token info for error context
     return accountBalanceInFiat({
       address: params.address,
       client: params.client,
       chain: params.chain,
       tokenAddress: tokenInfo.address,
       currency: currency
-    }).catch((error) => {
-      // Re-throw with more context about which token failed
-      const tokenIdentifier = tokenInfo.address || 'native token';
-      throw new Error(
-        `Failed to get balance for ${tokenIdentifier}: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    });
+    }).then(
+      (result) => ({ status: 'fulfilled' as const, value: result, tokenInfo }),
+      (error) => ({
+        status: 'rejected' as const,
+        tokenInfo,
+        error: `Failed to get balance for ${tokenInfo.address || 'native token'}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      })
+    );
   });
 
-  // Execute all balance fetches in parallel
-  const tokenBalances = await Promise.all(balancePromises);
+  // Execute all balance fetches in parallel with allSettled
+  const results = await Promise.allSettled(balancePromises);
 
-  // Calculate total value from all balances
-  const totalValue = tokenBalances.reduce(
+  // Separate successful and failed results
+  const successfulBalances: AccountBalanceInFiatResult[] = [];
+  const errors: TokenBalanceError[] = [];
+
+  results.forEach((result) => {
+    const wrappedResult = (
+      result as PromiseFulfilledResult<
+        | {
+            status: 'fulfilled';
+            value: AccountBalanceInFiatResult;
+            tokenInfo: { address?: string };
+          }
+        | { status: 'rejected'; tokenInfo: { address?: string }; error: string }
+      >
+    ).value;
+    if (wrappedResult.status === 'fulfilled') {
+      successfulBalances.push(wrappedResult.value);
+    } else {
+      // This was our pre-validation rejection or API failure
+      errors.push({
+        token: wrappedResult.tokenInfo,
+        error: wrappedResult.error
+      });
+    }
+  });
+
+  // Calculate total value from successful balances only
+  const totalValue = successfulBalances.reduce(
     (sum, balance) => sum + balance.fiatBalance.amount,
     0
   );
 
-  return {
+  const result: AccountBalancesInFiatResult = {
     totalValue: {
       amount: totalValue,
       currency: currency
     },
-    tokenBalances
+    tokenBalances: successfulBalances
   };
+
+  // Only add errors property if there are errors
+  if (errors.length > 0) {
+    result.errors = errors;
+  }
+
+  return result;
 }
