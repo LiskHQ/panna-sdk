@@ -243,34 +243,38 @@ export async function accountBalancesInFiat(
   }
 
   const currency = params.currency || 'USD';
-  const tokenBalances: AccountBalanceInFiatResult[] = [];
-  let totalValue = 0;
 
-  // Process each token
-  for (const tokenInfo of params.tokens) {
+  // Create array of promises for parallel execution
+  const balancePromises = params.tokens.map((tokenInfo) => {
+    // Validate token address upfront
     if (tokenInfo.address && !isValidAddress(tokenInfo.address)) {
       throw new Error(`Invalid token address format: ${tokenInfo.address}`);
     }
 
-    try {
-      const balanceResult = await accountBalanceInFiat({
-        address: params.address,
-        client: params.client,
-        chain: params.chain,
-        tokenAddress: tokenInfo.address,
-        currency: currency
-      });
-
-      tokenBalances.push(balanceResult);
-      totalValue += balanceResult.fiatBalance.amount;
-    } catch (error) {
-      // Re-throw with more context
+    // Return promise with error handling
+    return accountBalanceInFiat({
+      address: params.address,
+      client: params.client,
+      chain: params.chain,
+      tokenAddress: tokenInfo.address,
+      currency: currency
+    }).catch((error) => {
+      // Re-throw with more context about which token failed
       const tokenIdentifier = tokenInfo.address || 'native token';
       throw new Error(
         `Failed to get balance for ${tokenIdentifier}: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
-    }
-  }
+    });
+  });
+
+  // Execute all balance fetches in parallel
+  const tokenBalances = await Promise.all(balancePromises);
+
+  // Calculate total value from all balances
+  const totalValue = tokenBalances.reduce(
+    (sum, balance) => sum + balance.fiatBalance.amount,
+    0
+  );
 
   return {
     totalValue: {
