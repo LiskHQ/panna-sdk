@@ -8,6 +8,8 @@ import {
   type AccountBalanceResult,
   type AccountBalanceInFiatParams,
   type AccountBalanceInFiatResult,
+  type AccountBalancesInFiatParams,
+  type AccountBalancesInFiatResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type SocialProvider
@@ -207,3 +209,74 @@ export const accountBalanceInFiat = async function (
 
   return result;
 };
+
+/**
+ * Get the total fiat value of multiple tokens and individual token balances
+ * @param params - Parameters for getting multiple account balances
+ * @returns Total value and individual token balances with fiat values
+ * @throws Error if address is invalid or if any token fetch fails
+ * @example
+ * ```ts
+ * // Get portfolio value for multiple tokens
+ * const result = await accountBalancesInFiat({
+ *   client: pannaClient,
+ *   address: '0x...',
+ *   chain: lisk,
+ *   tokens: [
+ *     {}, // Native token
+ *     { address: '0x...' }, // USDC
+ *     { address: '0x...' }  // DAI
+ *   ],
+ *   currency: 'USD'
+ * });
+ * // result: {
+ * //   totalValue: { amount: 5250.75, currency: 'USD' },
+ * //   tokenBalances: [...]
+ * // }
+ * ```
+ */
+export async function accountBalancesInFiat(
+  params: AccountBalancesInFiatParams
+): Promise<AccountBalancesInFiatResult> {
+  if (!isValidAddress(params.address)) {
+    throw new Error('Invalid address format');
+  }
+
+  const currency = params.currency || 'USD';
+  const tokenBalances: AccountBalanceInFiatResult[] = [];
+  let totalValue = 0;
+
+  // Process each token
+  for (const tokenInfo of params.tokens) {
+    if (tokenInfo.address && !isValidAddress(tokenInfo.address)) {
+      throw new Error(`Invalid token address format: ${tokenInfo.address}`);
+    }
+
+    try {
+      const balanceResult = await accountBalanceInFiat({
+        address: params.address,
+        client: params.client,
+        chain: params.chain,
+        tokenAddress: tokenInfo.address,
+        currency: currency
+      });
+
+      tokenBalances.push(balanceResult);
+      totalValue += balanceResult.fiatBalance.amount;
+    } catch (error) {
+      // Re-throw with more context
+      const tokenIdentifier = tokenInfo.address || 'native token';
+      throw new Error(
+        `Failed to get balance for ${tokenIdentifier}: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
+    }
+  }
+
+  return {
+    totalValue: {
+      amount: totalValue,
+      currency: currency
+    },
+    tokenBalances
+  };
+}

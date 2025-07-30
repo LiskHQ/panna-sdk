@@ -67,13 +67,18 @@ export interface GetFiatPriceResult {
   currency: FiatCurrency;
 }
 
-// Parameters for getting account fiat balance
-export interface AccountBalanceInFiatParams {
+// Base parameters shared by account balance in fiat operations
+interface BaseAccountBalanceInFiatParams {
   address: string;
   client: PannaClient;
   chain?: Chain;
-  tokenAddress?: string;
   currency?: FiatCurrency;
+}
+
+// Parameters for getting single account fiat balance
+export interface AccountBalanceInFiatParams
+  extends BaseAccountBalanceInFiatParams {
+  tokenAddress?: string;
 }
 
 interface Token {
@@ -83,7 +88,7 @@ interface Token {
   decimals: number;
 }
 
-interface AccountFiatBalance {
+export interface AccountFiatBalance {
   amount: number;
   currency: FiatCurrency;
 }
@@ -93,4 +98,16 @@ export interface AccountBalanceInFiatResult {
   token: Token;
   tokenBalance: MinimalTokenBalance;
   fiatBalance: AccountFiatBalance;
+}
+
+// Parameters for getting multiple account balances in fiat
+export interface AccountBalancesInFiatParams
+  extends BaseAccountBalanceInFiatParams {
+  tokens: Array<{ address?: string }>;
+}
+
+// Result of multiple account balances calculation
+export interface AccountBalancesInFiatResult {
+  totalValue: AccountFiatBalance;
+  tokenBalances: AccountBalanceInFiatResult[];
 }

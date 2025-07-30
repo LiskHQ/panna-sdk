@@ -39,6 +39,7 @@ export {
   // Utils functions
   accountBalance,
   accountBalanceInFiat,
+  accountBalancesInFiat,
   getSocialIcon,
   getFiatPrice,
   isValidAddress,
@@ -47,6 +48,9 @@ export {
   type AccountBalanceResult,
   type AccountBalanceInFiatParams,
   type AccountBalanceInFiatResult,
+  type AccountBalancesInFiatParams,
+  type AccountBalancesInFiatResult,
+  type AccountFiatBalance,
   type SocialProvider,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
