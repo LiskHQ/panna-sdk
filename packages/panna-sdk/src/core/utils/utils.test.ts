@@ -5,13 +5,20 @@ import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
 import { lisk } from '../chains/chain-definitions/lisk';
 import { type PannaClient } from '../client';
-import { type FiatCurrency, type SocialProvider } from './types';
+import {
+  type FiatCurrency,
+  type SocialProvider,
+  type AccountBalanceResult,
+  type GetFiatPriceResult
+} from './types';
 import {
   accountBalance,
+  accountBalanceInFiat,
   getFiatPrice,
   getSocialIcon,
   isValidAddress
 } from './utils';
+import * as utils from './utils';
 
 // Mock thirdweb modules
 jest.mock('thirdweb');
@@ -585,6 +592,174 @@ describe('Utils - Unit Tests', () => {
       );
       expect(isValidAddress('0xAABBCCDDEEFF1234567890123456789012345678')).toBe(
         true
+      );
+    });
+  });
+
+  describe('accountBalanceInFiat', () => {
+    it('should call accountBalanceInFiat with correct parameters', async () => {
+      const mockAccountBalance = {
+        value: BigInt('1000000000000000000'),
+        decimals: 18,
+        symbol: 'ETH',
+        name: 'Ethereum',
+        displayValue: '1.0'
+      } as AccountBalanceResult;
+      jest.spyOn(utils, 'accountBalance').mockResolvedValue(mockAccountBalance);
+
+      const mockFiatPrice = {
+        price: 3000.5,
+        currency: 'USD'
+      } as GetFiatPriceResult;
+      jest.spyOn(utils, 'getFiatPrice').mockResolvedValue(mockFiatPrice);
+
+      const params = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain
+      };
+
+      const result = await accountBalanceInFiat(params);
+
+      expect(utils.accountBalance).toHaveBeenCalledTimes(1);
+      expect(utils.accountBalance).toHaveBeenCalledWith({
+        address: params.address,
+        client: params.client,
+        chain: params.chain,
+        tokenAddress: undefined
+      });
+
+      expect(utils.getFiatPrice).toHaveBeenCalledTimes(1);
+      expect(utils.getFiatPrice).toHaveBeenCalledWith({
+        client: params.client,
+        chain: params.chain,
+        amount: Number(mockAccountBalance.displayValue),
+        tokenAddress: undefined,
+        currency: undefined
+      });
+
+      expect(result.fiatBalance).toEqual({
+        amount: mockFiatPrice.price,
+        currency: mockFiatPrice.currency
+      });
+    });
+
+    it('should call accountBalance with token address when provided', async () => {
+      const mockAccountBalance = {
+        value: BigInt('5000000'),
+        decimals: 6,
+        symbol: 'USDC',
+        name: 'USD Coin',
+        displayValue: '5.0'
+      } as AccountBalanceResult;
+      jest.spyOn(utils, 'accountBalance').mockResolvedValue(mockAccountBalance);
+
+      const mockFiatPrice = {
+        price: 5,
+        currency: 'USD'
+      } as GetFiatPriceResult;
+      jest.spyOn(utils, 'getFiatPrice').mockResolvedValue(mockFiatPrice);
+
+      const params = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain,
+        tokenAddress: '0x0987654321098765432109876543210987654321'
+      };
+
+      const result = await accountBalanceInFiat(params);
+
+      expect(utils.accountBalance).toHaveBeenCalledTimes(1);
+      expect(utils.accountBalance).toHaveBeenCalledWith({
+        address: params.address,
+        client: params.client,
+        chain: params.chain,
+        tokenAddress: params.tokenAddress
+      });
+
+      expect(utils.getFiatPrice).toHaveBeenCalledTimes(1);
+      expect(utils.getFiatPrice).toHaveBeenCalledWith({
+        client: params.client,
+        chain: params.chain,
+        amount: Number(mockAccountBalance.displayValue),
+        tokenAddress: params.tokenAddress,
+        currency: undefined
+      });
+
+      expect(result.fiatBalance).toEqual({
+        amount: mockFiatPrice.price,
+        currency: mockFiatPrice.currency
+      });
+    });
+
+    it('should handle errors from accountBalance', async () => {
+      const mockError = new Error('Network error');
+      jest.spyOn(utils, 'accountBalance').mockRejectedValue(mockError);
+
+      const params = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain
+      };
+
+      await expect(accountBalanceInFiat(params)).rejects.toThrow(
+        'Network error'
+      );
+    });
+
+    it('should handle zero balance correctly', async () => {
+      const mockAccountBalance = {
+        value: BigInt('0'),
+        decimals: 18,
+        symbol: 'ETH',
+        name: 'Ethereum',
+        displayValue: '0.0'
+      };
+      jest.spyOn(utils, 'accountBalance').mockResolvedValue(mockAccountBalance);
+
+      const mockFiatPrice = {
+        price: 0,
+        currency: 'USD'
+      } as GetFiatPriceResult;
+      jest.spyOn(utils, 'getFiatPrice').mockResolvedValue(mockFiatPrice);
+
+      const params = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain
+      };
+
+      const result = await accountBalanceInFiat(params);
+
+      expect(result.fiatBalance).toEqual({
+        amount: mockFiatPrice.price,
+        currency: mockFiatPrice.currency
+      });
+      expect(result.fiatBalance.amount).toBe(0);
+    });
+
+    it('should throw error for invalid address', async () => {
+      const params = {
+        address: '0xinvalid',
+        client: mockClient,
+        chain: mockChain
+      };
+
+      await expect(accountBalanceInFiat(params)).rejects.toThrow(
+        'Invalid address format'
+      );
+    });
+
+    it('should throw error for invalid token address', async () => {
+      const params = {
+        address: '0x1234567890123456789012345678901234567890',
+        client: mockClient,
+        chain: mockChain,
+        tokenAddress: 'not-an-address'
+      };
+
+      await expect(accountBalanceInFiat(params)).rejects.toThrow(
+        'Invalid token address format'
       );
     });
   });

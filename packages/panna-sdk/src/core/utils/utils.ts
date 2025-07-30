@@ -6,6 +6,8 @@ import { lisk } from '../chains/chain-definitions/lisk';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
+  type AccountBalanceInFiatParams,
+  type AccountBalanceInFiatResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type SocialProvider
@@ -22,12 +24,12 @@ import {
  * isValidAddress('not an address'); // false
  * ```
  */
-export function isValidAddress(address: string): boolean {
+export const isValidAddress = function (address: string): boolean {
   if (!address || typeof address !== 'string') {
     return false;
   }
   return /^0x[a-fA-F0-9]{40}$/.test(address);
-}
+};
 
 /**
  * Get the balance of an account
@@ -35,7 +37,7 @@ export function isValidAddress(address: string): boolean {
  * @returns Account balance information
  * @throws Error if address or token address are invalid
  */
-export async function accountBalance(
+export const accountBalance = async function (
   params: AccountBalanceParams
 ): Promise<AccountBalanceResult> {
   if (!isValidAddress(params.address)) {
@@ -60,16 +62,16 @@ export async function accountBalance(
     name: result.name,
     displayValue: result.displayValue
   };
-}
+};
 
 /**
  * Get the icon URI for a social authentication provider
  * @param provider - The social provider name
  * @returns The icon URI string
  */
-export function getSocialIcon(provider: SocialProvider): string {
+export const getSocialIcon = function (provider: SocialProvider): string {
   return thirdwebGetSocialIcon(provider);
-}
+};
 
 /**
  * Get the fiat value for a specific amount of tokens
@@ -96,7 +98,7 @@ export function getSocialIcon(provider: SocialProvider): string {
  * // result: { price: 105.00, currency: 'EUR' }
  * ```
  */
-export async function getFiatPrice(
+export const getFiatPrice = async function (
   params: GetFiatPriceParams
 ): Promise<GetFiatPriceResult> {
   if (!params.client) {
@@ -119,4 +121,89 @@ export async function getFiatPrice(
     price: result.result,
     currency: params.currency || 'USD'
   };
-}
+};
+
+/**
+ * Get the fiat balance of an account
+ * @param params - Parameters for getting account balance
+ * @param params.address - The address for which to retrieve the balance.
+ * @param params.client - The Panna client to use for the request.
+ * @param params.chain - (Optional) The chain for which to retrieve the balance. If not provided, it will default to Lisk Mainnet.
+ * @param params.tokenAddress - (Optional) The address of the token to retrieve the balance for. If not provided, the balance of the native token will be retrieved.
+ * @param params.currency - (Optional) The currency in which the fiat value is determined. If not provided, the fiat value will be returned in USD.
+ * @returns Account balance information
+ * @throws Error if address or token address are invalid
+ * @example
+ * ```ts
+ * // Get value for the specified user's native token balance in USD
+ * const result = await accountBalanceInFiat({
+ *   address: userAddress,
+ *   client: pannaClient,
+ *   chain: customChain,
+ * });
+ * // result: {
+ * //   token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
+ * //   tokenBalance: { value: BigInt(10e11), displayValue: '0.0000001' },
+ * //   fiatBalance: { amount: 0.0003, currency: 'USD' }
+ * // }
+ *
+ * // Get value for the specified user's ERC20 token balance in EUR
+ * const result = await accountBalanceInFiat({
+ *   address: userAddress,
+ *   client: pannaClient,
+ *   chain: customChain,
+ *   tokenAddress: '0x...',
+ *   currency: 'EUR'
+ * });
+ * // result: {
+ * //   token: { symbol: 'USDC.e', name: 'USD Coin', decimals: 6 },
+ * //   tokenBalance: { value: BigInt('100000132'), displayValue: '100.000132' },
+ * //   fiatBalance: { amount: 86.7, currency: 'EUR' }
+ * // }
+ * ```
+ */
+export const accountBalanceInFiat = async function (
+  params: AccountBalanceInFiatParams
+): Promise<AccountBalanceInFiatResult> {
+  if (!isValidAddress(params.address)) {
+    throw new Error('Invalid address format');
+  }
+
+  if (params.tokenAddress && !isValidAddress(params.tokenAddress)) {
+    throw new Error('Invalid token address format');
+  }
+
+  const tokenBalance = await accountBalance({
+    address: params.address,
+    client: params.client,
+    chain: params.chain || lisk,
+    tokenAddress: params.tokenAddress
+  });
+
+  const fiatBalance = await getFiatPrice({
+    client: params.client,
+    chain: params.chain,
+    tokenAddress: params.tokenAddress,
+    amount: Number(tokenBalance.displayValue),
+    currency: params.currency
+  });
+
+  const result: AccountBalanceInFiatResult = {
+    token: {
+      address: params.tokenAddress,
+      symbol: tokenBalance.symbol,
+      name: tokenBalance.name,
+      decimals: tokenBalance.decimals
+    },
+    tokenBalance: {
+      value: tokenBalance.value,
+      displayValue: tokenBalance.displayValue
+    },
+    fiatBalance: {
+      amount: fiatBalance.price,
+      currency: fiatBalance.currency
+    }
+  };
+
+  return result;
+};
