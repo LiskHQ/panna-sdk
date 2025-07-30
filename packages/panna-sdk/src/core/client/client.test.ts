@@ -14,6 +14,10 @@ jest.mock('thirdweb', () => ({
 }));
 
 describe('createPannaClient - Unit Tests', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('should create client with clientId', () => {
     const options: CreatePannaClientOptions = { clientId: 'test-client-id' };
     const client = createPannaClient(options) as PannaClient & {

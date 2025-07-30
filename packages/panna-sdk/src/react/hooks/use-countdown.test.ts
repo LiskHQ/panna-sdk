@@ -2,12 +2,15 @@ import { renderHook } from '@testing-library/react';
 import { act } from 'react';
 import { useCountdown } from './use-countdown';
 
-jest.useFakeTimers();
-
 describe('useCountdown', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
     jest.clearAllTimers();
     jest.clearAllMocks();
+    jest.useRealTimers();
   });
 
   it('should initialize with the start value', () => {
