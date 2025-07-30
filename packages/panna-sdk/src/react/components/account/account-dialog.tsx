@@ -70,12 +70,14 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 />
               </DialogClose>
             </div>
-            <DialogTitle className="text-5xl">
-              {isLoadingBalance || isLoadingUsdBalance
-                ? '...'
-                : `$${balanceUsd.toFixed(2)}`}
-            </DialogTitle>
-            <DialogDescription>Total value</DialogDescription>
+            <div className="flex flex-col items-center gap-2">
+              <DialogTitle className="text-4xl">
+                {isLoadingBalance || isLoadingUsdBalance
+                  ? '...'
+                  : `$${balanceUsd.toFixed(2)}`}
+              </DialogTitle>
+              <DialogDescription>Total value</DialogDescription>
+            </div>
           </DialogHeader>
         );
       case 'settings':
@@ -105,8 +107,8 @@ export function AccountDialog({ address }: AccountDialogProps) {
     switch (view) {
       case 'main':
         return (
-          <div className="flex flex-col items-center gap-4">
-            <div className="flex w-full items-center gap-2">
+          <div className="flex flex-col items-center gap-8">
+            <div className="flex w-full items-center gap-4">
               <Button type="button" variant="outline" className="flex-1">
                 <SendIcon />
                 Send
