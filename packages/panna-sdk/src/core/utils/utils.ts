@@ -1,8 +1,11 @@
-import { NATIVE_TOKEN_ADDRESS } from 'thirdweb';
 import { convertCryptoToFiat } from 'thirdweb/pay';
 import { getWalletBalance } from 'thirdweb/wallets';
 import { getSocialIcon as thirdwebGetSocialIcon } from 'thirdweb/wallets/in-app';
-import { DEFAULT_CHAIN, DEFAULT_CURRENCY } from '../defaults';
+import {
+  DEFAULT_CHAIN,
+  DEFAULT_CURRENCY,
+  NATIVE_TOKEN_ADDRESS
+} from '../defaults';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -224,9 +227,9 @@ export const accountBalanceInFiat = async function (
  *   address: '0x...',
  *   chain: lisk,
  *   tokens: [
- *     {}, // Native token
- *     { address: '0x...' }, // USDC
- *     { address: '0x...' }  // DAI
+ *     NATIVE_TOKEN_ADDRESS, // Native token
+ *     '0x...', // USDC
+ *     '0x...'  // DAI
  *   ],
  *   currency: 'USD'
  * });
@@ -247,30 +250,41 @@ export async function accountBalancesInFiat(
   const currency = params.currency || DEFAULT_CURRENCY;
 
   // Create array of promises for parallel execution with wrapped context
-  const balancePromises = params.tokens.map((tokenInfo) => {
-    // Validate token address upfront
-    if (tokenInfo.address && !isValidAddress(tokenInfo.address)) {
+  const balancePromises = params.tokens.map((tokenAddress) => {
+    // Validate token address upfront (skip validation for native token address)
+    if (
+      tokenAddress !== NATIVE_TOKEN_ADDRESS &&
+      !isValidAddress(tokenAddress)
+    ) {
       // Return a rejected promise wrapped with context
       return Promise.resolve({
         status: 'rejected' as const,
-        tokenInfo,
-        error: `Invalid token address format: ${tokenInfo.address}`
+        tokenAddress,
+        error: `Invalid token address format: ${tokenAddress}`
       });
     }
 
-    // Return promise that captures the token info for error context
+    // Convert native token address to undefined for the API call
+    const apiTokenAddress =
+      tokenAddress === NATIVE_TOKEN_ADDRESS ? undefined : tokenAddress;
+
+    // Return promise that captures the token address for error context
     return accountBalanceInFiat({
       address: params.address,
       client: params.client,
       chain: params.chain,
-      tokenAddress: tokenInfo.address,
+      tokenAddress: apiTokenAddress,
       currency: currency
     }).then(
-      (result) => ({ status: 'fulfilled' as const, value: result, tokenInfo }),
+      (result) => ({
+        status: 'fulfilled' as const,
+        value: result,
+        tokenAddress
+      }),
       (error) => ({
         status: 'rejected' as const,
-        tokenInfo,
-        error: `Failed to get balance for ${tokenInfo.address || 'native token'}: ${
+        tokenAddress,
+        error: `Failed to get balance for ${tokenAddress === NATIVE_TOKEN_ADDRESS ? 'native token' : tokenAddress}: ${
           error instanceof Error ? error.message : 'Unknown error'
         }`
       })
@@ -290,9 +304,9 @@ export async function accountBalancesInFiat(
         | {
             status: 'fulfilled';
             value: AccountBalanceInFiatResult;
-            tokenInfo: { address?: string };
+            tokenAddress: string;
           }
-        | { status: 'rejected'; tokenInfo: { address?: string }; error: string }
+        | { status: 'rejected'; tokenAddress: string; error: string }
       >
     ).value;
     if (wrappedResult.status === 'fulfilled') {
@@ -300,7 +314,7 @@ export async function accountBalancesInFiat(
     } else {
       // This was our pre-validation rejection or API failure
       errors.push({
-        token: wrappedResult.tokenInfo,
+        token: { address: wrappedResult.tokenAddress },
         error: wrappedResult.error
       });
     }

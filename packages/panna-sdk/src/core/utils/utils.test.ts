@@ -5,7 +5,7 @@ import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
 import { lisk } from '../chains/chain-definitions/lisk';
 import { type PannaClient } from '../client';
-import { DEFAULT_CURRENCY } from '../defaults';
+import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import {
   type FiatCurrency,
   type SocialProvider,
@@ -238,7 +238,7 @@ describe('Utils - Unit Tests', () => {
   describe('getFiatPrice', () => {
     beforeEach(() => {
       (thirdweb.NATIVE_TOKEN_ADDRESS as unknown as string) =
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
     });
 
     it('should call convertCryptoToFiat for native token with correct parameters', async () => {
@@ -261,7 +261,7 @@ describe('Utils - Unit Tests', () => {
       expect(thirdwebPay.convertCryptoToFiat).toHaveBeenCalledTimes(1);
       expect(thirdwebPay.convertCryptoToFiat).toHaveBeenCalledWith({
         client: mockClient,
-        fromTokenAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+        fromTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
         fromAmount: 1,
         chain: lisk,
         to: DEFAULT_CURRENCY
@@ -503,7 +503,7 @@ describe('Utils - Unit Tests', () => {
       expect(result.price).toBe(3000.5);
       expect(thirdwebPay.convertCryptoToFiat).toHaveBeenCalledWith(
         expect.objectContaining({
-          fromTokenAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+          fromTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
         })
       );
     });
@@ -772,7 +772,7 @@ describe('Utils - Unit Tests', () => {
 
     beforeEach(() => {
       (thirdweb.NATIVE_TOKEN_ADDRESS as unknown as string) =
-        '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
     });
 
     it('should calculate balances for single native token', async () => {
@@ -801,7 +801,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{}], // Native token
+        tokens: [NATIVE_TOKEN_ADDRESS], // Native token
         currency: DEFAULT_CURRENCY
       };
 
@@ -880,9 +880,9 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [
-          {}, // Native token
-          { address: '0x0987654321098765432109876543210987654321' },
-          { address: '0x1111111111111111111111111111111111111111' }
+          NATIVE_TOKEN_ADDRESS, // Native token
+          '0x0987654321098765432109876543210987654321',
+          '0x1111111111111111111111111111111111111111'
         ],
         currency: DEFAULT_CURRENCY
       };
@@ -948,7 +948,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{}]
+        tokens: [NATIVE_TOKEN_ADDRESS]
         // currency not specified
       };
 
@@ -984,7 +984,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{}],
+        tokens: [NATIVE_TOKEN_ADDRESS],
         currency: 'EUR'
       };
 
@@ -1003,7 +1003,7 @@ describe('Utils - Unit Tests', () => {
         address: '0xinvalid',
         client: mockClient,
         chain: mockChain,
-        tokens: [{}]
+        tokens: [NATIVE_TOKEN_ADDRESS]
       };
 
       await expect(accountBalancesInFiat(params)).rejects.toThrow(
@@ -1016,7 +1016,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{ address: 'invalid-token-address' }]
+        tokens: ['invalid-token-address']
       };
 
       const result = await accountBalancesInFiat(params);
@@ -1039,7 +1039,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{ address: '0x0987654321098765432109876543210987654321' }]
+        tokens: ['0x0987654321098765432109876543210987654321']
       };
 
       const result = await accountBalancesInFiat(params);
@@ -1063,7 +1063,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{}] // Native token
+        tokens: [NATIVE_TOKEN_ADDRESS] // Native token
       };
 
       const result = await accountBalancesInFiat(params);
@@ -1071,7 +1071,7 @@ describe('Utils - Unit Tests', () => {
       expect(result.errors).toBeDefined();
       expect(result.errors).toHaveLength(1);
       expect(result.errors![0]).toEqual({
-        token: {},
+        token: { address: NATIVE_TOKEN_ADDRESS },
         error: 'Failed to get balance for native token: RPC error'
       });
       expect(result.tokenBalances).toHaveLength(0);
@@ -1125,7 +1125,10 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{}, { address: '0x0987654321098765432109876543210987654321' }]
+        tokens: [
+          NATIVE_TOKEN_ADDRESS,
+          '0x0987654321098765432109876543210987654321'
+        ]
       };
 
       const result = await accountBalancesInFiat(params);
@@ -1189,9 +1192,9 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [
-          {}, // Native token - succeeds
-          { address: '0x0987654321098765432109876543210987654321' }, // Fails
-          { address: '0x1111111111111111111111111111111111111111' } // Succeeds
+          NATIVE_TOKEN_ADDRESS, // Native token - succeeds
+          '0x0987654321098765432109876543210987654321', // Fails
+          '0x1111111111111111111111111111111111111111' // Succeeds
         ]
       };
 
@@ -1225,9 +1228,9 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [
-          {},
-          { address: '0x0987654321098765432109876543210987654321' },
-          { address: '0x1111111111111111111111111111111111111111' }
+          NATIVE_TOKEN_ADDRESS,
+          '0x0987654321098765432109876543210987654321',
+          '0x1111111111111111111111111111111111111111'
         ]
       };
 
@@ -1280,9 +1283,9 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [
-          {}, // Native token - succeeds
-          { address: 'not-valid' }, // Invalid address
-          { address: '0x0987654321098765432109876543210987654321' } // Valid but API fails
+          NATIVE_TOKEN_ADDRESS, // Native token - succeeds
+          'not-valid', // Invalid address
+          '0x0987654321098765432109876543210987654321' // Valid but API fails
         ]
       };
 
@@ -1328,7 +1331,7 @@ describe('Utils - Unit Tests', () => {
         address: validAddress,
         client: mockClient,
         chain: mockChain,
-        tokens: [{}]
+        tokens: [NATIVE_TOKEN_ADDRESS]
       };
 
       const result = await accountBalancesInFiat(params);

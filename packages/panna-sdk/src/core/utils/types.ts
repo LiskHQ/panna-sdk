@@ -103,12 +103,12 @@ export interface AccountBalanceInFiatResult {
 // Parameters for getting multiple account balances in fiat
 export interface AccountBalancesInFiatParams
   extends BaseAccountBalanceInFiatParams {
-  tokens: Array<{ address?: string }>;
+  tokens: string[];
 }
 
 // Error result for failed token balance fetch
 export interface TokenBalanceError {
-  token: { address?: string };
+  token: { address: string };
   error: string;
 }
 

@@ -1,6 +1,6 @@
 import { type Chain } from 'thirdweb';
 import { type PannaClient } from '../client';
-import { DEFAULT_CURRENCY } from '../defaults';
+import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -320,9 +320,9 @@ describe('Utils Types', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [
-          {}, // Native token
-          { address: '0x0987654321098765432109876543210987654321' },
-          { address: '0x1111111111111111111111111111111111111111' }
+          NATIVE_TOKEN_ADDRESS, // Native token
+          '0x0987654321098765432109876543210987654321',
+          '0x1111111111111111111111111111111111111111'
         ],
         currency: 'EUR'
       };
@@ -331,11 +331,11 @@ describe('Utils Types', () => {
       expect(params.client).toBe(mockClient);
       expect(params.chain).toBe(mockChain);
       expect(params.tokens).toHaveLength(3);
-      expect(params.tokens[0]).toEqual({});
-      expect(params.tokens[1].address).toBe(
+      expect(params.tokens[0]).toBe(NATIVE_TOKEN_ADDRESS);
+      expect(params.tokens[1]).toBe(
         '0x0987654321098765432109876543210987654321'
       );
-      expect(params.tokens[2].address).toBe(
+      expect(params.tokens[2]).toBe(
         '0x1111111111111111111111111111111111111111'
       );
       expect(params.currency).toBe('EUR');
@@ -376,16 +376,16 @@ describe('Utils Types', () => {
         address: '0x1234567890123456789012345678901234567890',
         client: mockClient,
         tokens: [
-          {}, // Native token (empty object)
-          { address: undefined }, // Native token (explicit undefined)
-          { address: '0x0987654321098765432109876543210987654321' } // ERC20 token
+          NATIVE_TOKEN_ADDRESS, // Native token
+          NATIVE_TOKEN_ADDRESS, // Native token (duplicate for test)
+          '0x0987654321098765432109876543210987654321' // ERC20 token
         ]
       };
 
       expect(params.tokens).toHaveLength(3);
-      expect(params.tokens[0]).toEqual({});
-      expect(params.tokens[1].address).toBeUndefined();
-      expect(params.tokens[2].address).toBe(
+      expect(params.tokens[0]).toBe(NATIVE_TOKEN_ADDRESS);
+      expect(params.tokens[1]).toBe(NATIVE_TOKEN_ADDRESS);
+      expect(params.tokens[2]).toBe(
         '0x0987654321098765432109876543210987654321'
       );
     });
@@ -674,24 +674,24 @@ describe('Utils Types', () => {
 
     it('should have all required properties for native token error', () => {
       const error: TokenBalanceError = {
-        token: {},
+        token: { address: NATIVE_TOKEN_ADDRESS },
         error: 'Failed to get balance for native token: RPC error'
       };
 
       expect(error.token).toBeDefined();
-      expect(error.token.address).toBeUndefined();
+      expect(error.token.address).toBe(NATIVE_TOKEN_ADDRESS);
       expect(error.error).toBe(
         'Failed to get balance for native token: RPC error'
       );
     });
 
-    it('should accept token with undefined address for native token', () => {
+    it('should accept token with native token address', () => {
       const error: TokenBalanceError = {
-        token: { address: undefined },
+        token: { address: NATIVE_TOKEN_ADDRESS },
         error: 'Failed to get balance for native token: Network timeout'
       };
 
-      expect(error.token.address).toBeUndefined();
+      expect(error.token.address).toBe(NATIVE_TOKEN_ADDRESS);
       expect(error.error).toContain('native token');
     });
 
@@ -731,7 +731,7 @@ describe('Utils Types', () => {
     it('should allow various error message formats', () => {
       const errors: TokenBalanceError[] = [
         {
-          token: {},
+          token: { address: NATIVE_TOKEN_ADDRESS },
           error: 'Network timeout'
         },
         {
