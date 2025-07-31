@@ -235,8 +235,40 @@ export const accountBalanceInFiat = async function (
  * });
  * // result: {
  * //   totalValue: { amount: 5250.75, currency: 'USD' },
- * //   tokenBalances: [...],
- * //   errors: [{ token: { address: '0x...' }, error: 'Failed to get balance...' }]
+ * //   tokenBalances: [
+ * //     {
+ * //       token: {
+ * //         address: undefined, // Native token
+ * //         symbol: 'ETH',
+ * //         name: 'Ethereum',
+ * //         decimals: 18
+ * //       },
+ * //       tokenBalance: {
+ * //         value: 2000000000000000000n, // 2 ETH in wei
+ * //         displayValue: '2.0'
+ * //       },
+ * //       fiatBalance: { amount: 3000.0, currency: 'USD' }
+ * //     },
+ * //     {
+ * //       token: {
+ * //         address: '0xA0b86a33E6417a8fdf77C4d0e6B9d6a66B5B8f78',
+ * //         symbol: 'USDC',
+ * //         name: 'USD Coin',
+ * //         decimals: 6
+ * //       },
+ * //       tokenBalance: {
+ * //         value: 2250750000n, // 2250.75 USDC
+ * //         displayValue: '2250.75'
+ * //       },
+ * //       fiatBalance: { amount: 2250.75, currency: 'USD' }
+ * //     }
+ * //   ],
+ * //   errors: [
+ * //     {
+ * //       token: { address: '0xInvalidToken123' },
+ * //       error: 'Failed to get balance: Invalid token contract'
+ * //     }
+ * //   ]
  * // }
  * ```
  */
