@@ -8,7 +8,7 @@ import {
 import { useState } from 'react';
 import { truncateAddress } from '@/utils/address';
 import { lisk } from '../../../core';
-import { useAccountBalance, usePanna, useFiatBalance } from '../../hooks';
+import { useAccountBalance, useFiatBalance, usePanna } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { CollectiblesList } from '../collectibles/collectibles-list';
@@ -125,13 +125,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
-              <TabsContent value="balance">
+              <TabsContent value="balance" className="w-full">
                 <TokensList />
               </TabsContent>
-              <TabsContent value="collectibles">
+              <TabsContent value="collectibles" className="w-full">
                 <CollectiblesList />
               </TabsContent>
-              <TabsContent value="activity">
+              <TabsContent value="activity" className="w-full">
                 <ActivityList />
               </TabsContent>
             </Tabs>
