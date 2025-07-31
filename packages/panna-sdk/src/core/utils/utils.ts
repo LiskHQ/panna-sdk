@@ -1,16 +1,22 @@
-import { NATIVE_TOKEN_ADDRESS } from 'thirdweb';
 import { convertCryptoToFiat } from 'thirdweb/pay';
 import { getWalletBalance } from 'thirdweb/wallets';
 import { getSocialIcon as thirdwebGetSocialIcon } from 'thirdweb/wallets/in-app';
-import { lisk } from '../chains/chain-definitions/lisk';
+import {
+  DEFAULT_CHAIN,
+  DEFAULT_CURRENCY,
+  NATIVE_TOKEN_ADDRESS
+} from '../defaults';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
   type AccountBalanceInFiatParams,
   type AccountBalanceInFiatResult,
+  type AccountBalancesInFiatParams,
+  type AccountBalancesInFiatResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
-  type SocialProvider
+  type SocialProvider,
+  type TokenBalanceError
 } from './types';
 
 /**
@@ -113,13 +119,13 @@ export const getFiatPrice = async function (
     client: params.client,
     fromTokenAddress: params.tokenAddress || NATIVE_TOKEN_ADDRESS,
     fromAmount: params.amount,
-    chain: params.chain || lisk,
-    to: params.currency || 'USD'
+    chain: params.chain || DEFAULT_CHAIN,
+    to: params.currency || DEFAULT_CURRENCY
   });
 
   return {
     price: result.result,
-    currency: params.currency || 'USD'
+    currency: params.currency || DEFAULT_CURRENCY
   };
 };
 
@@ -176,7 +182,7 @@ export const accountBalanceInFiat = async function (
   const tokenBalance = await accountBalance({
     address: params.address,
     client: params.client,
-    chain: params.chain || lisk,
+    chain: params.chain || DEFAULT_CHAIN,
     tokenAddress: params.tokenAddress
   });
 
@@ -207,3 +213,163 @@ export const accountBalanceInFiat = async function (
 
   return result;
 };
+
+/**
+ * Get the total fiat value of multiple tokens and individual token balances
+ * @param params - Parameters for getting multiple account balances
+ * @returns Total value and individual token balances with fiat values, plus any errors
+ * @throws Error if address is invalid
+ * @example
+ * ```ts
+ * // Get portfolio value for multiple tokens
+ * const result = await accountBalancesInFiat({
+ *   client: pannaClient,
+ *   address: '0x...',
+ *   chain: lisk,
+ *   tokens: [
+ *     NATIVE_TOKEN_ADDRESS, // Native token
+ *     '0x...', // USDC
+ *     '0x...'  // DAI
+ *   ],
+ *   currency: 'USD'
+ * });
+ * // result: {
+ * //   totalValue: { amount: 5250.75, currency: 'USD' },
+ * //   tokenBalances: [
+ * //     {
+ * //       token: {
+ * //         address: undefined, // Native token
+ * //         symbol: 'ETH',
+ * //         name: 'Ethereum',
+ * //         decimals: 18
+ * //       },
+ * //       tokenBalance: {
+ * //         value: 2000000000000000000n, // 2 ETH in wei
+ * //         displayValue: '2.0'
+ * //       },
+ * //       fiatBalance: { amount: 3000.0, currency: 'USD' }
+ * //     },
+ * //     {
+ * //       token: {
+ * //         address: '0xA0b86a33E6417a8fdf77C4d0e6B9d6a66B5B8f78',
+ * //         symbol: 'USDC',
+ * //         name: 'USD Coin',
+ * //         decimals: 6
+ * //       },
+ * //       tokenBalance: {
+ * //         value: 2250750000n, // 2250.75 USDC
+ * //         displayValue: '2250.75'
+ * //       },
+ * //       fiatBalance: { amount: 2250.75, currency: 'USD' }
+ * //     }
+ * //   ],
+ * //   errors: [
+ * //     {
+ * //       token: { address: '0xInvalidToken123' },
+ * //       error: 'Failed to get balance: Invalid token contract'
+ * //     }
+ * //   ]
+ * // }
+ * ```
+ */
+export async function accountBalancesInFiat(
+  params: AccountBalancesInFiatParams
+): Promise<AccountBalancesInFiatResult> {
+  if (!isValidAddress(params.address)) {
+    throw new Error('Invalid address format');
+  }
+
+  const currency = params.currency || DEFAULT_CURRENCY;
+
+  // Create array of promises for parallel execution with wrapped context
+  const balancePromises = params.tokens.map((tokenAddress) => {
+    // Validate token address upfront (skip validation for native token address)
+    if (
+      tokenAddress !== NATIVE_TOKEN_ADDRESS &&
+      !isValidAddress(tokenAddress)
+    ) {
+      // Return a rejected promise wrapped with context
+      return Promise.resolve({
+        status: 'rejected' as const,
+        tokenAddress,
+        error: `Invalid token address format: ${tokenAddress}`
+      });
+    }
+
+    // Convert native token address to undefined for the API call
+    const apiTokenAddress =
+      tokenAddress === NATIVE_TOKEN_ADDRESS ? undefined : tokenAddress;
+
+    // Return promise that captures the token address for error context
+    return accountBalanceInFiat({
+      address: params.address,
+      client: params.client,
+      chain: params.chain,
+      tokenAddress: apiTokenAddress,
+      currency: currency
+    }).then(
+      (result) => ({
+        status: 'fulfilled' as const,
+        value: result,
+        tokenAddress
+      }),
+      (error) => ({
+        status: 'rejected' as const,
+        tokenAddress,
+        error: `Failed to get balance for ${tokenAddress === NATIVE_TOKEN_ADDRESS ? 'native token' : tokenAddress}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      })
+    );
+  });
+
+  // Execute all balance fetches in parallel with allSettled
+  const results = await Promise.allSettled(balancePromises);
+
+  // Separate successful and failed results
+  const successfulBalances: AccountBalanceInFiatResult[] = [];
+  const errors: TokenBalanceError[] = [];
+
+  results.forEach((result) => {
+    const wrappedResult = (
+      result as PromiseFulfilledResult<
+        | {
+            status: 'fulfilled';
+            value: AccountBalanceInFiatResult;
+            tokenAddress: string;
+          }
+        | { status: 'rejected'; tokenAddress: string; error: string }
+      >
+    ).value;
+    if (wrappedResult.status === 'fulfilled') {
+      successfulBalances.push(wrappedResult.value);
+    } else {
+      // This was our pre-validation rejection or API failure
+      errors.push({
+        token: { address: wrappedResult.tokenAddress },
+        error: wrappedResult.error
+      });
+    }
+  });
+
+  // Calculate total value from successful balances only
+  const totalValue = successfulBalances.reduce(
+    (sum, balance) => sum + balance.fiatBalance.amount,
+    0
+  );
+
+  const result: AccountBalancesInFiatResult = {
+    totalValue: {
+      amount: totalValue,
+      currency: currency
+    },
+    tokenBalances: successfulBalances
+  };
+
+  // Only add errors property if there are errors
+  if (errors.length > 0) {
+    result.errors = errors;
+  }
+
+  return result;
+}

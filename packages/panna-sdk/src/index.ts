@@ -39,6 +39,7 @@ export {
   // Utils functions
   accountBalance,
   accountBalanceInFiat,
+  accountBalancesInFiat,
   getSocialIcon,
   getFiatPrice,
   isValidAddress,
@@ -47,10 +48,17 @@ export {
   type AccountBalanceResult,
   type AccountBalanceInFiatParams,
   type AccountBalanceInFiatResult,
+  type AccountBalancesInFiatParams,
+  type AccountBalancesInFiatResult,
+  type AccountFiatBalance,
   type SocialProvider,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
-  type FiatCurrency
+  type FiatCurrency,
+  // Constants
+  DEFAULT_CURRENCY,
+  DEFAULT_CHAIN,
+  NATIVE_TOKEN_ADDRESS
 } from './core';
 
 export * from './react';

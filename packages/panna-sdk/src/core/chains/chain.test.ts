@@ -1,6 +1,34 @@
 import { describeChain, getChainInfo, getRpcUrlForChain } from './chain';
 import { Chain } from './types';
 
+// Mock thirdweb's getChainMetadata to prevent network requests
+jest.mock('thirdweb/chains', () => ({
+  ...jest.requireActual('thirdweb/chains'),
+  getChainMetadata: jest.fn().mockImplementation(async (chain) => {
+    // Return mock metadata based on chain ID
+    const chainId = typeof chain === 'number' ? chain : chain.id;
+    return {
+      chainId,
+      name: chainId === 1 ? 'Ethereum' : `Chain ${chainId}`,
+      chain: chainId === 1 ? 'ETH' : `CHAIN${chainId}`,
+      shortName: chainId === 1 ? 'eth' : `chain${chainId}`,
+      testnet: false,
+      slug: chainId === 1 ? 'ethereum' : `chain-${chainId}`,
+      icon: {
+        url: `https://example.com/icon-${chainId}.png`,
+        width: 32,
+        height: 32,
+        format: 'png'
+      },
+      nativeCurrency: {
+        name: chainId === 1 ? 'Ether' : `Token ${chainId}`,
+        symbol: chainId === 1 ? 'ETH' : `TKN${chainId}`,
+        decimals: 18
+      }
+    };
+  })
+}));
+
 describe('chains', () => {
   describe('describeChain', () => {
     it('should define a chain with basic options', () => {
