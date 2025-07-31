@@ -69,7 +69,7 @@ export {
   // Constants
   DEFAULT_CURRENCY,
   DEFAULT_CHAIN,
-  NATIVE_TOKEN_ADDRESS
+  NATIVE_TOKEN_ADDRESS,
   // Wallet Event types and API service
   type AccountEventPayload,
   type OnConnectEventData,
