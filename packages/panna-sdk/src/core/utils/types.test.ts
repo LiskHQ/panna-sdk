@@ -1,5 +1,6 @@
 import { type Chain } from 'thirdweb';
 import { type PannaClient } from '../client';
+import { DEFAULT_CURRENCY } from '../defaults';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -102,7 +103,7 @@ describe('Utils Types', () => {
   describe('FiatCurrency', () => {
     it('should accept all valid fiat currencies', () => {
       const validCurrencies: FiatCurrency[] = [
-        'USD',
+        DEFAULT_CURRENCY,
         'EUR',
         'GBP',
         'CAD',
@@ -130,7 +131,7 @@ describe('Utils Types', () => {
         chain: mockChain,
         tokenAddress: '0x1234567890123456789012345678901234567890',
         amount: 100,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       expect(params.client).toBe(mockClient);
@@ -139,7 +140,7 @@ describe('Utils Types', () => {
         '0x1234567890123456789012345678901234567890'
       );
       expect(params.amount).toBe(100);
-      expect(params.currency).toBe('USD');
+      expect(params.currency).toBe(DEFAULT_CURRENCY);
     });
 
     it('should accept parameters with only required fields', () => {
@@ -173,16 +174,16 @@ describe('Utils Types', () => {
     it('should have all required properties', () => {
       const result: GetFiatPriceResult = {
         price: 3000.5,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       expect(result.price).toBe(3000.5);
-      expect(result.currency).toBe('USD');
+      expect(result.currency).toBe(DEFAULT_CURRENCY);
     });
 
     it('should accept different currencies', () => {
       const currencies: FiatCurrency[] = [
-        'USD',
+        DEFAULT_CURRENCY,
         'EUR',
         'GBP',
         'CAD',
@@ -204,7 +205,7 @@ describe('Utils Types', () => {
     it('should accept fractional prices', () => {
       const result: GetFiatPriceResult = {
         price: 0.0003,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       expect(result.price).toBe(0.0003);
@@ -221,7 +222,7 @@ describe('Utils Types', () => {
         client: mockClient,
         chain: mockChain,
         tokenAddress: '0x1234567890123456789012345678901234567890',
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       expect(params.address).toBe('0x1234567890123456789012345678901234567890');
@@ -230,7 +231,7 @@ describe('Utils Types', () => {
       expect(params.tokenAddress).toBe(
         '0x1234567890123456789012345678901234567890'
       );
-      expect(params.currency).toBe('USD');
+      expect(params.currency).toBe(DEFAULT_CURRENCY);
     });
 
     it('should accept parameters with only required fields', () => {
@@ -254,7 +255,7 @@ describe('Utils Types', () => {
       const result: AccountBalanceInFiatResult = {
         token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
         tokenBalance: { value: BigInt(10e18), displayValue: '1' },
-        fiatBalance: { amount: 3000.5, currency: 'USD' }
+        fiatBalance: { amount: 3000.5, currency: DEFAULT_CURRENCY }
       };
 
       expect(result).not.toBeNull();
@@ -273,12 +274,12 @@ describe('Utils Types', () => {
       expect(result).toHaveProperty('fiatBalance');
       expect(result.fiatBalance).not.toBeNull();
       expect(result.fiatBalance.amount).toBeCloseTo(3000.5);
-      expect(result.fiatBalance.currency).toBe('USD');
+      expect(result.fiatBalance.currency).toBe(DEFAULT_CURRENCY);
     });
 
     it('should accept different currencies', () => {
       const currencies: FiatCurrency[] = [
-        'USD',
+        DEFAULT_CURRENCY,
         'EUR',
         'GBP',
         'CAD',
@@ -302,7 +303,7 @@ describe('Utils Types', () => {
       const result: AccountBalanceInFiatResult = {
         token: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
         tokenBalance: { value: BigInt(10e11), displayValue: '0.0000001' },
-        fiatBalance: { amount: 0.0003, currency: 'USD' }
+        fiatBalance: { amount: 0.0003, currency: DEFAULT_CURRENCY }
       };
 
       expect(result.fiatBalance.amount).toBeCloseTo(0.0003);
@@ -395,7 +396,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 5250.75,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [
           {
@@ -404,7 +405,7 @@ describe('Utils Types', () => {
               value: BigInt('1000000000000000000'),
               displayValue: '1.0'
             },
-            fiatBalance: { amount: 3000.0, currency: 'USD' }
+            fiatBalance: { amount: 3000.0, currency: DEFAULT_CURRENCY }
           },
           {
             token: {
@@ -417,7 +418,7 @@ describe('Utils Types', () => {
               value: BigInt('1000000000'),
               displayValue: '1000.0'
             },
-            fiatBalance: { amount: 1000.0, currency: 'USD' }
+            fiatBalance: { amount: 1000.0, currency: DEFAULT_CURRENCY }
           },
           {
             token: {
@@ -430,7 +431,7 @@ describe('Utils Types', () => {
               value: BigInt('1250750000000000000000'),
               displayValue: '1250.75'
             },
-            fiatBalance: { amount: 1250.75, currency: 'USD' }
+            fiatBalance: { amount: 1250.75, currency: DEFAULT_CURRENCY }
           }
         ]
       };
@@ -440,7 +441,7 @@ describe('Utils Types', () => {
       expect(result).toHaveProperty('totalValue');
       expect(result.totalValue).not.toBeNull();
       expect(result.totalValue.amount).toBe(5250.75);
-      expect(result.totalValue.currency).toBe('USD');
+      expect(result.totalValue.currency).toBe(DEFAULT_CURRENCY);
 
       expect(result).toHaveProperty('tokenBalances');
       expect(result.tokenBalances).toHaveLength(3);
@@ -469,7 +470,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 0,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: []
       };
@@ -480,7 +481,7 @@ describe('Utils Types', () => {
 
     it('should accept different currencies', () => {
       const currencies: FiatCurrency[] = [
-        'USD',
+        DEFAULT_CURRENCY,
         'EUR',
         'GBP',
         'CAD',
@@ -516,7 +517,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 0.0003456,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [
           {
@@ -525,7 +526,7 @@ describe('Utils Types', () => {
               value: BigInt('123456789000000000000000'),
               displayValue: '123456.789'
             },
-            fiatBalance: { amount: 0.0003456, currency: 'USD' }
+            fiatBalance: { amount: 0.0003456, currency: DEFAULT_CURRENCY }
           }
         ]
       };
@@ -538,7 +539,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 7006.25, // 4500.75 + 2505.5
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [
           {
@@ -547,7 +548,7 @@ describe('Utils Types', () => {
               value: BigInt('1500000000000000000'),
               displayValue: '1.5'
             },
-            fiatBalance: { amount: 4500.75, currency: 'USD' }
+            fiatBalance: { amount: 4500.75, currency: DEFAULT_CURRENCY }
           },
           {
             token: {
@@ -560,7 +561,7 @@ describe('Utils Types', () => {
               value: BigInt('2505500000'),
               displayValue: '2505.5'
             },
-            fiatBalance: { amount: 2505.5, currency: 'USD' }
+            fiatBalance: { amount: 2505.5, currency: DEFAULT_CURRENCY }
           }
         ]
       };
@@ -578,7 +579,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 3000.0,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [
           {
@@ -587,7 +588,7 @@ describe('Utils Types', () => {
               value: BigInt('1000000000000000000'),
               displayValue: '1.0'
             },
-            fiatBalance: { amount: 3000.0, currency: 'USD' }
+            fiatBalance: { amount: 3000.0, currency: DEFAULT_CURRENCY }
           }
         ],
         errors: [
@@ -611,7 +612,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 3000.0,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [
           {
@@ -620,7 +621,7 @@ describe('Utils Types', () => {
               value: BigInt('1000000000000000000'),
               displayValue: '1.0'
             },
-            fiatBalance: { amount: 3000.0, currency: 'USD' }
+            fiatBalance: { amount: 3000.0, currency: DEFAULT_CURRENCY }
           }
         ]
       };
@@ -634,7 +635,7 @@ describe('Utils Types', () => {
       const result: AccountBalancesInFiatResult = {
         totalValue: {
           amount: 3000.0,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [
           {
@@ -643,7 +644,7 @@ describe('Utils Types', () => {
               value: BigInt('1000000000000000000'),
               displayValue: '1.0'
             },
-            fiatBalance: { amount: 3000.0, currency: 'USD' }
+            fiatBalance: { amount: 3000.0, currency: DEFAULT_CURRENCY }
           }
         ],
         errors: []

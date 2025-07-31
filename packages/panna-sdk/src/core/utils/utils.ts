@@ -2,7 +2,7 @@ import { NATIVE_TOKEN_ADDRESS } from 'thirdweb';
 import { convertCryptoToFiat } from 'thirdweb/pay';
 import { getWalletBalance } from 'thirdweb/wallets';
 import { getSocialIcon as thirdwebGetSocialIcon } from 'thirdweb/wallets/in-app';
-import { lisk } from '../chains/chain-definitions/lisk';
+import { DEFAULT_CHAIN, DEFAULT_CURRENCY } from '../defaults';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -116,13 +116,13 @@ export const getFiatPrice = async function (
     client: params.client,
     fromTokenAddress: params.tokenAddress || NATIVE_TOKEN_ADDRESS,
     fromAmount: params.amount,
-    chain: params.chain || lisk,
-    to: params.currency || 'USD'
+    chain: params.chain || DEFAULT_CHAIN,
+    to: params.currency || DEFAULT_CURRENCY
   });
 
   return {
     price: result.result,
-    currency: params.currency || 'USD'
+    currency: params.currency || DEFAULT_CURRENCY
   };
 };
 
@@ -179,7 +179,7 @@ export const accountBalanceInFiat = async function (
   const tokenBalance = await accountBalance({
     address: params.address,
     client: params.client,
-    chain: params.chain || lisk,
+    chain: params.chain || DEFAULT_CHAIN,
     tokenAddress: params.tokenAddress
   });
 
@@ -244,7 +244,7 @@ export async function accountBalancesInFiat(
     throw new Error('Invalid address format');
   }
 
-  const currency = params.currency || 'USD';
+  const currency = params.currency || DEFAULT_CURRENCY;
 
   // Create array of promises for parallel execution with wrapped context
   const balancePromises = params.tokens.map((tokenInfo) => {

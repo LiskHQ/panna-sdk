@@ -5,6 +5,7 @@ import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
 import { lisk } from '../chains/chain-definitions/lisk';
 import { type PannaClient } from '../client';
+import { DEFAULT_CURRENCY } from '../defaults';
 import {
   type FiatCurrency,
   type SocialProvider,
@@ -252,7 +253,7 @@ describe('Utils - Unit Tests', () => {
       const params = {
         client: mockClient,
         amount: 1,
-        currency: 'USD' as FiatCurrency
+        currency: DEFAULT_CURRENCY
       };
 
       const result = await getFiatPrice(params);
@@ -263,12 +264,12 @@ describe('Utils - Unit Tests', () => {
         fromTokenAddress: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
         fromAmount: 1,
         chain: lisk,
-        to: 'USD'
+        to: DEFAULT_CURRENCY
       });
 
       expect(result).toEqual({
         price: 3000.5,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       });
     });
 
@@ -350,13 +351,13 @@ describe('Utils - Unit Tests', () => {
 
       expect(thirdwebPay.convertCryptoToFiat).toHaveBeenCalledWith(
         expect.objectContaining({
-          to: 'USD'
+          to: DEFAULT_CURRENCY
         })
       );
 
       expect(result).toEqual({
         price: 150.75,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       });
     });
 
@@ -364,7 +365,7 @@ describe('Utils - Unit Tests', () => {
       const params = {
         client: undefined as unknown as PannaClient,
         amount: 1,
-        currency: 'USD' as FiatCurrency
+        currency: DEFAULT_CURRENCY
       };
 
       await expect(getFiatPrice(params)).rejects.toThrow(
@@ -374,7 +375,7 @@ describe('Utils - Unit Tests', () => {
 
     it('should handle all supported fiat currencies', async () => {
       const currencies: FiatCurrency[] = [
-        'USD',
+        DEFAULT_CURRENCY,
         'EUR',
         'GBP',
         'CAD',
@@ -611,7 +612,7 @@ describe('Utils - Unit Tests', () => {
 
       const mockFiatPrice = {
         price: 3000.5,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       } as GetFiatPriceResult;
       jest.spyOn(utils, 'getFiatPrice').mockResolvedValue(mockFiatPrice);
 
@@ -658,7 +659,7 @@ describe('Utils - Unit Tests', () => {
 
       const mockFiatPrice = {
         price: 5,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       } as GetFiatPriceResult;
       jest.spyOn(utils, 'getFiatPrice').mockResolvedValue(mockFiatPrice);
 
@@ -721,7 +722,7 @@ describe('Utils - Unit Tests', () => {
 
       const mockFiatPrice = {
         price: 0,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       } as GetFiatPriceResult;
       jest.spyOn(utils, 'getFiatPrice').mockResolvedValue(mockFiatPrice);
 
@@ -788,7 +789,7 @@ describe('Utils - Unit Tests', () => {
         },
         fiatBalance: {
           amount: 6000.0,
-          currency: 'USD' as FiatCurrency
+          currency: DEFAULT_CURRENCY
         }
       };
 
@@ -801,7 +802,7 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [{}], // Native token
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       const result = await accountBalancesInFiat(params);
@@ -809,7 +810,7 @@ describe('Utils - Unit Tests', () => {
       expect(result).toEqual({
         totalValue: {
           amount: 6000.0,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: [mockAccountBalanceInFiatResult]
       });
@@ -830,7 +831,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 3000.0,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         },
         {
@@ -846,7 +847,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 1000.0,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         },
         {
@@ -862,7 +863,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 500.0,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         }
       ];
@@ -883,14 +884,14 @@ describe('Utils - Unit Tests', () => {
           { address: '0x0987654321098765432109876543210987654321' },
           { address: '0x1111111111111111111111111111111111111111' }
         ],
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       const result = await accountBalancesInFiat(params);
 
       expect(result.totalValue).toEqual({
         amount: 4500.0, // 3000 + 1000 + 500
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       });
 
       expect(result.tokenBalances).toHaveLength(3);
@@ -907,7 +908,7 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [],
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       };
 
       const result = await accountBalancesInFiat(params);
@@ -915,7 +916,7 @@ describe('Utils - Unit Tests', () => {
       expect(result).toEqual({
         totalValue: {
           amount: 0,
-          currency: 'USD'
+          currency: DEFAULT_CURRENCY
         },
         tokenBalances: []
       });
@@ -937,7 +938,7 @@ describe('Utils - Unit Tests', () => {
         },
         fiatBalance: {
           amount: 3000.0,
-          currency: 'USD' as FiatCurrency
+          currency: DEFAULT_CURRENCY
         }
       };
 
@@ -953,8 +954,10 @@ describe('Utils - Unit Tests', () => {
 
       const result = await accountBalancesInFiat(params);
 
-      expect(result.totalValue.currency).toBe('USD');
-      expect(result.tokenBalances[0].fiatBalance.currency).toBe('USD');
+      expect(result.totalValue.currency).toBe(DEFAULT_CURRENCY);
+      expect(result.tokenBalances[0].fiatBalance.currency).toBe(
+        DEFAULT_CURRENCY
+      );
     });
 
     it('should support different currencies', async () => {
@@ -1090,7 +1093,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 4500.75,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         },
         {
@@ -1106,7 +1109,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 2505.5,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         }
       ];
@@ -1146,7 +1149,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 3000.0,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         },
         // This will fail
@@ -1165,7 +1168,7 @@ describe('Utils - Unit Tests', () => {
           },
           fiatBalance: {
             amount: 500.0,
-            currency: 'USD' as FiatCurrency
+            currency: DEFAULT_CURRENCY
           }
         }
       ];
@@ -1265,7 +1268,7 @@ describe('Utils - Unit Tests', () => {
             },
             fiatBalance: {
               amount: 6000.0,
-              currency: 'USD' as FiatCurrency
+              currency: DEFAULT_CURRENCY
             }
           });
         }
@@ -1315,7 +1318,7 @@ describe('Utils - Unit Tests', () => {
         },
         fiatBalance: {
           amount: 3000.0,
-          currency: 'USD' as FiatCurrency
+          currency: DEFAULT_CURRENCY
         }
       };
 
