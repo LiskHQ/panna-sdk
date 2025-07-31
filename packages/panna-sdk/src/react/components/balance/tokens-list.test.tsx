@@ -3,18 +3,8 @@ import { useTokenBalances } from '../../hooks/use-token-balances';
 import { useAuth } from '../auth/auth-provider';
 import { TokensList } from './tokens-list';
 
-// const mockUseTokenBalances =
-//   require('@/hooks/use-token-balances').useTokenBalances;
-// const mockUseAuth = require('../auth/auth-provider').useAuth;
-
 jest.mock('../../hooks/use-token-balances');
 jest.mock('../auth/auth-provider');
-// jest.mock('../ui/skeleton', () => ({
-//     Skeleton: (props: any) => <div data-testid="skeleton" {...props} />,
-// }));
-// jest.mock('../ui/typography', () => ({
-//     Typography: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-// }));
 
 describe('TokensList', () => {
   beforeEach(() => {
