@@ -107,7 +107,7 @@ function TokenItem({ token }: TokenItemProps) {
         </div>
         <div>
           <Typography variant="muted">
-            {currencyMap[token.fiatBalance.currency]}{' '}
+            {currencyMap[token.fiatBalance.currency]}
             {token.fiatBalance.amount.toFixed(2)}
           </Typography>
         </div>

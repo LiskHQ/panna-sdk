@@ -125,7 +125,10 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
                 <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
-              <TabsContent value="balance" className="w-full">
+              <TabsContent
+                value="balance"
+                className="max-h-[320px] w-full overflow-y-auto"
+              >
                 <TokensList />
               </TabsContent>
               <TabsContent value="collectibles" className="w-full">
