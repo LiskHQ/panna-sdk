@@ -24,3 +24,5 @@ export {
 } from 'thirdweb/react';
 
 export { usePanna as usePanna } from './use-panna';
+export { useFiatBalance } from './use-fiat-balance';
+export { useAccount } from './use-account';

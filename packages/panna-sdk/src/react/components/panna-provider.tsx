@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
 import { ThirdwebProvider } from 'thirdweb/react';
 import { createPannaClient, type PannaClient } from '../../core';
@@ -6,6 +7,7 @@ export type PannaProviderProps = {
   children?: ReactNode;
   clientId?: string;
   partnerId?: string;
+  queryClient?: QueryClient;
 };
 
 export type PannaContextValue = {
@@ -39,10 +41,16 @@ export const PannaClientContext =
  * export function ClientProviders({ children }) {
  *   return <PannaProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>{children}</PannaProvider>;
  * }
+ *
+ * // With custom QueryClient
+ * const queryClient = new QueryClient();
+ * <PannaProvider clientId="your-client-id" queryClient={queryClient}>
+ *   <App />
+ * </PannaProvider>
  * ```
  */
 export function PannaProvider(props: PannaProviderProps) {
-  const { clientId, partnerId, children } = props;
+  const { clientId, partnerId, children, queryClient } = props;
 
   const contextValue = useMemo(() => {
     const client = clientId ? createPannaClient({ clientId }) : null;
@@ -52,9 +60,27 @@ export function PannaProvider(props: PannaProviderProps) {
     };
   }, [clientId, partnerId]);
 
+  // Create a default QueryClient if none provided
+  const defaultQueryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            retry: 3
+          }
+        }
+      }),
+    []
+  );
+
+  const activeQueryClient = queryClient || defaultQueryClient;
+
   return (
-    <PannaClientContext value={contextValue}>
-      <ThirdwebProvider>{children}</ThirdwebProvider>
-    </PannaClientContext>
+    <QueryClientProvider client={activeQueryClient}>
+      <PannaClientContext value={contextValue}>
+        <ThirdwebProvider>{children}</ThirdwebProvider>
+      </PannaClientContext>
+    </QueryClientProvider>
   );
 }
