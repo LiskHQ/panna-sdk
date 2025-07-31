@@ -69,6 +69,16 @@ type TokenItemProps = {
   token: TokenBalance;
 };
 
+const currencyMap = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  CAD: 'C$',
+  AUD: 'A$',
+  JPY: '¥',
+  NZD: 'NZ$'
+};
+
 function TokenItem({ token }: TokenItemProps) {
   return (
     <div className="flex w-full justify-between">
@@ -97,7 +107,8 @@ function TokenItem({ token }: TokenItemProps) {
         </div>
         <div>
           <Typography variant="muted">
-            {token.fiatBalance.currency} {token.fiatBalance.amount.toFixed(2)}
+            {currencyMap[token.fiatBalance.currency]}{' '}
+            {token.fiatBalance.amount.toFixed(2)}
           </Typography>
         </div>
       </div>
@@ -108,13 +119,13 @@ function TokenItem({ token }: TokenItemProps) {
 function TokenListLoading() {
   return (
     <section className="flex w-full justify-between">
-      <div className="flex gap-3">
+      <header className="flex gap-3">
         <Skeleton className="h-10 w-10 rounded-full" />
         <div className="flex flex-col gap-2">
           <Skeleton className="h-4 w-16 rounded-sm" />
           <Skeleton className="h-4 w-16 rounded-sm" />
         </div>
-      </div>
+      </header>
       <div className="flex flex-col gap-2 text-right">
         <Skeleton className="h-4 w-16 rounded-sm" />
         <Skeleton className="h-4 w-20 rounded-sm" />

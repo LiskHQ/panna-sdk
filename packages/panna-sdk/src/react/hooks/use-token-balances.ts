@@ -17,7 +17,7 @@ export const useTokenBalances = ({ address }: UseTokenBalancesParams) => {
   const hasValidAddress = isValidAddress(address);
 
   return useQuery({
-    queryKey: ['tokenBalances', address],
+    queryKey: ['token-balances', address],
     queryFn: async (): Promise<TokenBalance[]> => {
       return new Promise((resolve) => {
         setTimeout(() => {

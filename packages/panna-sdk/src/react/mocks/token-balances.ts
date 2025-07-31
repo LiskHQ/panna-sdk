@@ -62,7 +62,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
       symbol: 'USDT',
       name: 'Tether',
       decimals: 6,
-      address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+      address: '0x05D032ac25d322df992303dCa074EE7392C117b9'
     },
     tokenBalance: {
       value: BigInt(250000000000000000000n),
