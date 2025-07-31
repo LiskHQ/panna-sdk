@@ -54,7 +54,11 @@ export {
   type SocialProvider,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
-  type FiatCurrency
+  type FiatCurrency,
+  // Constants
+  DEFAULT_CURRENCY,
+  DEFAULT_CHAIN,
+  NATIVE_TOKEN_ADDRESS
 } from './core';
 
 export * from './react';
