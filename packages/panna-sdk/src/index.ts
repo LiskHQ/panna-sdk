@@ -55,6 +55,17 @@ export {
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type FiatCurrency,
+  // Onramp functions
+  onRampStatus,
+  // Onramp types
+  type OnrampStatus,
+  type OnrampTransaction,
+  type OnrampPurchaseData,
+  type OnrampStatusParams,
+  type OnrampStatusResult,
+  type OnrampCreatedResult,
+  type OnrampPendingResult,
+  type OnrampCompletedResult,
   // Constants
   DEFAULT_CURRENCY,
   DEFAULT_CHAIN,
