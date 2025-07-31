@@ -17,7 +17,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
       address: '0x519cA97c86Df5286e94327Bd7f639cD8619BB309'
     },
     tokenBalance: {
-      value: BigInt(1234567890123456789),
+      value: BigInt(1234567890123456789n),
       displayValue: '1.234567890123456789'
     },
     fiatBalance: {
@@ -33,7 +33,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
       address: '0xac485391EB2d7D88253a7F1eF18C37f4242D1A24'
     },
     tokenBalance: {
-      value: BigInt(1000000000000000000000),
+      value: BigInt(1000000000000000000000n),
       displayValue: '1000.00000000'
     },
     fiatBalance: {
@@ -49,7 +49,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
       address: '0xF242275d3a6527d877f2c927a82D9b057609cc71'
     },
     tokenBalance: {
-      value: BigInt(5000000000000000000000),
+      value: BigInt(5000000000000000000000n),
       displayValue: '5000.000000'
     },
     fiatBalance: {
@@ -65,7 +65,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
       address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
     },
     tokenBalance: {
-      value: BigInt(250000000000000000000),
+      value: BigInt(250000000000000000000n),
       displayValue: '2500.000000'
     },
     fiatBalance: {
