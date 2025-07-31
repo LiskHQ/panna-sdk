@@ -65,6 +65,8 @@
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",
+    "axios": "^1.11.0",
+    "lru-cache": "^11.1.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.7",
     "thirdweb": "^5.101.1"
