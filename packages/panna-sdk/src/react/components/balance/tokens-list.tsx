@@ -19,7 +19,10 @@ export function TokensList({ className }: TokensListProps) {
 
   if (isLoading) {
     return (
-      <section className="flex flex-col items-center justify-center gap-6">
+      <section
+        className="flex flex-col items-center justify-center gap-6"
+        data-testid="token-list-loading"
+      >
         {Array.from({ length: 4 }).map((_, index) => (
           <TokenListLoading key={index} />
         ))}
