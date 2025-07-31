@@ -8,6 +8,15 @@ const nextConfig: NextConfig = {
   transpilePackages: ['panna-sdk'],
   experimental: {
     optimizePackageImports: ['panna-sdk']
+  },
+  redirects: async () => {
+    return [
+      {
+        source: '/',
+        destination: '/account',
+        permanent: true
+      }
+    ];
   }
 };
 
