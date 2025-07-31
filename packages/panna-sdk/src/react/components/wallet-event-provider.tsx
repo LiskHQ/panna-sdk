@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useEffect, ReactNode } from 'react';
-import { useConnectedWallets, useActiveAccount } from 'thirdweb/react';
-import { type Wallet } from 'thirdweb/wallets';
+import {
+  createContext,
+  useEffect,
+  ReactNode,
+  use,
+  useMemo,
+  useRef
+} from 'react';
+import { type Wallet, ecosystemWallet } from 'thirdweb/wallets';
+import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
   type OnConnectEventData,
@@ -9,6 +16,7 @@ import {
   pannaApiService
 } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
+import { useAuth } from './auth/auth-provider';
 
 export type WalletEventContextType = {
   isTracking: boolean;
@@ -26,21 +34,6 @@ const WalletEventContext = createContext<WalletEventContextType | null>(null);
 
 export type WalletEventProviderProps = {
   children: ReactNode;
-  /**
-   * The ecosystem ID for the wallet events
-   * @default 'ecosystem.lisk'
-   */
-  ecosystemId?: string;
-
-  /**
-   * Whether to enable automatic event tracking
-   * @default true
-   */
-  enableTracking?: boolean;
-
-  /**
-   * Optional authentication token for API requests
-   */
   authToken?: string;
 };
 
@@ -49,13 +42,26 @@ export type WalletEventProviderProps = {
  */
 export function WalletEventProvider({
   children,
-  ecosystemId = 'ecosystem.lisk',
-  enableTracking = true,
   authToken
 }: WalletEventProviderProps) {
+  const ecosystemId = 'ecosystem.lisk';
+  const enableTracking = true;
   const { partnerId } = usePanna();
-  const connectedWallets = useConnectedWallets();
-  const activeAccount = useActiveAccount();
+  const { userAddress, isHydrated } = useAuth();
+  const walletRef = useRef<Wallet | null>(null);
+  const previousAddressRef = useRef<string | null>(null);
+
+  // Create wallet instance when user is authenticated
+  const wallet = useMemo(() => {
+    if (userAddress && partnerId) {
+      const walletInstance = ecosystemWallet(EcosystemId.LISK, { partnerId });
+      walletRef.current = walletInstance;
+      return walletInstance;
+    }
+    return null;
+  }, [userAddress, partnerId]);
+
+  console.log({ userAddress, wallet, isHydrated });
 
   /**
    * Send account event to Panna dashboard API
@@ -158,11 +164,9 @@ export function WalletEventProvider({
   /**
    * Handle wallet onConnect event
    */
-  const handleOnConnect = async (wallet: Wallet) => {
-    if (!activeAccount?.address) return;
-
+  const handleOnConnect = async (address: string) => {
     try {
-      const chain = wallet.getChain?.();
+      const chain = wallet?.getChain?.();
 
       const eventData: OnConnectEventData = {
         smartAccount: {
@@ -179,7 +183,7 @@ export function WalletEventProvider({
         eventData.social = socialInfo;
       }
 
-      await sendAccountEvent('onConnect', activeAccount.address, eventData);
+      await sendAccountEvent('onConnect', address, eventData);
     } catch (error) {
       console.error('Error handling onConnect event:', error);
     }
@@ -188,75 +192,93 @@ export function WalletEventProvider({
   /**
    * Handle wallet disconnect event
    */
-  const handleDisconnect = async (wallet: Wallet) => {
-    const account = wallet.getAccount?.();
-    if (account?.address) {
-      await sendAccountEvent('disconnect', account.address, {});
+  const handleDisconnect = async (address: string) => {
+    try {
+      await sendAccountEvent('disconnect', address, {});
+    } catch (error) {
+      console.error('Error handling disconnect event:', error);
     }
   };
 
   /**
    * Handle account changed event
    */
-  const handleAccountChanged = async (
-    wallet: Wallet,
-    newAccount: { address?: string }
-  ) => {
-    if (newAccount?.address) {
-      await sendAccountEvent('accountUpdate', newAccount.address, {});
+  const handleAccountChanged = async (address: string) => {
+    try {
+      await sendAccountEvent('accountUpdate', address, {});
+    } catch (error) {
+      console.error('Error handling account changed event:', error);
     }
   };
 
   /**
-   * Set up wallet event subscriptions
+   * Monitor auth state changes to detect wallet events
    */
   useEffect(() => {
-    if (!enableTracking || !connectedWallets.length) return;
+    if (!enableTracking || !isHydrated) return;
+
+    const previousAddress = previousAddressRef.current;
+
+    if (userAddress && !previousAddress) {
+      // User connected
+      console.log('User connected:', userAddress);
+      handleOnConnect(userAddress);
+    } else if (!userAddress && previousAddress) {
+      // User disconnected
+      console.log('User disconnected:', previousAddress);
+      handleDisconnect(previousAddress);
+    } else if (
+      userAddress &&
+      previousAddress &&
+      userAddress !== previousAddress
+    ) {
+      // Account changed
+      console.log('Account changed:', {
+        from: previousAddress,
+        to: userAddress
+      });
+      handleAccountChanged(userAddress);
+    }
+
+    // Update the reference
+    previousAddressRef.current = userAddress;
+  }, [userAddress, isHydrated, enableTracking]);
+
+  /**
+   * Subscribe to wallet events when wallet instance is available
+   */
+  useEffect(() => {
+    if (!enableTracking || !wallet || !userAddress) return;
 
     const unsubscribers: (() => void)[] = [];
 
-    connectedWallets.forEach((wallet: Wallet) => {
-      try {
-        // Subscribe to onConnect event
-        const unsubscribeOnConnect = wallet.subscribe('onConnect', (data) => {
-          console.log('Wallet onConnect event:', data);
-          handleOnConnect(wallet);
-        });
-        unsubscribers.push(unsubscribeOnConnect);
-
-        // Subscribe to disconnect event
-        const unsubscribeDisconnect = wallet.subscribe('disconnect', () => {
-          console.log('Wallet disconnect event');
-          handleDisconnect(wallet);
-        });
-        unsubscribers.push(unsubscribeDisconnect);
-
-        // Subscribe to accountChanged event
-        const unsubscribeAccountChanged = wallet.subscribe(
-          'accountChanged',
-          (account) => {
-            console.log('Wallet accountChanged event:', account);
-            handleAccountChanged(wallet, account);
+    try {
+      // Subscribe to wallet events for additional event capturing
+      const unsubscribeAccountChanged = wallet.subscribe?.(
+        'accountChanged',
+        (account) => {
+          console.log('Wallet accountChanged event:', account);
+          if (account?.address && account.address !== userAddress) {
+            handleAccountChanged(account.address);
           }
-        );
+        }
+      );
+      if (unsubscribeAccountChanged)
         unsubscribers.push(unsubscribeAccountChanged);
 
-        // Subscribe to chainChanged event (for account updates)
-        const unsubscribeChainChanged = wallet.subscribe(
-          'chainChanged',
-          (chain) => {
-            console.log('Wallet chainChanged event:', chain);
-            const account = wallet.getAccount?.();
-            if (account) {
-              handleAccountChanged(wallet, account);
-            }
+      const unsubscribeChainChanged = wallet.subscribe?.(
+        'chainChanged',
+        (chain) => {
+          console.log('Wallet chainChanged event:', chain);
+          if (userAddress) {
+            handleAccountChanged(userAddress);
           }
-        );
-        unsubscribers.push(unsubscribeChainChanged);
-      } catch (error) {
-        console.error('Error subscribing to wallet events:', error);
-      }
-    });
+        }
+      );
+      if (unsubscribeChainChanged) unsubscribers.push(unsubscribeChainChanged);
+    } catch (error) {
+      console.error('Error subscribing to wallet events:', error);
+    }
 
     // Cleanup function
     return () => {
@@ -268,7 +290,7 @@ export function WalletEventProvider({
         }
       });
     };
-  }, [connectedWallets, enableTracking]);
+  }, [wallet, userAddress, enableTracking]);
 
   const contextValue: WalletEventContextType = {
     isTracking: enableTracking,
@@ -276,9 +298,7 @@ export function WalletEventProvider({
   };
 
   return (
-    <WalletEventContext.Provider value={contextValue}>
-      {children}
-    </WalletEventContext.Provider>
+    <WalletEventContext value={contextValue}>{children}</WalletEventContext>
   );
 }
 
@@ -286,7 +306,7 @@ export function WalletEventProvider({
  * Hook to access wallet event functionality
  */
 export function useWalletEventContext() {
-  const context = useContext(WalletEventContext);
+  const context = use(WalletEventContext);
   if (!context) {
     throw new Error(
       'useWalletEventContext must be used within a WalletEventProvider'
