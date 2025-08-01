@@ -21,7 +21,8 @@ module.exports = {
       },
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1'
+        '^@/(.*)$': '<rootDir>/src/react/$1',
+        '^src/(.*)$': '<rootDir>/src/$1'
       },
       testEnvironmentOptions: {
         customExportConditions: ['node', 'node-addons']
