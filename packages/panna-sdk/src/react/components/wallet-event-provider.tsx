@@ -19,7 +19,6 @@ import { usePanna } from '../hooks/use-panna';
 import { useAuth } from './auth/auth-provider';
 
 export type WalletEventContextType = {
-  isTracking: boolean;
   sendAccountEvent: (
     eventType: AccountEventPayload['eventType'],
     address: string,
@@ -44,8 +43,6 @@ export function WalletEventProvider({
   children,
   authToken
 }: WalletEventProviderProps) {
-  const ecosystemId = 'ecosystem.lisk';
-  const enableTracking = true;
   const { partnerId } = usePanna();
   const { userAddress, isHydrated } = useAuth();
   const walletRef = useRef<Wallet | null>(null);
@@ -61,8 +58,6 @@ export function WalletEventProvider({
     return null;
   }, [userAddress, partnerId]);
 
-  console.log({ userAddress, wallet, isHydrated });
-
   /**
    * Send account event to Panna dashboard API
    */
@@ -74,13 +69,11 @@ export function WalletEventProvider({
       | DisconnectEventData
       | AccountUpdateEventData = {}
   ) => {
-    if (!enableTracking) return;
-
     try {
       const payload: AccountEventPayload = {
         eventType,
         timestamp: new Date().toISOString(),
-        ecosystemId,
+        ecosystemId: EcosystemId.LISK,
         partnerId,
         chainId: '4202', // Default to Lisk Sepolia
         eventData
@@ -214,7 +207,7 @@ export function WalletEventProvider({
    * Monitor auth state changes to detect wallet events
    */
   useEffect(() => {
-    if (!enableTracking || !isHydrated) return;
+    if (!isHydrated) return;
 
     const previousAddress = previousAddressRef.current;
 
@@ -241,13 +234,13 @@ export function WalletEventProvider({
 
     // Update the reference
     previousAddressRef.current = userAddress;
-  }, [userAddress, isHydrated, enableTracking]);
+  }, [userAddress, isHydrated]);
 
   /**
    * Subscribe to wallet events when wallet instance is available
    */
   useEffect(() => {
-    if (!enableTracking || !wallet || !userAddress) return;
+    if (!wallet || !userAddress) return;
 
     const unsubscribers: (() => void)[] = [];
 
@@ -289,10 +282,9 @@ export function WalletEventProvider({
         }
       });
     };
-  }, [wallet, userAddress, enableTracking]);
+  }, [wallet, userAddress]);
 
   const contextValue: WalletEventContextType = {
-    isTracking: enableTracking,
     sendAccountEvent
   };
 
