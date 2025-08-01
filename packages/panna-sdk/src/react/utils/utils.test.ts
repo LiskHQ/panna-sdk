@@ -33,7 +33,7 @@ describe('utils', () => {
       const result = getSupportedTokens(undefined);
 
       expect(result).toEqual(liskTokenConfig);
-      expect(result['1135']).toHaveLength(1);
+      expect(result['1135']).toHaveLength(liskTokenConfig[lisk.id].length);
     });
   });
 
