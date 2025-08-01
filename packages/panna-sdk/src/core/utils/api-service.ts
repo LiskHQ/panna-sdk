@@ -12,7 +12,7 @@ export type PannaApiConfig = {
  * Default configuration for the Panna dashboard API
  */
 const DEFAULT_CONFIG: PannaApiConfig = {
-  baseUrl: process.env.PANNA_API_URL || 'https://api.panna.dev'
+  baseUrl: process.env.PANNA_API_URL
 };
 
 /**
@@ -38,7 +38,7 @@ export class PannaApiService {
     const { baseUrl } = this.config;
     const { address } = payload;
 
-    const url = `${baseUrl}/api/v1/account/${address}/activity`;
+    const url = `${baseUrl}/v1/account/${address}/activity`;
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json'

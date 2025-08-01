@@ -45,7 +45,11 @@ export const PannaClientContext =
  * // Next.js App Router - wrap in 'use client' component
  * 'use client';
  * export function ClientProviders({ children }) {
- *   return <PannaProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>{children}</PannaProvider>;
+ *   return (
+ *     <PannaProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>
+ *       {children}
+ *     </PannaProvider>
+ *   );
  * }
  *
  * // With custom QueryClient

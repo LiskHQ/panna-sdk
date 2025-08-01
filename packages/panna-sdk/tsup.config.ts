@@ -1,4 +1,9 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
 import { defineConfig } from 'tsup';
+
+// Load .env file from the same directory as this config file
+config({ path: resolve(__dirname, '.env') });
 
 export default defineConfig({
   entry: ['src/index.ts'],
@@ -9,5 +14,10 @@ export default defineConfig({
   minify: true,
   splitting: true,
   outDir: 'dist',
-  external: ['react', 'react-dom']
+  external: ['react', 'react-dom'],
+  define: {
+    'process.env.PANNA_API_URL': JSON.stringify(
+      process.env.PANNA_API_URL || 'https://api.panna.io'
+    )
+  }
 });
