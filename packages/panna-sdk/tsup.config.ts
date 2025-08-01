@@ -18,6 +18,9 @@ export default defineConfig({
   define: {
     'process.env.PANNA_API_URL': JSON.stringify(
       process.env.PANNA_API_URL || 'https://api.panna.io'
+    ),
+    'process.env.MOCK_PANNA_API': JSON.stringify(
+      process.env.MOCK_PANNA_API || 'false'
     )
   }
 });

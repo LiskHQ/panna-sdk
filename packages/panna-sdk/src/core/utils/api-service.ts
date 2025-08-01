@@ -5,14 +5,15 @@ import { type AccountEventPayload } from './types';
  */
 export type PannaApiConfig = {
   baseUrl?: string;
-  apiKey?: string;
+  isMockMode?: boolean;
 };
 
 /**
  * Default configuration for the Panna dashboard API
  */
 const DEFAULT_CONFIG: PannaApiConfig = {
-  baseUrl: process.env.PANNA_API_URL
+  baseUrl: process.env.PANNA_API_URL,
+  isMockMode: process.env.MOCK_PANNA_API === 'true'
 };
 
 /**
@@ -35,7 +36,7 @@ export class PannaApiService {
     payload: AccountEventPayload,
     authToken?: string
   ): Promise<Response> {
-    const { baseUrl } = this.config;
+    const { baseUrl, isMockMode } = this.config;
     const { address } = payload;
 
     const url = `${baseUrl}/v1/account/${address}/activity`;
@@ -47,6 +48,25 @@ export class PannaApiService {
     // Add authorization header if token is provided
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
+    }
+
+    if (isMockMode) {
+      // Generate a mock UUID for the response
+      const mockId = 'c59309e4-3647-49a8-bf32-beab50923a27';
+      const mockResponse = {
+        details: {
+          id: mockId
+        },
+        message: 'Account event received',
+        status: 'success'
+      };
+
+      return new Response(JSON.stringify(mockResponse), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
     }
 
     try {
