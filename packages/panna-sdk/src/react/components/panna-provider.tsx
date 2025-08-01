@@ -2,8 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
 import { ThirdwebProvider } from 'thirdweb/react';
 import { createPannaClient, type PannaClient } from '../../core';
+import { AccountEventProvider } from './account-event-provider';
 import { AuthProvider } from './auth/auth-provider';
-import { WalletEventProvider } from './wallet-event-provider';
 
 export type PannaProviderProps = {
   children?: ReactNode;
@@ -91,9 +91,9 @@ export function PannaProvider(props: PannaProviderProps) {
       <PannaClientContext value={contextValue}>
         <ThirdwebProvider>
           <AuthProvider>
-            <WalletEventProvider authToken={authToken}>
+            <AccountEventProvider authToken={authToken}>
               {children}
-            </WalletEventProvider>
+            </AccountEventProvider>
           </AuthProvider>
         </ThirdwebProvider>
       </PannaClientContext>

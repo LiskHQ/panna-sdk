@@ -1,14 +1,23 @@
 import { useEffect, useRef } from 'react';
-import { useActiveAccount } from 'thirdweb/react';
-import { type Wallet, type Account } from 'thirdweb/wallets';
+import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
   type OnConnectEventData,
   pannaApiService
 } from '../../core/utils';
+import { getEmail, getPhoneNumber } from '../../core/wallet';
+import { useAuth } from '../components/auth/auth-provider';
 import { usePanna } from './use-panna';
 
-export type WalletEventConfig = {
+// Smart account configuration for Lisk ecosystem
+// TODO: This should come from a centralized configuration or wallet config
+const LISK_SMART_ACCOUNT_CONFIG = {
+  factoryAddress: '0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb',
+  entrypointAddress: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
+  sponsorGas: true
+} as const;
+
+export type AccountEventConfig = {
   /**
    * The ecosystem ID for the wallet events
    * @default 'ecosystem.lisk'
@@ -31,7 +40,7 @@ export type WalletEventConfig = {
  * Hook to handle wallet events and send them to the Panna dashboard API
  * @param config - Configuration options for wallet event handling
  */
-export function useWalletEvents(config: WalletEventConfig = {}) {
+export function useAccountEvents(config: AccountEventConfig = {}) {
   const {
     ecosystemId = 'ecosystem.lisk',
     enableTracking = true,
@@ -39,12 +48,11 @@ export function useWalletEvents(config: WalletEventConfig = {}) {
   } = config;
 
   const { partnerId } = usePanna();
-  const activeAccount = useActiveAccount();
-  const walletRef = useRef<Wallet | null>(null);
-  const connectedAccountRef = useRef<Account | null>(null);
+  const { userAddress } = useAuth();
+  const previousAddressRef = useRef<string | null>(null);
 
   /**
-   * Send account event to Panna dashboard API
+   * Send account event to Panna API
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
@@ -75,49 +83,65 @@ export function useWalletEvents(config: WalletEventConfig = {}) {
    * Handle wallet onConnect event
    */
   const handleOnConnect = async () => {
-    if (!activeAccount?.address) return;
+    if (!userAddress) return;
 
     try {
-      // Extract smart account information from the wallet
-      const wallet = walletRef.current;
-      const chain = wallet?.getChain?.();
-
+      // Use centralized smart account configuration
       const eventData: OnConnectEventData = {
         smartAccount: {
-          chain: chain?.name || 'lisk-sepolia',
-          factoryAddress: '0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb', // Default factory address
-          entrypointAddress: '0x0000000071727De22E5E9d8BAf0edAc6f37da032', // Default entrypoint
-          sponsorGas: true
+          chain: 'lisk-sepolia', // Default chain since we don't have wallet access
+          ...LISK_SMART_ACCOUNT_CONFIG
         }
       };
 
-      // Try to get social profile information if available
+      // Try to get social profile information if available using core functions
       try {
-        const { getUserEmail, getUserPhoneNumber } = await import(
-          'thirdweb/wallets'
-        );
-        const { client } = usePanna();
+        const { client, partnerId: currentPartnerId } = usePanna();
 
-        const email = await getUserEmail({ client });
-        const phone = await getUserPhoneNumber({ client });
+        if (client && currentPartnerId) {
+          const ecosystemConfig = {
+            id: EcosystemId.LISK,
+            partnerId: currentPartnerId
+          };
 
-        if (email) {
-          eventData.social = {
-            type: 'email',
-            data: email
-          };
-        } else if (phone) {
-          eventData.social = {
-            type: 'phone',
-            data: phone
-          };
+          try {
+            const email = await getEmail({
+              client,
+              ecosystem: ecosystemConfig
+            });
+            if (email) {
+              eventData.social = {
+                type: 'email',
+                data: email
+              };
+            }
+          } catch (error) {
+            console.debug('Could not get user email:', error);
+          }
+
+          if (!eventData.social) {
+            try {
+              const phone = await getPhoneNumber({
+                client,
+                ecosystem: ecosystemConfig
+              });
+              if (phone) {
+                eventData.social = {
+                  type: 'phone',
+                  data: phone
+                };
+              }
+            } catch (error) {
+              console.debug('Could not get user phone:', error);
+            }
+          }
         }
       } catch (error) {
         // Social profile information is optional
         console.debug('Could not retrieve social profile information:', error);
       }
 
-      await sendAccountEvent('onConnect', activeAccount.address, eventData);
+      await sendAccountEvent('onConnect', userAddress, eventData);
     } catch (error) {
       console.error('Error handling onConnect event:', error);
     }
@@ -127,7 +151,7 @@ export function useWalletEvents(config: WalletEventConfig = {}) {
    * Handle wallet disconnect event
    */
   const handleDisconnect = async () => {
-    const previousAddress = connectedAccountRef.current?.address;
+    const previousAddress = userAddress;
     if (previousAddress) {
       await sendAccountEvent('disconnect', previousAddress, {});
     }
@@ -136,9 +160,9 @@ export function useWalletEvents(config: WalletEventConfig = {}) {
   /**
    * Handle account changed event
    */
-  const handleAccountChanged = async (account: Account) => {
-    if (account?.address) {
-      await sendAccountEvent('accountUpdate', account.address, {});
+  const handleAccountChanged = async (address: string) => {
+    if (address) {
+      await sendAccountEvent('accountUpdate', address, {});
     }
   };
 
@@ -146,37 +170,37 @@ export function useWalletEvents(config: WalletEventConfig = {}) {
    * Set up wallet event subscriptions
    */
   useEffect(() => {
-    if (!enableTracking || !activeAccount) return;
+    if (!enableTracking || !userAddress) return;
 
     // Note: In this hook implementation, we're monitoring account changes
-    // rather than directly subscribing to wallet events. The WalletEventProvider
+    // rather than directly subscribing to wallet events. The AccountEventProvider
     // handles the direct wallet event subscriptions.
-  }, [activeAccount, enableTracking]);
+  }, [userAddress, enableTracking]);
 
   /**
    * Monitor account changes to detect connections/disconnections
    */
   useEffect(() => {
-    const previousAccount = connectedAccountRef.current;
+    const previousAddress = previousAddressRef.current;
 
-    if (activeAccount && !previousAccount) {
+    if (userAddress && !previousAddress) {
       // Account connected
       handleOnConnect();
-    } else if (!activeAccount && previousAccount) {
+    } else if (!userAddress && previousAddress) {
       // Account disconnected
       handleDisconnect();
     } else if (
-      activeAccount &&
-      previousAccount &&
-      activeAccount.address !== previousAccount.address
+      userAddress &&
+      previousAddress &&
+      userAddress !== previousAddress
     ) {
       // Account changed
-      handleAccountChanged(activeAccount);
+      handleAccountChanged(userAddress);
     }
 
     // Update the reference
-    connectedAccountRef.current = activeAccount || null;
-  }, [activeAccount]);
+    previousAddressRef.current = userAddress;
+  }, [userAddress]);
 
   return {
     sendAccountEvent,

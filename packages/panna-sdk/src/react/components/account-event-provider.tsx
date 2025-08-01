@@ -6,7 +6,13 @@ import {
   useMemo,
   useRef
 } from 'react';
-import { type Wallet, ecosystemWallet } from 'thirdweb/wallets';
+import {
+  Account,
+  createAccount,
+  getEmail,
+  getPhoneNumber,
+  getLinkedAccounts
+} from 'src/core';
 import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
@@ -18,7 +24,15 @@ import {
 import { usePanna } from '../hooks/use-panna';
 import { useAuth } from './auth/auth-provider';
 
-export type WalletEventContextType = {
+// Smart account configuration for Lisk ecosystem
+// TODO: This should come from a centralized configuration or wallet config
+const LISK_SMART_ACCOUNT_CONFIG = {
+  factoryAddress: '0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb',
+  entrypointAddress: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
+  sponsorGas: true
+} as const;
+
+export type AccountEventContextType = {
   sendAccountEvent: (
     eventType: AccountEventPayload['eventType'],
     address: string,
@@ -29,9 +43,9 @@ export type WalletEventContextType = {
   ) => Promise<void>;
 };
 
-const WalletEventContext = createContext<WalletEventContextType | null>(null);
+const AccountEventContext = createContext<AccountEventContextType | null>(null);
 
-export type WalletEventProviderProps = {
+export type AccountEventProviderProps = {
   children: ReactNode;
   authToken?: string;
 };
@@ -39,21 +53,24 @@ export type WalletEventProviderProps = {
 /**
  * Provider component that handles wallet events and sends them to the Panna dashboard API
  */
-export function WalletEventProvider({
+export function AccountEventProvider({
   children,
   authToken
-}: WalletEventProviderProps) {
+}: AccountEventProviderProps) {
   const { partnerId } = usePanna();
   const { userAddress, isHydrated } = useAuth();
-  const walletRef = useRef<Wallet | null>(null);
+  const accountRef = useRef<Account | null>(null);
   const previousAddressRef = useRef<string | null>(null);
 
   // Create wallet instance when user is authenticated
-  const wallet = useMemo(() => {
+  const account = useMemo(() => {
     if (userAddress && partnerId) {
-      const walletInstance = ecosystemWallet(EcosystemId.LISK, { partnerId });
-      walletRef.current = walletInstance;
-      return walletInstance;
+      const accountInstance = createAccount({
+        ecosystemId: EcosystemId.LISK,
+        partnerId
+      });
+      accountRef.current = accountInstance;
+      return accountInstance;
     }
     return null;
   }, [userAddress, partnerId]);
@@ -92,39 +109,53 @@ export function WalletEventProvider({
    */
   const getSocialProfileInfo = async () => {
     try {
-      const { getUserEmail, getUserPhoneNumber, getProfiles } = await import(
-        'thirdweb/wallets'
-      );
-      const { client } = usePanna();
+      const { client, partnerId: currentPartnerId } = usePanna();
 
-      // Try to get profiles from the wallet
-      const profiles = await getProfiles({ client });
-
-      if (profiles && profiles.length > 0) {
-        const emailProfile = profiles.find(
-          (p) => p.type === 'email' || p.type === 'google' || p.details?.email
-        );
-
-        const phoneProfile = profiles.find(
-          (p) => p.type === 'phone' || p.details?.phone
-        );
-
-        if (emailProfile?.details?.email) {
-          return {
-            type: 'email' as const,
-            data: emailProfile.details.email
-          };
-        } else if (phoneProfile?.details?.phone) {
-          return {
-            type: 'phone' as const,
-            data: phoneProfile.details.phone
-          };
-        }
+      if (!client || !currentPartnerId) {
+        console.debug('Client or partnerId not available');
+        return null;
       }
 
-      // Fallback to direct methods
+      const ecosystemConfig = {
+        id: EcosystemId.LISK,
+        partnerId: currentPartnerId
+      };
+
+      // Try to get profiles from the wallet using core function
       try {
-        const email = await getUserEmail({ client });
+        const profiles = await getLinkedAccounts({
+          client,
+          ecosystem: ecosystemConfig
+        });
+
+        if (profiles && profiles.length > 0) {
+          const emailProfile = profiles.find(
+            (p) => p.type === 'email' || p.type === 'google' || p.details?.email
+          );
+
+          const phoneProfile = profiles.find(
+            (p) => p.type === 'phone' || p.details?.phone
+          );
+
+          if (emailProfile?.details?.email) {
+            return {
+              type: 'email' as const,
+              data: emailProfile.details.email
+            };
+          } else if (phoneProfile?.details?.phone) {
+            return {
+              type: 'phone' as const,
+              data: phoneProfile.details.phone
+            };
+          }
+        }
+      } catch (error) {
+        console.debug('Could not get linked accounts:', error);
+      }
+
+      // Fallback to direct methods using core functions
+      try {
+        const email = await getEmail({ client, ecosystem: ecosystemConfig });
         if (email) {
           return {
             type: 'email' as const,
@@ -136,7 +167,10 @@ export function WalletEventProvider({
       }
 
       try {
-        const phone = await getUserPhoneNumber({ client });
+        const phone = await getPhoneNumber({
+          client,
+          ecosystem: ecosystemConfig
+        });
         if (phone) {
           return {
             type: 'phone' as const,
@@ -158,14 +192,17 @@ export function WalletEventProvider({
    */
   const handleOnConnect = async (address: string) => {
     try {
-      const chain = wallet?.getChain?.();
+      if (!account) {
+        throw new Error('Account not found');
+      }
 
+      const chain = account.getChain?.();
+
+      // Use centralized smart account configuration
       const eventData: OnConnectEventData = {
         smartAccount: {
           chain: chain?.name || 'lisk-sepolia',
-          factoryAddress: '0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb', // Default factory address
-          entrypointAddress: '0x0000000071727De22E5E9d8BAf0edAc6f37da032', // Default entrypoint
-          sponsorGas: true
+          ...LISK_SMART_ACCOUNT_CONFIG
         }
       };
 
@@ -240,13 +277,13 @@ export function WalletEventProvider({
    * Subscribe to wallet events when wallet instance is available
    */
   useEffect(() => {
-    if (!wallet || !userAddress) return;
+    if (!account || !userAddress) return;
 
     const unsubscribers: (() => void)[] = [];
 
     try {
       // Subscribe to wallet events for additional event capturing
-      const unsubscribeAccountChanged = wallet.subscribe?.(
+      const unsubscribeAccountChanged = account.subscribe?.(
         'accountChanged',
         (account) => {
           console.log('Wallet accountChanged event:', account);
@@ -258,7 +295,7 @@ export function WalletEventProvider({
       if (unsubscribeAccountChanged)
         unsubscribers.push(unsubscribeAccountChanged);
 
-      const unsubscribeChainChanged = wallet.subscribe?.(
+      const unsubscribeChainChanged = account.subscribe?.(
         'chainChanged',
         (chain) => {
           console.log('Wallet chainChanged event:', chain);
@@ -282,25 +319,25 @@ export function WalletEventProvider({
         }
       });
     };
-  }, [wallet, userAddress]);
+  }, [account, userAddress]);
 
-  const contextValue: WalletEventContextType = {
+  const contextValue: AccountEventContextType = {
     sendAccountEvent
   };
 
   return (
-    <WalletEventContext value={contextValue}>{children}</WalletEventContext>
+    <AccountEventContext value={contextValue}>{children}</AccountEventContext>
   );
 }
 
 /**
  * Hook to access wallet event functionality
  */
-export function useWalletEventContext() {
-  const context = use(WalletEventContext);
+export function useAccountEventContext() {
+  const context = use(AccountEventContext);
   if (!context) {
     throw new Error(
-      'useWalletEventContext must be used within a WalletEventProvider'
+      'useAccountEventContext must be used within a AccountEventProvider'
     );
   }
   return context;
