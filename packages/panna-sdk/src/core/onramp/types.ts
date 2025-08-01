@@ -40,7 +40,6 @@ export interface OnrampPendingResult extends BaseOnrampStatusResult {
 // Completed status result
 export interface OnrampCompletedResult extends BaseOnrampStatusResult {
   status: 'COMPLETED';
-  transactions: OnrampTransaction[]; // Contains transaction details
 }
 
 // Union type for all possible status results
