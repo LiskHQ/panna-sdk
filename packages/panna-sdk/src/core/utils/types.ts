@@ -122,7 +122,6 @@ export interface AccountBalancesInFiatResult {
 export type AccountEventPayload = {
   eventType: 'onConnect' | 'disconnect' | 'accountUpdate';
   timestamp: string;
-  address: string;
   ecosystemId: string;
   partnerId: string;
   chainId: string;

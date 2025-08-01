@@ -1,23 +1,17 @@
 import { type AccountEventPayload } from './types';
 
-/**
- * Configuration for the Panna dashboard API
- */
 export type PannaApiConfig = {
   baseUrl?: string;
   isMockMode?: boolean;
 };
 
-/**
- * Default configuration for the Panna dashboard API
- */
 const DEFAULT_CONFIG: PannaApiConfig = {
   baseUrl: process.env.PANNA_API_URL,
   isMockMode: process.env.MOCK_PANNA_API === 'true'
 };
 
 /**
- * API service for sending account events to the Panna dashboard
+ * API service for sending account events to the Panna app.
  */
 export class PannaApiService {
   private config: PannaApiConfig;
@@ -27,17 +21,17 @@ export class PannaApiService {
   }
 
   /**
-   * Send account event data to the Panna dashboard API
+   * Send account event data to the Panna API
    * @param payload - The account event payload
    * @param authToken - JWT authentication token
    * @returns Promise resolving to the API response
    */
   public async sendAccountEvent(
+    address: string,
     payload: AccountEventPayload,
     authToken?: string
   ): Promise<Response> {
     const { baseUrl, isMockMode } = this.config;
-    const { address } = payload;
 
     const url = `${baseUrl}/v1/account/${address}/activity`;
 
@@ -45,13 +39,11 @@ export class PannaApiService {
       'Content-Type': 'application/json'
     };
 
-    // Add authorization header if token is provided
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
     }
 
     if (isMockMode) {
-      // Generate a mock UUID for the response
       const mockId = 'c59309e4-3647-49a8-bf32-beab50923a27';
       const mockResponse = {
         details: {
