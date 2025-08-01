@@ -80,7 +80,6 @@ export function WalletEventProvider({
       const payload: AccountEventPayload = {
         eventType,
         timestamp: new Date().toISOString(),
-        address,
         ecosystemId,
         partnerId,
         chainId: '4202', // Default to Lisk Sepolia
@@ -88,7 +87,7 @@ export function WalletEventProvider({
       };
 
       // Use the default Panna API service
-      await pannaApiService.sendAccountEvent(payload, authToken);
+      await pannaApiService.sendAccountEvent(address, payload, authToken);
       console.log(`Successfully sent ${eventType} event for address:`, address);
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
