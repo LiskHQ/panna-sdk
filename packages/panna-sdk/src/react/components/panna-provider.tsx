@@ -3,7 +3,6 @@ import { ReactNode, createContext, useMemo } from 'react';
 import { ThirdwebProvider } from 'thirdweb/react';
 import { createPannaClient, type PannaClient } from '../../core';
 import { AccountEventProvider } from './account-event-provider';
-import { AuthProvider } from './auth/auth-provider';
 
 export type PannaProviderProps = {
   children?: ReactNode;
@@ -90,11 +89,9 @@ export function PannaProvider(props: PannaProviderProps) {
     <QueryClientProvider client={activeQueryClient}>
       <PannaClientContext value={contextValue}>
         <ThirdwebProvider>
-          <AuthProvider>
-            <AccountEventProvider authToken={authToken}>
-              {children}
-            </AccountEventProvider>
-          </AuthProvider>
+          <AccountEventProvider authToken={authToken}>
+            {children}
+          </AccountEventProvider>
         </ThirdwebProvider>
       </PannaClientContext>
     </QueryClientProvider>

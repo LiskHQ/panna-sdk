@@ -1,16 +1,40 @@
-import { MailIcon } from 'lucide-react';
-import { useAccount } from '../../hooks';
-import { useAuth } from '../auth/auth-provider';
+import { MailIcon, PhoneIcon } from 'lucide-react';
+import { useActiveWallet, useDisconnect, useProfiles } from 'thirdweb/react';
+import { usePanna } from '../../hooks';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
 export function AccountSettingsView() {
-  const { logout } = useAuth();
-  const { data, isLoading, isError, error } = useAccount();
+  const { client } = usePanna();
+  const activeWallet = useActiveWallet();
+  const { disconnect } = useDisconnect();
+  const {
+    data: userProfiles,
+    isLoading,
+    error
+  } = useProfiles({ client: client! });
 
-  const handleLogout = () => logout();
+  const handleLogout = () => {
+    if (activeWallet) {
+      disconnect(activeWallet);
+    }
+  };
+
+  // Extract email and phone from profiles
+  const emailProfile = userProfiles?.find(
+    (profile) =>
+      profile.type === 'email' ||
+      profile.type === 'google' ||
+      profile.type === 'discord' ||
+      profile.type === 'apple' ||
+      profile.type === 'facebook'
+  );
+
+  const phoneProfile = userProfiles?.find(
+    (profile) => profile.type === 'phone'
+  );
 
   const renderData = () => {
     if (isLoading) {
@@ -22,7 +46,7 @@ export function AccountSettingsView() {
       );
     }
 
-    if (isError || !data) {
+    if (error) {
       return (
         <Typography as="span" variant="small" className="text-destructive">
           Error: {error?.message}
@@ -30,15 +54,36 @@ export function AccountSettingsView() {
       );
     }
 
+    const userEmail = emailProfile?.details?.email;
+    const userPhone = phoneProfile?.details?.phone;
+
+    if (!userEmail && !userPhone) {
+      return (
+        <Typography as="span" variant="small" className="text-muted-foreground">
+          No contact information available
+        </Typography>
+      );
+    }
+
     return (
-      <>
-        <div className="flex items-center gap-3">
-          <MailIcon size={16} />
-          <Typography as="span" variant="small">
-            {data.email}
-          </Typography>
-        </div>
-      </>
+      <div className="flex flex-col gap-3">
+        {userEmail && (
+          <div className="flex items-center gap-3">
+            <MailIcon size={16} />
+            <Typography as="span" variant="small">
+              {userEmail}
+            </Typography>
+          </div>
+        )}
+        {userPhone && (
+          <div className="flex items-center gap-3">
+            <PhoneIcon size={16} />
+            <Typography as="span" variant="small">
+              {userPhone}
+            </Typography>
+          </div>
+        )}
+      </div>
     );
   };
 

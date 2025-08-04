@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+import { useActiveAccount, useActiveWallet } from 'thirdweb/react';
+import { SmartWalletOptions } from 'thirdweb/wallets';
 import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
@@ -6,16 +8,7 @@ import {
   pannaApiService
 } from '../../core/utils';
 import { getEmail, getPhoneNumber } from '../../core/wallet';
-import { useAuth } from '../components/auth/auth-provider';
 import { usePanna } from './use-panna';
-
-// Smart account configuration for Lisk ecosystem
-// TODO: This should come from a centralized configuration or wallet config
-const LISK_SMART_ACCOUNT_CONFIG = {
-  factoryAddress: '0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb',
-  entrypointAddress: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
-  sponsorGas: true
-} as const;
 
 export type AccountEventConfig = {
   /**
@@ -23,12 +16,6 @@ export type AccountEventConfig = {
    * @default 'ecosystem.lisk'
    */
   ecosystemId?: string;
-
-  /**
-   * Whether to enable automatic event tracking
-   * @default true
-   */
-  enableTracking?: boolean;
 
   /**
    * Optional authentication token for API requests
@@ -41,15 +28,21 @@ export type AccountEventConfig = {
  * @param config - Configuration options for wallet event handling
  */
 export function useAccountEvents(config: AccountEventConfig = {}) {
-  const {
-    ecosystemId = 'ecosystem.lisk',
-    enableTracking = true,
-    authToken
-  } = config;
+  const { ecosystemId = EcosystemId.LISK, authToken } = config;
 
   const { partnerId } = usePanna();
-  const { userAddress } = useAuth();
+  const account = useActiveAccount();
+  const activeWallet = useActiveWallet();
+  const userAddress = account?.address || null;
   const previousAddressRef = useRef<string | null>(null);
+
+  const smartAccountConfig = useMemo(() => {
+    const config = activeWallet?.getConfig();
+    if (!config) return null;
+
+    return (config as unknown as { smartAccount: SmartWalletOptions })
+      .smartAccount;
+  }, [activeWallet]);
 
   /**
    * Send account event to Panna API
@@ -59,8 +52,6 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
     address: string,
     eventData: OnConnectEventData | Record<string, never> = {}
   ) => {
-    if (!enableTracking) return;
-
     try {
       const payload: AccountEventPayload = {
         eventType,
@@ -86,12 +77,12 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
     if (!userAddress) return;
 
     try {
-      // Use centralized smart account configuration
+      if (!smartAccountConfig) {
+        throw new Error('Smart account config not found');
+      }
+
       const eventData: OnConnectEventData = {
-        smartAccount: {
-          chain: 'lisk-sepolia', // Default chain since we don't have wallet access
-          ...LISK_SMART_ACCOUNT_CONFIG
-        }
+        smartAccount: smartAccountConfig
       };
 
       // Try to get social profile information if available using core functions
@@ -165,17 +156,6 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
       await sendAccountEvent('accountUpdate', address, {});
     }
   };
-
-  /**
-   * Set up wallet event subscriptions
-   */
-  useEffect(() => {
-    if (!enableTracking || !userAddress) return;
-
-    // Note: In this hook implementation, we're monitoring account changes
-    // rather than directly subscribing to wallet events. The AccountEventProvider
-    // handles the direct wallet event subscriptions.
-  }, [userAddress, enableTracking]);
 
   /**
    * Monitor account changes to detect connections/disconnections

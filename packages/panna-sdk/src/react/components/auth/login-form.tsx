@@ -9,6 +9,8 @@ import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
+import { liskSepolia } from 'src/core/chains';
+import { useConnect } from 'thirdweb/react';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -20,11 +22,12 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { LAST_AUTH_PROVIDER, USER_ADDRESS } from '@/consts';
+import { LAST_AUTH_PROVIDER } from '@/consts';
 import { usePanna } from '@/hooks/use-panna';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
-import { useAuth } from './auth-provider';
+
+// Removed useAuth - thirdweb handles wallet state automatically
 
 type LoginFormProps = {
   next: DialogStepperContextValue['next'];
@@ -73,11 +76,16 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
     }
   });
   const { client, partnerId } = usePanna();
-  const { setUserAddress } = useAuth();
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
-  const wallet = ecosystemWallet(EcosystemId.LISK, {
-    partnerId
+
+  // Configure useConnect with account abstraction for smart accounts
+  const { connect } = useConnect({
+    client,
+    accountAbstraction: {
+      chain: liskSepolia, // the chain where smart accounts will be deployed
+      sponsorGas: true // enable sponsored transactions
+    }
   });
 
   const handleFormSubmit = async (field: keyof z.infer<typeof formSchema>) => {
@@ -118,19 +126,34 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
   }
 
   const handleGoogleLogin = async () => {
-    const res = await wallet.connect({
-      client,
-      strategy: 'google'
-    });
+    try {
+      const wallet = await connect(async () => {
+        // Create ecosystem wallet for Google auth
+        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
+          partnerId
+        });
 
-    if (res) {
-      const isBrowser = typeof window !== 'undefined';
-      if (isBrowser) {
-        localStorage.setItem(LAST_AUTH_PROVIDER, 'Email');
-        localStorage.setItem(USER_ADDRESS, res.address);
-        setUserAddress(res.address);
+        await ecoWallet.connect({
+          client,
+          strategy: 'google'
+        });
+
+        return ecoWallet;
+      });
+
+      if (wallet) {
+        const address = wallet.getAccount()?.address;
+        if (address) {
+          const isBrowser = typeof window !== 'undefined';
+          if (isBrowser) {
+            localStorage.setItem(LAST_AUTH_PROVIDER, 'Google');
+            // Note: USER_ADDRESS is automatically managed by thirdweb
+          }
+          onClose?.();
+        }
       }
-      onClose?.();
+    } catch (error) {
+      console.error('Google login failed:', error);
     }
   };
 

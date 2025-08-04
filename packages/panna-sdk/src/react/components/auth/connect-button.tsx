@@ -1,13 +1,12 @@
+import { useActiveAccount } from 'thirdweb/react';
 import { AccountDialog } from '../account/account-dialog';
-import { useAuth } from './auth-provider';
 import { LoginButton } from './login-button';
 
 /**
- * A connect button component that connects users to their wallets using the Panna client from context.
+ * A connect button component that connects users to their wallets using thirdweb's native hooks.
  *
  * This component must be used within a PannaProvider that provides the Panna client via context.
- * It automatically configures the Lisk ecosystem wallet and defaults to the Lisk chain.
- * The PannaProvider automatically includes the AuthProvider, so this component can directly use useAuth().
+ * It uses thirdweb's built-in state management for wallet connections.
  *
  * @throws {Error} When used outside of PannaProvider context or when no client is available
  *
@@ -19,15 +18,15 @@ import { LoginButton } from './login-button';
  * ```
  */
 export function ConnectButton() {
-  const { userAddress, isHydrated } = useAuth();
-
-  if (!isHydrated) {
-    return <LoginButton />;
-  }
+  const account = useActiveAccount();
 
   return (
     <>
-      {userAddress ? <AccountDialog address={userAddress} /> : <LoginButton />}
+      {account?.address ? (
+        <AccountDialog address={account.address} />
+      ) : (
+        <LoginButton />
+      )}
     </>
   );
 }

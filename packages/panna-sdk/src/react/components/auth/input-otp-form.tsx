@@ -2,14 +2,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import {
-  AuthParams,
-  EcosystemId,
-  login,
-  LoginStrategy,
-  prepareLogin
-} from 'src/core';
-import { AuthStoredTokenWithCookieReturnType } from 'thirdweb/dist/types/wallets/in-app/core/authentication/types';
+import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
+import { liskSepolia } from 'src/core/chains';
+import { useConnect } from 'thirdweb/react';
+import { ecosystemWallet } from 'thirdweb/wallets';
 import z from 'zod';
 import {
   Form,
@@ -24,18 +20,12 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp';
-import {
-  LAST_AUTH_PROVIDER,
-  USER_ADDRESS,
-  USER_CONTACT,
-  WALLET_TOKEN
-} from '@/consts';
+import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
-import { useAuth } from './auth-provider';
 
 type InputOTPFormProps = {
   data: DialogStepperContextValue['stepData'];
@@ -52,13 +42,6 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-type AuthDetailsFull =
-  AuthStoredTokenWithCookieReturnType['storedToken']['authDetails'] & {
-    email?: string;
-    phoneNumber?: string;
-    walletAddress: string;
-  };
-
 export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,47 +50,69 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     }
   });
   const { client, partnerId } = usePanna();
-  const { setUserAddress } = useAuth();
   const [resendTimer, resetResendTimer] = useCountdown(45);
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
 
+  // Configure useConnect with account abstraction for smart accounts
+  const { connect } = useConnect({
+    client,
+    accountAbstraction: {
+      chain: liskSepolia, // the chain where smart accounts will be deployed
+      sponsorGas: true // enable sponsored transactions
+    }
+  });
+
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     try {
       form.clearErrors('code');
-      const res = await login({
-        client,
-        ecosystem: {
-          id: EcosystemId.LISK,
+
+      // Connect using smart account with ecosystem wallet
+      const wallet = await connect(async () => {
+        // Create ecosystem wallet and authenticate with OTP
+        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
           partnerId
-        },
-        ...(data.email
-          ? { strategy: LoginStrategy.EMAIL, email: data.email }
-          : { strategy: LoginStrategy.PHONE, phoneNumber: data.phoneNumber }),
-        verificationCode: values.code
-      } as AuthParams);
+        });
 
-      if (res.storedToken) {
-        const isBrowser = typeof window !== 'undefined';
-        if (isBrowser) {
-          localStorage.setItem(
-            LAST_AUTH_PROVIDER,
-            res.storedToken.authProvider
-          );
-          localStorage.setItem(WALLET_TOKEN, res.storedToken.jwtToken);
-          const authDetails = res.storedToken.authDetails as AuthDetailsFull;
+        if (data.email) {
+          await ecoWallet.connect({
+            client,
+            strategy: 'email',
+            email: data.email as string,
+            verificationCode: values.code
+          });
+        } else {
+          await ecoWallet.connect({
+            client,
+            strategy: 'phone',
+            phoneNumber: data.phoneNumber as string,
+            verificationCode: values.code
+          });
+        }
 
-          if (authDetails.email) {
-            localStorage.setItem(USER_CONTACT, authDetails.email);
-          } else if (authDetails.phoneNumber) {
-            localStorage.setItem(USER_CONTACT, authDetails.phoneNumber);
+        return ecoWallet;
+      });
+
+      if (wallet) {
+        const address = wallet.getAccount()?.address;
+        if (address) {
+          const isBrowser = typeof window !== 'undefined';
+          if (isBrowser) {
+            const authProvider = data.email ? 'Email' : 'Phone';
+            const contact = data.email
+              ? (data.email as string)
+              : (data.phoneNumber as string);
+
+            localStorage.setItem(LAST_AUTH_PROVIDER, authProvider);
+            // Note: USER_ADDRESS is automatically managed by thirdweb
+            if (contact) {
+              localStorage.setItem(USER_CONTACT, contact);
+            }
           }
-          localStorage.setItem(USER_ADDRESS, authDetails.walletAddress);
-          setUserAddress(authDetails.walletAddress);
+          reset();
+          onClose();
         }
       }
-      reset();
-      onClose();
     } catch (error) {
       console.error('Error during OTP verification:', error);
       form.setError('code', {
