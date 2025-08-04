@@ -10,6 +10,7 @@ export {
   getChainInfo,
   type CreatePannaClientOptions as CreatePannaClientOptions,
   type PannaClient as PannaClient,
+
   // Wallet/Account functions
   login,
   createAccount,
@@ -19,6 +20,7 @@ export {
   linkAccount,
   prepareLogin,
   unlinkAccount,
+
   // Wallet/Account types and enums
   EcosystemId,
   LoginStrategy,
@@ -26,6 +28,7 @@ export {
   type AccountConnectionOptions,
   type AccountAuth,
   type LinkedAccount,
+
   // Authentication types
   type AuthParams,
   type SingleStepAuthParams,
@@ -36,13 +39,16 @@ export {
   type PhonePrepareParams,
   type EcosystemConfig,
   type LoginStrategyType,
+
   // Utils functions
   accountBalance,
   accountBalanceInFiat,
   accountBalancesInFiat,
+  getActivity,
   getSocialIcon,
   getFiatPrice,
   isValidAddress,
+
   // Utils types
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -56,11 +62,15 @@ export {
   type SocialAuthData,
   AccountEventType,
   type AccountEventTypeValue,
+  type GetActivityParams,
+  type GetActivityResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type FiatCurrency,
+
   // Onramp functions
   onRampStatus,
+
   // Onramp types
   type OnrampStatus,
   type OnrampTransaction,
@@ -74,6 +84,7 @@ export {
   type OnrampPrepareResult,
   type OnRampIntent,
   type OnrampPrepareParams,
+
   // Constants
   DEFAULT_CURRENCY,
   DEFAULT_CHAIN,
