@@ -1,5 +1,4 @@
 import { type Chain } from 'thirdweb';
-import { SmartWalletOptions } from 'thirdweb/wallets';
 import { type PannaClient } from '../client';
 
 // Parameters for getting account balance
