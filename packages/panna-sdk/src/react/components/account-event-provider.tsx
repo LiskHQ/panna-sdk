@@ -11,9 +11,10 @@ import { SmartWalletOptions } from 'thirdweb/wallets';
 import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
-  type OnConnectEventData,
-  type DisconnectEventData,
-  type AccountUpdateEventData,
+  type OnConnectActivityRequest,
+  type DisconnectActivityRequest,
+  type AccountUpdateActivityRequest,
+  type SmartAccountTransform,
   pannaApiService
 } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
@@ -22,10 +23,11 @@ export type AccountEventContextType = {
   sendAccountEvent: (
     eventType: AccountEventPayload['eventType'],
     address: string,
-    eventData?:
-      | OnConnectEventData
-      | DisconnectEventData
-      | AccountUpdateEventData
+    eventOptions?: {
+      social?: { type: 'email' | 'phone' | 'google'; data: string };
+      reason?: string;
+      updateType?: string;
+    }
   ) => Promise<void>;
 };
 
@@ -60,29 +62,96 @@ export function AccountEventProvider({
   }, [activeWallet]);
 
   /**
+   * Transform SmartWalletOptions to API-compatible format
+   */
+  const transformSmartAccount = (
+    config: SmartWalletOptions
+  ): SmartAccountTransform => {
+    return {
+      chain: config?.chain?.name || currentChain?.name || 'lisk-sepolia',
+      factoryAddress: config.factoryAddress || '',
+      entrypointAddress: config.overrides?.entrypointAddress || '',
+      sponsorGas:
+        'sponsorGas' in config
+          ? config.sponsorGas
+          : 'gasless' in config
+            ? config.gasless
+            : true
+    };
+  };
+
+  /**
    * Send account event to Panna dashboard API
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
     address: string,
-    eventData:
-      | OnConnectEventData
-      | DisconnectEventData
-      | AccountUpdateEventData = {}
+    eventOptions: {
+      social?: { type: 'email' | 'phone' | 'google'; data: string };
+      reason?: string;
+      updateType?: string;
+    } = {}
   ) => {
     try {
-      const payload: AccountEventPayload = {
+      const basePayload = {
         eventType,
         timestamp: new Date().toISOString(),
         ecosystemId: EcosystemId.LISK,
         partnerId,
-        chainId: currentChain?.id?.toString() || '4202', // Use actual chain ID or default to Lisk Sepolia
-        eventData
+        chainId: currentChain?.id || 4202
       };
+
+      let payload: AccountEventPayload;
+
+      if (eventType === 'onConnect') {
+        if (!smartAccountConfig) {
+          throw new Error('Smart account config required for onConnect event');
+        }
+
+        const socialInfo = eventOptions.social || getSocialInfo();
+        if (!socialInfo) {
+          console.warn(
+            'Social authentication info not available, using fallback'
+          );
+          // Provide a fallback since API requires social field
+          // This indicates connection was made without social login
+          payload = {
+            ...basePayload,
+            eventType: 'onConnect',
+            smartAccount: transformSmartAccount(smartAccountConfig),
+            social: {
+              type: 'email',
+              data: `wallet-${address.slice(-8)}@unknown.domain` // Placeholder email format
+            }
+          } as OnConnectActivityRequest;
+        } else {
+          payload = {
+            ...basePayload,
+            eventType: 'onConnect',
+            smartAccount: transformSmartAccount(smartAccountConfig),
+            social: socialInfo
+          } as OnConnectActivityRequest;
+        }
+      } else if (eventType === 'disconnect') {
+        payload = {
+          ...basePayload,
+          eventType: 'disconnect',
+          ...(eventOptions.reason && { reason: eventOptions.reason })
+        } as DisconnectActivityRequest;
+      } else if (eventType === 'accountUpdate') {
+        payload = {
+          ...basePayload,
+          eventType: 'accountUpdate',
+          ...(eventOptions.updateType && {
+            updateType: eventOptions.updateType
+          })
+        } as AccountUpdateActivityRequest;
+      } else {
+        throw new Error(`Unsupported event type: ${eventType}`);
+      }
 
       // Use the default Panna API service
       await pannaApiService.sendAccountEvent(address, payload, authToken);
-      console.log(`Successfully sent ${eventType} event for address:`, address);
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
     }
@@ -122,20 +191,10 @@ export function AccountEventProvider({
    */
   const handleOnConnect = async (address: string) => {
     try {
-      if (!smartAccountConfig) {
-        throw new Error('Smart account config not found');
-      }
-
-      const eventData: OnConnectEventData = {
-        smartAccount: smartAccountConfig
-      };
-
       const socialInfo = getSocialInfo();
-      if (socialInfo) {
-        eventData.social = socialInfo;
-      }
-
-      await sendAccountEvent('onConnect', address, eventData);
+      await sendAccountEvent('onConnect', address, {
+        social: socialInfo || undefined
+      });
     } catch (error) {
       console.error('Error handling onConnect event:', error);
     }
@@ -146,7 +205,9 @@ export function AccountEventProvider({
    */
   const handleDisconnect = async (address: string) => {
     try {
-      await sendAccountEvent('disconnect', address, {});
+      await sendAccountEvent('disconnect', address, {
+        reason: 'User initiated'
+      });
     } catch (error) {
       console.error('Error handling disconnect event:', error);
     }
@@ -157,7 +218,9 @@ export function AccountEventProvider({
    */
   const handleAccountChanged = async (address: string) => {
     try {
-      await sendAccountEvent('accountUpdate', address, {});
+      await sendAccountEvent('accountUpdate', address, {
+        updateType: 'account_change'
+      });
     } catch (error) {
       console.error('Error handling account changed event:', error);
     }
@@ -172,11 +235,9 @@ export function AccountEventProvider({
 
     if (userAddress && !previousAddress) {
       // User connected
-      console.log('User connected:', userAddress);
       handleOnConnect(userAddress);
     } else if (!userAddress && previousAddress) {
       // User disconnected
-      console.log('User disconnected:', previousAddress);
       handleDisconnect(previousAddress);
     } else if (
       userAddress &&
@@ -184,10 +245,6 @@ export function AccountEventProvider({
       userAddress !== previousAddress
     ) {
       // Account changed
-      console.log('Account changed:', {
-        from: previousAddress,
-        to: userAddress
-      });
       handleAccountChanged(userAddress);
     }
 
@@ -208,7 +265,6 @@ export function AccountEventProvider({
       const unsubscribeAccountChanged = activeWallet.subscribe(
         'accountChanged',
         (account) => {
-          console.log('Wallet accountChanged event:', account);
           if (account?.address && account.address !== userAddress) {
             handleAccountChanged(account.address);
           }
@@ -220,8 +276,7 @@ export function AccountEventProvider({
       // Subscribe to chain change events
       const unsubscribeChainChanged = activeWallet.subscribe(
         'chainChanged',
-        (chain) => {
-          console.log('Wallet chainChanged event:', chain);
+        () => {
           if (userAddress) {
             handleAccountChanged(userAddress);
           }
@@ -233,7 +288,6 @@ export function AccountEventProvider({
       const unsubscribeAccountsChanged = activeWallet.subscribe(
         'accountsChanged',
         (addresses) => {
-          console.log('Wallet accountsChanged event:', addresses);
           if (addresses?.[0] && addresses[0] !== userAddress) {
             handleAccountChanged(addresses[0]);
           }

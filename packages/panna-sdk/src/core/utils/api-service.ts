@@ -33,7 +33,7 @@ export class PannaApiService {
   ): Promise<Response> {
     const { baseUrl, isMockMode } = this.config;
 
-    const url = `${baseUrl}/v1/account/${address}/activity`;
+    const url = `${baseUrl}/account/${address}/activity`;
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json'
@@ -54,7 +54,7 @@ export class PannaApiService {
       };
 
       return new Response(JSON.stringify(mockResponse), {
-        status: 200,
+        status: 201,
         headers: {
           'Content-Type': 'application/json'
         }

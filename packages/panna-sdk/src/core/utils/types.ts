@@ -1,5 +1,4 @@
 import { type Chain } from 'thirdweb';
-import { SmartWalletOptions } from 'thirdweb/wallets';
 import { type PannaClient } from '../client';
 
 // Parameters for getting account balance
@@ -119,26 +118,52 @@ export interface AccountBalancesInFiatResult {
   tokenBalances: AccountBalanceInFiatResult[];
   errors?: TokenBalanceError[];
 }
-// Account event types for Panna dashboard API
-export type AccountEventPayload = {
+// Account event types for Panna API
+export type AccountEventPayload =
+  | OnConnectActivityRequest
+  | DisconnectActivityRequest
+  | AccountUpdateActivityRequest;
+
+// Base schema for all activity requests
+type BaseActivityRequest = {
   eventType: 'onConnect' | 'disconnect' | 'accountUpdate';
   timestamp: string;
   ecosystemId: string;
   partnerId: string;
-  chainId: string;
-  eventData: OnConnectEventData | DisconnectEventData | AccountUpdateEventData;
+  chainId: number;
 };
 
-export type OnConnectEventData = {
-  smartAccount: SmartWalletOptions;
-  social?: {
+// OnConnect event schema - matches API discriminated union
+export type OnConnectActivityRequest = BaseActivityRequest & {
+  eventType: 'onConnect';
+  smartAccount: {
+    chain: string;
+    factoryAddress: string;
+    entrypointAddress: string;
+    sponsorGas: boolean;
+  };
+  social: {
     type: 'email' | 'phone' | 'google';
     data: string;
   };
 };
 
-export type DisconnectEventData = Record<string, never>;
+// Disconnect event schema
+export type DisconnectActivityRequest = BaseActivityRequest & {
+  eventType: 'disconnect';
+  reason?: string;
+};
 
-export type AccountUpdateEventData = {
-  updatedFields?: Record<string, unknown>;
+// Account update event schema
+export type AccountUpdateActivityRequest = BaseActivityRequest & {
+  eventType: 'accountUpdate';
+  updateType?: string;
+};
+
+// Helper type for transforming SmartWalletOptions to API format
+export type SmartAccountTransform = {
+  chain: string;
+  factoryAddress: string;
+  entrypointAddress: string;
+  sponsorGas: boolean;
 };

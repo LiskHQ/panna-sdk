@@ -72,9 +72,9 @@ export {
   NATIVE_TOKEN_ADDRESS,
   // Wallet Event types and API service
   type AccountEventPayload,
-  type OnConnectEventData,
-  type DisconnectEventData,
-  type AccountUpdateEventData,
+  type OnConnectActivityRequest,
+  type DisconnectActivityRequest,
+  type AccountUpdateActivityRequest,
   PannaApiService,
   pannaApiService,
   type PannaApiConfig
