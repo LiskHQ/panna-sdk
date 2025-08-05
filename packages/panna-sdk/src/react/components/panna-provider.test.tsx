@@ -3,10 +3,28 @@ import React, { useContext } from 'react';
 import { createPannaClient, type PannaClient } from '../../core';
 import { PannaProvider, PannaClientContext } from './panna-provider';
 
+// Mock @tanstack/react-query
+jest.mock('@tanstack/react-query', () => ({
+  QueryClient: jest.fn().mockImplementation(() => ({})),
+  QueryClientProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="query-client-provider">{children}</div>
+  )
+}));
+
 // Mock the thirdweb module
 jest.mock('thirdweb/react', () => ({
   ThirdwebProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="thirdweb-provider">{children}</div>
+  ),
+  useActiveAccount: jest.fn(() => null),
+  useActiveWallet: jest.fn(() => null),
+  useProfiles: jest.fn(() => ({ data: [] }))
+}));
+
+// Mock the AccountEventProvider
+jest.mock('./account-event-provider', () => ({
+  AccountEventProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="account-event-provider">{children}</div>
   )
 }));
 
@@ -26,6 +44,9 @@ const TestConsumer: React.FC = () => {
     <div>
       <span data-testid="client-status">
         {context?.client ? 'client-available' : 'client-null'}
+      </span>
+      <span data-testid="partner-id">
+        {context?.partnerId || 'no-partner-id'}
       </span>
       <span data-testid="client-value">{JSON.stringify(context)}</span>
     </div>
@@ -48,14 +69,16 @@ describe('PannaProvider', () => {
       expect(screen.getByTestId('test-child')).toBeInTheDocument();
     });
 
-    it('should wrap children with ThirdwebProvider', () => {
+    it('should wrap children with all provider layers', () => {
       render(
         <PannaProvider>
           <div data-testid="test-child">Test Child</div>
         </PannaProvider>
       );
 
+      expect(screen.getByTestId('query-client-provider')).toBeInTheDocument();
       expect(screen.getByTestId('thirdweb-provider')).toBeInTheDocument();
+      expect(screen.getByTestId('account-event-provider')).toBeInTheDocument();
       expect(screen.getByTestId('test-child')).toBeInTheDocument();
     });
   });
@@ -71,6 +94,9 @@ describe('PannaProvider', () => {
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-null'
       );
+      expect(screen.getByTestId('partner-id')).toHaveTextContent(
+        'no-partner-id'
+      );
       expect(mockCreatePannaClient).not.toHaveBeenCalled();
     });
 
@@ -84,6 +110,9 @@ describe('PannaProvider', () => {
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-null'
       );
+      expect(screen.getByTestId('partner-id')).toHaveTextContent(
+        'no-partner-id'
+      );
       expect(mockCreatePannaClient).not.toHaveBeenCalled();
     });
 
@@ -96,6 +125,9 @@ describe('PannaProvider', () => {
 
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-null'
+      );
+      expect(screen.getByTestId('partner-id')).toHaveTextContent(
+        'no-partner-id'
       );
       expect(mockCreatePannaClient).not.toHaveBeenCalled();
     });
@@ -116,6 +148,27 @@ describe('PannaProvider', () => {
       expect(mockCreatePannaClient).toHaveBeenCalledTimes(1);
       expect(screen.getByTestId('client-status')).toHaveTextContent(
         'client-available'
+      );
+      expect(screen.getByTestId('partner-id')).toHaveTextContent(
+        'no-partner-id'
+      );
+    });
+
+    it('should provide partnerId when specified', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      render(
+        <PannaProvider clientId="test-client-id" partnerId="test-partner">
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      expect(screen.getByTestId('client-status')).toHaveTextContent(
+        'client-available'
+      );
+      expect(screen.getByTestId('partner-id')).toHaveTextContent(
+        'test-partner'
       );
     });
   });
