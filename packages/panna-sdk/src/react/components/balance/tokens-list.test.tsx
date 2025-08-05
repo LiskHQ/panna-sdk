@@ -1,15 +1,17 @@
 import { render, screen } from '@testing-library/react';
+import { useActiveAccount } from 'thirdweb/react';
 import { useTokenBalances } from '../../hooks/use-token-balances';
-import { useAuth } from '../auth/auth-provider';
 import { TokensList } from './tokens-list';
 
 jest.mock('../../hooks/use-token-balances');
-jest.mock('../auth/auth-provider');
+jest.mock('thirdweb/react', () => ({
+  useActiveAccount: jest.fn()
+}));
 
 describe('TokensList', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAuth as jest.Mock).mockReturnValue({ userAddress: '0x123' });
+    (useActiveAccount as jest.Mock).mockReturnValue({ address: '0x123' });
   });
 
   it('renders loading skeletons when loading', () => {
