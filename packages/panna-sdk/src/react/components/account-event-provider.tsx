@@ -81,7 +81,7 @@ export function AccountEventProvider({
   };
 
   /**
-   * Send account event to Panna dashboard API
+   * Send account event to Panna API
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
@@ -113,15 +113,14 @@ export function AccountEventProvider({
           console.warn(
             'Social authentication info not available, using fallback'
           );
-          // Provide a fallback since API requires social field
-          // This indicates connection was made without social login
+
           payload = {
             ...basePayload,
             eventType: 'onConnect',
             smartAccount: transformSmartAccount(smartAccountConfig),
             social: {
               type: 'email',
-              data: `wallet-${address.slice(-8)}@unknown.domain` // Placeholder email format
+              data: `wallet-${address.slice(-8)}@unknown.domain`
             }
           } as OnConnectActivityRequest;
         } else {
@@ -150,7 +149,6 @@ export function AccountEventProvider({
         throw new Error(`Unsupported event type: ${eventType}`);
       }
 
-      // Use the default Panna API service
       await pannaApiService.sendAccountEvent(address, payload, authToken);
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
