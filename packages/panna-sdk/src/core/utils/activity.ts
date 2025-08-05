@@ -42,9 +42,75 @@ const activityCache = lruMemCache('activity');
  * const result = await accountBalanceInFiat({ address: userAddress });
  * // result: {
  * //   activities: [{
- * //     // TODO: Add example
+ * //     activityType: 'sent',
+ * //     transactionID: '0x...',
+ * //     amount: {
+ * //       type: 'eth',
+ * //       value: '100000000000',
+ * //       tokenInfo: {
+ * //         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+ * //         name: 'Ether',
+ * //         symbol: 'ETH',
+ * //         decimals: 18,
+ * //         type: 'eth'
+ * //       }
+ * //     },
+ * //     status: 'ok'
+ * //   }, {
+ * //     activityType: 'received',
+ * //     transactionID: '0x...',
+ * //     amount: {
+ * //       type: 'erc-20',
+ * //       value: '100000000000',
+ * //       tokenInfo: {
+ * //         address: '0x...',
+ * //         name: 'Lisk',
+ * //         symbol: 'LSK',
+ * //         decimals: 18,
+ * //         type: 'erc-20'
+ * //         icon: null
+ * //       }
+ * //     },
+ * //     status: 'ok'
+ * //   }, {
+ * //     activityType: 'received',
+ * //     transactionID: '0x...',
+ * //     amount: {
+ * //       type: 'erc-721',
+ * //       tokenId: '9500',
+ * //       instance: {
+ * //         id: '9500',
+ * //         isUnique: null,
+ * //         owner: null,
+ * //         tokenInfo: {
+ * //           address: '0x...',
+ * //           name: 'Lisk of Life',
+ * //           symbol: 'LOL',
+ * //           decimals: null,
+ * //           type: 'erc-721',
+ * //           icon: null
+ * //         }
+ * //       },
+ * //     status: 'ok'
+ * //   }, {
+ * //     activityType: 'minted',
+ * //     transactionID: '0x...',
+ * //     amount: {
+ * //       type: 'erc-1155',
+ * //       tokenId: '29900446396079726096...',
+ * //       value: '100000000000',
+ * //       tokenInfo: {
+ * //         address: '0x...',
+ * //         name: 'Rarible',
+ * //         symbol: RARI,
+ * //         decimals: null,
+ * //         type: 'erc-1155',
+ * //         icon: null
+ * //       }
+ * //     },
+ * //     status: 'error'
  * //   }, ...],
- * //   metadata: { count: 10, offset: 0, limit: 10 },
+ * //   metadata: { count: 10, offset: 0, limit: 10 }
  * // }
  * ```
  */
@@ -114,7 +180,7 @@ export const getActivity = async function (
       }
 
       var amount: TransactionAmount;
-      const amountType = getAmountType(tx);
+      const amountType = getAmountType(address, tx);
       switch (amountType) {
         case TokenERC.ETH: {
           amount = {
@@ -225,17 +291,35 @@ export const getActivity = async function (
   return result;
 };
 
-const getAmountType = (tx: BlockscoutTransaction): TokenType => {
+/*
+ * Get amount type (known ERC standards or ETH) for a given transaction
+ * @param address - User address
+ * @param tx - Valid BlockscoutTransaction type
+ * @returns The determined ETH/ERC standard for the transacted amount
+ * @throws Error if unknown transaction amount type
+ * @example
+ * ```ts
+ * const result = await getAmountType(userAddress, blockscoutTransaction);
+ * // result: eth | erc-20 | erc-721 | erc-1155
+ * ```
+ */
+export const getAmountType = (
+  address: string,
+  tx: BlockscoutTransaction
+): TokenType => {
   if (tx.transaction_types.includes('contract_call')) {
-    const tokenTransferTx = tx.token_transfers.find((t) =>
-      ['token_transfer', 'token_minting'].includes(t.type.toLowerCase())
+    const tokenTransferTx = tx.token_transfers.find(
+      (t) =>
+        ['token_transfer', 'token_minting'].includes(t.type.toLowerCase()) &&
+        (t.from.hash.toLowerCase() === address.toLowerCase() ||
+          t.to.hash.toLowerCase() === address.toLowerCase())
     );
 
     if (!tokenTransferTx) {
-      throw new Error('Cannot determine transaction amoount type');
+      throw new Error('Cannot determine transaction amount type');
     }
 
-    switch (tokenTransferTx.type.toLowerCase()) {
+    switch (tokenTransferTx.token.type.toLowerCase()) {
       case TokenERC.ERC20.toLowerCase():
         return TokenERC.ERC20;
 
@@ -244,6 +328,9 @@ const getAmountType = (tx: BlockscoutTransaction): TokenType => {
 
       case TokenERC.ERC1155.toLowerCase():
         return TokenERC.ERC1155;
+
+      default:
+        throw new Error('Unable to determine the amount ERC standard');
     }
   }
 
