@@ -1,5 +1,5 @@
 import { NATIVE_TOKEN_ADDRESS } from '../defaults';
-import { lruMemCache } from '../helpers/cache';
+import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
 import {
   // const
@@ -26,7 +26,7 @@ import {
 import { isValidAddress } from './common';
 
 // Activity cache
-const activityCache = lruMemCache('activity');
+const activityCache = newLruMemCache('activity');
 
 /*
  * Get recent activities for an account
@@ -39,7 +39,7 @@ const activityCache = lruMemCache('activity');
  * @example
  * ```ts
  * // Get value for the specified user's native token balance in USD
- * const result = await accountBalanceInFiat({ address: userAddress });
+ * const result = await getActivity({ address: userAddress, offset: 0, limit: 10 });
  * // result: {
  * //   activities: [{
  * //     activityType: 'sent',
@@ -158,8 +158,6 @@ export const getActivity = async function (
 
     activityCache.set(cacheKeyTransactions, userTransactions);
     activityCache.set(cacheKeyNextPageParams, nextPageParams);
-
-    continue;
   } while (userTransactions.length <= offset + limit);
 
   const activities: Activity[] = userTransactions

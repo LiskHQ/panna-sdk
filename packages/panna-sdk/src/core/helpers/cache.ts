@@ -1,6 +1,9 @@
 import { LRUCache } from 'lru-cache';
 
-const memPool = new Map();
+const MAX_ITEMS_PER_CACHE = 100;
+const DEFAULT_CACHE_TTL_SEC = 6;
+
+const memCachePool = new Map();
 
 interface Cache {
   set(key: string, value: unknown, ttl?: number): Cache;
@@ -10,18 +13,21 @@ interface Cache {
   clear(): void;
 }
 
-export const lruMemCache = (bank: string = 'default'): Cache => {
-  if (!memPool.has(bank)) {
+export const newLruMemCache = (
+  bank: string = 'default',
+  ttlSec: number = DEFAULT_CACHE_TTL_SEC
+): Cache => {
+  if (!memCachePool.has(bank)) {
     const newCache = new LRUCache({
-      max: 100,
-      ttl: 2 * 1000,
+      max: MAX_ITEMS_PER_CACHE,
+      ttl: ttlSec * 1000, // ms
       updateAgeOnGet: true
     });
 
-    memPool.set(bank, newCache);
+    memCachePool.set(bank, newCache);
   }
 
-  const cache = memPool.get(bank);
+  const cache = memCachePool.get(bank);
 
   return {
     set: (key, val, ttl) => cache.set(key, val, ttl),

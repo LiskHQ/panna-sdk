@@ -1,5 +1,5 @@
 import * as axios from 'axios';
-import { lruMemCache } from './cache';
+import { newLruMemCache } from './cache';
 import { delay } from './delay';
 
 // Constants
@@ -7,7 +7,7 @@ const DEFAULT_RETRIES = 0;
 const DEFAULT_RETRY_DELAY_MS = 100;
 
 // Request cache
-const requestCache = lruMemCache('http_request');
+const requestCache = newLruMemCache('http_request');
 
 // Internal types
 type RequestParamsConfig = Omit<axios.AxiosRequestConfig, 'url'>;
