@@ -158,6 +158,16 @@ export const getActivity = async function (
 
     activityCache.set(cacheKeyTransactions, userTransactions);
     activityCache.set(cacheKeyNextPageParams, nextPageParams);
+
+    // Continue the loop only if more pages exist
+    // Second condition ensures handling of no existing activities
+    if (
+      nextPageParams === null &&
+      userTransactions.length >= response.items.length
+    ) {
+      activityCache.delete(cacheKeyNextPageParams);
+      break;
+    }
   } while (userTransactions.length <= offset + limit);
 
   const activities: Activity[] = userTransactions
