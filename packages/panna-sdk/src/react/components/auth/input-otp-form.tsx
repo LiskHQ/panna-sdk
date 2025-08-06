@@ -3,7 +3,6 @@ import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { liskSepolia } from 'src/core/chains';
 import { useConnect } from 'thirdweb/react';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import z from 'zod';
@@ -23,6 +22,7 @@ import {
 import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
+import { getEnvironmentChain } from '../../utils';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -58,7 +58,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   const { connect } = useConnect({
     client,
     accountAbstraction: {
-      chain: liskSepolia, // the chain where smart accounts will be deployed
+      chain: getEnvironmentChain(),
       sponsorGas: true // enable sponsored transactions
     }
   });

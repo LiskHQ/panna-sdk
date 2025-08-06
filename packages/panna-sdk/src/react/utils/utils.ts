@@ -20,6 +20,18 @@ export function getChain(testingStatus?: boolean | undefined) {
 }
 
 /**
+ * Get the chain settings based on the current environment.
+ * In production (NODE_ENV=production), uses lisk.
+ * In development/staging (NODE_ENV=development), uses liskSepolia.
+ * @returns The chain settings for the current environment
+ */
+export function getEnvironmentChain() {
+  const isProduction =
+    typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
+  return isProduction ? lisk : liskSepolia;
+}
+
+/**
  * Get the account abstraction settings for a given chain.
  * @param testingStatus - The testing status
  * @returns The account abstraction settings for the given chain

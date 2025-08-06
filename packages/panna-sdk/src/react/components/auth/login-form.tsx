@@ -9,7 +9,6 @@ import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { liskSepolia } from 'src/core/chains';
 import { useConnect } from 'thirdweb/react';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
@@ -24,6 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { LAST_AUTH_PROVIDER } from '@/consts';
 import { usePanna } from '@/hooks/use-panna';
+import { getEnvironmentChain } from '../../utils';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 
@@ -83,8 +83,8 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
   const { connect } = useConnect({
     client,
     accountAbstraction: {
-      chain: liskSepolia, // the chain where smart accounts will be deployed
-      sponsorGas: true // enable sponsored transactions
+      chain: getEnvironmentChain(),
+      sponsorGas: true
     }
   });
 

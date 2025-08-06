@@ -7,8 +7,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { truncateAddress } from '@/utils/address';
-import { lisk } from '../../../core';
 import { useAccountBalance, useFiatBalance, usePanna } from '../../hooks';
+import { getEnvironmentChain } from '../../utils';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { CollectiblesList } from '../collectibles/collectibles-list';
@@ -41,13 +41,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
     useAccountBalance({
       address,
       client: client!,
-      chain: lisk
+      chain: getEnvironmentChain()
     });
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useFiatBalance({
       balance: accountBalance?.displayValue,
-      chain: lisk,
+      chain: getEnvironmentChain(),
       currency: 'USD'
     });
 
