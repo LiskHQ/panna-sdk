@@ -42,6 +42,15 @@ export type SocialProvider =
   | 'passkey'
   | 'wallet';
 
+// Subset of social providers used for authentication data
+export type SocialAuthType = 'email' | 'phone' | 'google';
+
+// Social authentication data structure
+export type SocialAuthData = {
+  type: SocialAuthType;
+  data: string;
+};
+
 // Supported fiat currencies
 export type FiatCurrency =
   | 'USD'
@@ -142,10 +151,7 @@ export type OnConnectActivityRequest = BaseActivityRequest & {
     entrypointAddress: string;
     sponsorGas: boolean;
   };
-  social: {
-    type: 'email' | 'phone' | 'google';
-    data: string;
-  };
+  social: SocialAuthData;
 };
 
 // Disconnect event schema

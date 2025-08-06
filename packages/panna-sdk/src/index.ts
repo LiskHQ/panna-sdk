@@ -52,6 +52,8 @@ export {
   type AccountBalancesInFiatResult,
   type AccountFiatBalance,
   type SocialProvider,
+  type SocialAuthType,
+  type SocialAuthData,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type FiatCurrency,

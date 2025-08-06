@@ -15,6 +15,7 @@ import {
   type DisconnectActivityRequest,
   type AccountUpdateActivityRequest,
   type SmartAccountTransform,
+  type SocialAuthData,
   pannaApiService
 } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
@@ -24,7 +25,7 @@ export type AccountEventContextType = {
     eventType: AccountEventPayload['eventType'],
     address: string,
     eventOptions?: {
-      social?: { type: 'email' | 'phone' | 'google'; data: string };
+      social?: SocialAuthData;
       reason?: string;
       updateType?: string;
     }
@@ -87,7 +88,7 @@ export function AccountEventProvider({
     eventType: AccountEventPayload['eventType'],
     address: string,
     eventOptions: {
-      social?: { type: 'email' | 'phone' | 'google'; data: string };
+      social?: SocialAuthData;
       reason?: string;
       updateType?: string;
     } = {}
