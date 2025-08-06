@@ -9,6 +9,7 @@ import {
   type AccountUpdateActivityRequest,
   type SmartAccountTransform,
   type SocialAuthData,
+  AccountEventType,
   pannaApiService
 } from '../../core/utils';
 import { getEmail, getPhoneNumber } from '../../core/wallet';
@@ -82,7 +83,7 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
 
       let payload: AccountEventPayload;
 
-      if (eventType === 'onConnect') {
+      if (eventType === AccountEventType.ON_CONNECT) {
         if (!smartAccountConfig) {
           throw new Error('Smart account config required for onConnect event');
         }
@@ -94,7 +95,7 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
           );
           payload = {
             ...basePayload,
-            eventType: 'onConnect',
+            eventType: AccountEventType.ON_CONNECT,
             smartAccount: transformSmartAccount(smartAccountConfig),
             social: {
               type: 'email',
@@ -104,21 +105,21 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
         } else {
           payload = {
             ...basePayload,
-            eventType: 'onConnect',
+            eventType: AccountEventType.ON_CONNECT,
             smartAccount: transformSmartAccount(smartAccountConfig),
             social: socialInfo
           } as OnConnectActivityRequest;
         }
-      } else if (eventType === 'disconnect') {
+      } else if (eventType === AccountEventType.DISCONNECT) {
         payload = {
           ...basePayload,
-          eventType: 'disconnect',
+          eventType: AccountEventType.DISCONNECT,
           ...(eventOptions.reason && { reason: eventOptions.reason })
         } as DisconnectActivityRequest;
-      } else if (eventType === 'accountUpdate') {
+      } else if (eventType === AccountEventType.ACCOUNT_UPDATE) {
         payload = {
           ...basePayload,
-          eventType: 'accountUpdate',
+          eventType: AccountEventType.ACCOUNT_UPDATE,
           ...(eventOptions.updateType && {
             updateType: eventOptions.updateType
           })
@@ -189,7 +190,9 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
         console.debug('Could not retrieve social profile information:', error);
       }
 
-      await sendAccountEvent('onConnect', userAddress, { social: socialInfo });
+      await sendAccountEvent(AccountEventType.ON_CONNECT, userAddress, {
+        social: socialInfo
+      });
     } catch (error) {
       console.error('Error handling onConnect event:', error);
     }
@@ -201,7 +204,7 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
   const handleDisconnect = async () => {
     const previousAddress = userAddress;
     if (previousAddress) {
-      await sendAccountEvent('disconnect', previousAddress, {
+      await sendAccountEvent(AccountEventType.DISCONNECT, previousAddress, {
         reason: 'User initiated'
       });
     }
@@ -212,7 +215,7 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
    */
   const handleAccountChanged = async (address: string) => {
     if (address) {
-      await sendAccountEvent('accountUpdate', address, {
+      await sendAccountEvent(AccountEventType.ACCOUNT_UPDATE, address, {
         updateType: 'account_change'
       });
     }

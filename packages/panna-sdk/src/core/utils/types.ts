@@ -51,6 +51,16 @@ export type SocialAuthData = {
   data: string;
 };
 
+// Account event type constants
+export const AccountEventType = {
+  ON_CONNECT: 'onConnect',
+  DISCONNECT: 'disconnect',
+  ACCOUNT_UPDATE: 'accountUpdate'
+} as const;
+
+export type AccountEventTypeValue =
+  (typeof AccountEventType)[keyof typeof AccountEventType];
+
 // Supported fiat currencies
 export type FiatCurrency =
   | 'USD'
@@ -135,7 +145,7 @@ export type AccountEventPayload =
 
 // Base schema for all activity requests
 type BaseActivityRequest = {
-  eventType: 'onConnect' | 'disconnect' | 'accountUpdate';
+  eventType: AccountEventTypeValue;
   timestamp: string;
   ecosystemId: string;
   partnerId: string;
@@ -144,7 +154,7 @@ type BaseActivityRequest = {
 
 // OnConnect event schema - matches API discriminated union
 export type OnConnectActivityRequest = BaseActivityRequest & {
-  eventType: 'onConnect';
+  eventType: typeof AccountEventType.ON_CONNECT;
   smartAccount: {
     chain: string;
     factoryAddress: string;
@@ -156,13 +166,13 @@ export type OnConnectActivityRequest = BaseActivityRequest & {
 
 // Disconnect event schema
 export type DisconnectActivityRequest = BaseActivityRequest & {
-  eventType: 'disconnect';
+  eventType: typeof AccountEventType.DISCONNECT;
   reason?: string;
 };
 
 // Account update event schema
 export type AccountUpdateActivityRequest = BaseActivityRequest & {
-  eventType: 'accountUpdate';
+  eventType: typeof AccountEventType.ACCOUNT_UPDATE;
   updateType?: string;
 };
 

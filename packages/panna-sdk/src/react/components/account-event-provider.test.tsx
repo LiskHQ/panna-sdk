@@ -5,7 +5,7 @@ import React from 'react';
 import { SmartAccountOptions } from 'thirdweb/dist/types/wallets/smart/types';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { Account, Profile, SmartWalletOptions, Wallet } from 'thirdweb/wallets';
-import { pannaApiService } from '../../core/utils';
+import { pannaApiService, AccountEventType } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
 import {
   AccountEventProvider,
@@ -61,7 +61,7 @@ const TestConsumer: React.FC = () => {
 
   const handleTestEvent = async () => {
     await context.sendAccountEvent(
-      'onConnect',
+      AccountEventType.ON_CONNECT,
       '0x1234567890123456789012345678901234567890',
       {
         social: { type: 'email', data: 'test@example.com' }
@@ -464,7 +464,10 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="connect-button"
             onClick={() =>
-              context.sendAccountEvent('onConnect', mockAccount.address)
+              context.sendAccountEvent(
+                AccountEventType.ON_CONNECT,
+                mockAccount.address
+              )
             }
           >
             Connect
@@ -487,7 +490,7 @@ describe('AccountEventProvider', () => {
         expect(mockSendAccountEvent).toHaveBeenCalledWith(
           mockAccount.address,
           expect.objectContaining({
-            eventType: 'onConnect',
+            eventType: AccountEventType.ON_CONNECT,
             timestamp: expect.stringMatching(
               /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
             ),
@@ -509,9 +512,13 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="disconnect-button"
             onClick={() =>
-              context.sendAccountEvent('disconnect', mockAccount.address, {
-                reason: 'User initiated'
-              })
+              context.sendAccountEvent(
+                AccountEventType.DISCONNECT,
+                mockAccount.address,
+                {
+                  reason: 'User initiated'
+                }
+              )
             }
           >
             Disconnect
@@ -534,7 +541,7 @@ describe('AccountEventProvider', () => {
         expect(mockSendAccountEvent).toHaveBeenCalledWith(
           mockAccount.address,
           expect.objectContaining({
-            eventType: 'disconnect',
+            eventType: AccountEventType.DISCONNECT,
             reason: 'User initiated'
           }),
           undefined
@@ -549,9 +556,13 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="update-button"
             onClick={() =>
-              context.sendAccountEvent('accountUpdate', mockAccount.address, {
-                updateType: 'profile_change'
-              })
+              context.sendAccountEvent(
+                AccountEventType.ACCOUNT_UPDATE,
+                mockAccount.address,
+                {
+                  updateType: 'profile_change'
+                }
+              )
             }
           >
             Update
@@ -574,7 +585,7 @@ describe('AccountEventProvider', () => {
         expect(mockSendAccountEvent).toHaveBeenCalledWith(
           mockAccount.address,
           expect.objectContaining({
-            eventType: 'accountUpdate',
+            eventType: AccountEventType.ACCOUNT_UPDATE,
             updateType: 'profile_change'
           }),
           undefined
@@ -589,7 +600,10 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="auth-button"
             onClick={() =>
-              context.sendAccountEvent('onConnect', mockAccount.address)
+              context.sendAccountEvent(
+                AccountEventType.ON_CONNECT,
+                mockAccount.address
+              )
             }
           >
             Connect with Auth
@@ -632,7 +646,10 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="error-button"
             onClick={() =>
-              context.sendAccountEvent('onConnect', mockAccount.address)
+              context.sendAccountEvent(
+                AccountEventType.ON_CONNECT,
+                mockAccount.address
+              )
             }
           >
             Trigger Error
@@ -668,7 +685,10 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="api-error-button"
             onClick={() =>
-              context.sendAccountEvent('onConnect', mockAccount.address)
+              context.sendAccountEvent(
+                AccountEventType.ON_CONNECT,
+                mockAccount.address
+              )
             }
           >
             Trigger API Error
@@ -709,7 +729,10 @@ describe('AccountEventProvider', () => {
           <button
             data-testid="fallback-button"
             onClick={() =>
-              context.sendAccountEvent('onConnect', mockAccount.address)
+              context.sendAccountEvent(
+                AccountEventType.ON_CONNECT,
+                mockAccount.address
+              )
             }
           >
             Use Fallback
@@ -798,7 +821,7 @@ describe('AccountEventProvider', () => {
         expect(mockSendAccountEvent).toHaveBeenCalledWith(
           mockAccount.address,
           expect.objectContaining({
-            eventType: 'disconnect',
+            eventType: AccountEventType.DISCONNECT,
             reason: 'User initiated'
           }),
           undefined
@@ -836,7 +859,7 @@ describe('AccountEventProvider', () => {
         expect(mockSendAccountEvent).toHaveBeenCalledWith(
           newAccount.address,
           expect.objectContaining({
-            eventType: 'accountUpdate',
+            eventType: AccountEventType.ACCOUNT_UPDATE,
             updateType: 'account_change'
           }),
           undefined

@@ -54,6 +54,8 @@ export {
   type SocialProvider,
   type SocialAuthType,
   type SocialAuthData,
+  AccountEventType,
+  type AccountEventTypeValue,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type FiatCurrency,

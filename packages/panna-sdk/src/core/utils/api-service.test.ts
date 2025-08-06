@@ -6,7 +6,8 @@ import {
 import {
   type OnConnectActivityRequest,
   type DisconnectActivityRequest,
-  type AccountUpdateActivityRequest
+  type AccountUpdateActivityRequest,
+  AccountEventType
 } from './types';
 
 // Mock fetch globally
@@ -63,7 +64,7 @@ describe('PannaApiService', () => {
   describe('sendAccountEvent', () => {
     const testAddress = '0x1234567890123456789012345678901234567890';
     const mockOnConnectPayload: OnConnectActivityRequest = {
-      eventType: 'onConnect',
+      eventType: AccountEventType.ON_CONNECT,
       timestamp: '2024-01-01T10:00:00Z',
       ecosystemId: 'ecosystem.lisk',
       partnerId: '123e4567-e89b-12d3-a456-426614174000',
@@ -81,7 +82,7 @@ describe('PannaApiService', () => {
     };
 
     const mockDisconnectPayload: DisconnectActivityRequest = {
-      eventType: 'disconnect',
+      eventType: AccountEventType.DISCONNECT,
       timestamp: '2024-01-01T11:00:00Z',
       ecosystemId: 'ecosystem.lisk',
       partnerId: '123e4567-e89b-12d3-a456-426614174000',
@@ -90,7 +91,7 @@ describe('PannaApiService', () => {
     };
 
     const mockAccountUpdatePayload: AccountUpdateActivityRequest = {
-      eventType: 'accountUpdate',
+      eventType: AccountEventType.ACCOUNT_UPDATE,
       timestamp: '2024-01-01T12:00:00Z',
       ecosystemId: 'ecosystem.lisk',
       partnerId: '123e4567-e89b-12d3-a456-426614174000',
@@ -400,7 +401,7 @@ describe('PannaApiService', () => {
       const service = new PannaApiService({ isMockMode: true });
 
       const testPayload: OnConnectActivityRequest = {
-        eventType: 'onConnect',
+        eventType: AccountEventType.ON_CONNECT,
         timestamp: '2024-01-01T10:00:00Z',
         ecosystemId: 'ecosystem.lisk',
         partnerId: '123e4567-e89b-12d3-a456-426614174000',
@@ -434,7 +435,7 @@ describe('PannaApiService', () => {
       });
 
       const testPayload: DisconnectActivityRequest = {
-        eventType: 'disconnect',
+        eventType: AccountEventType.DISCONNECT,
         timestamp: '2024-01-01T11:00:00Z',
         ecosystemId: 'ecosystem.lisk',
         partnerId: '123e4567-e89b-12d3-a456-426614174000',
