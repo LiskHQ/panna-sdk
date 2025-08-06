@@ -417,7 +417,7 @@ describe('AccountEventProvider', () => {
       });
     });
 
-    it('should handle google profile as email type', async () => {
+    it('should handle google profile as google type', async () => {
       // Clear previous calls and setup google profiles
       jest.clearAllMocks();
 
@@ -449,7 +449,115 @@ describe('AccountEventProvider', () => {
         const firstCall = mockSendAccountEvent.mock.calls[0];
         expect(firstCall[1]).toEqual(
           expect.objectContaining({
-            social: { type: 'email', data: 'google@example.com' }
+            social: { type: 'google', data: 'google@example.com' }
+          })
+        );
+      });
+    });
+
+    it('should handle discord profile as discord type', async () => {
+      jest.clearAllMocks();
+
+      const discordProfiles = [
+        {
+          type: 'discord',
+          details: { email: 'discord@example.com' }
+        }
+      ];
+
+      mockUseProfiles.mockReturnValue({
+        data: discordProfiles
+      } as unknown as UseQueryResult<Profile[]>);
+
+      render(
+        <AccountEventProvider>
+          <TestConsumer />
+        </AccountEventProvider>
+      );
+
+      const button = screen.getByTestId('trigger-event');
+      await act(async () => {
+        button.click();
+      });
+
+      await waitFor(() => {
+        expect(mockSendAccountEvent).toHaveBeenCalled();
+        const firstCall = mockSendAccountEvent.mock.calls[0];
+        expect(firstCall[1]).toEqual(
+          expect.objectContaining({
+            social: { type: 'discord', data: 'discord@example.com' }
+          })
+        );
+      });
+    });
+
+    it('should handle apple profile as apple type', async () => {
+      jest.clearAllMocks();
+
+      const appleProfiles = [
+        {
+          type: 'apple',
+          details: { email: 'apple@example.com' }
+        }
+      ];
+
+      mockUseProfiles.mockReturnValue({
+        data: appleProfiles
+      } as unknown as UseQueryResult<Profile[]>);
+
+      render(
+        <AccountEventProvider>
+          <TestConsumer />
+        </AccountEventProvider>
+      );
+
+      const button = screen.getByTestId('trigger-event');
+      await act(async () => {
+        button.click();
+      });
+
+      await waitFor(() => {
+        expect(mockSendAccountEvent).toHaveBeenCalled();
+        const firstCall = mockSendAccountEvent.mock.calls[0];
+        expect(firstCall[1]).toEqual(
+          expect.objectContaining({
+            social: { type: 'apple', data: 'apple@example.com' }
+          })
+        );
+      });
+    });
+
+    it('should handle facebook profile as facebook type', async () => {
+      jest.clearAllMocks();
+
+      const facebookProfiles = [
+        {
+          type: 'facebook',
+          details: { email: 'facebook@example.com' }
+        }
+      ];
+
+      mockUseProfiles.mockReturnValue({
+        data: facebookProfiles
+      } as unknown as UseQueryResult<Profile[]>);
+
+      render(
+        <AccountEventProvider>
+          <TestConsumer />
+        </AccountEventProvider>
+      );
+
+      const button = screen.getByTestId('trigger-event');
+      await act(async () => {
+        button.click();
+      });
+
+      await waitFor(() => {
+        expect(mockSendAccountEvent).toHaveBeenCalled();
+        const firstCall = mockSendAccountEvent.mock.calls[0];
+        expect(firstCall[1]).toEqual(
+          expect.objectContaining({
+            social: { type: 'facebook', data: 'facebook@example.com' }
           })
         );
       });

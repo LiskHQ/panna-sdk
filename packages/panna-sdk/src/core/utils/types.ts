@@ -43,8 +43,14 @@ export type SocialProvider =
   | 'wallet';
 
 // Social providers that we currently support for capturing authentication data
-// Only these are used in account events and social auth data
-export type SocialAuthType = 'email' | 'phone' | 'google';
+// These are checked in both account-event-provider and account-settings-view
+export type SocialAuthType =
+  | 'email'
+  | 'phone'
+  | 'google'
+  | 'discord'
+  | 'apple'
+  | 'facebook';
 
 // Social authentication data structure
 export type SocialAuthData = {

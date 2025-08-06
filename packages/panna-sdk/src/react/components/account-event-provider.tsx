@@ -159,22 +159,54 @@ export function AccountEventProvider({
 
   const getSocialInfo = () => {
     const emailProfile = userProfiles?.find(
-      (profile) =>
-        profile.type === 'email' ||
-        profile.type === 'google' ||
-        profile.type === 'discord' ||
-        profile.type === 'apple' ||
-        profile.type === 'facebook'
+      (profile) => profile.type === 'email'
+    );
+
+    const googleProfile = userProfiles?.find(
+      (profile) => profile.type === 'google'
+    );
+
+    const discordProfile = userProfiles?.find(
+      (profile) => profile.type === 'discord'
+    );
+
+    const appleProfile = userProfiles?.find(
+      (profile) => profile.type === 'apple'
+    );
+
+    const facebookProfile = userProfiles?.find(
+      (profile) => profile.type === 'facebook'
     );
 
     const phoneProfile = userProfiles?.find(
       (profile) => profile.type === 'phone'
     );
 
+    // Return profile data with the actual provider type
     if (emailProfile?.details?.email) {
       return {
         type: 'email' as const,
         data: emailProfile.details.email
+      };
+    } else if (googleProfile?.details?.email) {
+      return {
+        type: 'google' as const,
+        data: googleProfile.details.email
+      };
+    } else if (discordProfile?.details?.email) {
+      return {
+        type: 'discord' as const,
+        data: discordProfile.details.email
+      };
+    } else if (appleProfile?.details?.email) {
+      return {
+        type: 'apple' as const,
+        data: appleProfile.details.email
+      };
+    } else if (facebookProfile?.details?.email) {
+      return {
+        type: 'facebook' as const,
+        data: facebookProfile.details.email
       };
     } else if (phoneProfile?.details?.phone) {
       return {
