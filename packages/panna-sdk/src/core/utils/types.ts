@@ -21,7 +21,7 @@ export interface AccountBalanceResult extends MinimalTokenBalance {
   name: string;
 }
 
-// Supported social authentication providers
+// All supported social authentication providers (for login, icons, etc.)
 export type SocialProvider =
   | 'google'
   | 'apple'
@@ -42,7 +42,8 @@ export type SocialProvider =
   | 'passkey'
   | 'wallet';
 
-// Subset of social providers used for authentication data
+// Social providers that we currently support for capturing authentication data
+// Only these are used in account events and social auth data
 export type SocialAuthType = 'email' | 'phone' | 'google';
 
 // Social authentication data structure

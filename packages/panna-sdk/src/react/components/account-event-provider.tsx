@@ -228,7 +228,7 @@ export function AccountEventProvider({
 
   /**
    * Monitor wallet state changes to detect connection/disconnection events
-   * Uses thirdweb's built-in state management instead of custom auth state
+   * Uses Thirdweb's built-in state management instead of custom auth state
    */
   useEffect(() => {
     const previousAddress = previousAddressRef.current;

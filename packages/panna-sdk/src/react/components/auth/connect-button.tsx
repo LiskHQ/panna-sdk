@@ -3,10 +3,10 @@ import { AccountDialog } from '../account/account-dialog';
 import { LoginButton } from './login-button';
 
 /**
- * A connect button component that connects users to their wallets using thirdweb's native hooks.
+ * A connect button component that connects users to their wallets using Thirdweb's native hooks.
  *
  * This component must be used within a PannaProvider that provides the Panna client via context.
- * It uses thirdweb's built-in state management for wallet connections.
+ * It uses Thirdweb's built-in state management for wallet connections.
  *
  * @throws {Error} When used outside of PannaProvider context or when no client is available
  *
