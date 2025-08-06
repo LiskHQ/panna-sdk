@@ -19,7 +19,7 @@ export type AccountEventConfig = {
 };
 
 /**
- * Hook to handle wallet events and send them to the Panna dashboard API
+ * Hook to handle wallet events and send them to the Panna API
  * @param config - Configuration options for wallet event handling
  */
 export function useAccountEvents(config: AccountEventConfig = {}) {
