@@ -28,6 +28,10 @@ import { isValidAddress } from './common';
 // Activity cache
 const activityCache = newLruMemCache('activity');
 
+// Default pagination params
+export const DEFAULT_PAGINATION_OFFSET = 0;
+export const DEFAULT_PAGINATION_LIMIT = 10;
+
 /*
  * Get recent activities for an account
  * @param params - Parameters for getting account balance
@@ -122,8 +126,12 @@ export const getActivity = async function (
   }
 
   // Set default pagination params
-  const { address, offset = 0, limit = 10 } = params;
-  const baseTxUrl = `https://blockscout.lisk.com/api/v2/addresses/${address}/transactions`;
+  const {
+    address,
+    offset = DEFAULT_PAGINATION_OFFSET,
+    limit = DEFAULT_PAGINATION_LIMIT
+  } = params;
+  const baseTxRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${address}/transactions`;
 
   const cacheKeyTransactions = address;
   const cacheKeyNextPageParams = `${address}_params`;
@@ -143,8 +151,8 @@ export const getActivity = async function (
   do {
     const requestUrl =
       nextPageParams === null
-        ? baseTxUrl
-        : `${baseTxUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}&items_count=${nextPageParams.items_count}`;
+        ? baseTxRequestUrl
+        : `${baseTxRequestUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}&items_count=${nextPageParams.items_count}`;
 
     const response: BlockscoutTransactionsResponse =
       await httpUtils.request(requestUrl);
@@ -171,14 +179,16 @@ export const getActivity = async function (
   } while (userTransactions.length <= offset + limit);
 
   const activities: Activity[] = userTransactions
-    .slice(offset, limit)
+    .slice(offset, offset + limit)
     .map((tx) => {
       const transactionID = tx.hash;
       const status = tx.result;
 
       let activityType: ActivityType = TransactionActivity.SENT;
 
-      if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
+      if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
+        activityType = TransactionActivity.SENT;
+      } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
         activityType = TransactionActivity.RECEIVED;
       } else if (
         tx.to.is_contract &&
@@ -207,7 +217,7 @@ export const getActivity = async function (
 
         case TokenERC.ERC20: {
           const erc20Tx = tx.token_transfers.find(
-            (e) => e.type.toLowerCase() === TokenERC.ERC20
+            (e) => e.token.type.toLowerCase() === TokenERC.ERC20
           );
 
           amount = {
@@ -227,7 +237,7 @@ export const getActivity = async function (
 
         case TokenERC.ERC721: {
           const erc721Tx = tx.token_transfers.find(
-            (e) => e.type.toLowerCase() === TokenERC.ERC721
+            (e) => e.token.type.toLowerCase() === TokenERC.ERC721
           );
           const erc721TxTotal = erc721Tx?.total as BlockscoutTotalERC721;
 
@@ -253,7 +263,7 @@ export const getActivity = async function (
 
         case TokenERC.ERC1155: {
           const erc1155Tx = tx.token_transfers.find(
-            (e) => e.type.toLowerCase() === TokenERC.ERC1155
+            (e) => e.token.type.toLowerCase() === TokenERC.ERC1155
           );
           const erc1155TxTotal = erc1155Tx?.total as BlockscoutTotalERC1155;
 
@@ -315,7 +325,10 @@ export const getAmountType = (
   address: string,
   tx: BlockscoutTransaction
 ): TokenType => {
-  if (tx.transaction_types.includes('contract_call')) {
+  if (
+    tx.transaction_types.includes('contract_call') &&
+    tx.transaction_types.find((e) => e.startsWith('token_'))
+  ) {
     const tokenTransferTx = tx.token_transfers.find(
       (t) =>
         ['token_transfer', 'token_minting'].includes(t.type.toLowerCase()) &&
