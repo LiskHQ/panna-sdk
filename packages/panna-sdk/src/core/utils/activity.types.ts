@@ -100,6 +100,11 @@ export interface BlockscoutTransactionsResponse {
   next_page_params: BlockscoutNextPageParams;
 }
 
+export interface BlockscoutTokenTransfersResponse {
+  items: BlockscoutTokenTransfer[];
+  next_page_params: BlockscoutNextPageParams;
+}
+
 export interface BlockscoutNextPageParams {
   block_number: number;
   index: number;
@@ -202,7 +207,7 @@ interface BlockscoutWatchlistName {
   label: string;
 }
 
-interface BlockscoutTokenTransfer {
+export interface BlockscoutTokenTransfer {
   block_hash: string;
   block_number: number;
   from: BlockscoutAddressParam;

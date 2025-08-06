@@ -15,6 +15,8 @@ import {
   type ActivityMetadata,
   type BlockscoutTransactionsResponse,
   type BlockscoutTransaction,
+  type BlockscoutTokenTransfersResponse,
+  type BlockscoutTokenTransfer,
   type BlockscoutNextPageParams,
   type BlockscoutTotalERC721,
   type BlockscoutTotalERC1155,
@@ -161,7 +163,9 @@ export const getActivity = async function (
       throw new Error(`Cannot fetch user activities: ${response.message}`);
     }
 
-    userTransactions.push(...response.items);
+    userTransactions.push(
+      ...(await fillTokenTransactions(address, response.items))
+    );
     nextPageParams = response.next_page_params;
 
     activityCache.set(cacheKeyTransactions, userTransactions);
@@ -307,6 +311,96 @@ export const getActivity = async function (
   const result: GetActivityResult = { activities, metadata };
 
   return result;
+};
+
+export const fillTokenTransactions = async (
+  address: string,
+  transactions: BlockscoutTransaction[],
+  recursionTxHash?: string
+): Promise<BlockscoutTransaction[]> => {
+  const isRecursion: boolean = !!recursionTxHash;
+
+  const cacheKeyTokenTransferTxs = `${address}_tt`;
+  const cacheKeyTokenTransferNextPageParams = `${address}_tt_params`;
+
+  let userTokenTransfers: BlockscoutTokenTransfer[] = activityCache.has(
+    cacheKeyTokenTransferTxs
+  )
+    ? (activityCache.get(cacheKeyTokenTransferTxs) as BlockscoutTokenTransfer[])
+    : [];
+
+  let nextPageParams: BlockscoutNextPageParams | null = activityCache.has(
+    cacheKeyTokenTransferNextPageParams
+  )
+    ? (activityCache.get(
+        cacheKeyTokenTransferNextPageParams
+      ) as BlockscoutNextPageParams)
+    : null;
+
+  if (isRecursion && nextPageParams === null) {
+    // On recurred invocation, when no more pages (token-transfers) are available to check through,
+    // return all the transactions in their current state
+    return transactions;
+  }
+
+  const baseRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${address}/token-transfers`;
+
+  const requestUrl =
+    nextPageParams === null
+      ? baseRequestUrl
+      : `${baseRequestUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}&items_count=${nextPageParams.items_count}`;
+
+  const response: BlockscoutTokenTransfersResponse =
+    await httpUtils.request(requestUrl);
+
+  if ('code' in response && 'message' in response) {
+    throw new Error(`Cannot fetch user token-transfers: ${response.message}`);
+  }
+
+  userTokenTransfers.push(...response.items);
+  activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
+
+  if (response.next_page_params) {
+    activityCache.set(cacheKeyTokenTransferNextPageParams, nextPageParams);
+  } else {
+    activityCache.delete(cacheKeyTokenTransferNextPageParams);
+  }
+
+  let isRecursionTxEncountered: boolean = false;
+
+  for (let tx of transactions) {
+    if (tx.hash === recursionTxHash) isRecursionTxEncountered = true;
+    if (isRecursion && !isRecursionTxEncountered) continue;
+
+    if (
+      tx.token_transfers === null &&
+      tx.transaction_types.includes('contract_call') &&
+      tx.transaction_types.find((e) => e.startsWith('token_'))
+    ) {
+      if (!tx.token_transfers) {
+        tx.token_transfers = [];
+      }
+
+      const tokenTransferTxs = userTokenTransfers.filter(
+        (e) => e.transaction_hash === tx.hash
+      );
+
+      if (tokenTransferTxs.length) {
+        tx.token_transfers.push(...tokenTransferTxs);
+
+        userTokenTransfers = userTokenTransfers.filter(
+          (e) => e.transaction_hash != tx.hash
+        );
+        activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
+      } else {
+        // Invoke the method recursively to fetch new set of token transfers
+        // and, continue filling token transfers for the remaining transactions
+        return fillTokenTransactions(address, transactions, tx.hash);
+      }
+    }
+  }
+
+  return transactions;
 };
 
 /*
