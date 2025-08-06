@@ -76,7 +76,7 @@ export class PannaApiService {
 
       return response;
     } catch (error) {
-      console.error('Failed to send account event to Panna dashboard:', error);
+      console.error('Failed to send account event to Panna API:', error);
       throw error;
     }
   }

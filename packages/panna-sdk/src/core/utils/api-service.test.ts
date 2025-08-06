@@ -382,7 +382,7 @@ describe('PannaApiService', () => {
         ).rejects.toThrow('Test error');
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Failed to send account event to Panna dashboard:',
+          'Failed to send account event to Panna API:',
           expect.any(Error)
         );
 
