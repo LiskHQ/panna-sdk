@@ -8,6 +8,7 @@ import {
   type DisconnectActivityRequest,
   type AccountUpdateActivityRequest,
   type SmartAccountTransform,
+  type SocialAuthData,
   pannaApiService
 } from '../../core/utils';
 import { getEmail, getPhoneNumber } from '../../core/wallet';
@@ -65,7 +66,7 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
     eventType: AccountEventPayload['eventType'],
     address: string,
     eventOptions: {
-      social?: { type: 'email' | 'phone' | 'google'; data: string };
+      social?: SocialAuthData;
       reason?: string;
       updateType?: string;
     } = {}
@@ -139,9 +140,7 @@ export function useAccountEvents(config: AccountEventConfig = {}) {
     if (!userAddress) return;
 
     try {
-      let socialInfo:
-        | { type: 'email' | 'phone' | 'google'; data: string }
-        | undefined;
+      let socialInfo: SocialAuthData | undefined;
 
       // Try to get social profile information if available using core functions
       try {
