@@ -305,17 +305,6 @@ export function AccountEventProvider({
       if (unsubscribeAccountChanged)
         unsubscribers.push(unsubscribeAccountChanged);
 
-      // Subscribe to chain change events
-      const unsubscribeChainChanged = activeWallet.subscribe(
-        'chainChanged',
-        () => {
-          if (userAddress) {
-            handleAccountChanged(userAddress);
-          }
-        }
-      );
-      if (unsubscribeChainChanged) unsubscribers.push(unsubscribeChainChanged);
-
       // Subscribe to multiple accounts change events
       const unsubscribeAccountsChanged = activeWallet.subscribe(
         'accountsChanged',
