@@ -172,6 +172,18 @@ export function AccountEventProvider({
       (profile) => profile.type === 'google'
     );
 
+    const discordProfile = userProfiles?.find(
+      (profile) => profile.type === 'discord'
+    );
+
+    const appleProfile = userProfiles?.find(
+      (profile) => profile.type === 'apple'
+    );
+
+    const facebookProfile = userProfiles?.find(
+      (profile) => profile.type === 'facebook'
+    );
+
     const phoneProfile = userProfiles?.find(
       (profile) => profile.type === 'phone'
     );
@@ -186,6 +198,21 @@ export function AccountEventProvider({
       return {
         type: 'google' as const,
         data: googleProfile.details.email
+      };
+    } else if (discordProfile?.details?.email) {
+      return {
+        type: 'discord' as const,
+        data: discordProfile.details.email
+      };
+    } else if (appleProfile?.details?.email) {
+      return {
+        type: 'apple' as const,
+        data: appleProfile.details.email
+      };
+    } else if (facebookProfile?.details?.email) {
+      return {
+        type: 'facebook' as const,
+        data: facebookProfile.details.email
       };
     } else if (phoneProfile?.details?.phone) {
       return {

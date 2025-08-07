@@ -106,8 +106,7 @@ const mockSmartAccountConfig: SmartWalletOptions = {
 
 const mockWallet = {
   getChain: jest.fn(() => mockChain),
-  getConfig: jest.fn(() => ({ smartAccount: mockSmartAccountConfig })),
-  subscribe: jest.fn()
+  getConfig: jest.fn(() => ({ smartAccount: mockSmartAccountConfig }))
 };
 
 const mockUserProfiles = [
@@ -135,7 +134,6 @@ describe('AccountEventProvider', () => {
     mockWallet.getConfig.mockReturnValue({
       smartAccount: mockSmartAccountConfig
     });
-    mockWallet.subscribe.mockReturnValue(jest.fn());
 
     // Setup default mocks
     mockUseActiveAccount.mockReturnValue(mockAccount as unknown as Account);
@@ -973,73 +971,6 @@ describe('AccountEventProvider', () => {
           undefined
         );
       });
-    });
-  });
-
-  describe('Wallet Event Subscriptions', () => {
-    it('should subscribe to wallet events when wallet is available', () => {
-      const mockUnsubscribe = jest.fn();
-      mockWallet.subscribe.mockReturnValue(mockUnsubscribe);
-
-      render(
-        <AccountEventProvider>
-          <div data-testid="provider-content">Provider Active</div>
-        </AccountEventProvider>
-      );
-
-      expect(mockWallet.subscribe).toHaveBeenCalledWith(
-        'accountChanged',
-        expect.any(Function)
-      );
-      expect(mockWallet.subscribe).toHaveBeenCalledWith(
-        'chainChanged',
-        expect.any(Function)
-      );
-      expect(mockWallet.subscribe).toHaveBeenCalledWith(
-        'accountsChanged',
-        expect.any(Function)
-      );
-    });
-
-    it('should handle wallet subscription errors gracefully', () => {
-      mockWallet.subscribe.mockImplementation(() => {
-        throw new Error('Subscription error');
-      });
-
-      render(
-        <AccountEventProvider>
-          <div data-testid="provider-content">Provider Active</div>
-        </AccountEventProvider>
-      );
-
-      expect(console.error).toHaveBeenCalledWith(
-        'Error subscribing to wallet events:',
-        expect.any(Error)
-      );
-    });
-
-    it('should not subscribe when wallet is not available', () => {
-      mockUseActiveWallet.mockReturnValue(undefined as unknown as Wallet);
-
-      render(
-        <AccountEventProvider>
-          <div data-testid="provider-content">Provider Active</div>
-        </AccountEventProvider>
-      );
-
-      expect(mockWallet.subscribe).not.toHaveBeenCalled();
-    });
-
-    it('should not subscribe when user address is not available', () => {
-      mockUseActiveAccount.mockReturnValue(null as unknown as Account);
-
-      render(
-        <AccountEventProvider>
-          <div data-testid="provider-content">Provider Active</div>
-        </AccountEventProvider>
-      );
-
-      expect(mockWallet.subscribe).not.toHaveBeenCalled();
     });
   });
 });
