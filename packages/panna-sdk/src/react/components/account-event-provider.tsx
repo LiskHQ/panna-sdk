@@ -70,7 +70,7 @@ export function AccountEventProvider({
     config: SmartWalletOptions
   ): SmartAccountTransform => {
     return {
-      chain: config?.chain?.name || currentChain?.name || 'lisk-sepolia',
+      chain: config.chain.name || '',
       factoryAddress: config.factoryAddress || '',
       entrypointAddress: config.overrides?.entrypointAddress || '',
       sponsorGas:
@@ -95,12 +95,18 @@ export function AccountEventProvider({
     } = {}
   ) => {
     try {
+      const chainId = currentChain?.id;
+
+      if (!chainId) {
+        throw new Error('Chain ID not found');
+      }
+
       const basePayload = {
         eventType,
         timestamp: new Date().toISOString(),
         ecosystemId: EcosystemId.LISK,
         partnerId,
-        chainId: currentChain?.id || 4202
+        chainId
       };
 
       let payload: AccountEventPayload;
@@ -166,18 +172,6 @@ export function AccountEventProvider({
       (profile) => profile.type === 'google'
     );
 
-    const discordProfile = userProfiles?.find(
-      (profile) => profile.type === 'discord'
-    );
-
-    const appleProfile = userProfiles?.find(
-      (profile) => profile.type === 'apple'
-    );
-
-    const facebookProfile = userProfiles?.find(
-      (profile) => profile.type === 'facebook'
-    );
-
     const phoneProfile = userProfiles?.find(
       (profile) => profile.type === 'phone'
     );
@@ -192,21 +186,6 @@ export function AccountEventProvider({
       return {
         type: 'google' as const,
         data: googleProfile.details.email
-      };
-    } else if (discordProfile?.details?.email) {
-      return {
-        type: 'discord' as const,
-        data: discordProfile.details.email
-      };
-    } else if (appleProfile?.details?.email) {
-      return {
-        type: 'apple' as const,
-        data: appleProfile.details.email
-      };
-    } else if (facebookProfile?.details?.email) {
-      return {
-        type: 'facebook' as const,
-        data: facebookProfile.details.email
       };
     } else if (phoneProfile?.details?.phone) {
       return {
@@ -283,54 +262,6 @@ export function AccountEventProvider({
     // Update the reference
     previousAddressRef.current = userAddress;
   }, [userAddress]);
-
-  /**
-   * Subscribe to wallet events using useActiveWallet
-   */
-  useEffect(() => {
-    if (!activeWallet || !userAddress) return;
-
-    const unsubscribers: (() => void)[] = [];
-
-    try {
-      // Subscribe to account change events
-      const unsubscribeAccountChanged = activeWallet.subscribe(
-        'accountChanged',
-        (account) => {
-          if (account?.address && account.address !== userAddress) {
-            handleAccountChanged(account.address);
-          }
-        }
-      );
-      if (unsubscribeAccountChanged)
-        unsubscribers.push(unsubscribeAccountChanged);
-
-      // Subscribe to multiple accounts change events
-      const unsubscribeAccountsChanged = activeWallet.subscribe(
-        'accountsChanged',
-        (addresses) => {
-          if (addresses?.[0] && addresses[0] !== userAddress) {
-            handleAccountChanged(addresses[0]);
-          }
-        }
-      );
-      if (unsubscribeAccountsChanged)
-        unsubscribers.push(unsubscribeAccountsChanged);
-    } catch (error) {
-      console.error('Error subscribing to wallet events:', error);
-    }
-
-    // Cleanup function
-    return () => {
-      unsubscribers.forEach((unsubscribe) => {
-        try {
-          unsubscribe();
-        } catch (error) {
-          console.error('Error unsubscribing from wallet events:', error);
-        }
-      });
-    };
-  }, [activeWallet, userAddress]);
 
   const contextValue: AccountEventContextType = {
     sendAccountEvent
