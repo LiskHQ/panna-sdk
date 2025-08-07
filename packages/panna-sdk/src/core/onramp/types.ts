@@ -47,3 +47,39 @@ export type OnrampStatusResult =
   | OnrampCreatedResult
   | OnrampPendingResult
   | OnrampCompletedResult;
+
+// Onramp providers list
+export type OnRampProvider = 'stripe' | 'coinbase' | 'transak';
+
+// Parameters for preparing an onramp
+export interface OnrampPrepareParams {
+  client: PannaClient;
+  onRampProvider: OnRampProvider;
+  chainId?: number;
+  tokenAddress: string;
+  receiver: string;
+  amount: string;
+  purchaseData?: OnrampPurchaseData;
+  country: string;
+}
+
+// OnRamp intent to hold provider info
+export interface OnRampIntent {
+  onRampProvider: OnRampProvider;
+  chainId: number;
+  tokenAddress: string;
+  receiver: string;
+  amount: string;
+}
+
+// Result structure for prepared onramps
+export interface OnrampPrepareResult {
+  id: string;
+  link: string;
+  currency: string;
+  currencyAmount: string;
+  destinationAmount: string;
+  timestamp?: number;
+  expiration?: number;
+  intent?: OnRampIntent;
+}

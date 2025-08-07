@@ -1,5 +1,12 @@
 import { Bridge } from 'thirdweb';
-import type { OnrampStatusParams, OnrampStatusResult } from './types';
+import { lisk } from '../chains';
+import type {
+  OnRampIntent,
+  OnrampPrepareParams,
+  OnrampPrepareResult,
+  OnrampStatusParams,
+  OnrampStatusResult
+} from './types';
 
 /**
  * Retrieves the status of an Onramp session created via prepareOnRamp
@@ -64,6 +71,89 @@ export async function onRampStatus(
       `Failed to get onramp status for session ${id}: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`
+    );
+  }
+}
+
+/**
+ * Prepares an onramp session for a fiat-to-crypto transaction
+ *
+ * This function creates a new onramp session that can be used to track the progress
+ * of a fiat-to-crypto onramp transaction from creation through completion.
+ *
+ * @param params - Parameters for preparing the onramp
+ * @param params.client - The Panna client instance used for authentication
+ * @param params.chainId - The chain ID of the token being purchased
+ * @param params.tokenAddress - The address of the token being purchased
+ * @param params.receiver - The address of the receiver of the token
+ * @param params.amount - The amount of the token being purchased
+ * @param params.purchaseData - Additional data to be stored with the onramp session
+ * @param params.onramp - The onramp provider to use
+ * @returns Promise resolving to the onramp session identifier
+ * @throws Error if the onramp session cannot be prepared
+ *
+ * @example
+ * ```ts
+ * // Prepare an onramp session for a fiat-to-crypto transaction
+ * const onramp = await onRampPrepare({
+ *   client: pannaClient,
+ *   chainId: 1,
+ *   tokenAddress: '0x0000000000000000000000000000000000000000',
+ *   receiver: '0x0000000000000000000000000000000000000000',
+ *   amount: '100',
+ *   purchaseData: { sessionId: '123' },
+ *   onramp: 'stripe'
+ * });
+ * ```
+ */
+export async function onRampPrepare(
+  params: OnrampPrepareParams
+): Promise<OnrampPrepareResult> {
+  const {
+    client,
+    chainId,
+    tokenAddress,
+    receiver,
+    amount,
+    purchaseData,
+    onRampProvider
+  } = params;
+
+  try {
+    // TODO: incase of providers outside thirdweb, we need to handle the result differently
+    const result = await Bridge.Onramp.prepare({
+      client,
+      chainId: chainId || lisk.id,
+      onramp: onRampProvider,
+      tokenAddress,
+      receiver,
+      amount: BigInt(amount),
+      purchaseData,
+      country: 'US'
+    });
+    let intent: OnRampIntent | undefined = result.intent
+      ? {
+          amount: result.intent.amount || '0',
+          chainId: result.intent.chainId,
+          onRampProvider: result.intent.onramp,
+          receiver: result.intent.receiver,
+          tokenAddress: result.intent.tokenAddress
+        }
+      : undefined;
+
+    return {
+      currency: result.currency,
+      currencyAmount: result.currencyAmount.toString(),
+      destinationAmount: result.destinationAmount.toString(),
+      expiration: result.expiration,
+      id: result.id,
+      link: result.link,
+      timestamp: result.timestamp,
+      intent
+    };
+  } catch (error) {
+    throw new Error(
+      `Failed to prepare onramp: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   }
 }
