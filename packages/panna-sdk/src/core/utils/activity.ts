@@ -318,6 +318,9 @@ export const fillTokenTransactions = async (
   transactions: BlockscoutTransaction[],
   recursionTxHash?: string
 ): Promise<BlockscoutTransaction[]> => {
+  // Do not proceed (avoid unnecessary API calls) if there are no transactions
+  if (transactions.length === 0) return transactions;
+
   const isRecursion: boolean = !!recursionTxHash;
 
   const cacheKeyTokenTransferTxs = `${address}_tt`;

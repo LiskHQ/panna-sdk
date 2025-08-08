@@ -3152,9 +3152,14 @@ describe('getActivity', () => {
     const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
     const result = await getActivity(params);
 
-    expect(httpUtils.request).toHaveBeenCalledTimes(1);
-    expect(httpUtils.request).toHaveBeenCalledWith(
+    expect(httpUtils.request).toHaveBeenCalledTimes(2);
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      1,
       `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`
+    );
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      2,
+      `https://blockscout.lisk.com/api/v2/addresses/${params.address}/token-transfers`
     );
     expect(result).toStrictEqual({
       activities: [
