@@ -34,6 +34,25 @@ const activityCache = newLruMemCache('activity');
 export const DEFAULT_PAGINATION_OFFSET = 0;
 export const DEFAULT_PAGINATION_LIMIT = 10;
 
+// Blockscout URLs
+const BASE_BLOCKSCOUT_URL = 'https://blockscout.lisk.com/api/v2';
+
+/**
+ * Get blockscout transactions endpoint
+ * @param address The address for which to return the transactions API endpoint
+ * @returns Blockscout transactions API endpoint for the supplied address
+ */
+export const getBaseTransactionsRequestUrl = (address: string): string =>
+  `${BASE_BLOCKSCOUT_URL}/addresses/${address}/transactions`;
+
+/**
+ * Get blockscout token transfers endpoint
+ * @param address The address for which to return the token transfers API endpoint
+ * @returns Blockscout token transfers API endpoint for the supplied address
+ */
+export const getBaseTokenTransferRequestUrl = (address: string): string =>
+  `${BASE_BLOCKSCOUT_URL}/addresses/${address}/token-transfers`;
+
 /*
  * Get recent activities for an account
  * @param params - Parameters for getting account balance
@@ -133,8 +152,6 @@ export const getActivity = async function (
     offset = DEFAULT_PAGINATION_OFFSET,
     limit = DEFAULT_PAGINATION_LIMIT
   } = params;
-  const baseTxRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${address}/transactions`;
-
   const cacheKeyTransactions = address;
   const cacheKeyNextPageParams = `${address}_params`;
 
@@ -150,7 +167,8 @@ export const getActivity = async function (
     ? (activityCache.get(cacheKeyNextPageParams) as BlockscoutNextPageParams)
     : null;
 
-  do {
+  const baseTxRequestUrl = getBaseTransactionsRequestUrl(address);
+  while (userTransactions.length <= offset + limit) {
     const requestUrl =
       nextPageParams === null
         ? baseTxRequestUrl
@@ -180,7 +198,7 @@ export const getActivity = async function (
       activityCache.delete(cacheKeyNextPageParams);
       break;
     }
-  } while (userTransactions.length <= offset + limit);
+  }
 
   const activities: Activity[] = userTransactions
     .slice(offset, offset + limit)
@@ -201,7 +219,7 @@ export const getActivity = async function (
         activityType = TransactionActivity.MINTED;
       }
 
-      var amount: TransactionAmount;
+      let amount: TransactionAmount;
       const amountType = getAmountType(address, tx);
       switch (amountType) {
         case TokenERC.ETH: {
@@ -313,13 +331,18 @@ export const getActivity = async function (
   return result;
 };
 
+/**
+ *
+ */
 export const fillTokenTransactions = async (
   address: string,
   transactions: BlockscoutTransaction[],
   recursionTxHash?: string
 ): Promise<BlockscoutTransaction[]> => {
   // Do not proceed (avoid unnecessary API calls) if there are no transactions
-  if (transactions.length === 0) return transactions;
+  if (transactions.length === 0) {
+    return transactions;
+  }
 
   const isRecursion: boolean = !!recursionTxHash;
 
@@ -346,8 +369,7 @@ export const fillTokenTransactions = async (
     return transactions;
   }
 
-  const baseRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${address}/token-transfers`;
-
+  const baseRequestUrl = getBaseTokenTransferRequestUrl(address);
   const requestUrl =
     nextPageParams === null
       ? baseRequestUrl
@@ -372,8 +394,12 @@ export const fillTokenTransactions = async (
   let isRecursionTxEncountered: boolean = false;
 
   for (let tx of transactions) {
-    if (tx.hash === recursionTxHash) isRecursionTxEncountered = true;
-    if (isRecursion && !isRecursionTxEncountered) continue;
+    if (tx.hash === recursionTxHash) {
+      isRecursionTxEncountered = true;
+    }
+    if (isRecursion && !isRecursionTxEncountered) {
+      continue;
+    }
 
     if (
       tx.token_transfers === null &&
@@ -391,6 +417,8 @@ export const fillTokenTransactions = async (
       if (tokenTransferTxs.length) {
         tx.token_transfers.push(...tokenTransferTxs);
 
+        // Evict the token transfers from the cache for the given transaction,
+        // since they are already included (above) within the transaction itself
         userTokenTransfers = userTokenTransfers.filter(
           (e) => e.transaction_hash != tx.hash
         );

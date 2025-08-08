@@ -30,7 +30,10 @@ export const newLruMemCache = (
   const cache = memCachePool.get(bank);
 
   return {
-    set: (key, val, ttl) => cache.set(key, val, ttl),
+    set: (key, val, ttl) => {
+      cache.set(key, val, ttl);
+      return cache;
+    },
     get: (key) => cache.get(key),
     has: (key) => cache.has(key),
     delete: (key) => cache.delete(key),

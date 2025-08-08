@@ -13,7 +13,7 @@ const requestCache = newLruMemCache('http_request');
 type RequestParamsConfig = Omit<axios.AxiosRequestConfig, 'url'>;
 
 // Internal functions
-const isCacheableResponse = (response: axios.AxiosResponse) =>
+const isCacheableResponse = (response: axios.AxiosResponse): boolean =>
   response.status === HttpStatusCode.Ok;
 
 const requestWithRetries = async (
@@ -21,15 +21,19 @@ const requestWithRetries = async (
   requestParams: RequestParamsConfig,
   numRetries: number = DEFAULT_RETRIES,
   retryDelayMs: number = DEFAULT_RETRY_DELAY_MS
-) => {
+): Promise<axios.AxiosResponse> => {
   let response: axios.AxiosResponse;
+  const ax = new axios.Axios();
 
   do {
-    const ax = new axios.Axios();
     response = await ax.request({ url, ...requestParams });
-    if (response.status < HttpStatusCode.BadRequest) return response;
+    if (response.status < HttpStatusCode.InternalServerError) {
+      return response;
+    }
 
-    await delay(retryDelayMs);
+    const backedoffDelayMs =
+      retryDelayMs * Math.pow(2, DEFAULT_RETRIES - numRetries);
+    await delay(backedoffDelayMs);
   } while (--numRetries);
 
   return response;
@@ -44,19 +48,19 @@ export const request = async (
 ) => {
   let response: axios.AxiosResponse;
 
-  if (!('method' in params)) {
-    params.method = 'get';
-  }
+  const { method = 'get', ...restParams } = params;
+  const finalParams = { method, ...restParams };
 
   // If cache exists, return the response from cache
-  const cacheKey = JSON.stringify({ url, params }, null, 0);
+  const cacheKey = JSON.stringify({ url, finalParams }, null, 0);
   if (requestCache.has(cacheKey)) {
     response = requestCache.get(cacheKey) as axios.AxiosResponse;
+    return response.data;
   }
 
   response = await requestWithRetries(
     url,
-    params,
+    finalParams,
     DEFAULT_RETRIES,
     DEFAULT_RETRY_DELAY_MS
   );

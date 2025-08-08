@@ -3,12 +3,44 @@ import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
   getActivity,
-  getAmountType
+  getAmountType,
+  getBaseTransactionsRequestUrl,
+  getBaseTokenTransferRequestUrl
 } from './activity';
 import { TokenERC, BlockscoutTransaction, TokenType } from './activity.types';
 
 // Mock upstream modules
 jest.mock('../helpers/http');
+
+// Constant
+const REGEX_URL =
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+
+describe('getBaseTransactionsRequestUrl', () => {
+  it('should return the transactions API endpoint for the given address', () => {
+    const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
+    const url = getBaseTransactionsRequestUrl(address);
+
+    expect(typeof url).toBe('string');
+    expect(url).toMatch(REGEX_URL);
+    expect(url.startsWith('https')).toBeTruthy();
+    expect(url.endsWith('transactions')).toBeTruthy();
+    expect(url.includes(address)).toBeTruthy();
+  });
+});
+
+describe('getBaseTokenTransferRequestUrl', () => {
+  it('should return the token transfers API endpoint for the given address', () => {
+    const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
+    const url = getBaseTokenTransferRequestUrl(address);
+
+    expect(typeof url).toBe('string');
+    expect(url).toMatch(REGEX_URL);
+    expect(url.startsWith('https')).toBeTruthy();
+    expect(url.endsWith('token-transfers')).toBeTruthy();
+    expect(url.includes(address)).toBeTruthy();
+  });
+});
 
 describe('getAmountType', () => {
   it(`should throw error for invalid transaction`, () => {
