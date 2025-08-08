@@ -1,4 +1,4 @@
-import { useActiveAccount } from 'thirdweb/react';
+import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance } from '@/mocks/token-balances';
 import { cn } from '@/utils';

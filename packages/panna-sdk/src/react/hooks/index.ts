@@ -5,7 +5,8 @@ export {
   useAutoConnect as useAutoLogin,
   useConnectedWallets as useConnectedAccounts,
   useActiveAccount,
-  useSetActiveWallet as useSetActiveAccount,
+  useActiveWallet,
+  useSetActiveWallet,
 
   // Balance & Wallet Info hooks
   useWalletBalance as useAccountBalance,

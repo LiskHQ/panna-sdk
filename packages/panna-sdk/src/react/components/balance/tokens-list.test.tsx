@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { useActiveAccount } from 'thirdweb/react';
+import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '../../hooks/use-token-balances';
 import { TokensList } from './tokens-list';
 
 jest.mock('../../hooks/use-token-balances');
-jest.mock('thirdweb/react', () => ({
+jest.mock('@/hooks', () => ({
   useActiveAccount: jest.fn()
 }));
 

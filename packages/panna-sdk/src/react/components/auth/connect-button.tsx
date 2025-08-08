@@ -1,4 +1,4 @@
-import { useActiveAccount } from 'thirdweb/react';
+import { useActiveAccount } from '@/hooks';
 import { AccountDialog } from '../account/account-dialog';
 import { LoginButton } from './login-button';
 

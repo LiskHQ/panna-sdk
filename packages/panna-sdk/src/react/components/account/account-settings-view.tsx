@@ -1,5 +1,5 @@
 import { MailIcon, PhoneIcon } from 'lucide-react';
-import { useActiveWallet, useDisconnect, useProfiles } from 'thirdweb/react';
+import { useActiveWallet, useLogout, useUserProfiles } from '@/hooks';
 import { usePanna } from '../../hooks';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
@@ -9,12 +9,12 @@ import { Typography } from '../ui/typography';
 export function AccountSettingsView() {
   const { client } = usePanna();
   const activeWallet = useActiveWallet();
-  const { disconnect } = useDisconnect();
+  const { disconnect } = useLogout();
   const {
     data: userProfiles,
     isLoading,
     error
-  } = useProfiles({ client: client! });
+  } = useUserProfiles({ client: client! });
 
   const handleLogout = () => {
     if (activeWallet) {

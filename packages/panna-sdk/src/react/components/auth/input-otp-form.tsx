@@ -3,7 +3,6 @@ import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { useConnect } from 'thirdweb/react';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import z from 'zod';
 import {
@@ -20,7 +19,7 @@ import {
   InputOTPSlot
 } from '@/components/ui/input-otp';
 import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
-import { usePanna } from '@/hooks';
+import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { getEnvironmentChain } from '../../utils';
 import { Button } from '../ui/button';
@@ -54,9 +53,9 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
 
-  // Configure useConnect with account abstraction for smart accounts
-  const { connect } = useConnect({
+  const { connect } = useLogin({
     client,
+    setWalletAsActive: true,
     accountAbstraction: {
       chain: getEnvironmentChain(),
       sponsorGas: true // enable sponsored transactions

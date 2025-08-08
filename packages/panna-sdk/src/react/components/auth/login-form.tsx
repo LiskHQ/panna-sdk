@@ -9,7 +9,6 @@ import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { useConnect } from 'thirdweb/react';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { LAST_AUTH_PROVIDER } from '@/consts';
+import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
 import { getEnvironmentChain } from '../../utils';
 import { GoogleIcon } from '../icons/google';
@@ -79,9 +79,9 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
 
-  // Configure useConnect with account abstraction for smart accounts
-  const { connect } = useConnect({
+  const { connect } = useLogin({
     client,
+    setWalletAsActive: true,
     accountAbstraction: {
       chain: getEnvironmentChain(),
       sponsorGas: true
