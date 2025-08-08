@@ -12,8 +12,8 @@ type TokensListProps = {
 export function TokensList({ className }: TokensListProps) {
   const account = useActiveAccount();
   const {
-    isLoading,
     data: tokens,
+    isLoading,
     isError
   } = useTokenBalances(
     { address: account?.address as string },
