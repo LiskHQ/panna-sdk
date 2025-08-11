@@ -37,30 +37,53 @@ export const DEFAULT_PAGINATION_LIMIT = 10;
 // Blockscout URLs
 const BASE_BLOCKSCOUT_URL = 'https://blockscout.lisk.com/api/v2';
 
+export const CACHE_KEY_TYPE = {
+  transactions: '',
+  transactions_next_params: 'params',
+  token_transfers: 'tt',
+  token_transfers_next_params: 'tt_params'
+};
+
 /**
- * Get blockscout transactions endpoint
- * @param address The address for which to return the transactions API endpoint
- * @returns Blockscout transactions API endpoint for the supplied address
+ * Get the cache key for the provided address and type of data.
+ * @param address The address for which to retrieve the cache key.
+ * @param type The type of cached data.
+ * @returns Cache key for the provided address and data type.
+ * @example
+ * ```ts
+ * // Get the cache key for the specified user's transactions
+ * const result = await getCacheKey('0xc0ffee254729296a45a3885639AC7E10F9d54979', 'transactions');
+ * // result: '0xc0ffee254729296a45a3885639AC7E10F9d54979_'
+ */
+export const getCacheKey = (
+  address: string,
+  type: keyof typeof CACHE_KEY_TYPE
+): string => `${address}_${CACHE_KEY_TYPE[type]}`;
+
+/**
+ * Get blockscout transactions endpoint.
+ * @param address The address for which to return the transactions API endpoint.
+ * @returns Blockscout transactions API endpoint for the supplied address.
  */
 export const getBaseTransactionsRequestUrl = (address: string): string =>
   `${BASE_BLOCKSCOUT_URL}/addresses/${address}/transactions`;
 
 /**
- * Get blockscout token transfers endpoint
- * @param address The address for which to return the token transfers API endpoint
- * @returns Blockscout token transfers API endpoint for the supplied address
+ * Get blockscout token transfers endpoint.
+ * @param address The address for which to return the token transfers API endpoint.
+ * @returns Blockscout token transfers API endpoint for the supplied address.
  */
 export const getBaseTokenTransferRequestUrl = (address: string): string =>
   `${BASE_BLOCKSCOUT_URL}/addresses/${address}/token-transfers`;
 
 /*
- * Get recent activities for an account
- * @param params - Parameters for getting account balance
- * @param params.address - The address for which to retrieve the balance.
+ * Get recent activities for an account.
+ * @param params - Parameters for fetching the account activities.
+ * @param params.address - The address for which to retrieve the activities.
  * @param params.offset - (Optional) The number of items to be skipped from the matching result. (Default: 0)
  * @param params.limit - (Optional) The number of items to be returned from the matching result. (Default: 10)
- * @returns Account activity information
- * @throws Error if address is invalid
+ * @returns Account activity information.
+ * @throws Error if address is invalid.
  * @example
  * ```ts
  * // Get value for the specified user's native token balance in USD
@@ -152,8 +175,11 @@ export const getActivity = async function (
     offset = DEFAULT_PAGINATION_OFFSET,
     limit = DEFAULT_PAGINATION_LIMIT
   } = params;
-  const cacheKeyTransactions = address;
-  const cacheKeyNextPageParams = `${address}_params`;
+  const cacheKeyTransactions = getCacheKey(address, 'transactions');
+  const cacheKeyNextPageParams = getCacheKey(
+    address,
+    'transactions_next_params'
+  );
 
   const userTransactions: BlockscoutTransaction[] = activityCache.has(
     cacheKeyTransactions
@@ -332,22 +358,99 @@ export const getActivity = async function (
 };
 
 /**
- *
+ * Fill transactions with the token transfers details (when applicable) that are used to determine the user's activity details.
+ * @param address The address corresponding which the token transfers need to be filled.
+ * @param transactions The transactions list that need to be filled with the token transactions information.
+ * @returns The input transaction objects filled with token transfers when applicable.
  */
 export const fillTokenTransactions = async (
   address: string,
-  transactions: BlockscoutTransaction[],
-  recursionTxHash?: string
+  transactions: BlockscoutTransaction[]
 ): Promise<BlockscoutTransaction[]> => {
   // Do not proceed (avoid unnecessary API calls) if there are no transactions
   if (transactions.length === 0) {
     return transactions;
   }
 
-  const isRecursion: boolean = !!recursionTxHash;
+  const cacheKeyTokenTransferTxs = getCacheKey(address, 'token_transfers');
+  const cacheKeyTokenTransferNextPageParams = getCacheKey(
+    address,
+    'token_transfers_next_params'
+  );
 
-  const cacheKeyTokenTransferTxs = `${address}_tt`;
-  const cacheKeyTokenTransferNextPageParams = `${address}_tt_params`;
+  for (let tx of transactions) {
+    // Set to empty array to ensure array functions on `token_transfers`
+    // within getActivity do not throw error
+    if (!Array.isArray(tx.token_transfers)) {
+      tx.token_transfers = [];
+    }
+
+    if (
+      tx.transaction_types.includes('contract_call') &&
+      tx.transaction_types.find((e) => e.startsWith('token_'))
+    ) {
+      let shouldRetryAfterUpdatingTTCache: boolean = true;
+      do {
+        const userTokenTransfers: BlockscoutTokenTransfer[] = activityCache.has(
+          cacheKeyTokenTransferTxs
+        )
+          ? (activityCache.get(
+              cacheKeyTokenTransferTxs
+            ) as BlockscoutTokenTransfer[])
+          : [];
+
+        const nextPageParams: BlockscoutNextPageParams | null =
+          activityCache.has(cacheKeyTokenTransferNextPageParams)
+            ? (activityCache.get(
+                cacheKeyTokenTransferNextPageParams
+              ) as BlockscoutNextPageParams)
+            : null;
+
+        const tokenTransferTxs = userTokenTransfers.filter(
+          (e) => e.transaction_hash === tx.hash
+        );
+
+        if (
+          // no matching token transfer transactions exist in cache
+          tokenTransferTxs.length === 0 ||
+          // matching token transfer transactions partially exist in cache
+          (nextPageParams !== null &&
+            tx.block_number <= nextPageParams.block_number)
+        ) {
+          await updateTokenTransactionsCache(address);
+          continue;
+        }
+
+        shouldRetryAfterUpdatingTTCache = false;
+        tx.token_transfers.push(...tokenTransferTxs);
+
+        // Evict the token transfers from the cache for the given transaction,
+        // since they are already included (above) within the transaction itself
+        activityCache.set(
+          cacheKeyTokenTransferTxs,
+          userTokenTransfers.filter((e) => e.transaction_hash != tx.hash)
+        );
+      } while (shouldRetryAfterUpdatingTTCache);
+    }
+  }
+
+  return transactions;
+};
+
+/**
+ * Update the cache for the given address with token transfer transactions (one page with one invocation), if exists.
+ * @param address The address for which to update the token transactions cache.
+ * @returns void
+ * @throws Error if the external API call fails.
+ */
+export const updateTokenTransactionsCache = async (
+  address: string
+): Promise<void> => {
+  const cacheKeyTokenTransferTxs = getCacheKey(address, 'token_transfers');
+  const cacheKeyTokenTransferNextPageParams = getCacheKey(
+    address,
+    'token_transfers_next_params'
+  );
 
   let userTokenTransfers: BlockscoutTokenTransfer[] = activityCache.has(
     cacheKeyTokenTransferTxs
@@ -362,12 +465,6 @@ export const fillTokenTransactions = async (
         cacheKeyTokenTransferNextPageParams
       ) as BlockscoutNextPageParams)
     : null;
-
-  if (isRecursion && nextPageParams === null) {
-    // On recurred invocation, when no more pages (token-transfers) are available to check through,
-    // return all the transactions in their current state
-    return transactions;
-  }
 
   const baseRequestUrl = getBaseTokenTransferRequestUrl(address);
   const requestUrl =
@@ -390,56 +487,14 @@ export const fillTokenTransactions = async (
   } else {
     activityCache.delete(cacheKeyTokenTransferNextPageParams);
   }
-
-  let isRecursionTxEncountered: boolean = false;
-
-  for (let tx of transactions) {
-    if (tx.hash === recursionTxHash) {
-      isRecursionTxEncountered = true;
-    }
-    if (isRecursion && !isRecursionTxEncountered) {
-      continue;
-    }
-
-    if (
-      tx.token_transfers === null &&
-      tx.transaction_types.includes('contract_call') &&
-      tx.transaction_types.find((e) => e.startsWith('token_'))
-    ) {
-      if (!tx.token_transfers) {
-        tx.token_transfers = [];
-      }
-
-      const tokenTransferTxs = userTokenTransfers.filter(
-        (e) => e.transaction_hash === tx.hash
-      );
-
-      if (tokenTransferTxs.length) {
-        tx.token_transfers.push(...tokenTransferTxs);
-
-        // Evict the token transfers from the cache for the given transaction,
-        // since they are already included (above) within the transaction itself
-        userTokenTransfers = userTokenTransfers.filter(
-          (e) => e.transaction_hash != tx.hash
-        );
-        activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
-      } else {
-        // Invoke the method recursively to fetch new set of token transfers
-        // and, continue filling token transfers for the remaining transactions
-        return fillTokenTransactions(address, transactions, tx.hash);
-      }
-    }
-  }
-
-  return transactions;
 };
 
 /*
- * Get amount type (known ERC standards or ETH) for a given transaction
- * @param address - User address
- * @param tx - Valid BlockscoutTransaction type
- * @returns The determined ETH/ERC standard for the transacted amount
- * @throws Error if unknown transaction amount type
+ * Get amount type (known ERC standards or ETH) for a given transaction.
+ * @param address - User address.
+ * @param tx - Valid BlockscoutTransaction type.
+ * @returns The determined ETH/ERC standard for the transacted amount.
+ * @throws Error if unknown transaction amount type.
  * @example
  * ```ts
  * const result = await getAmountType(userAddress, blockscoutTransaction);

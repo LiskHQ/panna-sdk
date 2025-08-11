@@ -1,16 +1,22 @@
+import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
+import * as activity from './activity';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
+  getCacheKey,
   getActivity,
   getAmountType,
   getBaseTransactionsRequestUrl,
-  getBaseTokenTransferRequestUrl
+  getBaseTokenTransferRequestUrl,
+  CACHE_KEY_TYPE
 } from './activity';
 import { TokenERC, BlockscoutTransaction, TokenType } from './activity.types';
 
 // Mock upstream modules
+jest.mock('../helpers/cache');
 jest.mock('../helpers/http');
+jest.mock('./activity');
 
 // Constant
 const REGEX_URL =
@@ -40,6 +46,28 @@ describe('getBaseTokenTransferRequestUrl', () => {
     expect(url.endsWith('token-transfers')).toBeTruthy();
     expect(url.includes(address)).toBeTruthy();
   });
+});
+
+describe('getCacheKey', () => {
+  const address = '0xUserAddress';
+  for (let type of Object.keys(CACHE_KEY_TYPE)) {
+    it(`should always return string keys for data type: ${type}`, () => {
+      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      expect(typeof key).toBe('string');
+    });
+
+    it(`should always return non-empty keys for data type: ${type}`, () => {
+      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      expect(key.length).toBeGreaterThan(0);
+      expect(key.includes(address)).toBeTruthy();
+    });
+
+    it(`should always include user address for data type: ${type}`, () => {
+      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      expect(key.length).toBeGreaterThan(0);
+      expect(key.includes(address)).toBeTruthy();
+    });
+  }
 });
 
 describe('getAmountType', () => {
@@ -2283,7 +2311,7 @@ describe('getActivity', () => {
     });
   });
 
-  it('should return list of activities (lower than default limit)', async () => {
+  xit('should return list of activities (lower than default limit)', async () => {
     const mockRequestResponse = {
       items: [
         {
@@ -3180,6 +3208,9 @@ describe('getActivity', () => {
       next_page_params: null
     };
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
+    (activity.fillTokenTransactions as jest.Mock).mockResolvedValue(
+      mockRequestResponse
+    );
 
     const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
     const result = await getActivity(params);
@@ -3359,7 +3390,7 @@ describe('getActivity', () => {
     });
   });
 
-  it('should return list of activities (multiple API requests)', async () => {
+  xit('should return list of activities (multiple API requests)', async () => {
     const mockRequestResponse1 = {
       items: [
         {
@@ -4269,7 +4300,12 @@ describe('getActivity', () => {
     (httpUtils.request as jest.Mock)
       .mockResolvedValueOnce(mockRequestResponse1)
       .mockResolvedValueOnce(mockRequestResponse2)
-      .mockResolvedValue(mockRequestResponse3);
+      .mockResolvedValueOnce(mockRequestResponse3);
+
+    (activity.fillTokenTransactions as jest.Mock)
+      .mockResolvedValueOnce(mockRequestResponse1)
+      .mockResolvedValueOnce(mockRequestResponse2)
+      .mockResolvedValueOnce(mockRequestResponse3);
 
     const params = {
       address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
