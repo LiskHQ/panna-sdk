@@ -70,6 +70,10 @@ export {
   type OnrampCreatedResult,
   type OnrampPendingResult,
   type OnrampCompletedResult,
+  type OnRampProvider,
+  type OnrampPrepareResult,
+  type OnRampIntent,
+  type OnrampPrepareParams,
   // Constants
   DEFAULT_CURRENCY,
   DEFAULT_CHAIN,

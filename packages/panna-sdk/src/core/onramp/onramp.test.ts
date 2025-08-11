@@ -1,17 +1,20 @@
 import { Bridge } from 'thirdweb';
+import { liskSepolia } from '../chains';
 import type { PannaClient } from '../client';
-import { onRampStatus } from './onramp';
+import { onRampStatus, onRampPrepare } from './onramp';
 import type {
   OnrampCreatedResult,
   OnrampPendingResult,
-  OnrampCompletedResult
+  OnrampCompletedResult,
+  OnrampPrepareParams
 } from './types';
 
 // Mock thirdweb Bridge module
 jest.mock('thirdweb', () => ({
   Bridge: {
     Onramp: {
-      status: jest.fn()
+      status: jest.fn(),
+      prepare: jest.fn()
     }
   }
 }));
@@ -154,5 +157,127 @@ describe('onRampStatus', () => {
       id: testId,
       client: testClient
     });
+  });
+});
+
+describe('onRampPrepare', () => {
+  const mockClient = { clientId: 'test-client' } as PannaClient;
+
+  const onRampProvider = 'stripe';
+  const expectedPrepareResult = {
+    id: 'session-prepare-1',
+    link: 'https://onramp.example.com/session-prepare-1',
+    currency: 'USD',
+    currencyAmount: '100',
+    destinationAmount: '11',
+    timestamp: 1710000000,
+    expiration: 1710003600
+  };
+
+  const expectedIntent = {
+    onRampProvider,
+    chainId: 1,
+    tokenAddress: '0xToken',
+    receiver: '0xReceiver',
+    amount: '100'
+  };
+
+  const mockPrepareResult = {
+    ...expectedPrepareResult,
+    currencyAmount: Number(expectedPrepareResult.currencyAmount),
+    destinationAmount: BigInt(expectedPrepareResult.destinationAmount)
+  };
+
+  const mockPrepareIntent = {
+    onramp: onRampProvider,
+    chainId: expectedIntent.chainId,
+    tokenAddress: expectedIntent.tokenAddress,
+    receiver: expectedIntent.receiver,
+    amount: expectedIntent.amount
+  };
+
+  const params: OnrampPrepareParams = {
+    client: mockClient,
+    onRampProvider: onRampProvider,
+    tokenAddress: '0xToken',
+    receiver: '0xReceiver',
+    amount: '100',
+    country: 'US',
+    chainId: liskSepolia.id,
+    purchaseData: undefined
+  };
+
+  const expectedParams = {
+    client: params.client,
+    onramp: params.onRampProvider,
+    tokenAddress: params.tokenAddress,
+    receiver: params.receiver,
+    amount: BigInt(params.amount),
+    country: params.country,
+    chainId: params.chainId,
+    purchaseData: params.purchaseData
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call Bridge.Onramp.prepare with correct parameters', async () => {
+    (Bridge.Onramp.prepare as jest.Mock).mockResolvedValue({
+      ...mockPrepareResult,
+      intent: { ...mockPrepareIntent }
+    });
+
+    const result = await onRampPrepare(params);
+
+    expect(Bridge.Onramp.prepare).toHaveBeenCalledTimes(1);
+    expect(Bridge.Onramp.prepare).toHaveBeenCalledWith(expectedParams);
+    expect(result).toEqual({
+      ...expectedPrepareResult,
+      intent: { ...expectedIntent }
+    });
+  });
+
+  it('should throw with descriptive error if Bridge.Onramp.prepare throws Error', async () => {
+    (Bridge.Onramp.prepare as jest.Mock).mockRejectedValue(
+      new Error('API prepare failed')
+    );
+
+    await expect(
+      onRampPrepare({
+        client: mockClient,
+        onRampProvider: 'stripe',
+        chainId: 1,
+        tokenAddress: '0xToken',
+        receiver: '0xReceiver',
+        amount: '100',
+        country: 'US'
+      })
+    ).rejects.toThrow('Failed to prepare onramp: API prepare failed');
+  });
+
+  it('should throw with generic error if Bridge.Onramp.prepare throws non-Error', async () => {
+    (Bridge.Onramp.prepare as jest.Mock).mockRejectedValue('String error');
+
+    await expect(
+      onRampPrepare({
+        client: mockClient,
+        onRampProvider: 'stripe',
+        chainId: 1,
+        tokenAddress: '0xToken',
+        receiver: '0xReceiver',
+        amount: '100',
+        country: 'US'
+      })
+    ).rejects.toThrow('Failed to prepare onramp: Unknown error');
+  });
+
+  it('should work with minimal required parameters', async () => {
+    (Bridge.Onramp.prepare as jest.Mock).mockResolvedValue(mockPrepareResult);
+
+    const result = await onRampPrepare(params);
+
+    expect(Bridge.Onramp.prepare).toHaveBeenCalledWith(expectedParams);
+    expect(result).toEqual(expectedPrepareResult);
   });
 });

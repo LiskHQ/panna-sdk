@@ -10,5 +10,9 @@ export type {
   OnrampStatusResult,
   OnrampCreatedResult,
   OnrampPendingResult,
-  OnrampCompletedResult
+  OnrampCompletedResult,
+  OnRampProvider,
+  OnrampPrepareResult,
+  OnRampIntent,
+  OnrampPrepareParams
 } from './types';
