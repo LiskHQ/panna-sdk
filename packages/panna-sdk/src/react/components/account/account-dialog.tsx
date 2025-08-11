@@ -127,14 +127,20 @@ export function AccountDialog({ address }: AccountDialogProps) {
               </TabsList>
               <TabsContent
                 value="balance"
-                className="max-h-[320px] w-full overflow-y-auto"
+                className="max-h-80 w-full overflow-y-auto"
               >
                 <TokensList />
               </TabsContent>
-              <TabsContent value="collectibles" className="w-full">
+              <TabsContent
+                value="collectibles"
+                className="max-h-[400px] w-full overflow-y-auto"
+              >
                 <CollectiblesList />
               </TabsContent>
-              <TabsContent value="activity" className="w-full">
+              <TabsContent
+                value="activity"
+                className="max-h-80 w-full overflow-y-auto"
+              >
                 <ActivityList />
               </TabsContent>
             </Tabs>

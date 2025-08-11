@@ -61,6 +61,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           collapsible
           className="w-full"
           defaultValue={`item-${item.token_instances[0].id}-${index}`}
+          key={`item-${item.token_instances[0].id}-${index}`}
         >
           <AccordionItem value={`item-${item.token_instances[0].id}-${index}`}>
             <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
