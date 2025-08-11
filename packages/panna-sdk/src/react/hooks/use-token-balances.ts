@@ -38,8 +38,6 @@ export function useTokenBalances(
         process.env.NODE_ENV === 'development'
       );
 
-      console.log({ chain, supportedTokens });
-
       try {
         const chainTokens = supportedTokens[chain.id] ?? [];
 
@@ -51,8 +49,6 @@ export function useTokenBalances(
           chain,
           tokens: tokenAddresses
         });
-
-        console.log({ tokenBalances, tokenAddresses });
 
         const fallbackIcon = chainTokens[0]?.icon ?? '';
         const symbolToIcon = chainTokens.reduce<Record<string, string>>(
