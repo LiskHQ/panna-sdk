@@ -1,8 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
 import { AutoConnect, ThirdwebProvider } from 'thirdweb/react';
-import { ecosystemWallet } from 'thirdweb/wallets';
-import { createPannaClient, EcosystemId, type PannaClient } from '../../core';
+import { createAccount, createPannaClient, type PannaClient } from '../../core';
 import { AccountEventProvider } from './account-event-provider';
 
 export type PannaProviderProps = {
@@ -104,7 +103,7 @@ export function PannaProvider(props: PannaProviderProps) {
           {contextValue.client && contextValue.partnerId ? (
             <AutoConnect
               client={contextValue.client}
-              wallets={[ecosystemWallet(EcosystemId.LISK, { partnerId })]}
+              wallets={[createAccount({ partnerId: contextValue.partnerId })]}
               timeout={autoConnectTimeout}
             />
           ) : null}
