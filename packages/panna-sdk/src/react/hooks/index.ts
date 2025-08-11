@@ -35,3 +35,4 @@ export {
   DEFAULT_MAX_RETRIES,
   createDefaultRetryFn
 } from './constants';
+export { useTotalFiatBalance } from './use-total-fiat-balance';
