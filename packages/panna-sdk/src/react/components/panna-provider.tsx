@@ -98,7 +98,6 @@ export function PannaProvider(props: PannaProviderProps) {
 
   const wallets = useMemo(() => {
     if (!contextValue.partnerId) return [];
-    // In tests, the core module may be partially mocked. Guard to avoid calling an undefined function.
     if (typeof createAccount === 'function') {
       return [createAccount({ partnerId: contextValue.partnerId })];
     }
