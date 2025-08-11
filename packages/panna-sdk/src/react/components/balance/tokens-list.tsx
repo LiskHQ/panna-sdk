@@ -1,7 +1,7 @@
+import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance } from '@/mocks/token-balances';
 import { cn } from '@/utils';
-import { useAuth } from '../auth/auth-provider';
 import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
@@ -10,12 +10,17 @@ type TokensListProps = {
 };
 
 export function TokensList({ className }: TokensListProps) {
-  const { userAddress } = useAuth();
+  const account = useActiveAccount();
   const {
     isLoading,
     data: tokens,
     isError
-  } = useTokenBalances({ address: userAddress as string });
+  } = useTokenBalances(
+    { address: account?.address as string },
+    {
+      enabled: !!account?.address
+    }
+  );
 
   if (isLoading) {
     return (

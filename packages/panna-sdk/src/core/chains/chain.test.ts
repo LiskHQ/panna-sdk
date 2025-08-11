@@ -1,7 +1,7 @@
 import { describeChain, getChainInfo, getRpcUrlForChain } from './chain';
 import { Chain } from './types';
 
-// Mock thirdweb's getChainMetadata to prevent network requests
+// Mock Thirdweb's getChainMetadata to prevent network requests
 jest.mock('thirdweb/chains', () => ({
   ...jest.requireActual('thirdweb/chains'),
   getChainMetadata: jest.fn().mockImplementation(async (chain) => {

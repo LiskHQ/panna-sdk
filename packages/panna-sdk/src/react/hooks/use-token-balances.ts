@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { isValidAddress } from 'src/core';
 import { mockTokenBalances, TokenBalance } from '@/mocks/token-balances';
 import { usePanna } from './use-panna';
@@ -12,7 +12,10 @@ type UseTokenBalancesParams = {
  * @param params - Parameters for retrieving token balances
  * @returns React Query result with token balance data
  */
-export const useTokenBalances = ({ address }: UseTokenBalancesParams) => {
+export function useTokenBalances(
+  { address }: UseTokenBalancesParams,
+  options?: Omit<UseQueryOptions<TokenBalance[]>, 'queryKey' | 'queryFn'>
+) {
   const { client } = usePanna();
   const hasValidAddress = isValidAddress(address);
 
@@ -34,6 +37,7 @@ export const useTokenBalances = ({ address }: UseTokenBalancesParams) => {
       }
       return failureCount < 2; // Retry less for price data
     },
-    retryDelay: 1000 // 1 second delay between retries
+    retryDelay: 1000, // 1 second delay between retries
+    ...options
   });
-};
+}
