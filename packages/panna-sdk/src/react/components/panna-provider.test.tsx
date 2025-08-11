@@ -16,6 +16,7 @@ jest.mock('thirdweb/react', () => ({
   ThirdwebProvider: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="thirdweb-provider">{children}</div>
   ),
+  AutoConnect: () => <div data-testid="auto-connect" />,
   useActiveAccount: jest.fn(() => null),
   useActiveWallet: jest.fn(() => null),
   useProfiles: jest.fn(() => ({ data: [] }))

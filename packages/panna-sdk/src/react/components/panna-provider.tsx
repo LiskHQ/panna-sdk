@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
-import { ThirdwebProvider } from 'thirdweb/react';
-import { createPannaClient, type PannaClient } from '../../core';
+import { AutoConnect, ThirdwebProvider } from 'thirdweb/react';
+import { ecosystemWallet } from 'thirdweb/wallets';
+import { createPannaClient, EcosystemId, type PannaClient } from '../../core';
 import { AccountEventProvider } from './account-event-provider';
 
 export type PannaProviderProps = {
@@ -9,6 +10,10 @@ export type PannaProviderProps = {
   clientId?: string;
   partnerId?: string;
   queryClient?: QueryClient;
+  /**
+   * Optional timeout (ms) for Thirdweb AutoConnect
+   */
+  autoConnectTimeout?: number;
   /**
    * Optional authentication token for wallet event API requests
    */
@@ -59,7 +64,14 @@ export const PannaClientContext =
  * ```
  */
 export function PannaProvider(props: PannaProviderProps) {
-  const { clientId, partnerId, children, queryClient, authToken } = props;
+  const {
+    clientId,
+    partnerId,
+    children,
+    queryClient,
+    authToken,
+    autoConnectTimeout
+  } = props;
 
   const contextValue = useMemo(() => {
     const client = clientId ? createPannaClient({ clientId }) : null;
@@ -89,6 +101,13 @@ export function PannaProvider(props: PannaProviderProps) {
     <QueryClientProvider client={activeQueryClient}>
       <PannaClientContext value={contextValue}>
         <ThirdwebProvider>
+          {contextValue.client && contextValue.partnerId ? (
+            <AutoConnect
+              client={contextValue.client}
+              wallets={[ecosystemWallet(EcosystemId.LISK, { partnerId })]}
+              timeout={autoConnectTimeout}
+            />
+          ) : null}
           <AccountEventProvider authToken={authToken}>
             {children}
           </AccountEventProvider>
