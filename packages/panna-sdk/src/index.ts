@@ -52,6 +52,10 @@ export {
   type AccountBalancesInFiatResult,
   type AccountFiatBalance,
   type SocialProvider,
+  type SocialAuthType,
+  type SocialAuthData,
+  AccountEventType,
+  type AccountEventTypeValue,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type FiatCurrency,
@@ -69,7 +73,15 @@ export {
   // Constants
   DEFAULT_CURRENCY,
   DEFAULT_CHAIN,
-  NATIVE_TOKEN_ADDRESS
+  NATIVE_TOKEN_ADDRESS,
+  // Wallet Event types and API service
+  type AccountEventPayload,
+  type OnConnectActivityRequest,
+  type DisconnectActivityRequest,
+  type AccountUpdateActivityRequest,
+  PannaApiService,
+  pannaApiService,
+  type PannaApiConfig
 } from './core';
 
 export * from './react';

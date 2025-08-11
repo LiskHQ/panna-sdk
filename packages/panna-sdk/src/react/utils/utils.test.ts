@@ -1,6 +1,11 @@
 import { lisk, liskSepolia } from '../../core';
 import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
-import { getAAChain, getChain, getSupportedTokens } from './utils';
+import {
+  getAAChain,
+  getChain,
+  getEnvironmentChain,
+  getSupportedTokens
+} from './utils';
 
 jest.mock('../../core', () => ({
   lisk: {
@@ -74,6 +79,47 @@ describe('utils', () => {
       const result = getAAChain(undefined);
 
       expect(result).toEqual(lisk);
+    });
+  });
+
+  describe('getEnvironmentChain', () => {
+    const originalEnv = process.env;
+
+    beforeEach(() => {
+      jest.resetModules();
+      process.env = { ...originalEnv };
+    });
+
+    afterAll(() => {
+      process.env = originalEnv;
+    });
+
+    it('should return lisk when NODE_ENV is production', () => {
+      process.env.NODE_ENV = 'production';
+      const result = getEnvironmentChain();
+
+      expect(result).toEqual(lisk);
+    });
+
+    it('should return liskSepolia when NODE_ENV is development', () => {
+      process.env.NODE_ENV = 'development';
+      const result = getEnvironmentChain();
+
+      expect(result).toEqual(liskSepolia);
+    });
+
+    it('should return liskSepolia when NODE_ENV is not set', () => {
+      delete process.env.NODE_ENV;
+      const result = getEnvironmentChain();
+
+      expect(result).toEqual(liskSepolia);
+    });
+
+    it('should return liskSepolia for any non-production NODE_ENV', () => {
+      process.env.NODE_ENV = 'staging';
+      const result = getEnvironmentChain();
+
+      expect(result).toEqual(liskSepolia);
     });
   });
 });

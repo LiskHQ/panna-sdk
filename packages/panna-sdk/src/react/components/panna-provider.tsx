@@ -2,12 +2,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
 import { ThirdwebProvider } from 'thirdweb/react';
 import { createPannaClient, type PannaClient } from '../../core';
+import { AccountEventProvider } from './account-event-provider';
 
 export type PannaProviderProps = {
   children?: ReactNode;
   clientId?: string;
   partnerId?: string;
   queryClient?: QueryClient;
+  /**
+   * Optional authentication token for wallet event API requests
+   */
+  authToken?: string;
 };
 
 export type PannaContextValue = {
@@ -39,7 +44,11 @@ export const PannaClientContext =
  * // Next.js App Router - wrap in 'use client' component
  * 'use client';
  * export function ClientProviders({ children }) {
- *   return <PannaProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>{children}</PannaProvider>;
+ *   return (
+ *     <PannaProvider clientId={process.env.NEXT_PUBLIC_CLIENT_ID}>
+ *       {children}
+ *     </PannaProvider>
+ *   );
  * }
  *
  * // With custom QueryClient
@@ -50,7 +59,7 @@ export const PannaClientContext =
  * ```
  */
 export function PannaProvider(props: PannaProviderProps) {
-  const { clientId, partnerId, children, queryClient } = props;
+  const { clientId, partnerId, children, queryClient, authToken } = props;
 
   const contextValue = useMemo(() => {
     const client = clientId ? createPannaClient({ clientId }) : null;
@@ -79,7 +88,11 @@ export function PannaProvider(props: PannaProviderProps) {
   return (
     <QueryClientProvider client={activeQueryClient}>
       <PannaClientContext value={contextValue}>
-        <ThirdwebProvider>{children}</ThirdwebProvider>
+        <ThirdwebProvider>
+          <AccountEventProvider authToken={authToken}>
+            {children}
+          </AccountEventProvider>
+        </ThirdwebProvider>
       </PannaClientContext>
     </QueryClientProvider>
   );

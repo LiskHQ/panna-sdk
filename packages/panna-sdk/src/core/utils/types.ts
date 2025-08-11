@@ -21,7 +21,7 @@ export interface AccountBalanceResult extends MinimalTokenBalance {
   name: string;
 }
 
-// Supported social authentication providers
+// All supported social authentication providers (for login, icons, etc.)
 export type SocialProvider =
   | 'google'
   | 'apple'
@@ -41,6 +41,32 @@ export type SocialProvider =
   | 'phone'
   | 'passkey'
   | 'wallet';
+
+// Social providers that we currently support for capturing authentication data
+// These are checked in both account-event-provider and account-settings-view
+export type SocialAuthType =
+  | 'email'
+  | 'phone'
+  | 'google'
+  | 'discord'
+  | 'apple'
+  | 'facebook';
+
+// Social authentication data structure
+export type SocialAuthData = {
+  type: SocialAuthType;
+  data: string;
+};
+
+// Account event type constants
+export const AccountEventType = {
+  ON_CONNECT: 'onConnect',
+  DISCONNECT: 'disconnect',
+  ACCOUNT_UPDATE: 'accountUpdate'
+} as const;
+
+export type AccountEventTypeValue =
+  (typeof AccountEventType)[keyof typeof AccountEventType];
 
 // Supported fiat currencies
 export type FiatCurrency =
@@ -118,3 +144,49 @@ export interface AccountBalancesInFiatResult {
   tokenBalances: AccountBalanceInFiatResult[];
   errors?: TokenBalanceError[];
 }
+// Account event types for Panna API
+export type AccountEventPayload =
+  | OnConnectActivityRequest
+  | DisconnectActivityRequest
+  | AccountUpdateActivityRequest;
+
+// Base schema for all activity requests
+type BaseActivityRequest = {
+  eventType: AccountEventTypeValue;
+  timestamp: string;
+  ecosystemId: string;
+  partnerId: string;
+  chainId: number;
+};
+
+// OnConnect event schema - matches API discriminated union
+export type OnConnectActivityRequest = BaseActivityRequest & {
+  eventType: typeof AccountEventType.ON_CONNECT;
+  smartAccount: {
+    chain: string;
+    factoryAddress: string;
+    entrypointAddress: string;
+    sponsorGas: boolean;
+  };
+  social: SocialAuthData;
+};
+
+// Disconnect event schema
+export type DisconnectActivityRequest = BaseActivityRequest & {
+  eventType: typeof AccountEventType.DISCONNECT;
+  reason?: string;
+};
+
+// Account update event schema
+export type AccountUpdateActivityRequest = BaseActivityRequest & {
+  eventType: typeof AccountEventType.ACCOUNT_UPDATE;
+  updateType?: string;
+};
+
+// Helper type for transforming SmartWalletOptions to API format
+export type SmartAccountTransform = {
+  chain: string;
+  factoryAddress: string;
+  entrypointAddress: string;
+  sponsorGas: boolean;
+};
