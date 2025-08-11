@@ -34,36 +34,48 @@ export function useTokenBalances(
       }
 
       const chain = getEnvironmentChain();
-      const supportedTokens = getSupportedTokens();
-      const chainTokens = supportedTokens[chain.id] ?? [];
-
-      const tokenAddresses = chainTokens.map((t) => t.address);
-
-      const { tokenBalances } = await accountBalancesInFiat({
-        address,
-        client,
-        chain,
-        tokens: tokenAddresses
-      });
-
-      const fallbackIcon = chainTokens[0]?.icon ?? '';
-      const symbolToIcon = chainTokens.reduce<Record<string, string>>(
-        (acc, t) => {
-          if (t.symbol) acc[t.symbol] = t.icon ?? fallbackIcon;
-          return acc;
-        },
-        {}
+      const supportedTokens = getSupportedTokens(
+        process.env.NODE_ENV === 'development'
       );
 
-      const balancesWithIcons: TokenBalance[] = tokenBalances.map((b) => ({
-        ...b,
-        token: {
-          ...b.token,
-          icon: symbolToIcon[b.token.symbol] ?? fallbackIcon
-        }
-      }));
+      console.log({ chain, supportedTokens });
 
-      return balancesWithIcons;
+      try {
+        const chainTokens = supportedTokens[chain.id] ?? [];
+
+        const tokenAddresses = chainTokens.map((t) => t.address);
+
+        const { tokenBalances } = await accountBalancesInFiat({
+          address,
+          client,
+          chain,
+          tokens: tokenAddresses
+        });
+
+        console.log({ tokenBalances, tokenAddresses });
+
+        const fallbackIcon = chainTokens[0]?.icon ?? '';
+        const symbolToIcon = chainTokens.reduce<Record<string, string>>(
+          (acc, t) => {
+            if (t.symbol) acc[t.symbol] = t.icon ?? fallbackIcon;
+            return acc;
+          },
+          {}
+        );
+
+        const balancesWithIcons: TokenBalance[] = tokenBalances.map((b) => ({
+          ...b,
+          token: {
+            ...b.token,
+            icon: symbolToIcon[b.token.symbol] ?? fallbackIcon
+          }
+        }));
+
+        return balancesWithIcons;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     },
     staleTime: DEFAULT_STALE_TIME,
     refetchInterval: DEFAULT_REFETCH_INTERVAL,

@@ -22,6 +22,8 @@ export function TokensList({ className }: TokensListProps) {
     }
   );
 
+  console.log({ tokens, isLoading, isError });
+
   if (isLoading) {
     return (
       <section
