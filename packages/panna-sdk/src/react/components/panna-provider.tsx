@@ -96,6 +96,15 @@ export function PannaProvider(props: PannaProviderProps) {
 
   const activeQueryClient = queryClient || defaultQueryClient;
 
+  const wallets = useMemo(() => {
+    if (!contextValue.partnerId) return [];
+    // In tests, the core module may be partially mocked. Guard to avoid calling an undefined function.
+    if (typeof createAccount === 'function') {
+      return [createAccount({ partnerId: contextValue.partnerId })];
+    }
+    return [];
+  }, [contextValue.partnerId]);
+
   return (
     <QueryClientProvider client={activeQueryClient}>
       <PannaClientContext value={contextValue}>
@@ -103,7 +112,7 @@ export function PannaProvider(props: PannaProviderProps) {
           {contextValue.client && contextValue.partnerId ? (
             <AutoConnect
               client={contextValue.client}
-              wallets={[createAccount({ partnerId: contextValue.partnerId })]}
+              wallets={wallets}
               timeout={autoConnectTimeout}
             />
           ) : null}
