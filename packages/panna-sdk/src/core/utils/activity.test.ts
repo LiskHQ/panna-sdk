@@ -1,22 +1,21 @@
-import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
+  CACHE_KEY_TYPE,
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
   getCacheKey,
   getActivity,
   getAmountType,
   getBaseTransactionsRequestUrl,
-  getBaseTokenTransferRequestUrl,
-  CACHE_KEY_TYPE
+  getBaseTokenTransferRequestUrl
 } from './activity';
 import { TokenERC, BlockscoutTransaction, TokenType } from './activity.types';
 
 // Mock upstream modules
-jest.mock('../helpers/cache');
+jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
 jest.mock('../helpers/http');
-jest.mock('./activity');
+jest.mock('./activity', () => jest.requireActual('./activity'));
 
 // Constant
 const REGEX_URL =
@@ -68,6 +67,14 @@ describe('getCacheKey', () => {
       expect(key.includes(address)).toBeTruthy();
     });
   }
+});
+
+describe('updateTokenTransactionsCache', () => {
+  it.todo('implement test cases');
+});
+
+describe('fillTokenTransactions', () => {
+  it.todo('implement test cases');
 });
 
 describe('getAmountType', () => {
