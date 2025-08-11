@@ -7,8 +7,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { truncateAddress } from '@/utils/address';
-import { useAccountBalance, useFiatBalance, usePanna } from '../../hooks';
-import { getEnvironmentChain } from '../../utils';
+import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { CollectiblesList } from '../collectibles/collectibles-list';
@@ -35,19 +34,9 @@ type AccountDialogProps = {
 export function AccountDialog({ address }: AccountDialogProps) {
   const [activeView, setActiveView] = useState<AccountView>('main');
 
-  const { client } = usePanna();
-
-  const { data: accountBalance, isLoading: isLoadingBalance } =
-    useAccountBalance({
-      address,
-      client: client!,
-      chain: getEnvironmentChain()
-    });
-
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
-    useFiatBalance({
-      balance: accountBalance?.displayValue,
-      chain: getEnvironmentChain(),
+    useTotalFiatBalance({
+      address,
       currency: 'USD'
     });
 
@@ -72,9 +61,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
             </div>
             <div className="flex flex-col items-center gap-2">
               <DialogTitle className="text-4xl">
-                {isLoadingBalance || isLoadingUsdBalance
-                  ? '...'
-                  : `$${balanceUsd.toFixed(2)}`}
+                {isLoadingUsdBalance ? '...' : `$${balanceUsd.toFixed(2)}`}
               </DialogTitle>
               <DialogDescription>Total value</DialogDescription>
             </div>
