@@ -1,6 +1,6 @@
+import { useActiveAccount } from '@/hooks';
 import { useCollectibles } from '@/hooks/use-collectibles';
 import { cn } from '@/utils';
-import { useAuth } from '../auth/auth-provider';
 import {
   Accordion,
   AccordionContent,
@@ -16,10 +16,15 @@ type CollectiblesListProps = {
 };
 
 export function CollectiblesList({ className }: CollectiblesListProps) {
-  const { userAddress } = useAuth();
-  const { isLoading, data, isError } = useCollectibles({
-    address: userAddress as string
-  });
+  const account = useActiveAccount();
+  const { isLoading, data, isError } = useCollectibles(
+    {
+      address: account?.address as string
+    },
+    {
+      enabled: !!account?.address
+    }
+  );
 
   if (isLoading) {
     return (
