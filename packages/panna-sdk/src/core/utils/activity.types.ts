@@ -163,7 +163,7 @@ interface BlockscoutFee {
 
 type BlockscoutTransactionStatus = 'ok' | 'error';
 
-interface BlockscoutAddressParam {
+export interface BlockscoutAddressParam {
   hash: string;
   implementations: BlockscoutAddressParamImplementation[];
   implementation_name?: string;
@@ -222,7 +222,7 @@ export interface BlockscoutTokenTransfer {
   type: string;
 }
 
-interface BlockscoutTokenInfo {
+export interface BlockscoutTokenInfo {
   circulating_market_cap: string | null;
   icon_url: string | null;
   name: string;

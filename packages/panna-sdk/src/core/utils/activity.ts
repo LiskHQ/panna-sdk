@@ -26,22 +26,22 @@ import {
   type ERC1155Amount
 } from './activity.types';
 import { isValidAddress } from './common';
+import {
+  BASE_BLOCKSCOUT_URL,
+  DEFAULT_PAGINATION_OFFSET,
+  DEFAULT_PAGINATION_LIMIT
+} from './constants';
 
 // Activity cache
 const activityCache = newLruMemCache('activity');
-
-// Default pagination params
-export const DEFAULT_PAGINATION_OFFSET = 0;
-export const DEFAULT_PAGINATION_LIMIT = 10;
-
-// Blockscout URLs
-const BASE_BLOCKSCOUT_URL = 'https://blockscout.lisk.com/api/v2';
 
 export const CACHE_KEY_TYPE = {
   transactions: '',
   transactions_next_params: 'params',
   token_transfers: 'tt',
-  token_transfers_next_params: 'tt_params'
+  token_transfers_next_params: 'tt_params',
+  collectibles: 'coll',
+  collectibles_next_params: 'coll_params'
 };
 
 /**

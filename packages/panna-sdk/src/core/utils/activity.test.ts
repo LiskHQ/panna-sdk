@@ -2,8 +2,6 @@ import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
   CACHE_KEY_TYPE,
-  DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET,
   getCacheKey,
   getActivitiesByAddress,
   getAmountType,
@@ -11,6 +9,10 @@ import {
   getBaseTokenTransferRequestUrl
 } from './activity';
 import { TokenERC, BlockscoutTransaction, TokenType } from './activity.types';
+import {
+  DEFAULT_PAGINATION_LIMIT,
+  DEFAULT_PAGINATION_OFFSET
+} from './constants';
 
 // Mock upstream modules
 jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
