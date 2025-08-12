@@ -6,6 +6,7 @@ import {
   DEFAULT_CURRENCY,
   NATIVE_TOKEN_ADDRESS
 } from '../defaults';
+import { isValidAddress } from './common';
 import {
   type AccountBalanceParams,
   type AccountBalanceResult,
@@ -18,24 +19,6 @@ import {
   type SocialProvider,
   type TokenBalanceError
 } from './types';
-
-/**
- * Validates if a string is a valid Ethereum address
- * @param address - The address to validate
- * @returns true if valid, false otherwise
- * @example
- * ```ts
- * isValidAddress('0x1234567890123456789012345678901234567890'); // true
- * isValidAddress('0x123'); // false
- * isValidAddress('not an address'); // false
- * ```
- */
-export const isValidAddress = function (address: string): boolean {
-  if (!address || typeof address !== 'string') {
-    return false;
-  }
-  return /^0x[a-fA-F0-9]{40}$/.test(address);
-};
 
 /**
  * Get the balance of an account
@@ -137,7 +120,7 @@ export const getFiatPrice = async function (
  * @param params.chain - (Optional) The chain for which to retrieve the balance. If not provided, it will default to Lisk Mainnet.
  * @param params.tokenAddress - (Optional) The address of the token to retrieve the balance for. If not provided, the balance of the native token will be retrieved.
  * @param params.currency - (Optional) The currency in which the fiat value is determined. If not provided, the fiat value will be returned in USD.
- * @returns Account balance information
+ * @returns Account fiat balance information
  * @throws Error if address or token address are invalid
  * @example
  * ```ts
@@ -272,7 +255,7 @@ export const accountBalanceInFiat = async function (
  * // }
  * ```
  */
-export async function accountBalancesInFiat(
+export const accountBalancesInFiat = async function (
   params: AccountBalancesInFiatParams
 ): Promise<AccountBalancesInFiatResult> {
   if (!isValidAddress(params.address)) {
@@ -372,4 +355,4 @@ export async function accountBalancesInFiat(
   }
 
   return result;
-}
+};
