@@ -67,13 +67,13 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
               <div className="flex items-center gap-3">
                 <img
-                  src={item.token_instances[0].metadata!.image_url}
-                  alt={item.token_instances[0].metadata!.name}
+                  src={item.token_instances[0].metadata!.image_url as string}
+                  alt={item.token_instances[0].metadata!.name as string}
                   className="h-10 w-10 rounded-full"
                 />
                 <div className="flex items-center gap-1">
                   <Typography variant="small">
-                    {item.token_instances[0].metadata!.name}
+                    {item.token_instances[0].metadata!.name as string}
                   </Typography>
                   <Typography variant="muted">
                     ({item.token_instances.length})
@@ -86,8 +86,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 <Card key={index} className="p-0">
                   <CardContent className="p-0">
                     <img
-                      src={item.metadata!.image_url}
-                      alt={item.metadata!.name}
+                      src={item.metadata!.image_url as string}
+                      alt={item.metadata!.name as string}
                       className="h-52 w-full rounded-xl"
                     />
                   </CardContent>
