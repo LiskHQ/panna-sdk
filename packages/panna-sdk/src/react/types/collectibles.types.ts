@@ -22,8 +22,8 @@ export interface AddressNFTInstanceCollection {
   image_url?: string;
   animation_url?: string;
   external_app_url?: string;
-  metadata?: Record<string, any>;
-  token?: Record<string, any> | null;
+  metadata?: Record<string, unknown>;
+  token?: Record<string, unknown> | null;
 }
 
 export interface TokenInfo {
@@ -46,7 +46,7 @@ export interface AddressParam {
   is_verified: boolean;
   name: string;
   ens_domain_name?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   private_tags: AddressTag[];
   watchlist_names: WatchlistName[];
   public_tags: AddressTag[];
