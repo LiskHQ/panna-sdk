@@ -57,7 +57,9 @@ export function AccountEventProvider({
 
   const smartAccountConfig = useMemo(() => {
     const config = activeWallet?.getConfig();
-    if (!config) return null;
+    if (!config) {
+      return null;
+    }
 
     return (config as unknown as { smartAccount: SmartWalletOptions })
       .smartAccount;

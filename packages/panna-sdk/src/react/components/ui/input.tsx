@@ -21,12 +21,16 @@ function Input({
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
-    if (onFocus) onFocus(e);
+    if (onFocus) {
+      onFocus(e);
+    }
   };
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    if (onBlur) onBlur(e);
+    if (onBlur) {
+      onBlur(e);
+    }
   };
 
   return (

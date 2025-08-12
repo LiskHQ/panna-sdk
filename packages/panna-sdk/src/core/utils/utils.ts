@@ -255,7 +255,7 @@ export const accountBalanceInFiat = async function (
  * // }
  * ```
  */
-export async function accountBalancesInFiat(
+export const accountBalancesInFiat = async function (
   params: AccountBalancesInFiatParams
 ): Promise<AccountBalancesInFiatResult> {
   if (!isValidAddress(params.address)) {
@@ -355,4 +355,4 @@ export async function accountBalancesInFiat(
   }
 
   return result;
-}
+};

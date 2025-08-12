@@ -46,26 +46,26 @@ export const request = async (
   url: string,
   params: RequestParamsConfig = {}
 ) => {
-  let response: axios.AxiosResponse;
-
   const { method = 'get', ...restParams } = params;
   const finalParams = { method, ...restParams };
 
   // If cache exists, return the response from cache
   const cacheKey = JSON.stringify({ url, finalParams }, null, 0);
   if (requestCache.has(cacheKey)) {
-    response = requestCache.get(cacheKey) as axios.AxiosResponse;
+    const response = requestCache.get(cacheKey) as axios.AxiosResponse;
     return response.data;
   }
 
-  response = await requestWithRetries(
+  const response = await requestWithRetries(
     url,
     finalParams,
     DEFAULT_RETRIES,
     DEFAULT_RETRY_DELAY_MS
   );
 
-  if (isCacheableResponse(response)) requestCache.set(cacheKey, response);
+  if (isCacheableResponse(response)) {
+    requestCache.set(cacheKey, response);
+  }
 
   return response.data;
 };

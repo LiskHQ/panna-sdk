@@ -12,7 +12,9 @@ export function useCountdown(
   }, [start]);
 
   useEffect(() => {
-    if (timeRemaining === 0) return;
+    if (timeRemaining === 0) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
