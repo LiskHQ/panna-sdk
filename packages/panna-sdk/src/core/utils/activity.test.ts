@@ -5,7 +5,7 @@ import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
   getCacheKey,
-  getActivity,
+  getActivitiesByAddress,
   getAmountType,
   getBaseTransactionsRequestUrl,
   getBaseTokenTransferRequestUrl
@@ -2289,7 +2289,7 @@ describe('getAmountType', () => {
   });
 });
 
-describe('getActivity', () => {
+describe('getActivitiesByAddress', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
@@ -2302,7 +2302,7 @@ describe('getActivity', () => {
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
 
     const params = { address: '0xe1287E785D424cd3d0998957388C4770488ed841' };
-    const result = await getActivity(params);
+    const result = await getActivitiesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(1);
     expect(httpUtils.request).toHaveBeenCalledWith(
@@ -2313,7 +2313,8 @@ describe('getActivity', () => {
       metadata: {
         count: mockRequestResponse.items.length,
         offset: DEFAULT_PAGINATION_OFFSET,
-        limit: DEFAULT_PAGINATION_LIMIT
+        limit: DEFAULT_PAGINATION_LIMIT,
+        hasNextPage: false
       }
     });
   });
@@ -3220,7 +3221,7 @@ describe('getActivity', () => {
     );
 
     const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
-    const result = await getActivity(params);
+    const result = await getActivitiesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(2);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
@@ -3392,7 +3393,8 @@ describe('getActivity', () => {
       metadata: {
         count: mockRequestResponse.items.length,
         offset: DEFAULT_PAGINATION_OFFSET,
-        limit: DEFAULT_PAGINATION_LIMIT
+        limit: DEFAULT_PAGINATION_LIMIT,
+        hasNextPage: false
       }
     });
   });
@@ -4319,7 +4321,7 @@ describe('getActivity', () => {
       offset: 4,
       limit: 4
     };
-    const result = await getActivity(params);
+    const result = await getActivitiesByAddress(params);
     expect(httpUtils.request).toHaveBeenCalledTimes(3);
 
     const baseRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`;
@@ -4404,13 +4406,13 @@ describe('getActivity', () => {
             '0x426e9555a435cef173103d817b63a86cf8a96888bcc6fc47e405fff608e08d1e'
         }
       ],
-      metadata: { count: 4, offset: 4, limit: 4 }
+      metadata: { count: 4, offset: 4, limit: 4, hasNextPage: true }
     });
   });
 
   it('should throw error when address in params is invalid', async () => {
     const params = { address: 'invalidAddress' };
-    expect(async () => getActivity(params)).rejects.toThrow(
+    expect(async () => getActivitiesByAddress(params)).rejects.toThrow(
       'Invalid address format'
     );
   });

@@ -39,6 +39,9 @@ const requestWithRetries = async (
   return response;
 };
 
+const formatResponseToJSON = (respData: unknown) =>
+  typeof respData === 'string' ? JSON.parse(respData) : respData;
+
 // Exported entities
 export const HttpStatusCode = axios.HttpStatusCode;
 
@@ -53,7 +56,7 @@ export const request = async (
   const cacheKey = JSON.stringify({ url, finalParams }, null, 0);
   if (requestCache.has(cacheKey)) {
     const response = requestCache.get(cacheKey) as axios.AxiosResponse;
-    return response.data;
+    return formatResponseToJSON(response.data);
   }
 
   const response = await requestWithRetries(
@@ -67,5 +70,5 @@ export const request = async (
     requestCache.set(cacheKey, response);
   }
 
-  return response.data;
+  return formatResponseToJSON(response.data);
 };
