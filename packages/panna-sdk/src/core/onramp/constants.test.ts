@@ -36,13 +36,13 @@ describe('Onramp Constants', () => {
       'stripe'
     ]);
   });
-  
-   it('should contain entries for valid countries', () => {
+
+  it('should contain entries for valid countries', () => {
     Object.keys(COUNTRY_PROVIDER_MAP).forEach((countryCode) => {
       expect(countryCode).toBeOfLength(2);
 
       const countryName = iso3311a2.getCountry(countryCode);
       expect(countryName).toBeDefined();
     });
-   });
+  });
 });
