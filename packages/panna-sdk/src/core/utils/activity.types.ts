@@ -1,12 +1,12 @@
 // Parameters for fetching account activities
-export interface GetActivityParams {
+export interface GetActivitiesByAddressParams {
   address: string;
   limit?: number;
   offset?: number;
 }
 
 // Result for fetched account activities
-export interface GetActivityResult {
+export interface GetActivitiesByAddressResult {
   activities: Activity[];
   metadata: ActivityMetadata;
 }

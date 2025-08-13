@@ -5,7 +5,7 @@ import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
   getCacheKey,
-  getActivity,
+  getActivitiesByAddress,
   getAmountType,
   getBaseTransactionsRequestUrl,
   getBaseTokenTransferRequestUrl
@@ -2289,7 +2289,7 @@ describe('getAmountType', () => {
   });
 });
 
-describe('getActivity', () => {
+describe('getActivitiesByAddress', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
@@ -2302,7 +2302,7 @@ describe('getActivity', () => {
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
 
     const params = { address: '0xe1287E785D424cd3d0998957388C4770488ed841' };
-    const result = await getActivity(params);
+    const result = await getActivitiesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(1);
     expect(httpUtils.request).toHaveBeenCalledWith(
@@ -3220,7 +3220,7 @@ describe('getActivity', () => {
     );
 
     const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
-    const result = await getActivity(params);
+    const result = await getActivitiesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(2);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
@@ -4319,7 +4319,7 @@ describe('getActivity', () => {
       offset: 4,
       limit: 4
     };
-    const result = await getActivity(params);
+    const result = await getActivitiesByAddress(params);
     expect(httpUtils.request).toHaveBeenCalledTimes(3);
 
     const baseRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`;
@@ -4410,7 +4410,7 @@ describe('getActivity', () => {
 
   it('should throw error when address in params is invalid', async () => {
     const params = { address: 'invalidAddress' };
-    expect(async () => getActivity(params)).rejects.toThrow(
+    expect(async () => getActivitiesByAddress(params)).rejects.toThrow(
       'Invalid address format'
     );
   });

@@ -6,8 +6,8 @@ import {
   TokenERC,
   TransactionActivity,
   // type
-  type GetActivityParams,
-  type GetActivityResult,
+  type GetActivitiesByAddressParams,
+  type GetActivitiesByAddressResult,
   type Activity,
   type ActivityType,
   type TokenType,
@@ -86,8 +86,8 @@ export const getBaseTokenTransferRequestUrl = (address: string): string =>
  * @throws Error if address is invalid.
  * @example
  * ```ts
- * // Get value for the specified user's native token balance in USD
- * const result = await getActivity({ address: userAddress, offset: 0, limit: 10 });
+ * // Get list of recent activities for the specified user
+ * const result = await getActivitiesByAddress({ address: userAddress, offset: 0, limit: 10 });
  * // result: {
  * //   activities: [{
  * //     activityType: 'sent',
@@ -162,9 +162,9 @@ export const getBaseTokenTransferRequestUrl = (address: string): string =>
  * // }
  * ```
  */
-export const getActivity = async function (
-  params: GetActivityParams
-): Promise<GetActivityResult> {
+export const getActivitiesByAddress = async function (
+  params: GetActivitiesByAddressParams
+): Promise<GetActivitiesByAddressResult> {
   if (!isValidAddress(params.address)) {
     throw new Error('Invalid address format');
   }
