@@ -200,17 +200,18 @@ export const getActivitiesByAddress = async function (
         ? baseTxRequestUrl
         : `${baseTxRequestUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}&items_count=${nextPageParams.items_count}`;
 
-    const response: BlockscoutTransactionsResponse =
-      await httpUtils.request(requestUrl);
+    const response = await httpUtils.request(requestUrl);
 
-    if ('code' in response && 'message' in response) {
-      throw new Error(`Cannot fetch user activities: ${response.message}`);
+    const errResponse = response as Error;
+    if ('code' in errResponse && 'message' in errResponse) {
+      throw new Error(`Cannot fetch user activities: ${errResponse.message}`);
     }
 
+    const blockscoutRes = response as BlockscoutTransactionsResponse;
     userTransactions.push(
-      ...(await fillTokenTransactions(address, response.items))
+      ...(await fillTokenTransactions(address, blockscoutRes.items))
     );
-    nextPageParams = response.next_page_params;
+    nextPageParams = blockscoutRes.next_page_params;
 
     activityCache.set(cacheKeyTransactions, userTransactions);
     activityCache.set(cacheKeyNextPageParams, nextPageParams);
@@ -219,7 +220,7 @@ export const getActivitiesByAddress = async function (
     // Second condition ensures handling of no existing activities
     if (
       nextPageParams === null &&
-      userTransactions.length >= response.items.length
+      userTransactions.length >= blockscoutRes.items.length
     ) {
       activityCache.delete(cacheKeyNextPageParams);
       break;
