@@ -3228,7 +3228,7 @@ describe('getActivitiesByAddress', () => {
     expect(httpUtils.request).toHaveBeenCalledTimes(2);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`
+      getBaseTransactionsRequestUrl(params.address)
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
@@ -4326,7 +4326,7 @@ describe('getActivitiesByAddress', () => {
     const result = await getActivitiesByAddress(params);
     expect(httpUtils.request).toHaveBeenCalledTimes(3);
 
-    const baseRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`;
+    const baseRequestUrl = getBaseTransactionsRequestUrl(params.address);
     expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,

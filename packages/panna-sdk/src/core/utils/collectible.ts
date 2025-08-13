@@ -140,15 +140,18 @@ export const getCollectiblesByAddress = async function name(
         ? baseCollectionsRequestUrl
         : `${baseCollectionsRequestUrl}?token_contract_address_hash=${nextPageParams.token_contract_address_hash}&token_type=${nextPageParams.token_type}`;
 
-    const response: BlockscoutNFTCollectionsResponse =
-      await httpUtils.request(requestUrl);
+    const response = await httpUtils.request(requestUrl);
 
-    if ('code' in response && 'message' in response) {
-      throw new Error(`Cannot fetch user NFT collections: ${response.message}`);
+    const errResponse = response as Error;
+    if ('code' in errResponse && 'message' in errResponse) {
+      throw new Error(
+        `Cannot fetch user NFT collections: ${errResponse.message}`
+      );
     }
 
-    userCollections.push(...response.items);
-    nextPageParams = response.next_page_params;
+    const blockscoutRes = response as BlockscoutNFTCollectionsResponse;
+    userCollections.push(...blockscoutRes.items);
+    nextPageParams = blockscoutRes.next_page_params;
 
     collectibleCache.set(cacheKeyCollectibles, userCollections);
     collectibleCache.set(cacheKeyNextPageParams, nextPageParams);
@@ -157,7 +160,7 @@ export const getCollectiblesByAddress = async function name(
     // Second condition ensures handling of no existing activities
     if (
       nextPageParams === null &&
-      userCollections.length >= response.items.length
+      userCollections.length >= blockscoutRes.items.length
     ) {
       collectibleCache.delete(cacheKeyNextPageParams);
       break;
