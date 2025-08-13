@@ -37,7 +37,22 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
-  if (isError || !data) {
+  if (isError) {
+    return (
+      <section
+        className={cn(
+          'flex flex-col items-center justify-center gap-2 text-center',
+          className
+        )}
+      >
+        <Typography variant="muted">
+          Error fetching collectibles. Please try again later.
+        </Typography>
+      </section>
+    );
+  }
+
+  if (!data) {
     return (
       <section
         className={cn(

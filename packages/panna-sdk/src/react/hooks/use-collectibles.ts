@@ -13,10 +13,10 @@ type UseCollectiblesParams = {
  * @param params - Parameters for retrieving collectibles
  * @returns React Query result with collectible data
  */
-export const useCollectibles = (
+export function useCollectibles(
   { address }: UseCollectiblesParams,
   options?: Omit<UseQueryOptions<CollectiblesResponse>, 'queryKey' | 'queryFn'>
-) => {
+) {
   const { client } = usePanna();
   const hasValidAddress = isValidAddress(address);
 
@@ -41,4 +41,4 @@ export const useCollectibles = (
     retryDelay: 1000, // 1 second delay between retries
     ...options
   });
-};
+}
