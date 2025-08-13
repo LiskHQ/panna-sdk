@@ -343,4 +343,10 @@ describe('getOnrampProviders', () => {
     const result = await getOnrampProviders('xX');
     expect(result).toEqual([]);
   });
+
+  it('should throw an error for invalid country codes', async () => {
+    await expect(getOnrampProviders('INVALID')).rejects.toThrow(
+      'Invalid country code: INVALID'
+    );
+  });
 });

@@ -179,7 +179,7 @@ export async function onRampPrepare(
 export function getOnrampProviders(countryCode: string): ProviderInfo[] {
   // Returns undefined when country code is invalid
   if (!iso3311a2.getCountry(countryCode)) {
-    return [];
+    throw new Error(`Invalid country code: ${countryCode}`);
   }
   const normalizedCode = countryCode.toUpperCase();
   const providers: OnrampProvider[] =
