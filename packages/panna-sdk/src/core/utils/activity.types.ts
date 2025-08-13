@@ -92,6 +92,7 @@ export interface ActivityMetadata {
   count: number;
   offset: number;
   limit: number;
+  hasNextPage: boolean;
 }
 
 // Blockscout API response types

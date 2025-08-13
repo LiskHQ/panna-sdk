@@ -2313,7 +2313,8 @@ describe('getActivitiesByAddress', () => {
       metadata: {
         count: mockRequestResponse.items.length,
         offset: DEFAULT_PAGINATION_OFFSET,
-        limit: DEFAULT_PAGINATION_LIMIT
+        limit: DEFAULT_PAGINATION_LIMIT,
+        hasNextPage: false
       }
     });
   });
@@ -3392,7 +3393,8 @@ describe('getActivitiesByAddress', () => {
       metadata: {
         count: mockRequestResponse.items.length,
         offset: DEFAULT_PAGINATION_OFFSET,
-        limit: DEFAULT_PAGINATION_LIMIT
+        limit: DEFAULT_PAGINATION_LIMIT,
+        hasNextPage: false
       }
     });
   });
@@ -4404,7 +4406,7 @@ describe('getActivitiesByAddress', () => {
             '0x426e9555a435cef173103d817b63a86cf8a96888bcc6fc47e405fff608e08d1e'
         }
       ],
-      metadata: { count: 4, offset: 4, limit: 4 }
+      metadata: { count: 4, offset: 4, limit: 4, hasNextPage: true }
     });
   });
 

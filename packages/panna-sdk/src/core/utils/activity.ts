@@ -158,7 +158,7 @@ export const getBaseTokenTransferRequestUrl = (address: string): string =>
  * //     },
  * //     status: 'error'
  * //   }, ...],
- * //   metadata: { count: 10, offset: 0, limit: 10 }
+ * //   metadata: { count: 10, offset: 0, limit: 10, hasNextPage: true }
  * // }
  * ```
  */
@@ -349,10 +349,12 @@ export const getActivitiesByAddress = async function (
   const metadata: ActivityMetadata = {
     count: activities.length,
     offset,
-    limit
+    limit,
+    hasNextPage:
+      nextPageParams != null || userTransactions.length >= offset + limit
   };
 
-  const result: GetActivityResult = { activities, metadata };
+  const result: GetActivitiesByAddressResult = { activities, metadata };
 
   return result;
 };
