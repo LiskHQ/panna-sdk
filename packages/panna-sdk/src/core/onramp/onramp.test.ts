@@ -321,19 +321,12 @@ describe('getOnrampProviders', () => {
     expect(resultDE).toEqual(expectedResultForDeAndUs);
   });
 
-  it('should return an empty array for unsupported countries', async () => {
-    const result = await getOnrampProviders('XX');
-    expect(result).toEqual([]);
-  });
-
   it('should handle case insensitivity for country codes', async () => {
-    const result = await getOnrampProviders('de');
-    expect(result).toEqual(expectedResultForDeAndUs);
-  });
-
-  it('should return empty array if no providers are available', async () => {
-    const result = await getOnrampProviders('ZZ');
-    expect(result).toEqual([]);
+    const result1 = await getOnrampProviders('de');
+    expect(result1).toEqual(expectedResultForDeAndUs);
+    
+    const result2 = await getOnrampProviders('De');
+    expect(result2).toEqual(expectedResultForDeAndUs);
   });
 
   it('should return providers for a valid country code SA', async () => {
@@ -341,8 +334,13 @@ describe('getOnrampProviders', () => {
     expect(result).toEqual(expectedResultForSA);
   });
 
-  it('should return empty array for unsupported country code', async () => {
-    const result = await getOnrampProviders('XX');
+it('should return empty array if no providers are available', async () => {
+    const result = await getOnrampProviders('ZZ');
+    expect(result).toEqual([]);
+  });
+  
+it('should return an empty array for unsupported countries', async () => {
+    const result = await getOnrampProviders('xX');
     expect(result).toEqual([]);
   });
 });
