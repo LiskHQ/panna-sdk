@@ -318,7 +318,6 @@ describe('getOnrampProviders', () => {
     const resultUS = await getOnrampProviders('US');
     const resultDE = await getOnrampProviders('DE');
     expect(resultUS).toEqual(expectedResultForDeAndUs);
-
     expect(resultDE).toEqual(expectedResultForDeAndUs);
   });
 

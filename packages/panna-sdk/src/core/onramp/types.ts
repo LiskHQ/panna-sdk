@@ -90,5 +90,5 @@ export interface ProviderInfo {
   id: OnrampProvider;
   displayName: string;
   logoUrl?: string;
-  websiteUrl?: string;
+  websiteUrl: string;
 }
