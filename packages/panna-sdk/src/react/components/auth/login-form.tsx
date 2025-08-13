@@ -159,10 +159,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-4"
-      >
+      <form className="flex flex-col gap-4">
         <Button
           type="button"
           className="flex gap-3"
@@ -190,6 +187,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                     <Button
                       className="hover:bg-primary/90! bg-transparent"
                       onClick={() => handleFormSubmit('email')}
+                      type="button"
                     >
                       <MoveRightIcon className="text-neutral-400" />
                     </Button>
@@ -225,6 +223,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                     <Button
                       className="hover:bg-primary/90! bg-transparent"
                       onClick={() => handleFormSubmit('phoneNumber')}
+                      type="button"
                     >
                       <MoveRightIcon className="text-neutral-400" />
                     </Button>
