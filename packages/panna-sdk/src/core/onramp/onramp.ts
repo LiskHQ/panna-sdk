@@ -1,11 +1,15 @@
+import { getCountry } from 'iso-3166-1-alpha-2';
 import { Bridge } from 'thirdweb';
 import { lisk } from '../chains';
+import { COUNTRY_PROVIDER_MAP, PROVIDERS } from './constants';
 import type {
   OnRampIntent,
   OnrampPrepareParams,
   OnrampPrepareResult,
+  OnrampProvider,
   OnrampStatusParams,
-  OnrampStatusResult
+  OnrampStatusResult,
+  ProviderInfo
 } from './types';
 
 /**
@@ -156,4 +160,32 @@ export async function onRampPrepare(
       `Failed to prepare onramp: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   }
+}
+
+/**
+ * Get available onramp providers for a given country code.
+ * @param countryCode - ISO 3166-1 alpha-2 code (e.g., "US", "IN")
+ * @returns List of providers available in that country
+ * @throws Error when the provided country code does not match ISO 3166-1 alpha-2 standards
+ * @example
+ * ```
+ * const germanyProviders = getOnrampProviders("DE");
+ * [
+ *  { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
+ *  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
+ *  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
+ * ]
+ * ```
+ */
+export function getOnrampProviders(countryCode: string): ProviderInfo[] {
+  const normalizedCountryCode = countryCode.toUpperCase();
+
+  // Returns undefined when country code is invalid
+  if (!getCountry(normalizedCountryCode)) {
+    throw new Error(`Invalid country code: ${countryCode}`);
+  }
+
+  const providers: OnrampProvider[] =
+    COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
+  return providers.map((provider) => PROVIDERS[provider]);
 }
