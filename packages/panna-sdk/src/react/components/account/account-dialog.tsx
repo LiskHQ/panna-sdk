@@ -10,6 +10,7 @@ import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
+import { BuyFlow } from '../buy/buy-flow';
 import { CollectiblesList } from '../collectibles/collectibles-list';
 import { Button } from '../ui/button';
 import {
@@ -25,7 +26,7 @@ import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { AccountSettingsView } from './account-settings-view';
 
-type AccountView = 'main' | 'settings';
+type AccountView = 'main' | 'settings' | 'buy';
 
 type AccountDialogProps = {
   address: string;
@@ -87,6 +88,26 @@ export function AccountDialog({ address }: AccountDialogProps) {
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
         );
+      case 'buy':
+        return (
+          <DialogHeader className="items-center gap-0">
+            <div className="flex w-full items-center justify-between gap-2">
+              <button type="button" onClick={() => setActiveView('main')}>
+                <ArrowLeftIcon
+                  size={20}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                />
+              </button>
+              <DialogClose>
+                <XIcon
+                  size={20}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                />
+              </DialogClose>
+            </div>
+            {/* No dialog title for Buy flow; each step renders its own title */}
+          </DialogHeader>
+        );
     }
   };
 
@@ -100,7 +121,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 <SendIcon />
                 Send
               </Button>
-              <Button type="button" variant="outline" className="flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => setActiveView('buy')}
+              >
                 <TagIcon />
                 Buy
               </Button>
@@ -135,6 +161,8 @@ export function AccountDialog({ address }: AccountDialogProps) {
         );
       case 'settings':
         return <AccountSettingsView />;
+      case 'buy':
+        return <BuyFlow onClose={() => setActiveView('main')} />;
     }
   };
 
