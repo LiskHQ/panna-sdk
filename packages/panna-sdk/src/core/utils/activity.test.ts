@@ -1,3 +1,4 @@
+import { liskSepolia } from '../chains';
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
@@ -22,7 +23,7 @@ jest.mock('./activity', () => jest.requireActual('./activity'));
 describe('getBaseTransactionsRequestUrl', () => {
   it('should return the transactions API endpoint for the given address', () => {
     const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
-    const url = getBaseTransactionsRequestUrl(address);
+    const url = getBaseTransactionsRequestUrl(address, liskSepolia.id);
 
     expect(typeof url).toBe('string');
     expect(url).toMatch(REGEX_URL);
@@ -35,7 +36,7 @@ describe('getBaseTransactionsRequestUrl', () => {
 describe('getBaseTokenTransferRequestUrl', () => {
   it('should return the token transfers API endpoint for the given address', () => {
     const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
-    const url = getBaseTokenTransferRequestUrl(address);
+    const url = getBaseTokenTransferRequestUrl(address, liskSepolia.id);
 
     expect(typeof url).toBe('string');
     expect(url).toMatch(REGEX_URL);
@@ -231,7 +232,7 @@ describe('getAmountType', () => {
       has_error_in_internal_transactions: false
     };
     expect(() => getAmountType(invalidTx.from.hash, invalidTx)).toThrow(
-      'Cannot determine transaction amount type'
+      'Unable to determine transaction amount type'
     );
   });
 
@@ -3196,13 +3197,16 @@ describe('getActivitiesByAddress', () => {
       mockRequestResponse
     );
 
-    const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
+    const params = {
+      address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia
+    };
     const result = await getActivitiesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(2);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      getBaseTransactionsRequestUrl(params.address)
+      getBaseTransactionsRequestUrl(params.address, liskSepolia.id)
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
@@ -4294,13 +4298,17 @@ describe('getActivitiesByAddress', () => {
 
     const params = {
       address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia,
       offset: 4,
       limit: 4
     };
     const result = await getActivitiesByAddress(params);
     expect(httpUtils.request).toHaveBeenCalledTimes(3);
 
-    const baseRequestUrl = getBaseTransactionsRequestUrl(params.address);
+    const baseRequestUrl = getBaseTransactionsRequestUrl(
+      params.address,
+      liskSepolia.id
+    );
     expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,

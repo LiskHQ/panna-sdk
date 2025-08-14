@@ -1,23 +1,52 @@
-import { CACHE_KEY_TYPE, getCacheKey, isValidAddress } from './common';
+import { lisk, liskSepolia } from '../chains';
+import {
+  CACHE_KEY_TYPE,
+  CHAIN_ID_API_URL_MAP,
+  getBaseApiUrl,
+  getCacheKey,
+  isValidAddress
+} from './common';
 
 describe('getCacheKey', () => {
   const address = '0xUserAddress';
   for (let type of Object.keys(CACHE_KEY_TYPE)) {
     it(`should always return string keys for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      const key = getCacheKey(
+        address,
+        lisk.id,
+        type as keyof typeof CACHE_KEY_TYPE
+      );
       expect(typeof key).toBe('string');
     });
 
     it(`should always return non-empty keys for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      const key = getCacheKey(
+        address,
+        lisk.id,
+        type as keyof typeof CACHE_KEY_TYPE
+      );
       expect(key.length).toBeGreaterThan(0);
       expect(key.includes(address)).toBeTruthy();
     });
 
     it(`should always include user address for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      const key = getCacheKey(
+        address,
+        lisk.id,
+        type as keyof typeof CACHE_KEY_TYPE
+      );
       expect(key.length).toBeGreaterThan(0);
       expect(key.includes(address)).toBeTruthy();
+    });
+
+    it(`should always include the specified chain id for data type: ${type}`, () => {
+      const key = getCacheKey(
+        address,
+        lisk.id,
+        type as keyof typeof CACHE_KEY_TYPE
+      );
+      expect(key.length).toBeGreaterThan(0);
+      expect(key.includes(lisk.id as unknown as string)).toBeTruthy();
     });
   }
 });
@@ -109,5 +138,44 @@ describe('isValidAddress', () => {
     expect(isValidAddress('0xAABBCCDDEEFF1234567890123456789012345678')).toBe(
       true
     );
+  });
+});
+
+describe('CHAIN_API_URL_MAP', () => {
+  it('should at least contain entries for both lisk and liskSepolia', () => {
+    const supportedChainIDs = Object.keys(CHAIN_ID_API_URL_MAP);
+    expect(supportedChainIDs.length).toBeGreaterThanOrEqual(2);
+
+    const baseUrlLisk = CHAIN_ID_API_URL_MAP[lisk.id];
+    expect(baseUrlLisk).toBeDefined();
+    expect(baseUrlLisk.startsWith('https://')).toBeTruthy();
+    expect(baseUrlLisk.includes('lisk.com')).toBeTruthy();
+    expect(baseUrlLisk.includes('sepolia')).toBeFalsy();
+
+    const baseUrlLiskSepolia = CHAIN_ID_API_URL_MAP[liskSepolia.id];
+    expect(baseUrlLiskSepolia).toBeDefined();
+    expect(baseUrlLiskSepolia.startsWith('https://')).toBeTruthy();
+    expect(baseUrlLiskSepolia.includes('lisk.com')).toBeTruthy();
+    expect(baseUrlLiskSepolia.includes('sepolia')).toBeTruthy();
+  });
+});
+
+describe('getBaseApiUrl', () => {
+  it('should always return base API URL for lisk', () => {
+    const baseUrl = getBaseApiUrl(lisk.id);
+    expect(typeof baseUrl).toBe('string');
+    expect(baseUrl.length).toBeGreaterThan(1);
+    expect(baseUrl.startsWith('https://')).toBeTruthy();
+    expect(baseUrl.includes('lisk.com')).toBeTruthy();
+    expect(baseUrl.includes('sepolia')).toBeFalsy();
+  });
+
+  it('should always return base API URL for lisk sepolia', () => {
+    const baseUrl = getBaseApiUrl(liskSepolia.id);
+    expect(typeof baseUrl).toBe('string');
+    expect(baseUrl.length).toBeGreaterThan(1);
+    expect(baseUrl.startsWith('https://')).toBeTruthy();
+    expect(baseUrl.includes('lisk.com')).toBeTruthy();
+    expect(baseUrl.includes('sepolia')).toBeTruthy();
   });
 });

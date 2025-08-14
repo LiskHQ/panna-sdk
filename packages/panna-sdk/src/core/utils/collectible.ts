@@ -1,5 +1,7 @@
+import { lisk } from '../chains';
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
+import { PannaHttpErr } from '../helpers/http';
 import {
   BlockscoutAddressNFTCollection,
   BlockscoutNFTNextPageParams,
@@ -13,9 +15,8 @@ import {
   Token,
   TokenInstance
 } from './collectible.types';
-import { getCacheKey, isValidAddress } from './common';
+import { getBaseApiUrl, getCacheKey, isValidAddress } from './common';
 import {
-  BASE_BLOCKSCOUT_URL,
   DEFAULT_PAGINATION_OFFSET,
   DEFAULT_PAGINATION_LIMIT
 } from './constants';
@@ -28,21 +29,32 @@ const collectibleCache = newLruMemCache('collectible');
  * @param address The address for which to return the NFT collections API endpoint.
  * @returns Blockscout NFT collections API endpoint for the supplied address.
  */
-export const getBaseNFTRequestUrl = (address: string): string =>
-  `${BASE_BLOCKSCOUT_URL}/addresses/${address}/nft`;
+export const getBaseNFTRequestUrl = (
+  address: string,
+  chainID: number
+): string => {
+  const BASE_API_URL = getBaseApiUrl(chainID);
+  return `${BASE_API_URL}/addresses/${address}/nft`;
+};
 
 /**
  * Get blockscout NFT collections endpoint.
  * @param address The address for which to return the NFT collections API endpoint.
  * @returns Blockscout NFT collections API endpoint for the supplied address.
  */
-export const getBaseNFTCollectionsRequestUrl = (address: string): string =>
-  `${BASE_BLOCKSCOUT_URL}/addresses/${address}/nft/collections`;
+export const getBaseNFTCollectionsRequestUrl = (
+  address: string,
+  chainID: number
+): string => {
+  const BASE_API_URL = getBaseApiUrl(chainID);
+  return `${BASE_API_URL}/addresses/${address}/nft/collections`;
+};
 
 /**
  * Get collectibles held by an account.
  * @param params - Parameters for fetching the collectibles.
  * @param params.address - The account address for which to retrieve the collectibles.
+ * @param params.chain - (Optional) Chain object type. (Default: lisk)
  * @param params.offset - (Optional) The number of items to be skipped from the matching result. (Default: 0)
  * @param params.limit - (Optional) The number of items to be returned from the matching result. (Default: 10)
  * @returns Collectibles owned by the account.
@@ -99,7 +111,7 @@ export const getBaseNFTCollectionsRequestUrl = (address: string): string =>
  * // }
  * ```
  */
-export const getCollectiblesByAddress = async function name(
+export const getCollectiblesByAddress = async function (
   params: GetCollectiblesByAddressParams
 ): Promise<GetCollectiblesByAddressResult> {
   if (!isValidAddress(params.address)) {
@@ -109,33 +121,37 @@ export const getCollectiblesByAddress = async function name(
   // Set default pagination params
   const {
     address,
+    chain = lisk,
     offset = DEFAULT_PAGINATION_OFFSET,
     limit = DEFAULT_PAGINATION_LIMIT
   } = params;
 
-  const cacheKeyCollectibles = getCacheKey(address, 'collectibles');
+  const cacheKeyCollectibles = getCacheKey(address, chain.id, 'collectibles');
   const cacheKeyNextPageParams = getCacheKey(
     address,
+    chain.id,
     'collectibles_next_params'
   );
 
   const userCollections: BlockscoutAddressNFTCollection[] =
-    collectibleCache.has(cacheKeyCollectibles)
-      ? (collectibleCache.get(
-          cacheKeyCollectibles
-        ) as BlockscoutAddressNFTCollection[])
-      : [];
+    (collectibleCache.get(cacheKeyCollectibles) ||
+      []) as BlockscoutAddressNFTCollection[];
 
-  let nextPageParams: BlockscoutNFTNextPageParams | null = collectibleCache.has(
-    cacheKeyNextPageParams
-  )
-    ? (collectibleCache.get(
-        cacheKeyNextPageParams
-      ) as BlockscoutNFTNextPageParams)
-    : null;
+  let nextPageParams: BlockscoutNFTNextPageParams | null =
+    (collectibleCache.get(
+      cacheKeyNextPageParams
+    ) as BlockscoutNFTNextPageParams) || null;
 
-  const baseCollectionsRequestUrl = getBaseNFTCollectionsRequestUrl(address);
-  while (userCollections.length <= offset + limit) {
+  const baseCollectionsRequestUrl = getBaseNFTCollectionsRequestUrl(
+    address,
+    chain.id
+  );
+  while (userCollections.length < offset + limit) {
+    // No new pages exist, avoid unnecessary API calls
+    if (userCollections.length && nextPageParams === null) {
+      break;
+    }
+
     const requestUrl =
       nextPageParams === null
         ? baseCollectionsRequestUrl
@@ -143,14 +159,15 @@ export const getCollectiblesByAddress = async function name(
 
     const response = await httpUtils.request(requestUrl);
 
-    const errResponse = response as Error;
+    const errResponse = response as PannaHttpErr;
     if ('code' in errResponse && 'message' in errResponse) {
       throw new Error(
-        `Cannot fetch user NFT collections: ${errResponse.message}`
+        `Unable to fetch user NFT collections: ${errResponse.message}`
       );
     }
 
-    const blockscoutRes = response as BlockscoutNFTCollectionsResponse;
+    const blockscoutRes =
+      response as unknown as BlockscoutNFTCollectionsResponse;
     userCollections.push(...blockscoutRes.items);
     nextPageParams = blockscoutRes.next_page_params;
 
@@ -158,7 +175,7 @@ export const getCollectiblesByAddress = async function name(
     collectibleCache.set(cacheKeyNextPageParams, nextPageParams);
 
     // Continue the loop only if more pages exist
-    // Second condition ensures handling of no existing activities
+    // Second condition ensures handling of no existing collections
     if (
       nextPageParams === null &&
       userCollections.length >= blockscoutRes.items.length

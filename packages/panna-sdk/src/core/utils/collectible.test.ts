@@ -1,3 +1,4 @@
+import { liskSepolia } from '../chains';
 import * as httpUtils from '../helpers/http';
 import {
   getBaseNFTRequestUrl,
@@ -15,9 +16,9 @@ jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
 jest.mock('../helpers/http');
 
 describe('getBaseNFTRequestUrl', () => {
-  it('should return the transactions API endpoint for the given address', () => {
+  it('should return the NFT API endpoint for the given address', () => {
     const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
-    const url = getBaseNFTRequestUrl(address);
+    const url = getBaseNFTRequestUrl(address, liskSepolia.id);
 
     expect(typeof url).toBe('string');
     expect(url).toMatch(REGEX_URL);
@@ -28,9 +29,9 @@ describe('getBaseNFTRequestUrl', () => {
 });
 
 describe('getBaseNFTCollectionsRequestUrl', () => {
-  it('should return the transactions API endpoint for the given address', () => {
+  it('should return the NFT collections API endpoint for the given address', () => {
     const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
-    const url = getBaseNFTCollectionsRequestUrl(address);
+    const url = getBaseNFTCollectionsRequestUrl(address, liskSepolia.id);
 
     expect(typeof url).toBe('string');
     expect(url).toMatch(REGEX_URL);
@@ -48,7 +49,7 @@ describe('getCollectiblesByAddress', () => {
     );
   });
 
-  it('should return empty list of activities if none exist', async () => {
+  it('should return empty list of collections if none exist', async () => {
     const mockRequestResponse = {
       items: [],
       next_page_params: null
@@ -995,13 +996,16 @@ describe('getCollectiblesByAddress', () => {
     };
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
 
-    const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
+    const params = {
+      address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia
+    };
     const result = await getCollectiblesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(1);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      getBaseNFTCollectionsRequestUrl(params.address)
+      getBaseNFTCollectionsRequestUrl(params.address, liskSepolia.id)
     );
     expect(result).toStrictEqual({
       collectibles: [
@@ -2189,6 +2193,7 @@ describe('getCollectiblesByAddress', () => {
       .mockResolvedValueOnce(mockRequestResponse2);
     const params = {
       address: '0x1AC80cE05ed1775BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia,
       offset: 3,
       limit: 10
     };
@@ -2197,11 +2202,11 @@ describe('getCollectiblesByAddress', () => {
     expect(httpUtils.request).toHaveBeenCalledTimes(2);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      getBaseNFTCollectionsRequestUrl(params.address)
+      getBaseNFTCollectionsRequestUrl(params.address, liskSepolia.id)
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
-      `${getBaseNFTCollectionsRequestUrl(params.address)}?token_contract_address_hash=${mockRequestResponse1.next_page_params.token_contract_address_hash}&token_type=${mockRequestResponse1.next_page_params.token_type}`
+      `${getBaseNFTCollectionsRequestUrl(params.address, liskSepolia.id)}?token_contract_address_hash=${mockRequestResponse1.next_page_params.token_contract_address_hash}&token_type=${mockRequestResponse1.next_page_params.token_type}`
     );
 
     expect(result).toStrictEqual({

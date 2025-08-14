@@ -1,6 +1,8 @@
+import { lisk } from '../chains';
 import { NATIVE_TOKEN_ADDRESS } from '../defaults';
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
+import { PannaHttpErr } from '../helpers/http';
 import {
   // const
   TokenERC,
@@ -27,9 +29,8 @@ import {
   type BlockscoutTotalERC721,
   type BlockscoutTotalERC1155
 } from './blockscout.types';
-import { getCacheKey, isValidAddress } from './common';
+import { getBaseApiUrl, getCacheKey, isValidAddress } from './common';
 import {
-  BASE_BLOCKSCOUT_URL,
   DEFAULT_PAGINATION_OFFSET,
   DEFAULT_PAGINATION_LIMIT
 } from './constants';
@@ -42,21 +43,32 @@ const activityCache = newLruMemCache('activity');
  * @param address The address for which to return the transactions API endpoint.
  * @returns Blockscout transactions API endpoint for the supplied address.
  */
-export const getBaseTransactionsRequestUrl = (address: string): string =>
-  `${BASE_BLOCKSCOUT_URL}/addresses/${address}/transactions`;
+export const getBaseTransactionsRequestUrl = (
+  address: string,
+  chainID: number
+): string => {
+  const BASE_API_URL = getBaseApiUrl(chainID);
+  return `${BASE_API_URL}/addresses/${address}/transactions`;
+};
 
 /**
  * Get blockscout token transfers endpoint.
  * @param address The address for which to return the token transfers API endpoint.
  * @returns Blockscout token transfers API endpoint for the supplied address.
  */
-export const getBaseTokenTransferRequestUrl = (address: string): string =>
-  `${BASE_BLOCKSCOUT_URL}/addresses/${address}/token-transfers`;
+export const getBaseTokenTransferRequestUrl = (
+  address: string,
+  chainID: number
+): string => {
+  const BASE_API_URL = getBaseApiUrl(chainID);
+  return `${BASE_API_URL}/addresses/${address}/token-transfers`;
+};
 
 /*
  * Get recent activities for an account.
  * @param params - Parameters for fetching the account activities.
  * @param params.address - The address for which to retrieve the activities.
+ * @param params.chain - (Optional) Chain object type. (Default: lisk)
  * @param params.offset - (Optional) The number of items to be skipped from the matching result. (Default: 0)
  * @param params.limit - (Optional) The number of items to be returned from the matching result. (Default: 10)
  * @returns Account activity information.
@@ -149,29 +161,32 @@ export const getActivitiesByAddress = async function (
   // Set default pagination params
   const {
     address,
+    chain = lisk,
     offset = DEFAULT_PAGINATION_OFFSET,
     limit = DEFAULT_PAGINATION_LIMIT
   } = params;
-  const cacheKeyTransactions = getCacheKey(address, 'transactions');
+  const cacheKeyTransactions = getCacheKey(address, chain.id, 'transactions');
   const cacheKeyNextPageParams = getCacheKey(
     address,
+    chain.id,
     'transactions_next_params'
   );
 
-  const userTransactions: BlockscoutTransaction[] = activityCache.has(
+  const userTransactions: BlockscoutTransaction[] = (activityCache.get(
     cacheKeyTransactions
-  )
-    ? (activityCache.get(cacheKeyTransactions) as BlockscoutTransaction[])
-    : [];
+  ) || []) as BlockscoutTransaction[];
 
-  let nextPageParams: BlockscoutNextPageParams | null = activityCache.has(
-    cacheKeyNextPageParams
-  )
-    ? (activityCache.get(cacheKeyNextPageParams) as BlockscoutNextPageParams)
-    : null;
+  let nextPageParams: BlockscoutNextPageParams | null =
+    (activityCache.get(cacheKeyNextPageParams) as BlockscoutNextPageParams) ||
+    null;
 
-  const baseTxRequestUrl = getBaseTransactionsRequestUrl(address);
+  const baseTxRequestUrl = getBaseTransactionsRequestUrl(address, chain.id);
   while (userTransactions.length <= offset + limit) {
+    // No new pages exist, avoid unnecessary API calls
+    if (userTransactions.length && nextPageParams === null) {
+      break;
+    }
+
     const requestUrl =
       nextPageParams === null
         ? baseTxRequestUrl
@@ -179,14 +194,16 @@ export const getActivitiesByAddress = async function (
 
     const response = await httpUtils.request(requestUrl);
 
-    const errResponse = response as Error;
+    const errResponse = response as PannaHttpErr;
     if ('code' in errResponse && 'message' in errResponse) {
-      throw new Error(`Cannot fetch user activities: ${errResponse.message}`);
+      throw new Error(
+        `Unable to fetch user activities: ${errResponse.message}`
+      );
     }
 
-    const blockscoutRes = response as BlockscoutTransactionsResponse;
+    const blockscoutRes = response as unknown as BlockscoutTransactionsResponse;
     userTransactions.push(
-      ...(await fillTokenTransactions(address, blockscoutRes.items))
+      ...(await fillTokenTransactions(address, chain.id, blockscoutRes.items))
     );
     nextPageParams = blockscoutRes.next_page_params;
 
@@ -345,6 +362,7 @@ export const getActivitiesByAddress = async function (
  */
 export const fillTokenTransactions = async (
   address: string,
+  chainID: number,
   transactions: BlockscoutTransaction[]
 ): Promise<BlockscoutTransaction[]> => {
   // Do not proceed (avoid unnecessary API calls) if there are no transactions
@@ -352,9 +370,14 @@ export const fillTokenTransactions = async (
     return transactions;
   }
 
-  const cacheKeyTokenTransferTxs = getCacheKey(address, 'token_transfers');
+  const cacheKeyTokenTransferTxs = getCacheKey(
+    address,
+    chainID,
+    'token_transfers'
+  );
   const cacheKeyTokenTransferNextPageParams = getCacheKey(
     address,
+    chainID,
     'token_transfers_next_params'
   );
 
@@ -371,20 +394,14 @@ export const fillTokenTransactions = async (
     ) {
       let shouldRetryAfterUpdatingTTCache: boolean = true;
       do {
-        const userTokenTransfers: BlockscoutTokenTransfer[] = activityCache.has(
-          cacheKeyTokenTransferTxs
-        )
-          ? (activityCache.get(
-              cacheKeyTokenTransferTxs
-            ) as BlockscoutTokenTransfer[])
-          : [];
+        const userTokenTransfers: BlockscoutTokenTransfer[] =
+          (activityCache.get(cacheKeyTokenTransferTxs) ||
+            []) as BlockscoutTokenTransfer[];
 
         const nextPageParams: BlockscoutNextPageParams | null =
-          activityCache.has(cacheKeyTokenTransferNextPageParams)
-            ? (activityCache.get(
-                cacheKeyTokenTransferNextPageParams
-              ) as BlockscoutNextPageParams)
-            : null;
+          (activityCache.get(
+            cacheKeyTokenTransferNextPageParams
+          ) as BlockscoutNextPageParams) || null;
 
         const tokenTransferTxs = userTokenTransfers.filter(
           (e) => e.transaction_hash === tx.hash
@@ -397,7 +414,7 @@ export const fillTokenTransactions = async (
           (nextPageParams !== null &&
             tx.block_number <= nextPageParams.block_number)
         ) {
-          await updateTokenTransactionsCache(address);
+          await updateTokenTransactionsCache(address, chainID);
           continue;
         }
 
@@ -419,16 +436,23 @@ export const fillTokenTransactions = async (
 
 /**
  * Update the cache for the given address with token transfer transactions (one page with one invocation), if exists.
- * @param address The address for which to update the token transactions cache.
+ * @param address - The address for which to update the token transactions cache.
+ * @param chainID - Chain identifier for which the token transfers are being cached.
  * @returns void
  * @throws Error if the external API call fails.
  */
 export const updateTokenTransactionsCache = async (
-  address: string
+  address: string,
+  chainID: number
 ): Promise<void> => {
-  const cacheKeyTokenTransferTxs = getCacheKey(address, 'token_transfers');
+  const cacheKeyTokenTransferTxs = getCacheKey(
+    address,
+    chainID,
+    'token_transfers'
+  );
   const cacheKeyTokenTransferNextPageParams = getCacheKey(
     address,
+    chainID,
     'token_transfers_next_params'
   );
 
@@ -446,23 +470,26 @@ export const updateTokenTransactionsCache = async (
       ) as BlockscoutNextPageParams)
     : null;
 
-  const baseRequestUrl = getBaseTokenTransferRequestUrl(address);
+  const baseRequestUrl = getBaseTokenTransferRequestUrl(address, chainID);
   const requestUrl =
     nextPageParams === null
       ? baseRequestUrl
       : `${baseRequestUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}&items_count=${nextPageParams.items_count}`;
 
-  const response: BlockscoutTokenTransfersResponse =
-    await httpUtils.request(requestUrl);
+  const response = await httpUtils.request(requestUrl);
 
-  if ('code' in response && 'message' in response) {
-    throw new Error(`Cannot fetch user token-transfers: ${response.message}`);
+  const errResponse = response as PannaHttpErr;
+  if ('code' in errResponse && 'message' in errResponse) {
+    throw new Error(
+      `Unable to fetch user token-transfers: ${errResponse.message}`
+    );
   }
 
-  userTokenTransfers.push(...response.items);
+  const blockscoutRes = response as unknown as BlockscoutTokenTransfersResponse;
+  userTokenTransfers.push(...blockscoutRes.items);
   activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
 
-  if (response.next_page_params) {
+  if (blockscoutRes.next_page_params) {
     activityCache.set(cacheKeyTokenTransferNextPageParams, nextPageParams);
   } else {
     activityCache.delete(cacheKeyTokenTransferNextPageParams);
@@ -497,7 +524,7 @@ export const getAmountType = (
     );
 
     if (!tokenTransferTx) {
-      throw new Error('Cannot determine transaction amount type');
+      throw new Error('Unable to determine transaction amount type');
     }
 
     switch (tokenTransferTx.token.type.toLowerCase()) {

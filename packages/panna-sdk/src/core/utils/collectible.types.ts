@@ -1,6 +1,9 @@
+import { Chain } from 'thirdweb';
+
 // Parameters for fetching account collections
 export interface GetCollectiblesByAddressParams {
   address: string;
+  chain?: Chain;
   limit?: number;
   offset?: number;
 }
