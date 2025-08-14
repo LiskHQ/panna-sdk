@@ -83,3 +83,12 @@ export interface OnrampPrepareResult {
   expiration?: number;
   intent?: OnRampIntent;
 }
+
+export type OnrampProvider = 'coinbase' | 'stripe' | 'transak'; // Add more in future
+
+export interface ProviderInfo {
+  id: OnrampProvider;
+  displayName: string;
+  logoUrl?: string;
+  websiteUrl: string;
+}

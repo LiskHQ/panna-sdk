@@ -1,7 +1,8 @@
 import { Bridge } from 'thirdweb';
 import { liskSepolia } from '../chains';
 import type { PannaClient } from '../client';
-import { onRampStatus, onRampPrepare } from './onramp';
+import { onRampStatus, onRampPrepare, getOnrampProviders } from './onramp';
+// import { OnrampProvider } from './constants';
 import type {
   OnrampCreatedResult,
   OnrampPendingResult,
@@ -279,5 +280,68 @@ describe('onRampPrepare', () => {
 
     expect(Bridge.Onramp.prepare).toHaveBeenCalledWith(expectedParams);
     expect(result).toEqual(expectedPrepareResult);
+  });
+});
+
+describe('getOnrampProviders', () => {
+  const expectedResultForDeAndUs = [
+    {
+      id: 'transak',
+      displayName: 'Transak',
+      websiteUrl: 'https://www.transak.com'
+    },
+    {
+      id: 'coinbase',
+      displayName: 'Coinbase',
+      websiteUrl: 'https://www.coinbase.com'
+    },
+    {
+      id: 'stripe',
+      displayName: 'Stripe',
+      websiteUrl: 'https://www.stripe.com'
+    }
+  ];
+  const expectedResultForSA = [
+    {
+      id: 'coinbase',
+      displayName: 'Coinbase',
+      websiteUrl: 'https://www.coinbase.com'
+    },
+    {
+      id: 'stripe',
+      displayName: 'Stripe',
+      websiteUrl: 'https://www.stripe.com'
+    }
+  ];
+
+  it('should get onramp providers for a specific country DE', async () => {
+    const resultUS = await getOnrampProviders('US');
+    const resultDE = await getOnrampProviders('DE');
+    expect(resultUS).toEqual(expectedResultForDeAndUs);
+    expect(resultDE).toEqual(expectedResultForDeAndUs);
+  });
+
+  it('should handle case insensitivity for country codes', async () => {
+    const result1 = await getOnrampProviders('de');
+    expect(result1).toEqual(expectedResultForDeAndUs);
+
+    const result2 = await getOnrampProviders('De');
+    expect(result2).toEqual(expectedResultForDeAndUs);
+  });
+
+  it('should return providers for a valid country code SA', async () => {
+    const result = await getOnrampProviders('SA');
+    expect(result).toEqual(expectedResultForSA);
+  });
+
+  it('should return an empty array for unsupported countries', async () => {
+    const result = await getOnrampProviders('aQ');
+    expect(result).toEqual([]);
+  });
+
+  it('should throw an error for invalid country codes', async () => {
+    expect(() => getOnrampProviders('INVALID')).toThrow(
+      'Invalid country code: INVALID'
+    );
   });
 });
