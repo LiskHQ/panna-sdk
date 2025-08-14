@@ -334,18 +334,13 @@ describe('getOnrampProviders', () => {
     expect(result).toEqual(expectedResultForSA);
   });
 
-  it('should return empty array if no providers are available', async () => {
-    const result = await getOnrampProviders('ZZ');
-    expect(result).toEqual([]);
-  });
-
   it('should return an empty array for unsupported countries', async () => {
-    const result = await getOnrampProviders('xX');
+    const result = await getOnrampProviders('aQ');
     expect(result).toEqual([]);
   });
 
   it('should throw an error for invalid country codes', async () => {
-    await expect(getOnrampProviders('INVALID')).rejects.toThrow(
+    expect(() => getOnrampProviders('INVALID')).toThrow(
       'Invalid country code: INVALID'
     );
   });

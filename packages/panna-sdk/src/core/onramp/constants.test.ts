@@ -1,3 +1,4 @@
+import { getCountry } from 'iso-3166-1-alpha-2';
 import { COUNTRY_PROVIDER_MAP, PROVIDERS } from './constants';
 
 describe('Onramp Constants', () => {
@@ -39,9 +40,9 @@ describe('Onramp Constants', () => {
 
   it('should contain entries for valid countries', () => {
     Object.keys(COUNTRY_PROVIDER_MAP).forEach((countryCode) => {
-      expect(countryCode).toBeOfLength(2);
+      expect(countryCode).toHaveLength(2);
 
-      const countryName = iso3311a2.getCountry(countryCode);
+      const countryName = getCountry(countryCode);
       expect(countryName).toBeDefined();
     });
   });
