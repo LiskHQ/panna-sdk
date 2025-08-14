@@ -1,4 +1,26 @@
-import { isValidAddress } from './common';
+import { CACHE_KEY_TYPE, getCacheKey, isValidAddress } from './common';
+
+describe('getCacheKey', () => {
+  const address = '0xUserAddress';
+  for (let type of Object.keys(CACHE_KEY_TYPE)) {
+    it(`should always return string keys for data type: ${type}`, () => {
+      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      expect(typeof key).toBe('string');
+    });
+
+    it(`should always return non-empty keys for data type: ${type}`, () => {
+      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      expect(key.length).toBeGreaterThan(0);
+      expect(key.includes(address)).toBeTruthy();
+    });
+
+    it(`should always include user address for data type: ${type}`, () => {
+      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
+      expect(key.length).toBeGreaterThan(0);
+      expect(key.includes(address)).toBeTruthy();
+    });
+  }
+});
 
 describe('isValidAddress', () => {
   it('should return true for valid checksummed addresses', () => {

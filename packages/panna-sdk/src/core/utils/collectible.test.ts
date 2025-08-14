@@ -6,16 +6,13 @@ import {
 } from './collectible';
 import {
   DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET
+  DEFAULT_PAGINATION_OFFSET,
+  REGEX_URL
 } from './constants';
 
 // Mock upstream modules
 jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
 jest.mock('../helpers/http');
-
-// Constant
-const REGEX_URL =
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
 describe('getBaseNFTRequestUrl', () => {
   it('should return the transactions API endpoint for the given address', () => {

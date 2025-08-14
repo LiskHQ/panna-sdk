@@ -1,10 +1,11 @@
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
-import { getCacheKey } from './activity';
 import {
   BlockscoutAddressNFTCollection,
   BlockscoutNFTNextPageParams,
-  BlockscoutNFTCollectionsResponse,
+  BlockscoutNFTCollectionsResponse
+} from './blockscout.types';
+import {
   Collectible,
   CollectibleMetadata,
   GetCollectiblesByAddressParams,
@@ -12,7 +13,7 @@ import {
   Token,
   TokenInstance
 } from './collectible.types';
-import { isValidAddress } from './common';
+import { getCacheKey, isValidAddress } from './common';
 import {
   BASE_BLOCKSCOUT_URL,
   DEFAULT_PAGINATION_OFFSET,

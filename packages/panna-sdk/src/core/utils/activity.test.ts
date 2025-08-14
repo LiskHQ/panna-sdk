@@ -1,27 +1,23 @@
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
-  CACHE_KEY_TYPE,
-  getCacheKey,
   getActivitiesByAddress,
   getAmountType,
   getBaseTransactionsRequestUrl,
   getBaseTokenTransferRequestUrl
 } from './activity';
-import { TokenERC, BlockscoutTransaction, TokenType } from './activity.types';
+import { TokenERC, TokenType } from './activity.types';
+import { BlockscoutTransaction } from './blockscout.types';
 import {
   DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET
+  DEFAULT_PAGINATION_OFFSET,
+  REGEX_URL
 } from './constants';
 
 // Mock upstream modules
 jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
 jest.mock('../helpers/http');
 jest.mock('./activity', () => jest.requireActual('./activity'));
-
-// Constant
-const REGEX_URL =
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
 describe('getBaseTransactionsRequestUrl', () => {
   it('should return the transactions API endpoint for the given address', () => {
@@ -47,28 +43,6 @@ describe('getBaseTokenTransferRequestUrl', () => {
     expect(url.endsWith('token-transfers')).toBeTruthy();
     expect(url.includes(address)).toBeTruthy();
   });
-});
-
-describe('getCacheKey', () => {
-  const address = '0xUserAddress';
-  for (let type of Object.keys(CACHE_KEY_TYPE)) {
-    it(`should always return string keys for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
-      expect(typeof key).toBe('string');
-    });
-
-    it(`should always return non-empty keys for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
-      expect(key.length).toBeGreaterThan(0);
-      expect(key.includes(address)).toBeTruthy();
-    });
-
-    it(`should always include user address for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
-      expect(key.length).toBeGreaterThan(0);
-      expect(key.includes(address)).toBeTruthy();
-    });
-  }
 });
 
 describe('updateTokenTransactionsCache', () => {
