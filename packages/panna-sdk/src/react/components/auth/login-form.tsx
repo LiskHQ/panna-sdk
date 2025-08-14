@@ -188,6 +188,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                       className="hover:bg-primary/90! bg-transparent"
                       onClick={() => handleFormSubmit('email')}
                       type="button"
+                      data-testid="email-submit-button"
                     >
                       <MoveRightIcon className="text-neutral-400" />
                     </Button>
@@ -224,6 +225,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                       className="hover:bg-primary/90! bg-transparent"
                       onClick={() => handleFormSubmit('phoneNumber')}
                       type="button"
+                      data-testid="phone-submit-button"
                     >
                       <MoveRightIcon className="text-neutral-400" />
                     </Button>

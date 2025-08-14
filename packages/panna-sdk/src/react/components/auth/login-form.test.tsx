@@ -57,7 +57,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/Email address/i), {
       target: { value: 'test@example.com' }
     });
-    fireEvent.click(screen.getAllByRole('button', { name: '' })[0]);
+    fireEvent.click(screen.getByTestId('email-submit-button'));
     await waitFor(() => {
       expect(nextMock).toHaveBeenCalledWith({ email: 'test@example.com' });
       expect(nextMock).toHaveBeenCalledTimes(1);
@@ -69,7 +69,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/Email address/i), {
       target: { value: 'invalid' }
     });
-    fireEvent.click(screen.getAllByRole('button', { name: '' })[0]);
+    fireEvent.click(screen.getByTestId('email-submit-button'));
     await waitFor(() => {
       expect(
         screen.getByText(/This is not a valid email/i)
@@ -82,7 +82,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/Phone number/i), {
       target: { value: '+12345678901' }
     });
-    fireEvent.click(screen.getAllByRole('button', { name: '' })[1]);
+    fireEvent.click(screen.getByTestId('phone-submit-button'));
     await waitFor(() => {
       expect(nextMock).toHaveBeenCalledWith({ phoneNumber: '+12345678901' });
       expect(nextMock).toHaveBeenCalledTimes(1);
@@ -94,7 +94,7 @@ describe('LoginForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/Phone number/i), {
       target: { value: '123' }
     });
-    fireEvent.click(screen.getAllByRole('button', { name: '' })[1]);
+    fireEvent.click(screen.getByTestId('phone-submit-button'));
     await waitFor(() => {
       expect(
         screen.getByText(/Phone number must be at least 10 digits/i)
