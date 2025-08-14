@@ -1,7 +1,7 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { isValidAddress } from 'src/core';
 import { mockCollectibles } from '@/mocks/collectibles';
-import { CollectiblesResponse } from '@/types/collectibles.types';
+import { GetCollectiblesByAddressResult } from '@/types/collectibles.types';
 import { usePanna } from './use-panna';
 
 type UseCollectiblesParams = {
@@ -15,14 +15,17 @@ type UseCollectiblesParams = {
  */
 export function useCollectibles(
   { address }: UseCollectiblesParams,
-  options?: Omit<UseQueryOptions<CollectiblesResponse>, 'queryKey' | 'queryFn'>
+  options?: Omit<
+    UseQueryOptions<GetCollectiblesByAddressResult>,
+    'queryKey' | 'queryFn'
+  >
 ) {
   const { client } = usePanna();
   const hasValidAddress = isValidAddress(address);
 
   return useQuery({
     queryKey: ['collectibles', address],
-    queryFn: async (): Promise<CollectiblesResponse> => {
+    queryFn: async (): Promise<GetCollectiblesByAddressResult> => {
       return new Promise((resolve) => {
         setTimeout(() => {
           resolve(mockCollectibles);

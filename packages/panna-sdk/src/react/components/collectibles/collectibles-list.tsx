@@ -70,39 +70,39 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
 
   return (
     <section>
-      {data.collectibles.items.map((item, index) => (
+      {data.collectibles.map((item, index) => (
         <Accordion
           type="single"
           collapsible
           className="w-full"
-          defaultValue={`item-${item.token_instances[0].id}-${index}`}
-          key={`item-${item.token_instances[0].id}-${index}`}
+          defaultValue={`item-${item.instances[0].id}-${index}`}
+          key={`item-${item.token.symbol}-${index}`}
         >
-          <AccordionItem value={`item-${item.token_instances[0].id}-${index}`}>
+          <AccordionItem value={`item-${item.instances[0].id}-${index}`}>
             <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
               <div className="flex items-center gap-3">
                 <img
-                  src={item.token_instances[0].metadata!.image_url as string}
-                  alt={item.token_instances[0].metadata!.name as string}
+                  src={item.instances[0].image}
+                  alt={item.instances[0].name}
                   className="h-10 w-10 rounded-full"
                 />
                 <div className="flex items-center gap-1">
                   <Typography variant="small">
-                    {item.token_instances[0].metadata!.name as string}
+                    {item.instances[0].name}
                   </Typography>
                   <Typography variant="muted">
-                    ({item.token_instances.length})
+                    ({item.instances.length})
                   </Typography>
                 </div>
               </div>
             </AccordionTrigger>
             <AccordionContent className="grid grid-cols-2 gap-4">
-              {item.token_instances.map((item, index) => (
+              {item.instances.map((item, index) => (
                 <Card key={index} className="p-0">
                   <CardContent className="p-0">
                     <img
-                      src={item.metadata!.image_url as string}
-                      alt={item.metadata!.name as string}
+                      src={item.image}
+                      alt={item.name}
                       className="h-52 w-full rounded-xl"
                     />
                   </CardContent>
