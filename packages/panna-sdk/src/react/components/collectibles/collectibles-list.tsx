@@ -52,7 +52,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
-  if (!data) {
+  if (!data?.collectibles.length) {
     return (
       <section
         className={cn(
@@ -91,7 +91,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                     {item.instances[0].name}
                   </Typography>
                   <Typography variant="muted">
-                    ({item.instances.length})
+                    ({item.numInstancesOwned})
                   </Typography>
                 </div>
               </div>

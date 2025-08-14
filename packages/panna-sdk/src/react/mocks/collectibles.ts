@@ -31,7 +31,7 @@ export const mockCollectibles: GetCollectiblesByAddressResult = {
       token: {
         name: 'Lisk of Life',
         symbol: 'LOL',
-        type: 'erc-721',
+        type: 'ERC-721',
         address: '0x6da91ed1237ebf7f8c433659f13cc24e11e0de43',
         icon: 'https://drops-static.rarible.com/drops/image/Lisk%20of%20Life.jpg'
       },
