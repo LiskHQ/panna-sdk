@@ -166,6 +166,7 @@ export async function onRampPrepare(
  * Get available onramp providers for a given country code.
  * @param countryCode - ISO 3166-1 alpha-2 code (e.g., "US", "IN")
  * @returns List of providers available in that country
+ * @throws Error when the provided country code does not match ISO 3166-1 alpha-2 standards
  * @example
  * ```
  * const germanyProviders = getOnrampProviders("DE");
