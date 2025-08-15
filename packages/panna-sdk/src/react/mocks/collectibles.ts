@@ -1,4 +1,4 @@
-import { GetCollectiblesByAddressResult } from '@/types/collectibles.types';
+import { GetCollectiblesByAddressResult } from 'src/core/utils/collectible.types';
 
 export const mockCollectibles: GetCollectiblesByAddressResult = {
   collectibles: [

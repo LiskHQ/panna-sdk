@@ -1,12 +1,10 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { isValidAddress } from 'src/core';
-import { mockCollectibles } from '@/mocks/collectibles';
-import { GetCollectiblesByAddressResult } from '@/types/collectibles.types';
+import { getCollectiblesByAddress, isValidAddress } from 'src/core';
+import {
+  GetCollectiblesByAddressParams,
+  GetCollectiblesByAddressResult
+} from 'src/core/utils/collectible.types';
 import { usePanna } from './use-panna';
-
-type UseCollectiblesParams = {
-  address: string;
-};
 
 /**
  * Hook to retrieve collectibles
@@ -14,7 +12,7 @@ type UseCollectiblesParams = {
  * @returns React Query result with collectible data
  */
 export function useCollectibles(
-  { address }: UseCollectiblesParams,
+  { address, chain, limit, offset }: GetCollectiblesByAddressParams,
   options?: Omit<
     UseQueryOptions<GetCollectiblesByAddressResult>,
     'queryKey' | 'queryFn'
@@ -26,10 +24,11 @@ export function useCollectibles(
   return useQuery({
     queryKey: ['collectibles', address],
     queryFn: async (): Promise<GetCollectiblesByAddressResult> => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(mockCollectibles);
-        }, 3000);
+      return await getCollectiblesByAddress({
+        address,
+        chain,
+        limit,
+        offset
       });
     },
     staleTime: 30 * 1000, // 30 seconds (prices change frequently)
