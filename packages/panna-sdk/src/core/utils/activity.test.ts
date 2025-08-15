@@ -1,30 +1,29 @@
+import { liskSepolia } from '../chains';
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
-  CACHE_KEY_TYPE,
-  DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET,
-  getCacheKey,
   getActivitiesByAddress,
   getAmountType,
   getBaseTransactionsRequestUrl,
   getBaseTokenTransferRequestUrl
 } from './activity';
-import { TokenERC, BlockscoutTransaction, TokenType } from './activity.types';
+import { TokenERC, TokenType } from './activity.types';
+import { BlockscoutTransaction } from './blockscout.types';
+import {
+  DEFAULT_PAGINATION_LIMIT,
+  DEFAULT_PAGINATION_OFFSET,
+  REGEX_URL
+} from './constants';
 
 // Mock upstream modules
 jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
 jest.mock('../helpers/http');
 jest.mock('./activity', () => jest.requireActual('./activity'));
 
-// Constant
-const REGEX_URL =
-  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
-
 describe('getBaseTransactionsRequestUrl', () => {
   it('should return the transactions API endpoint for the given address', () => {
     const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
-    const url = getBaseTransactionsRequestUrl(address);
+    const url = getBaseTransactionsRequestUrl(address, liskSepolia.id);
 
     expect(typeof url).toBe('string');
     expect(url).toMatch(REGEX_URL);
@@ -37,7 +36,7 @@ describe('getBaseTransactionsRequestUrl', () => {
 describe('getBaseTokenTransferRequestUrl', () => {
   it('should return the token transfers API endpoint for the given address', () => {
     const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
-    const url = getBaseTokenTransferRequestUrl(address);
+    const url = getBaseTokenTransferRequestUrl(address, liskSepolia.id);
 
     expect(typeof url).toBe('string');
     expect(url).toMatch(REGEX_URL);
@@ -45,28 +44,6 @@ describe('getBaseTokenTransferRequestUrl', () => {
     expect(url.endsWith('token-transfers')).toBeTruthy();
     expect(url.includes(address)).toBeTruthy();
   });
-});
-
-describe('getCacheKey', () => {
-  const address = '0xUserAddress';
-  for (let type of Object.keys(CACHE_KEY_TYPE)) {
-    it(`should always return string keys for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
-      expect(typeof key).toBe('string');
-    });
-
-    it(`should always return non-empty keys for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
-      expect(key.length).toBeGreaterThan(0);
-      expect(key.includes(address)).toBeTruthy();
-    });
-
-    it(`should always include user address for data type: ${type}`, () => {
-      const key = getCacheKey(address, type as keyof typeof CACHE_KEY_TYPE);
-      expect(key.length).toBeGreaterThan(0);
-      expect(key.includes(address)).toBeTruthy();
-    });
-  }
 });
 
 describe('updateTokenTransactionsCache', () => {
@@ -255,7 +232,7 @@ describe('getAmountType', () => {
       has_error_in_internal_transactions: false
     };
     expect(() => getAmountType(invalidTx.from.hash, invalidTx)).toThrow(
-      'Cannot determine transaction amount type'
+      'Unable to determine transaction amount type'
     );
   });
 
@@ -3220,13 +3197,16 @@ describe('getActivitiesByAddress', () => {
       mockRequestResponse
     );
 
-    const params = { address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F' };
+    const params = {
+      address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia
+    };
     const result = await getActivitiesByAddress(params);
 
     expect(httpUtils.request).toHaveBeenCalledTimes(2);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`
+      getBaseTransactionsRequestUrl(params.address, liskSepolia.id)
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
@@ -4318,13 +4298,17 @@ describe('getActivitiesByAddress', () => {
 
     const params = {
       address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia,
       offset: 4,
       limit: 4
     };
     const result = await getActivitiesByAddress(params);
     expect(httpUtils.request).toHaveBeenCalledTimes(3);
 
-    const baseRequestUrl = `https://blockscout.lisk.com/api/v2/addresses/${params.address}/transactions`;
+    const baseRequestUrl = getBaseTransactionsRequestUrl(
+      params.address,
+      liskSepolia.id
+    );
     expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,

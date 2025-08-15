@@ -8,10 +8,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20]
-
     steps:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
@@ -19,12 +15,12 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10.10.0
+          package_json_file: 'package.json'
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js version from .nvmrc
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
 
       - name: 📥 Install dependencies

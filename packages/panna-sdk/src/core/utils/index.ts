@@ -4,3 +4,5 @@ export * from './api-service';
 export * from './common';
 export * from './activity';
 export * from './activity.types';
+export * from './collectible';
+export * from './collectible.types';

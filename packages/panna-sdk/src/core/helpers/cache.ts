@@ -1,7 +1,7 @@
 import { LRUCache } from 'lru-cache';
 
-const MAX_ITEMS_PER_CACHE = 100;
-const DEFAULT_CACHE_TTL_SEC = 6;
+const MAX_ITEMS_PER_CACHE = 50;
+const DEFAULT_CACHE_TTL_SEC = 60;
 
 const memCachePool = new Map();
 
