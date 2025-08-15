@@ -18,7 +18,8 @@ import {
   accountBalanceInFiat,
   accountBalancesInFiat,
   getFiatPrice,
-  getSocialIcon
+  getSocialIcon,
+  toWei
 } from './utils';
 import * as utils from './utils';
 
@@ -1249,6 +1250,29 @@ describe('Utils - Unit Tests', () => {
       expect(result.errors).toBeUndefined();
       expect(result.tokenBalances).toHaveLength(1);
       expect(result.totalValue.amount).toBe(3000.0);
+    });
+  });
+
+  describe('toWei', () => {
+    it('should convert string tokens to wei bigint', () => {
+      const result = toWei('1');
+      expect(result).toBe(BigInt('1000000000000000000'));
+      expect(typeof result).toBe('bigint');
+    });
+
+    it('should handle decimal values', () => {
+      const result = toWei('1.5');
+      expect(result).toBe(BigInt('1500000000000000000'));
+    });
+
+    it('should handle small decimal values', () => {
+      const result = toWei('0.001');
+      expect(result).toBe(BigInt('1000000000000000'));
+    });
+
+    it('should handle zero', () => {
+      const result = toWei('0');
+      expect(result).toBe(BigInt('0'));
     });
   });
 });

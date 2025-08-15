@@ -1,4 +1,5 @@
 import { convertCryptoToFiat } from 'thirdweb/pay';
+import { toWei as thirdwebToWei } from 'thirdweb/utils';
 import { getWalletBalance } from 'thirdweb/wallets';
 import { getSocialIcon as thirdwebGetSocialIcon } from 'thirdweb/wallets/in-app';
 import {
@@ -19,6 +20,21 @@ import {
   type SocialProvider,
   type TokenBalanceError
 } from './types';
+
+/**
+ * Converts the specified number of tokens to Wei.
+ * @param tokens The number of tokens to convert.
+ * @returns The converted value in Wei.
+ * @example
+ * ```ts
+ * import { toWei } from 'panna-sdk';
+ *
+ * const value = toWei('1.5'); // 1500000000000000000n
+ * ```
+ */
+export const toWei = function (tokens: string): bigint {
+  return thirdwebToWei(tokens);
+};
 
 /**
  * Get the balance of an account
