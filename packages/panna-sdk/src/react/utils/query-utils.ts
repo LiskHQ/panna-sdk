@@ -13,8 +13,10 @@ export const generatePaginationQueryFilter = (
   limit?: number,
   offset?: number
 ) => {
-  const isValidLimit = (limit ?? -1) > 0 && (limit ?? -1) <= MAX_LIMIT;
-  const isValidOffset = (offset ?? -1) >= 0 && (offset ?? -1) <= MAX_OFFSET;
+  const normalizedLimit = limit ?? -1;
+  const isValidLimit = normalizedLimit > 0 && normalizedLimit <= MAX_LIMIT;
+  const normalizedOffset = offset ?? -1;
+  const isValidOffset = normalizedOffset >= 0 && normalizedOffset <= MAX_OFFSET;
 
   if (!isValidLimit || !isValidOffset) {
     return undefined;
