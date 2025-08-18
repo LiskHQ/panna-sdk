@@ -76,7 +76,11 @@ describe('CollectiblesList', () => {
     render(<CollectiblesList />);
     expect(screen.getByTestId('circle-alert-icon')).toBeVisible();
     expect(screen.getByText(/Failed to get activity/i)).toBeVisible();
-    expect(screen.getByText(/Error fetching collectibles/i)).toBeVisible();
+    expect(
+      screen.getByText(
+        /There was an error attempting to load your collectibles./i
+      )
+    ).toBeVisible();
   });
 
   it('renders empty state', () => {

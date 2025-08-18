@@ -80,7 +80,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
         <CircleAlertIcon className="h-10 w-10 stroke-amber-300" />
         <Typography variant="small">Failed to get activity</Typography>
         <Typography variant="muted">
-          Error fetching collectibles. Please try again later.
+          There was an error attempting to load your collectibles. Please
+          refresh or check again soon.
         </Typography>
       </section>
     );
