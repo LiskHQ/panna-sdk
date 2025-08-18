@@ -25,7 +25,6 @@ export {
 } from 'thirdweb/react';
 
 export { usePanna } from './use-panna';
-export { useFiatBalance } from './use-fiat-balance';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
 export {
