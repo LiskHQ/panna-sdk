@@ -4,6 +4,7 @@ import {
   PaginationState,
   useReactTable
 } from '@tanstack/react-table';
+import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useActiveAccount } from '@/hooks';
 import { useCollectibles } from '@/hooks/use-collectibles';
@@ -77,6 +78,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           className
         )}
       >
+        <CircleAlertIcon className="h-10 w-10 stroke-amber-300" />
+        <Typography variant="small">Failed to get activity</Typography>
         <Typography variant="muted">
           Error fetching collectibles. Please try again later.
         </Typography>
