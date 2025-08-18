@@ -70,48 +70,56 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
 
   return (
     <section>
-      {data.collectibles.map((item, index) => (
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full"
-          defaultValue={`item-${item.instances[0].id}-${index}`}
-          key={`item-${item.token.symbol}-${index}`}
-        >
-          <AccordionItem value={`item-${item.instances[0].id}-${index}`}>
-            <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
-              <div className="flex items-center gap-3">
-                <img
-                  src={item.instances[0].image}
-                  alt={item.instances[0].name}
-                  className="h-10 w-10 rounded-full"
-                />
-                <div className="flex items-center gap-1">
-                  <Typography variant="small">
-                    {item.instances[0].name}
-                  </Typography>
-                  <Typography variant="muted">
-                    ({item.numInstancesOwned})
-                  </Typography>
+      {data.collectibles.map((item, index) => {
+        if (!item.instances || item.instances.length === 0) {
+          return null;
+        }
+
+        const firstInstance = item.instances[0];
+
+        return (
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            defaultValue={`item-${firstInstance.id}-${index}`}
+            key={`item-${item.token.symbol}-${index}`}
+          >
+            <AccordionItem value={`item-${firstInstance.id}-${index}`}>
+              <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={firstInstance.image}
+                    alt={firstInstance.name}
+                    className="h-10 w-10 rounded-full"
+                  />
+                  <div className="flex items-center gap-1">
+                    <Typography variant="small">
+                      {firstInstance.name}
+                    </Typography>
+                    <Typography variant="muted">
+                      ({item.numInstancesOwned})
+                    </Typography>
+                  </div>
                 </div>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="grid grid-cols-2 gap-4">
-              {item.instances.map((item, index) => (
-                <Card key={index} className="p-0">
-                  <CardContent className="p-0">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-52 w-full rounded-xl"
-                    />
-                  </CardContent>
-                </Card>
-              ))}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      ))}
+              </AccordionTrigger>
+              <AccordionContent className="grid grid-cols-2 gap-4">
+                {item.instances.map((instance, instanceIndex) => (
+                  <Card key={instanceIndex} className="p-0">
+                    <CardContent className="p-0">
+                      <img
+                        src={instance.image}
+                        alt={instance.name}
+                        className="h-52 w-full rounded-xl"
+                      />
+                    </CardContent>
+                  </Card>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        );
+      })}
     </section>
   );
 }
