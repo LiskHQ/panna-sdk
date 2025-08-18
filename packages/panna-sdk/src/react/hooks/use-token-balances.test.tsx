@@ -1,11 +1,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
-// Extract mocked functions for use in tests
 import { accountBalancesInFiat } from 'src/core';
 import { TokenBalance as UITokenBalance } from '@/mocks/token-balances';
-import { createQueryClientWrapper } from '../test-utils';
+import { createQueryClientWrapper } from '../utils/test-utils';
 import { useTokenBalances } from './use-token-balances';
 
-// Mock usePanna to provide a client without needing the full provider
 jest.mock('./use-panna', () => ({
   usePanna: jest.fn(() => ({
     client: {} as unknown as { clientId: string },
@@ -13,7 +11,6 @@ jest.mock('./use-panna', () => ({
   }))
 }));
 
-// Partially mock core: only override accountBalancesInFiat
 jest.mock('src/core', () => {
   const actual = jest.requireActual('src/core');
   return {
@@ -22,7 +19,6 @@ jest.mock('src/core', () => {
   };
 });
 
-// Mock utils to control chain and supported tokens/icon mapping
 jest.mock('@/utils', () => ({
   getEnvironmentChain: jest.fn(() => ({ id: 123 })),
   getSupportedTokens: jest.fn(() => ({
