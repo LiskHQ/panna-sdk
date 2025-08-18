@@ -3,6 +3,12 @@ import { getFiatPrice } from '../..';
 import { lisk } from '../../core';
 import type { Chain } from '../../core/chains/types';
 import type { FiatCurrency } from '../../core/utils/types';
+import {
+  DEFAULT_STALE_TIME,
+  DEFAULT_REFETCH_INTERVAL,
+  DEFAULT_RETRY_DELAY,
+  createDefaultRetryFn
+} from './constants';
 import { usePanna } from './use-panna';
 
 type UseFiatBalanceParams = {
@@ -43,15 +49,9 @@ export function useFiatBalance({
       return fiatValue.price;
     },
     enabled: !!(client && balance && hasValidBalance),
-    staleTime: 30 * 1000, // 30 seconds (prices change frequently)
-    refetchInterval: 60 * 1000, // Refetch every minute when component is focused
-    retry: (failureCount) => {
-      // Don't retry on client/validation errors
-      if (!client || !hasValidBalance) {
-        return false;
-      }
-      return failureCount < 2; // Retry less for price data
-    },
-    retryDelay: 1000 // 1 second delay between retries
+    staleTime: DEFAULT_STALE_TIME,
+    refetchInterval: DEFAULT_REFETCH_INTERVAL,
+    retry: createDefaultRetryFn(!!client, hasValidBalance),
+    retryDelay: DEFAULT_RETRY_DELAY
   });
 }

@@ -1,6 +1,12 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { isValidAddress } from 'src/core';
 import { mockTokenBalances, TokenBalance } from '@/mocks/token-balances';
+import {
+  DEFAULT_STALE_TIME,
+  DEFAULT_REFETCH_INTERVAL,
+  DEFAULT_RETRY_DELAY,
+  createDefaultRetryFn
+} from './constants';
 import { usePanna } from './use-panna';
 
 type UseTokenBalancesParams = {
@@ -28,16 +34,10 @@ export function useTokenBalances(
         }, 3000);
       });
     },
-    staleTime: 30 * 1000, // 30 seconds (prices change frequently)
-    refetchInterval: 60 * 1000, // Refetch every minute when component is focused
-    retry: (failureCount) => {
-      // Don't retry on client/validation errors
-      if (!client || !hasValidAddress) {
-        return false;
-      }
-      return failureCount < 2; // Retry less for price data
-    },
-    retryDelay: 1000, // 1 second delay between retries
+    staleTime: DEFAULT_STALE_TIME,
+    refetchInterval: DEFAULT_REFETCH_INTERVAL,
+    retry: createDefaultRetryFn(!!client, hasValidAddress),
+    retryDelay: DEFAULT_RETRY_DELAY,
     ...options
   });
 }
