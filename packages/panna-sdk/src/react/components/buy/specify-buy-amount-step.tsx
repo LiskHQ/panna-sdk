@@ -1,15 +1,20 @@
 import { useState } from 'react';
-import { cn } from '@/utils';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
-import { Typography, typographyVariants } from '../ui/typography';
+import { Typography } from '../ui/typography';
 import type { BuyStepData, Token } from './types';
 
 export function SpecifyBuyAmountStep() {
   const { next, prev, stepData } = useDialogStepper();
   const token: Token | undefined = (stepData as Partial<BuyStepData>).token;
-  const [amount, setAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<string>('');
+
+  const handleAmountChange = (value: string) => {
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setAmount(value);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center gap-6">
@@ -17,25 +22,30 @@ export function SpecifyBuyAmountStep() {
         <DialogTitle>Buy {token?.symbol}</DialogTitle>
       </DialogHeader>
       <div className="flex flex-col items-center gap-2">
-        <Typography variant="h2">
-          {amount}{' '}
-          <span
-            className={cn(
-              typographyVariants({ variant: 'h2' }),
-              'text-muted-foreground'
-            )}
-          >
+        <div className="flex items-center gap-1">
+          <input
+            type="text"
+            inputMode="decimal"
+            placeholder="0"
+            value={amount}
+            onChange={(e) => handleAmountChange(e.target.value)}
+            className="w-fit max-w-[8ch] border-none bg-transparent text-center text-3xl font-bold outline-none"
+            size={Math.max(1, (amount || '0').length)}
+          />
+          <Typography variant="h2" className="text-muted-foreground pb-0">
             {token?.symbol}
-          </span>
+          </Typography>
+        </div>
+        <Typography variant="muted">
+          ~${(parseFloat(amount) * 0 || 0).toFixed(2)}
         </Typography>
-        <Typography variant="muted">~${(amount * 0).toFixed(2)}</Typography>
       </div>
       <div className="flex gap-3">
         {[25, 50, 100].map((v) => (
           <Button
             key={v}
-            variant={amount === v ? 'default' : 'secondary'}
-            onClick={() => setAmount(v)}
+            variant={parseFloat(amount) === v ? 'default' : 'secondary'}
+            onClick={() => setAmount(v.toString())}
           >
             ${v}
           </Button>
@@ -52,8 +62,10 @@ export function SpecifyBuyAmountStep() {
         </Button>
         <Button
           className="flex-1"
-          onClick={() => next({ amount } as Partial<BuyStepData>)}
-          disabled={amount <= 0}
+          onClick={() =>
+            next({ amount: parseFloat(amount) } as Partial<BuyStepData>)
+          }
+          disabled={!amount || parseFloat(amount) <= 0}
         >
           Next
         </Button>
