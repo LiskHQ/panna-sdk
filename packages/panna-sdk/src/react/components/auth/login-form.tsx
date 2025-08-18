@@ -27,8 +27,6 @@ import { getEnvironmentChain } from '../../utils';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 
-// Removed useAuth - thirdweb handles wallet state automatically
-
 type LoginFormProps = {
   next: DialogStepperContextValue['next'];
   onClose?: () => void;

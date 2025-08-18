@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
-import { ThirdwebProvider } from 'thirdweb/react';
-import { createPannaClient, type PannaClient } from '../../core';
+import { AutoConnect, ThirdwebProvider } from 'thirdweb/react';
+import { createAccount, createPannaClient, type PannaClient } from '../../core';
 import { AccountEventProvider } from './account-event-provider';
 
 export type PannaProviderProps = {
@@ -9,6 +9,10 @@ export type PannaProviderProps = {
   clientId?: string;
   partnerId?: string;
   queryClient?: QueryClient;
+  /**
+   * Optional timeout (ms) for Thirdweb AutoConnect
+   */
+  autoConnectTimeout?: number;
   /**
    * Optional authentication token for wallet event API requests
    */
@@ -59,7 +63,14 @@ export const PannaClientContext =
  * ```
  */
 export function PannaProvider(props: PannaProviderProps) {
-  const { clientId, partnerId, children, queryClient, authToken } = props;
+  const {
+    clientId,
+    partnerId,
+    children,
+    queryClient,
+    authToken,
+    autoConnectTimeout
+  } = props;
 
   const contextValue = useMemo(() => {
     const client = clientId ? createPannaClient({ clientId }) : null;
@@ -85,10 +96,25 @@ export function PannaProvider(props: PannaProviderProps) {
 
   const activeQueryClient = queryClient || defaultQueryClient;
 
+  const wallets = useMemo(() => {
+    if (!contextValue.partnerId) return [];
+    if (typeof createAccount === 'function') {
+      return [createAccount({ partnerId: contextValue.partnerId })];
+    }
+    return [];
+  }, [contextValue.partnerId]);
+
   return (
     <QueryClientProvider client={activeQueryClient}>
       <PannaClientContext value={contextValue}>
         <ThirdwebProvider>
+          {contextValue.client && contextValue.partnerId ? (
+            <AutoConnect
+              client={contextValue.client}
+              wallets={wallets}
+              timeout={autoConnectTimeout}
+            />
+          ) : null}
           <AccountEventProvider authToken={authToken}>
             {children}
           </AccountEventProvider>

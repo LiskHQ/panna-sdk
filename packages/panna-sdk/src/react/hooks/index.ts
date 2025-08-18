@@ -25,7 +25,6 @@ export {
 } from 'thirdweb/react';
 
 export { usePanna } from './use-panna';
-export { useFiatBalance } from './use-fiat-balance';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
 export {
@@ -35,3 +34,4 @@ export {
   DEFAULT_MAX_RETRIES,
   createDefaultRetryFn
 } from './constants';
+export { useTotalFiatBalance } from './use-total-fiat-balance';
