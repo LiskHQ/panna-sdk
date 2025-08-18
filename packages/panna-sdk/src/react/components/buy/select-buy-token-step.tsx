@@ -58,7 +58,11 @@ export function SelectBuyTokenStep() {
               <ChevronRightIcon className="opacity-50" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-0" align="start">
+          <PopoverContent
+            className="w-[var(--radix-popover-trigger-width)] p-0"
+            align="start"
+            sideOffset={4}
+          >
             <Command>
               <CommandInput
                 placeholder="Search for an asset"
