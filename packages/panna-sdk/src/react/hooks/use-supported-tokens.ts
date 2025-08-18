@@ -1,6 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
-import type { Token } from '../components/buy/types';
 import {
   DEFAULT_STALE_TIME,
   DEFAULT_REFETCH_INTERVAL,
@@ -8,6 +7,13 @@ import {
   createDefaultRetryFn
 } from './constants';
 import { usePanna } from './use-panna';
+
+type Token = {
+  address: string;
+  symbol: string;
+  name: string;
+  icon?: string;
+};
 
 /**
  * Hook to retrieve supported tokens for the current environment
@@ -34,6 +40,7 @@ export function useSupportedTokens(
         const chainTokens = supportedTokens[chain.id] ?? [];
 
         return chainTokens.map((token) => ({
+          address: token.address,
           symbol: token.symbol || '',
           name: token.name || '',
           icon: token.icon
