@@ -124,7 +124,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <CustomMediaRenderer
+                  <img
                     src={firstInstance.image}
                     alt={firstInstance.name}
                     className="h-10 w-10 rounded-full"
