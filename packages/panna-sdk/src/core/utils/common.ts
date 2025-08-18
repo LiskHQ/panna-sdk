@@ -18,7 +18,7 @@ export const CHAIN_ID_API_URL_MAP: Record<number, string> = {
 /**
  * Get the cache key for the provided address and type of data.
  * @param address - The address for which to retrieve the cache key.
- * @param chainID -
+ * @param chainID - Chain identifier.
  * @param type - The type of cached data.
  * @returns Cache key for the provided address and data type.
  * @example
