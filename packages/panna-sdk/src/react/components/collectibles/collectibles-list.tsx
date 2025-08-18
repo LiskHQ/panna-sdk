@@ -6,8 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import { useActiveAccount } from '@/hooks';
-import { useCollectibles } from '@/hooks/use-collectibles';
+import { useActiveAccount, useCollectibles } from '@/hooks';
 import { cn } from '@/utils';
 import {
   Accordion,
