@@ -1,3 +1,10 @@
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  PaginationState,
+  useReactTable
+} from '@tanstack/react-table';
+import { useState } from 'react';
 import { useActiveAccount } from '@/hooks';
 import { useCollectibles } from '@/hooks/use-collectibles';
 import { cn } from '@/utils';
@@ -8,7 +15,9 @@ import {
   AccordionTrigger
 } from '../ui/accordion';
 import { Card, CardContent } from '../ui/card';
+import { CustomMediaRenderer } from '../ui/custom-media-renderer';
 import { Skeleton } from '../ui/skeleton';
+import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
 
 type CollectiblesListProps = {
@@ -17,14 +26,37 @@ type CollectiblesListProps = {
 
 export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
-  const { isLoading, data, isError } = useCollectibles(
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 2
+  });
+  const { isLoading, isFetching, data, isError } = useCollectibles(
     {
-      address: account?.address as string
+      address: account?.address as string,
+      limit: pagination.pageSize,
+      offset: pagination.pageIndex * pagination.pageSize
     },
     {
       enabled: !!account?.address
     }
   );
+
+  const collectiblesData = data?.collectibles || [];
+  const totalCount = data?.metadata.count || 0;
+
+  const table = useReactTable({
+    columns: [],
+    data: collectiblesData,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    rowCount: totalCount,
+    onPaginationChange: setPagination,
+    state: {
+      pagination
+    },
+    meta: data?.metadata
+  });
 
   if (isLoading) {
     return (
@@ -70,7 +102,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
 
   return (
     <section>
-      {data.collectibles.map((item, index) => {
+      {table.getRowModel().rows.map((row, index) => {
+        const item = row.original;
         if (!item.instances || item.instances.length === 0) {
           return null;
         }
@@ -88,7 +121,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <img
+                  <CustomMediaRenderer
                     src={firstInstance.image}
                     alt={firstInstance.name}
                     className="h-10 w-10 rounded-full"
@@ -107,10 +140,10 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 {item.instances.map((instance, instanceIndex) => (
                   <Card key={instanceIndex} className="p-0">
                     <CardContent className="p-0">
-                      <img
+                      <CustomMediaRenderer
                         src={instance.image}
                         alt={instance.name}
-                        className="h-52 w-full rounded-xl"
+                        className="h-52 w-full rounded-xl object-cover!"
                       />
                     </CardContent>
                   </Card>
@@ -120,6 +153,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           </Accordion>
         );
       })}
+      <TablePagination table={table} isFetching={isFetching} />
     </section>
   );
 }
