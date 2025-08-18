@@ -28,7 +28,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: 0,
-    pageSize: 2
+    pageSize: 10
   });
   const { isLoading, isFetching, data, isError } = useCollectibles(
     {
