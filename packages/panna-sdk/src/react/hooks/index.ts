@@ -28,6 +28,7 @@ export { usePanna } from './use-panna';
 export { useActivities } from './use-activities';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
+export { useSupportedTokens } from './use-supported-tokens';
 export {
   DEFAULT_STALE_TIME,
   DEFAULT_REFETCH_INTERVAL,

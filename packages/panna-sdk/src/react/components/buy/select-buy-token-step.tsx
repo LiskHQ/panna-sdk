@@ -1,5 +1,6 @@
 import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useSupportedTokens } from '../../hooks';
 import { Button } from '../ui/button';
 import {
   Command,
@@ -13,7 +14,6 @@ import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { TOKENS } from './data';
 import type { BuyStepData, Token } from './types';
 
 export function SelectBuyTokenStep() {
@@ -22,12 +22,14 @@ export function SelectBuyTokenStep() {
   const [query, setQuery] = useState('');
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
 
+  const { data: supportedTokens = [], isLoading } = useSupportedTokens();
+
   const tokens = useMemo(() => {
-    if (!query) return TOKENS;
-    return TOKENS.filter((t) =>
+    if (!query) return supportedTokens;
+    return supportedTokens.filter((t) =>
       `${t.symbol} ${t.name}`.toLowerCase().includes(query.toLowerCase())
     );
-  }, [query]);
+  }, [query, supportedTokens]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,19 +61,21 @@ export function SelectBuyTokenStep() {
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[var(--radix-popover-trigger-width)] p-0"
+            className="max-h-[400px] w-[var(--radix-popover-trigger-width)] overflow-hidden p-0"
             align="start"
             sideOffset={4}
           >
-            <Command>
+            <Command className="max-h-[400px] overflow-hidden">
               <CommandInput
                 placeholder="Search for an asset"
                 className="h-9"
                 value={query}
                 onValueChange={setQuery}
               />
-              <CommandList>
-                <CommandEmpty>No asset found.</CommandEmpty>
+              <CommandList className="max-h-[300px] overflow-y-auto">
+                <CommandEmpty>
+                  {isLoading ? 'Loading assets...' : 'No asset found.'}
+                </CommandEmpty>
                 <CommandGroup>
                   {tokens.map((t) => (
                     <CommandItem
