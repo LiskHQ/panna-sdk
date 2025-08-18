@@ -1,9 +1,8 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
 // Extract mocked functions for use in tests
 import { accountBalancesInFiat } from 'src/core';
 import { TokenBalance as UITokenBalance } from '@/mocks/token-balances';
+import { createQueryClientWrapper } from '../test-utils';
 import { useTokenBalances } from './use-token-balances';
 
 // Mock usePanna to provide a client without needing the full provider
@@ -47,15 +46,6 @@ jest.mock('@/utils', () => ({
 const mockedAccountBalancesInFiat =
   accountBalancesInFiat as jest.MockedFunction<typeof accountBalancesInFiat>;
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } }
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-}
-
 describe('useTokenBalances', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -93,7 +83,7 @@ describe('useTokenBalances', () => {
         useTokenBalances({
           address: '0x1234567890123456789012345678901234567890'
         }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -111,7 +101,7 @@ describe('useTokenBalances', () => {
   it('sets error state when address is invalid', async () => {
     const { result } = renderHook(
       () => useTokenBalances({ address: 'invalid-address' }),
-      { wrapper: createWrapper() }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => expect(result.current.isError).toBe(true));
