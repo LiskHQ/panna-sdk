@@ -14,13 +14,23 @@ import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import type { BuyStepData, Token } from './types';
+import { Typography } from '../ui/typography';
+import type { Token } from './types';
 
-export function SelectBuyTokenStep() {
+type SelectBuyTokenStepProps = {
+  selectedToken?: Token;
+  onTokenChange: (token: Token) => void;
+  error?: string;
+};
+
+export function SelectBuyTokenStep({
+  selectedToken,
+  onTokenChange,
+  error
+}: SelectBuyTokenStepProps) {
   const { next, prev } = useDialogStepper();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
 
   const { data: supportedTokens = [], isLoading } = useSupportedTokens();
 
@@ -82,7 +92,7 @@ export function SelectBuyTokenStep() {
                       key={t.symbol}
                       value={`${t.symbol} ${t.name}`}
                       onSelect={() => {
-                        setSelectedToken(t);
+                        onTokenChange(t);
                         setOpen(false);
                       }}
                     >
@@ -111,6 +121,11 @@ export function SelectBuyTokenStep() {
             </Command>
           </PopoverContent>
         </Popover>
+        {error && (
+          <Typography className="text-center text-sm text-red-500">
+            {error}
+          </Typography>
+        )}
       </div>
       <footer className="flex w-full items-center gap-2">
         <Button
@@ -125,10 +140,7 @@ export function SelectBuyTokenStep() {
         <Button
           type="button"
           className="flex-1"
-          onClick={() =>
-            selectedToken &&
-            next({ token: selectedToken } as Partial<BuyStepData>)
-          }
+          onClick={() => next()}
           disabled={!selectedToken}
         >
           Next

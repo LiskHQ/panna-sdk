@@ -19,3 +19,6 @@ export type BuyStepData = {
   amount?: number;
   provider?: Provider;
 };
+
+// Export the Zod-generated type for consistent validation
+export type { BuyFormData } from './schema';

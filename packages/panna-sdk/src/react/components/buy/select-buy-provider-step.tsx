@@ -4,18 +4,30 @@ import { useOnrampProviders, useSupportedTokens } from '../../hooks';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
-import type { BuyStepData, Provider } from './types';
+import { Typography } from '../ui/typography';
+import type { BuyFormData, Provider } from './types';
 
-export function SelectBuyProviderStep() {
-  const { next, prev, stepData } = useDialogStepper();
-  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(
-    null
-  );
+type SelectBuyProviderStepProps = {
+  selectedProvider?: Provider;
+  onProviderChange: (provider: Provider) => void;
+  formData: BuyFormData;
+  error?: string;
+};
+
+export function SelectBuyProviderStep({
+  selectedProvider,
+  onProviderChange,
+  formData,
+  error
+}: SelectBuyProviderStepProps) {
+  const { next, prev } = useDialogStepper();
+  const [localSelectedProvider, setLocalSelectedProvider] =
+    useState<Provider | null>(selectedProvider || null);
 
   const activeAccount = useActiveAccount();
-  const country = (stepData as Partial<BuyStepData>).country;
-  const token = (stepData as Partial<BuyStepData>).token;
-  const amount = (stepData as Partial<BuyStepData>).amount;
+  const country = formData.country;
+  const token = formData.token;
+  const amount = formData.amount;
 
   const receiver = activeAccount?.address;
   const { data: supportedTokens = [] } = useSupportedTokens();
@@ -74,8 +86,11 @@ export function SelectBuyProviderStep() {
             <button
               key={p.id}
               type="button"
-              className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${selectedProvider?.id === p.id ? 'ring-primary ring-2' : ''}`}
-              onClick={() => setSelectedProvider(p)}
+              className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${(selectedProvider?.id || localSelectedProvider?.id) === p.id ? 'ring-primary ring-2' : ''}`}
+              onClick={() => {
+                setLocalSelectedProvider(p);
+                onProviderChange(p);
+              }}
             >
               <div className="flex items-center gap-3">
                 <div className="bg-muted size-8 rounded-full" />
@@ -100,6 +115,11 @@ export function SelectBuyProviderStep() {
             </button>
           ))
         )}
+        {error && (
+          <Typography className="text-center text-sm text-red-500">
+            {error}
+          </Typography>
+        )}
       </div>
       <footer className="flex w-full items-center gap-2">
         <Button
@@ -113,11 +133,8 @@ export function SelectBuyProviderStep() {
         <Button
           type="button"
           className="flex-1"
-          onClick={() =>
-            selectedProvider &&
-            next({ provider: selectedProvider } as Partial<BuyStepData>)
-          }
-          disabled={!selectedProvider}
+          onClick={() => next()}
+          disabled={!selectedProvider && !localSelectedProvider}
         >
           Next
         </Button>

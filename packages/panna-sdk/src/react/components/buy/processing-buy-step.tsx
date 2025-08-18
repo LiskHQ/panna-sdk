@@ -3,8 +3,17 @@ import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
+import type { BuyFormData } from './types';
 
-export function ProcessingBuyStep({ onClose }: { onClose: () => void }) {
+type ProcessingBuyStepProps = {
+  onClose: () => void;
+  formData: BuyFormData;
+};
+
+export function ProcessingBuyStep({
+  onClose,
+  formData
+}: ProcessingBuyStepProps) {
   const { reset } = useDialogStepper();
 
   return (

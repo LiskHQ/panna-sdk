@@ -15,15 +15,28 @@ import { useDialogStepper } from '../ui/dialog-stepper';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Typography } from '../ui/typography';
-import type { BuyStepData, Country } from './types';
+import type { Country } from './types';
 
-export function SelectBuyRegionStep() {
+type SelectBuyRegionStepProps = {
+  selectedCountry?: Country;
+  onCountryChange: (country: Country) => void;
+  error?: string;
+};
+
+export function SelectBuyRegionStep({
+  selectedCountry,
+  onCountryChange,
+  error
+}: SelectBuyRegionStepProps) {
   const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
   const countries = getCountriesWithPopularFirst();
-  const [country, setCountry] = useState<Country | null>(
-    getCountryByCode('US') || countries[0]
-  );
+  const country = selectedCountry || getCountryByCode('US') || countries[0];
+
+  const handleCountrySelect = (selectedCountry: Country) => {
+    onCountryChange(selectedCountry);
+    setOpen(false);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,10 +72,7 @@ export function SelectBuyRegionStep() {
                     <CommandItem
                       key={c.code}
                       value={c.name}
-                      onSelect={() => {
-                        setCountry(c);
-                        setOpen(false);
-                      }}
+                      onSelect={() => handleCountrySelect(c)}
                     >
                       <span className="text-xl">{c.flag}</span>
                       {c.name}
@@ -77,10 +87,7 @@ export function SelectBuyRegionStep() {
                     <CommandItem
                       key={c.code}
                       value={c.name}
-                      onSelect={() => {
-                        setCountry(c);
-                        setOpen(false);
-                      }}
+                      onSelect={() => handleCountrySelect(c)}
                     >
                       <span className="text-xl">{c.flag}</span>
                       {c.name}
@@ -98,11 +105,13 @@ export function SelectBuyRegionStep() {
           Availability may vary based on your bank's location and our payment
           providers.
         </Typography>
+        {error && (
+          <Typography className="text-center text-sm text-red-500">
+            {error}
+          </Typography>
+        )}
       </div>
-      <Button
-        type="button"
-        onClick={() => next({ country } as Partial<BuyStepData>)}
-      >
+      <Button type="button" onClick={() => next()} disabled={!selectedCountry}>
         Next
       </Button>
     </div>
