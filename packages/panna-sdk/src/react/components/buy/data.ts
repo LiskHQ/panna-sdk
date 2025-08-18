@@ -1,13 +1,4 @@
-import type { Country, Provider, Token } from './types';
-
-export const COUNTRIES: Country[] = [
-  { code: 'ZA', name: 'South Africa', flag: '🇿🇦' },
-  { code: 'US', name: 'United States', flag: '🇺🇸' },
-  { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
-  { code: 'DE', name: 'Germany', flag: '🇩🇪' },
-  { code: 'FR', name: 'France', flag: '🇫🇷' },
-  { code: 'BR', name: 'Brazil', flag: '🇧🇷' }
-];
+import type { Provider, Token } from './types';
 
 export const TOKENS: Token[] = [
   {
