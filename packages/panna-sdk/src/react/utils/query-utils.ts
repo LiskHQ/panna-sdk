@@ -1,5 +1,4 @@
 const MAX_LIMIT = 100;
-const MAX_OFFSET = 1000;
 
 /**
  * Creates query filters for pagination if both limit and offset are valid non-negative numbers.
@@ -16,7 +15,7 @@ export const generatePaginationQueryFilter = (
   const normalizedLimit = limit ?? -1;
   const isValidLimit = normalizedLimit > 0 && normalizedLimit <= MAX_LIMIT;
   const normalizedOffset = offset ?? -1;
-  const isValidOffset = normalizedOffset >= 0 && normalizedOffset <= MAX_OFFSET;
+  const isValidOffset = normalizedOffset >= 0;
 
   if (!isValidLimit || !isValidOffset) {
     return undefined;
