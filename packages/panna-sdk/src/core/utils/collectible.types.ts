@@ -30,7 +30,8 @@ export interface Token {
 
 export interface TokenInstance {
   id: string;
-  image: string;
+  image_url: string;
+  image_data?: string;
   name?: string;
 }
 

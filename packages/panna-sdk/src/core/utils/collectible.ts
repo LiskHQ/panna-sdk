@@ -4,8 +4,8 @@ import * as httpUtils from '../helpers/http';
 import { PannaHttpErr } from '../helpers/http';
 import {
   BlockscoutAddressNFTCollection,
-  BlockscoutNFTNextPageParams,
-  BlockscoutNFTCollectionsResponse
+  BlockscoutNFTCollectionsResponse,
+  BlockscoutNFTNextPageParams
 } from './blockscout.types';
 import {
   Collectible,
@@ -17,8 +17,8 @@ import {
 } from './collectible.types';
 import { getBaseApiUrl, getCacheKey, isValidAddress } from './common';
 import {
-  DEFAULT_PAGINATION_OFFSET,
-  DEFAULT_PAGINATION_LIMIT
+  DEFAULT_PAGINATION_LIMIT,
+  DEFAULT_PAGINATION_OFFSET
 } from './constants';
 
 // Collectible cache
@@ -201,7 +201,8 @@ export const getCollectiblesByAddress = async function (
       const instances: TokenInstance[] = collection.token_instances.map((e) => {
         const instance: TokenInstance = {
           id: e.id,
-          image: e.image_url || e.metadata?.image_url,
+          image_url: e.image_url || e.metadata?.image_url,
+          image_data: e.metadata?.image_data,
           name: e.metadata?.name
         };
         return instance;

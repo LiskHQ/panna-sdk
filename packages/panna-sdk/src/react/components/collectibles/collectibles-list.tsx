@@ -124,11 +124,19 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={firstInstance.image}
-                    alt={firstInstance.name}
-                    className="h-10 w-10 rounded-full"
-                  />
+                  {firstInstance.image_url ? (
+                    <img
+                      src={firstInstance.image_url}
+                      alt={firstInstance.name}
+                      className="h-10 w-10 rounded-full"
+                    />
+                  ) : (
+                    <img
+                      src={`data:image/svg+xml;utf8,${encodeURIComponent(firstInstance.image_data!)}`}
+                      alt={firstInstance.name}
+                      className="h-10 w-10 rounded-full"
+                    />
+                  )}
                   <div className="flex items-center gap-1">
                     <Typography variant="small">
                       {firstInstance.name}
@@ -143,11 +151,19 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 {item.instances.map((instance, instanceIndex) => (
                   <Card key={instanceIndex} className="p-0">
                     <CardContent className="p-0">
-                      <CustomMediaRenderer
-                        src={instance.image}
-                        alt={instance.name}
-                        className="h-52 w-full rounded-xl object-cover!"
-                      />
+                      {instance.image_url ? (
+                        <CustomMediaRenderer
+                          src={instance.image_url}
+                          alt={instance.name}
+                          className="h-52 w-full rounded-xl object-cover!"
+                        />
+                      ) : (
+                        <img
+                          src={`data:image/svg+xml;utf8,${encodeURIComponent(firstInstance.image_data!)}`}
+                          alt={firstInstance.name}
+                          className="h-52 w-full rounded-xl"
+                        />
+                      )}
                     </CardContent>
                   </Card>
                 ))}

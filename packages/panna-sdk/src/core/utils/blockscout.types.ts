@@ -329,6 +329,7 @@ interface BlockscoutAddressNFTInstanceCollectionMetadata {
   tags: string[];
   name: string;
   image_url: string;
+  image_data: string;
   home_url: string;
   external_url: string;
   description: string;
