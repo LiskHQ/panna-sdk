@@ -12,6 +12,7 @@ import {
   CollectibleMetadata,
   GetCollectiblesByAddressParams,
   GetCollectiblesByAddressResult,
+  ImageType,
   Token,
   TokenInstance
 } from './collectible.types';
@@ -201,8 +202,24 @@ export const getCollectiblesByAddress = async function (
       const instances: TokenInstance[] = collection.token_instances.map((e) => {
         const instance: TokenInstance = {
           id: e.id,
-          image_url: e.image_url || e.metadata?.image_url,
-          image_data: e.metadata?.image_data,
+          imageType: (() => {
+            if (
+              ['https', 'ipfs'].find((type) =>
+                (e.image_url || e.metadata?.image_url || '').startsWith(type)
+              )
+            ) {
+              return ImageType.URL;
+            } else if (e.metadata?.image_data.includes('</svg>')) {
+              return ImageType.SVG;
+            } else {
+              return ImageType.UNKNOWN;
+            }
+          })(),
+          image:
+            e.image_url ||
+            e.metadata?.image_url ||
+            e.metadata?.image_data ||
+            null,
           name: e.metadata?.name
         };
         return instance;

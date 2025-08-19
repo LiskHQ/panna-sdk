@@ -6,8 +6,10 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
+import { ImageType } from 'src/core';
 import { useActiveAccount, useCollectibles } from '@/hooks';
 import { cn } from '@/utils';
+import { DefaultNFTIcon } from '../icons/default-nft-icon';
 import {
   Accordion,
   AccordionContent,
@@ -78,7 +80,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
         )}
       >
         <CircleAlertIcon className="h-10 w-10 stroke-amber-300" />
-        <Typography variant="small">Failed to get activity</Typography>
+        <Typography variant="small">Failed to get collectibles</Typography>
         <Typography variant="muted">
           There was an error attempting to load your collectibles. Please
           refresh or check again soon.
@@ -124,18 +126,22 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  {firstInstance.image_url ? (
+                  {firstInstance.imageType === ImageType.URL && (
                     <img
-                      src={firstInstance.image_url}
+                      src={firstInstance.image as string}
                       alt={firstInstance.name}
                       className="h-10 w-10 rounded-full"
                     />
-                  ) : (
+                  )}
+                  {firstInstance.imageType === ImageType.SVG && (
                     <img
-                      src={`data:image/svg+xml;utf8,${encodeURIComponent(firstInstance.image_data!)}`}
+                      src={`data:image/svg+xml;utf8,${encodeURIComponent(firstInstance.image as string)}`}
                       alt={firstInstance.name}
                       className="h-10 w-10 rounded-full"
                     />
+                  )}
+                  {firstInstance.imageType === ImageType.UNKNOWN && (
+                    <div className="bg-input/30 h-10 w-10 rounded-full" />
                   )}
                   <div className="flex items-center gap-1">
                     <Typography variant="small">
@@ -151,18 +157,24 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 {item.instances.map((instance, instanceIndex) => (
                   <Card key={instanceIndex} className="p-0">
                     <CardContent className="p-0">
-                      {instance.image_url ? (
+                      {firstInstance.imageType === ImageType.URL && (
                         <CustomMediaRenderer
-                          src={instance.image_url}
+                          src={instance.image as string}
                           alt={instance.name}
                           className="h-52 w-full rounded-xl object-cover!"
                         />
-                      ) : (
+                      )}
+                      {firstInstance.imageType === ImageType.SVG && (
                         <img
-                          src={`data:image/svg+xml;utf8,${encodeURIComponent(firstInstance.image_data!)}`}
-                          alt={firstInstance.name}
+                          src={`data:image/svg+xml;utf8,${encodeURIComponent(instance.image as string)}`}
+                          alt={instance.name}
                           className="h-52 w-full rounded-xl"
                         />
+                      )}
+                      {firstInstance.imageType === ImageType.UNKNOWN && (
+                        <div className="relative h-0 w-full p-0 pb-[100%]">
+                          <DefaultNFTIcon className="absolute top-0 left-0 h-full w-full rounded-xl" />
+                        </div>
                       )}
                     </CardContent>
                   </Card>
