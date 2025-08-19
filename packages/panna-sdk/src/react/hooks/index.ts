@@ -29,7 +29,7 @@ export { useActivities } from './use-activities';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
 export { useSupportedTokens } from './use-supported-tokens';
-export { useOnrampProviders } from './use-onramp-providers';
+export { useBuyWithFiatQuotes } from './use-buy-with-fiat-quotes';
 export {
   DEFAULT_STALE_TIME,
   DEFAULT_REFETCH_INTERVAL,

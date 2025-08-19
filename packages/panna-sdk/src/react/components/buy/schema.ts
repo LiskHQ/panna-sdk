@@ -14,14 +14,14 @@ export const tokenSchema = z.object({
   icon: z.string().optional()
 });
 
-// Provider schema
-export const providerSchema = z.object({
-  id: z.string().min(1, 'Provider ID is required'),
-  name: z.string().min(1, 'Provider name is required'),
-  description: z.string().optional(),
-  price: z.string().min(1, 'Provider price is required'),
-  best: z.boolean().optional(),
-  icon: z.string().optional(),
+// Buy with fiat quote schema
+export const buyWithFiatQuoteSchema = z.object({
+  providerId: z.string().min(1, 'Provider ID is required'),
+  providerName: z.string().min(1, 'Provider name is required'),
+  providerDescription: z.string().optional(),
+  providerLogoUrl: z.string().optional(),
+  price: z.string().min(1, 'Quote price is required'),
+  error: z.string().optional(),
   prepareResult: z
     .object({
       id: z.string(),
@@ -45,7 +45,7 @@ export const buyFormSchema = z.object({
     .min(0.01, 'Amount must be greater than 0')
     .max(1000000, 'Amount is too large')
     .optional(),
-  provider: providerSchema.optional()
+  provider: buyWithFiatQuoteSchema.optional()
 });
 
 export type BuyFormData = z.infer<typeof buyFormSchema>;

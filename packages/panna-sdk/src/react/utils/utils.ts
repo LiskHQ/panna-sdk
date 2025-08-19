@@ -39,3 +39,21 @@ export function getEnvironmentChain() {
 export function getAAChain(testingStatus?: boolean | undefined) {
   return getChain(testingStatus);
 }
+
+/**
+ * Detect user's country based on browser locale.
+ * @returns The detected country code or null if detection fails
+ */
+export function detectUserCountry(): string | null {
+  try {
+    // Get browser locale (e.g., "en-US", "fr-FR")
+    const locale = navigator.language || navigator.languages?.[0];
+    if (locale && locale.includes('-')) {
+      const countryCode = locale.split('-')[1]?.toUpperCase();
+      return countryCode || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}

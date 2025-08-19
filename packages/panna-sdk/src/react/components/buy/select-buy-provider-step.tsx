@@ -2,8 +2,8 @@ import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
-import { useOnrampProviders, useSupportedTokens } from '../../hooks';
-import type { OnrampProvider } from '../../types/onramp-provider.types';
+import { useBuyWithFiatQuotes, useSupportedTokens } from '../../hooks';
+import type { BuyWithFiatQuote } from '../../types/buy-with-fiat-quote.types';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
@@ -33,7 +33,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     return supportedToken?.address;
   }, [token?.symbol, supportedTokens]);
 
-  const { data: providerInfos = [], isLoading } = useOnrampProviders(
+  const { data: quotes = [], isLoading } = useBuyWithFiatQuotes(
     {
       countryCode: country?.code || '',
       tokenAddress,
@@ -43,51 +43,41 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     { enabled: Boolean(country?.code && tokenAddress && amount && receiver) }
   );
 
-  console.log({ providerInfos });
+  const quotesWithBestPrice: (BuyWithFiatQuote & { best?: boolean })[] =
+    useMemo(() => {
+      const quotesWithParsedPrices = quotes.map((quote) => {
+        const numericPrice =
+          quote.price && !quote.error
+            ? parseFloat(quote.price.replace(/[^\d.-]/g, ''))
+            : Infinity;
 
-  const providers: OnrampProvider[] = useMemo(() => {
-    const basicProviders = providerInfos.map((info) => ({
-      id: info.id,
-      name: info.displayName,
-      description: info.description,
-      price: info.price || 'Loading...',
-      rawPrice: info.price,
-      hasError: !!info.error,
-      icon: info.logoUrl
-    }));
+        return {
+          ...quote,
+          numericPrice
+        };
+      });
 
-    const providersWithParsedPrices = basicProviders.map((provider) => {
-      const numericPrice =
-        provider.rawPrice && !provider.hasError
-          ? parseFloat(provider.rawPrice.replace(/[^\d.-]/g, ''))
-          : Infinity;
+      const lowestPrice = Math.min(
+        ...quotesWithParsedPrices
+          .filter((q) => !q.error && isFinite(q.numericPrice))
+          .map((q) => q.numericPrice)
+      );
 
-      return {
-        ...provider,
-        numericPrice
-      };
-    });
-
-    const lowestPrice = Math.min(
-      ...providersWithParsedPrices
-        .filter((p) => !p.hasError && isFinite(p.numericPrice))
-        .map((p) => p.numericPrice)
-    );
-
-    // Mark the provider with the lowest price as best
-    return providersWithParsedPrices.map((provider, index) => ({
-      id: provider.id,
-      name: provider.name,
-      description: provider.description,
-      price: provider.price,
-      best:
-        !provider.hasError &&
-        provider.numericPrice === lowestPrice &&
-        isFinite(lowestPrice),
-      icon: provider.icon,
-      prepareResult: providerInfos[index]?.prepareResult
-    }));
-  }, [providerInfos]);
+      // Mark the quote with the lowest price as best
+      return quotesWithParsedPrices.map((quote) => ({
+        providerId: quote.providerId,
+        providerName: quote.providerName,
+        providerDescription: quote.providerDescription,
+        providerLogoUrl: quote.providerLogoUrl,
+        price: quote.price,
+        error: quote.error,
+        prepareResult: quote.prepareResult,
+        best:
+          !quote.error &&
+          quote.numericPrice === lowestPrice &&
+          isFinite(lowestPrice)
+      }));
+    }, [quotes]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,42 +98,44 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                       Generating quotes...
                     </Typography>
                   </div>
-                ) : providers.length === 0 ? (
+                ) : quotesWithBestPrice.length === 0 ? (
                   <div className="flex items-center justify-center py-8">
                     <Typography variant="muted">
-                      No providers available for this country
+                      No quotes available for this country
                     </Typography>
                   </div>
                 ) : (
-                  providers.map((p) => (
+                  quotesWithBestPrice.map((quote) => (
                     <button
-                      key={p.id}
+                      key={quote.providerId}
                       type="button"
-                      className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${field.value?.id === p.id ? 'ring-primary ring-2' : ''}`}
-                      onClick={() => field.onChange(p)}
+                      className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${field.value?.providerId === quote.providerId ? 'ring-primary ring-2' : ''}`}
+                      onClick={() => field.onChange(quote)}
                     >
                       <div className="flex items-center gap-3">
                         <img
-                          src={p.icon}
-                          alt={p.name}
+                          src={quote.providerLogoUrl}
+                          alt={quote.providerName}
                           className="size-8 rounded-full"
                         />
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
-                            <Typography variant="small">{p.name}</Typography>
-                            {p.best && (
+                            <Typography variant="small">
+                              {quote.providerName}
+                            </Typography>
+                            {quote.best && (
                               <Badge variant="default">Best price</Badge>
                             )}
                           </div>
-                          {p.description && (
+                          {quote.providerDescription && (
                             <Typography variant="muted">
-                              {p.description}
+                              {quote.providerDescription}
                             </Typography>
                           )}
                         </div>
                       </div>
                       <div className="text-right">
-                        <Typography variant="small">{p.price}</Typography>
+                        <Typography variant="small">{quote.price}</Typography>
                       </div>
                     </button>
                   ))

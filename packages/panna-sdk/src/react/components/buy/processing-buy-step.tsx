@@ -45,8 +45,8 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
           <Loader2Icon size={48} className="animate-spin" />
           <div className="space-y-2 text-center">
             <Typography variant="muted">
-              You've been redirected to {selectedProvider?.name} to complete
-              your purchase.
+              You've been redirected to {selectedProvider?.providerName} to
+              complete your purchase.
             </Typography>
             <Typography variant="muted">
               If the window didn't open, click the button below.
@@ -56,7 +56,7 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
           <div className="flex w-full flex-col gap-3">
             <Button className="w-full" onClick={handleRetryRedirect}>
               <ExternalLinkIcon className="mr-2 h-4 w-4" />
-              Open {selectedProvider?.name}
+              Open {selectedProvider?.providerName}
             </Button>
 
             <Button

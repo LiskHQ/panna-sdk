@@ -1,9 +1,6 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { getOnrampProviders, onRampPrepare } from '../../core/onramp';
-import type {
-  ProviderInfo,
-  OnrampPrepareResult
-} from '../../core/onramp/types';
+import type { BuyWithFiatQuote } from '../types/buy-with-fiat-quote.types';
 import {
   DEFAULT_STALE_TIME,
   DEFAULT_REFETCH_INTERVAL,
@@ -12,39 +9,35 @@ import {
 } from './constants';
 import { usePanna } from './use-panna';
 
-type UseOnrampProvidersParams = {
+type UseBuyWithFiatQuotesParams = {
   countryCode: string;
   tokenAddress?: string;
   amount?: string;
   receiver?: string;
 };
 
-type EnrichedProviderInfo = ProviderInfo & {
-  prepareResult?: OnrampPrepareResult;
-  price?: string;
-  isLoading?: boolean;
-  error?: string;
-};
-
 /**
- * Hook to retrieve onramp providers for a specific country with pricing information
- * @param params - Parameters for retrieving onramp providers
- * @returns React Query result with enriched onramp providers data
+ * Hook to retrieve buy with fiat quotes for a specific country with pricing information
+ * @param params - Parameters for retrieving buy with fiat quotes
+ * @returns React Query result with buy with fiat quotes data
  */
-export function useOnrampProviders(
-  { countryCode, tokenAddress, amount, receiver }: UseOnrampProvidersParams,
-  options?: Omit<
-    UseQueryOptions<EnrichedProviderInfo[]>,
-    'queryKey' | 'queryFn'
-  >
+export function useBuyWithFiatQuotes(
+  { countryCode, tokenAddress, amount, receiver }: UseBuyWithFiatQuotesParams,
+  options?: Omit<UseQueryOptions<BuyWithFiatQuote[]>, 'queryKey' | 'queryFn'>
 ) {
   const { client } = usePanna();
   const hasValidCountryCode = Boolean(countryCode);
   const canEnrich = Boolean(client && tokenAddress && amount && receiver);
 
   return useQuery({
-    queryKey: ['onramp-providers', countryCode, tokenAddress, amount, receiver],
-    queryFn: async (): Promise<EnrichedProviderInfo[]> => {
+    queryKey: [
+      'buy-with-fiat-quotes',
+      countryCode,
+      tokenAddress,
+      amount,
+      receiver
+    ],
+    queryFn: async (): Promise<BuyWithFiatQuote[]> => {
       if (!hasValidCountryCode) {
         throw new Error('Invalid country code');
       }
@@ -52,14 +45,22 @@ export function useOnrampProviders(
       try {
         const providers = getOnrampProviders(countryCode);
 
-        // If we don't have enrichment parameters, return basic provider info
+        // If we don't have enrichment parameters, return basic quotes
         if (!canEnrich) {
-          return providers.map((provider) => ({ ...provider }));
+          return providers.map(
+            (provider): BuyWithFiatQuote => ({
+              providerId: provider.id,
+              providerName: provider.displayName,
+              providerDescription: provider.description,
+              providerLogoUrl: provider.logoUrl,
+              price: 'Loading...'
+            })
+          );
         }
 
         // Enrich each provider with pricing data from onRampPrepare
-        const enrichedProviders = await Promise.allSettled(
-          providers.map(async (provider): Promise<EnrichedProviderInfo> => {
+        const enrichedQuotes = await Promise.allSettled(
+          providers.map(async (provider): Promise<BuyWithFiatQuote> => {
             try {
               const prepareResult = await onRampPrepare({
                 client: client!,
@@ -71,7 +72,10 @@ export function useOnrampProviders(
               });
 
               return {
-                ...provider,
+                providerId: provider.id,
+                providerName: provider.displayName,
+                providerDescription: provider.description,
+                providerLogoUrl: provider.logoUrl,
                 prepareResult,
                 price: `$${parseFloat(prepareResult.currencyAmount).toFixed(2)}`
               };
@@ -81,7 +85,10 @@ export function useOnrampProviders(
                 error
               );
               return {
-                ...provider,
+                providerId: provider.id,
+                providerName: provider.displayName,
+                providerDescription: provider.description,
+                providerLogoUrl: provider.logoUrl,
                 error: error instanceof Error ? error.message : 'Unknown error',
                 price: 'N/A'
               };
@@ -90,19 +97,23 @@ export function useOnrampProviders(
         );
 
         // Extract successful results and failed ones
-        return enrichedProviders.map((result, index) => {
+        return enrichedQuotes.map((result, index) => {
           if (result.status === 'fulfilled') {
             return result.value;
           } else {
+            const provider = providers[index];
             return {
-              ...providers[index],
+              providerId: provider.id,
+              providerName: provider.displayName,
+              providerDescription: provider.description,
+              providerLogoUrl: provider.logoUrl,
               error: result.reason?.message || 'Failed to load pricing',
               price: 'N/A'
             };
           }
         });
       } catch (error) {
-        console.error('Error fetching onramp providers:', error);
+        console.error('Error fetching buy with fiat quotes:', error);
         throw error;
       }
     },
