@@ -209,7 +209,10 @@ export const getCollectiblesByAddress = async function (
               )
             ) {
               return ImageType.URL;
-            } else if (e.metadata?.image_data?.includes('</svg>')) {
+            } else if (
+              typeof e.metadata?.image_data === 'string' &&
+              /^<svg[\s>]/i.test(e.metadata.image_data)
+            ) {
               return ImageType.SVG;
             } else {
               return ImageType.UNKNOWN;
