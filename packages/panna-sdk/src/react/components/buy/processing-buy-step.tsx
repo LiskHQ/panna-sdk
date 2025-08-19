@@ -1,20 +1,19 @@
 import { LoaderCircleIcon } from 'lucide-react';
+import type { UseFormReturn } from 'react-hook-form';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
-import type { BuyFormData } from './types';
+import type { BuyFormData } from './schema';
 
 type ProcessingBuyStepProps = {
   onClose: () => void;
-  formData: BuyFormData;
+  form: UseFormReturn<BuyFormData>;
 };
 
-export function ProcessingBuyStep({
-  onClose,
-  formData
-}: ProcessingBuyStepProps) {
+export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
   const { reset } = useDialogStepper();
+  const formData = form.getValues();
 
   return (
     <div className="flex flex-col items-center gap-6">

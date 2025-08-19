@@ -1,30 +1,23 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
+import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
 import { useOnrampProviders, useSupportedTokens } from '../../hooks';
+import type { OnrampProvider } from '../../types/onramp-provider.types';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
-import { Typography } from '../ui/typography';
-import type { BuyFormData, Provider } from './types';
+import { FormControl, FormField, FormItem, FormMessage } from '../ui/form';
+import type { BuyFormData } from './schema';
 
 type SelectBuyProviderStepProps = {
-  selectedProvider?: Provider;
-  onProviderChange: (provider: Provider) => void;
-  formData: BuyFormData;
-  error?: string;
+  form: UseFormReturn<BuyFormData>;
 };
 
-export function SelectBuyProviderStep({
-  selectedProvider,
-  onProviderChange,
-  formData,
-  error
-}: SelectBuyProviderStepProps) {
+export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { next, prev } = useDialogStepper();
-  const [localSelectedProvider, setLocalSelectedProvider] =
-    useState<Provider | null>(selectedProvider || null);
 
   const activeAccount = useActiveAccount();
+  const formData = form.watch();
   const country = formData.country;
   const token = formData.token;
   const amount = formData.amount;
@@ -52,7 +45,7 @@ export function SelectBuyProviderStep({
   );
 
   // Transform EnrichedProviderInfo to Provider format expected by the component
-  const providers: Provider[] = useMemo(() => {
+  const providers: OnrampProvider[] = useMemo(() => {
     return providerInfos.map((info, index) => ({
       id: info.id,
       name: info.displayName,
@@ -70,57 +63,62 @@ export function SelectBuyProviderStep({
       <DialogHeader className="items-center gap-0">
         <DialogTitle>Select payment provider</DialogTitle>
       </DialogHeader>
-      <div className="flex flex-col gap-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-muted-foreground">Loading providers...</div>
-          </div>
-        ) : providers.length === 0 ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-muted-foreground">
-              No providers available for this country
-            </div>
-          </div>
-        ) : (
-          providers.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${(selectedProvider?.id || localSelectedProvider?.id) === p.id ? 'ring-primary ring-2' : ''}`}
-              onClick={() => {
-                setLocalSelectedProvider(p);
-                onProviderChange(p);
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-muted size-8 rounded-full" />
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{p.name}</span>
-                    {p.best && (
-                      <span className="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-xs">
-                        Best price
-                      </span>
-                    )}
+      <FormField
+        control={form.control}
+        name="provider"
+        render={({ field }) => (
+          <FormItem className="flex flex-col gap-4">
+            <FormControl>
+              <div className="flex flex-col gap-4">
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-muted-foreground">
+                      Loading providers...
+                    </div>
                   </div>
-                  <span className="text-muted-foreground text-sm">
-                    {p.description}
-                  </span>
-                </div>
+                ) : providers.length === 0 ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-muted-foreground">
+                      No providers available for this country
+                    </div>
+                  </div>
+                ) : (
+                  providers.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${field.value?.id === p.id ? 'ring-primary ring-2' : ''}`}
+                      onClick={() => field.onChange(p)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="bg-muted size-8 rounded-full" />
+                        <div className="flex flex-col">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{p.name}</span>
+                            {p.best && (
+                              <span className="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-xs">
+                                Best price
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-muted-foreground text-sm">
+                            {p.description}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right text-sm">
+                        <div className="font-medium">{p.price}</div>
+                        <div className="text-muted-foreground">0.01</div>
+                      </div>
+                    </button>
+                  ))
+                )}
               </div>
-              <div className="text-right text-sm">
-                <div className="font-medium">{p.price}</div>
-                <div className="text-muted-foreground">0.01</div>
-              </div>
-            </button>
-          ))
+            </FormControl>
+            <FormMessage />
+          </FormItem>
         )}
-        {error && (
-          <Typography className="text-center text-sm text-red-500">
-            {error}
-          </Typography>
-        )}
-      </div>
+      />
       <footer className="flex w-full items-center gap-2">
         <Button
           variant="outline"
@@ -134,7 +132,7 @@ export function SelectBuyProviderStep({
           type="button"
           className="flex-1"
           onClick={() => next()}
-          disabled={!selectedProvider && !localSelectedProvider}
+          disabled={!form.watch('provider')}
         >
           Next
         </Button>

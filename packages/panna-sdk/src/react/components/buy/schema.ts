@@ -36,16 +36,4 @@ export const buyFormSchema = z.object({
   provider: providerSchema.optional()
 });
 
-// Complete form schema for final validation
-export const completeBuyFormSchema = z.object({
-  country: countrySchema,
-  token: tokenSchema,
-  amount: z
-    .number()
-    .min(0.01, 'Amount must be greater than 0')
-    .max(1000000, 'Amount is too large'),
-  provider: providerSchema
-});
-
 export type BuyFormData = z.infer<typeof buyFormSchema>;
-export type CompleteBuyFormData = z.infer<typeof completeBuyFormSchema>;

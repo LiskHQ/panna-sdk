@@ -1,4 +1,4 @@
-import type { Country } from '../components/buy/types';
+import type { Country } from '../types/country.types';
 
 /**
  * Comprehensive list of countries supported for onramp purchases.

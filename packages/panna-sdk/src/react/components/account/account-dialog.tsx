@@ -10,7 +10,7 @@ import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
-import { BuyFlow } from '../buy/buy-flow';
+import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
 import { Button } from '../ui/button';
 import {
@@ -162,7 +162,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
       case 'settings':
         return <AccountSettingsView />;
       case 'buy':
-        return <BuyFlow onClose={() => setActiveView('main')} />;
+        return <BuyForm onClose={() => setActiveView('main')} />;
     }
   };
 

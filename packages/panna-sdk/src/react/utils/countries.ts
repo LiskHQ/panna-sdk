@@ -1,5 +1,5 @@
-import type { Country } from '../components/buy/types';
 import { COUNTRIES } from '../consts';
+import type { Country } from '../types/country.types';
 
 /**
  * Get country by ISO 3166-1 alpha-2 country code
