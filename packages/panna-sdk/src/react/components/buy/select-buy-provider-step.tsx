@@ -1,12 +1,15 @@
+import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
 import { useOnrampProviders, useSupportedTokens } from '../../hooks';
 import type { OnrampProvider } from '../../types/onramp-provider.types';
+import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { FormControl, FormField, FormItem, FormMessage } from '../ui/form';
+import { Typography } from '../ui/typography';
 import type { BuyFormData } from './schema';
 
 type SelectBuyProviderStepProps = {
@@ -17,15 +20,11 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { next, prev } = useDialogStepper();
 
   const activeAccount = useActiveAccount();
-  const formData = form.watch();
-  const country = formData.country;
-  const token = formData.token;
-  const amount = formData.amount;
+  const { token, country, amount } = form.watch();
 
   const receiver = activeAccount?.address;
   const { data: supportedTokens = [] } = useSupportedTokens();
 
-  // Find the token address from supported tokens
   const tokenAddress = useMemo(() => {
     if (!token?.symbol) return undefined;
     const supportedToken = supportedTokens.find(
@@ -44,17 +43,48 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     { enabled: Boolean(country?.code && tokenAddress && amount && receiver) }
   );
 
-  // Transform EnrichedProviderInfo to Provider format expected by the component
+  console.log({ providerInfos });
+
   const providers: OnrampProvider[] = useMemo(() => {
-    return providerInfos.map((info, index) => ({
+    const basicProviders = providerInfos.map((info) => ({
       id: info.id,
       name: info.displayName,
-      description: info.error
-        ? 'Pricing unavailable'
-        : 'Card, Apple Pay or bank transfer',
+      description: info.description,
       price: info.price || 'Loading...',
-      best: index === 0 && !info.error, // Mark first successful provider as best
+      rawPrice: info.price,
+      hasError: !!info.error,
       icon: info.logoUrl
+    }));
+
+    const providersWithParsedPrices = basicProviders.map((provider) => {
+      const numericPrice =
+        provider.rawPrice && !provider.hasError
+          ? parseFloat(provider.rawPrice.replace(/[^\d.-]/g, ''))
+          : Infinity;
+
+      return {
+        ...provider,
+        numericPrice
+      };
+    });
+
+    const lowestPrice = Math.min(
+      ...providersWithParsedPrices
+        .filter((p) => !p.hasError && isFinite(p.numericPrice))
+        .map((p) => p.numericPrice)
+    );
+
+    // Mark the provider with the lowest price as best
+    return providersWithParsedPrices.map((provider) => ({
+      id: provider.id,
+      name: provider.name,
+      description: provider.description,
+      price: provider.price,
+      best:
+        !provider.hasError &&
+        provider.numericPrice === lowestPrice &&
+        isFinite(lowestPrice),
+      icon: provider.icon
     }));
   }, [providerInfos]);
 
@@ -71,16 +101,17 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
             <FormControl>
               <div className="flex flex-col gap-4">
                 {isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="text-muted-foreground">
-                      Loading providers...
-                    </div>
+                  <div className="flex flex-col items-center justify-center gap-4 py-8">
+                    <Loader2Icon size={48} className="animate-spin" />
+                    <Typography variant="muted">
+                      Generating quotes...
+                    </Typography>
                   </div>
                 ) : providers.length === 0 ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="text-muted-foreground">
+                    <Typography variant="muted">
                       No providers available for this country
-                    </div>
+                    </Typography>
                   </div>
                 ) : (
                   providers.map((p) => (
@@ -91,24 +122,27 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                       onClick={() => field.onChange(p)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="bg-muted size-8 rounded-full" />
-                        <div className="flex flex-col">
+                        <img
+                          src={p.icon}
+                          alt={p.name}
+                          className="size-8 rounded-full"
+                        />
+                        <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium">{p.name}</span>
+                            <Typography variant="small">{p.name}</Typography>
                             {p.best && (
-                              <span className="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-xs">
-                                Best price
-                              </span>
+                              <Badge variant="default">Best price</Badge>
                             )}
                           </div>
-                          <span className="text-muted-foreground text-sm">
-                            {p.description}
-                          </span>
+                          {p.description && (
+                            <Typography variant="muted">
+                              {p.description}
+                            </Typography>
+                          )}
                         </div>
                       </div>
-                      <div className="text-right text-sm">
-                        <div className="font-medium">{p.price}</div>
-                        <div className="text-muted-foreground">0.01</div>
+                      <div className="text-right">
+                        <Typography variant="small">{p.price}</Typography>
                       </div>
                     </button>
                   ))

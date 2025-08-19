@@ -86,6 +86,7 @@ export type OnrampProvider = 'coinbase' | 'stripe' | 'transak'; // Add more in f
 export interface ProviderInfo {
   id: OnrampProvider;
   displayName: string;
+  description?: string;
   logoUrl?: string;
   websiteUrl: string;
 }
