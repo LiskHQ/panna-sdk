@@ -1,4 +1,7 @@
-import { GetCollectiblesByAddressResult } from 'src/core/utils/collectible.types';
+import {
+  GetCollectiblesByAddressResult,
+  ImageType
+} from 'src/core/utils/collectible.types';
 
 export const mockCollectibles: GetCollectiblesByAddressResult = {
   collectibles: [
@@ -14,12 +17,14 @@ export const mockCollectibles: GetCollectiblesByAddressResult = {
       instances: [
         {
           id: '431',
+          imageType: ImageType.URL,
           image:
             'https://assets.poap.xyz/chanel-poap-4c-2023-logo-1675083420470.png',
           name: 'Social Listening Committee #2 Attendees'
         },
         {
           id: '465',
+          imageType: ImageType.URL,
           image:
             'https://assets.poap.xyz/chanel-poap-4c-2023-logo-1675083420470.png',
           name: 'Social Listening Committee #2 Attendees'
@@ -38,18 +43,21 @@ export const mockCollectibles: GetCollectiblesByAddressResult = {
       instances: [
         {
           id: '1234',
+          imageType: ImageType.URL,
           image:
             'https://drops-static.rarible.com/drops/image/Lisk%20of%20Life.jpg',
           name: 'Lisk of Life # 1234'
         },
         {
           id: '12592',
+          imageType: ImageType.URL,
           image:
             'https://drops-static.rarible.com/drops/image/Lisk%20of%20Life.jpg',
           name: 'Lisk of Life # 12592'
         },
         {
           id: '837',
+          imageType: ImageType.URL,
           image:
             'https://drops-static.rarible.com/drops/image/Lisk%20of%20Life.jpg',
           name: 'Lisk of Life # 837'

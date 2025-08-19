@@ -204,12 +204,12 @@ export const getCollectiblesByAddress = async function (
           id: e.id,
           imageType: (() => {
             if (
-              ['https', 'ipfs'].find((type) =>
+              ['https', 'ipfs', 'data'].find((type) =>
                 (e.image_url || e.metadata?.image_url || '').startsWith(type)
               )
             ) {
               return ImageType.URL;
-            } else if (e.metadata?.image_data.includes('</svg>')) {
+            } else if (e.metadata?.image_data?.includes('</svg>')) {
               return ImageType.SVG;
             } else {
               return ImageType.UNKNOWN;

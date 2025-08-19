@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { ImageType } from 'src/core';
 import { useActiveAccount, useCollectibles } from '@/hooks';
 import { CollectiblesList } from './collectibles-list';
 
@@ -75,7 +76,7 @@ describe('CollectiblesList', () => {
 
     render(<CollectiblesList />);
     expect(screen.getByTestId('circle-alert-icon')).toBeVisible();
-    expect(screen.getByText(/Failed to get activity/i)).toBeVisible();
+    expect(screen.getByText(/Failed to get collectibles/i)).toBeVisible();
     expect(
       screen.getByText(
         /There was an error attempting to load your collectibles./i
@@ -111,11 +112,13 @@ describe('CollectiblesList', () => {
               {
                 id: '1',
                 name: 'Collectible One',
+                imageType: ImageType.URL,
                 image: 'image1.png'
               },
               {
                 id: '2',
                 name: 'Collectible Two',
+                imageType: ImageType.SVG,
                 image: 'image2.png'
               }
             ]
