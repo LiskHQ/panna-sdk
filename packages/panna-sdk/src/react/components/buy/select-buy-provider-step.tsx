@@ -75,7 +75,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     );
 
     // Mark the provider with the lowest price as best
-    return providersWithParsedPrices.map((provider) => ({
+    return providersWithParsedPrices.map((provider, index) => ({
       id: provider.id,
       name: provider.name,
       description: provider.description,
@@ -84,7 +84,8 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
         !provider.hasError &&
         provider.numericPrice === lowestPrice &&
         isFinite(lowestPrice),
-      icon: provider.icon
+      icon: provider.icon,
+      prepareResult: providerInfos[index]?.prepareResult
     }));
   }, [providerInfos]);
 

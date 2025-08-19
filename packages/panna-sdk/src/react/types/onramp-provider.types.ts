@@ -1,3 +1,5 @@
+import type { OnrampPrepareResult } from '../../core/onramp/types';
+
 export type OnrampProvider = {
   id: string;
   name: string;
@@ -5,4 +7,5 @@ export type OnrampProvider = {
   price: string;
   best?: boolean;
   icon?: string;
+  prepareResult?: OnrampPrepareResult;
 };
