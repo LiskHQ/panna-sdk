@@ -44,7 +44,9 @@ export function TablePagination<TData>({ table, isFetching }: Props<TData>) {
             <PaginationItem>
               <PaginationNext
                 className="h-9 w-9 p-0"
-                onClick={() => table.nextPage()}
+                onClick={() =>
+                  table.options.meta?.hasNextPage ? table.nextPage() : undefined
+                }
                 disabled={!table.options.meta?.hasNextPage}
               >
                 <span className="sr-only">Go to next page</span>
