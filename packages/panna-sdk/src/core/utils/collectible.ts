@@ -5,7 +5,8 @@ import { PannaHttpErr } from '../helpers/http';
 import {
   BlockscoutAddressNFTCollection,
   BlockscoutNFTCollectionsResponse,
-  BlockscoutNFTNextPageParams
+  BlockscoutNFTNextPageParams,
+  BlockscoutAddressNFTInstanceCollection
 } from './blockscout.types';
 import {
   Collectible,
@@ -233,7 +234,7 @@ export const getCollectiblesByAddress = async function (
 };
 
 function determineImageType(
-  e: BlockscoutAddressNFTCollection['token_instances'][number]
+  e: BlockscoutAddressNFTInstanceCollection
 ): ImageType {
   if (
     ['https', 'ipfs', 'data'].find((type) =>
