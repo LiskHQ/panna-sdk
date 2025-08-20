@@ -310,7 +310,7 @@ export interface BlockscoutAddressNFTCollection {
   token_instances: BlockscoutAddressNFTInstanceCollection[];
 }
 
-interface BlockscoutAddressNFTInstanceCollection {
+export interface BlockscoutAddressNFTInstanceCollection {
   is_unique: boolean;
   id: string;
   holder_address_hash: string;
@@ -329,6 +329,7 @@ interface BlockscoutAddressNFTInstanceCollectionMetadata {
   tags: string[];
   name: string;
   image_url: string;
+  image_data?: string;
   home_url: string;
   external_url: string;
   description: string;

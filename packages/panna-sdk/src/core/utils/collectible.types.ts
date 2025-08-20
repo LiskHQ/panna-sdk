@@ -30,7 +30,8 @@ export interface Token {
 
 export interface TokenInstance {
   id: string;
-  image: string;
+  imageType: (typeof ImageType)[keyof typeof ImageType];
+  image: string | null;
   name?: string;
 }
 
@@ -39,4 +40,10 @@ export interface CollectibleMetadata {
   offset: number;
   limit: number;
   hasNextPage: boolean;
+}
+
+export enum ImageType {
+  URL = 'url',
+  SVG = 'svg',
+  UNKNOWN = 'unknown'
 }

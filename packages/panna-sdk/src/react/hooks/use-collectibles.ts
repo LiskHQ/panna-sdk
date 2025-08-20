@@ -4,11 +4,12 @@ import {
   GetCollectiblesByAddressParams,
   GetCollectiblesByAddressResult
 } from 'src/core/utils/collectible.types';
+import { generatePaginationQueryFilter } from '@/utils/query-utils';
 import {
-  DEFAULT_STALE_TIME,
+  createDefaultRetryFn,
   DEFAULT_REFETCH_INTERVAL,
   DEFAULT_RETRY_DELAY,
-  createDefaultRetryFn
+  DEFAULT_STALE_TIME
 } from './constants';
 import { usePanna } from './use-panna';
 
@@ -26,9 +27,11 @@ export function useCollectibles(
 ) {
   const { client } = usePanna();
   const hasValidAddress = isValidAddress(address);
+  const queryFilter = generatePaginationQueryFilter(limit, offset);
+  const variables = { address, chain, ...queryFilter };
 
   return useQuery({
-    queryKey: ['collectibles', address],
+    queryKey: ['collectibles', JSON.stringify(variables)],
     queryFn: async (): Promise<GetCollectiblesByAddressResult> => {
       return await getCollectiblesByAddress({
         address,

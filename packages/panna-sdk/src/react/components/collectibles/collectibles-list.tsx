@@ -1,6 +1,15 @@
-import { useActiveAccount } from '@/hooks';
-import { useCollectibles } from '@/hooks/use-collectibles';
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  PaginationState,
+  useReactTable
+} from '@tanstack/react-table';
+import { CircleAlertIcon } from 'lucide-react';
+import { useState } from 'react';
+import { ImageType, TokenInstance } from 'src/core';
+import { useActiveAccount, useCollectibles } from '@/hooks';
 import { cn } from '@/utils';
+import { DefaultNFTIcon } from '../icons/default-nft-icon';
 import {
   Accordion,
   AccordionContent,
@@ -8,8 +17,13 @@ import {
   AccordionTrigger
 } from '../ui/accordion';
 import { Card, CardContent } from '../ui/card';
+import { CustomMediaRenderer } from '../ui/custom-media-renderer';
 import { Skeleton } from '../ui/skeleton';
+import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
+
+const DEFAULT_LIMIT = 5;
+const DEFAULT_OFFSET = 0;
 
 type CollectiblesListProps = {
   className?: string;
@@ -17,14 +31,37 @@ type CollectiblesListProps = {
 
 export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
-  const { isLoading, data, isError } = useCollectibles(
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: DEFAULT_OFFSET,
+    pageSize: DEFAULT_LIMIT
+  });
+  const { isLoading, isFetching, data, isError } = useCollectibles(
     {
-      address: account?.address as string
+      address: account?.address as string,
+      limit: pagination.pageSize,
+      offset: pagination.pageIndex * pagination.pageSize
     },
     {
       enabled: !!account?.address
     }
   );
+
+  const collectiblesData = data?.collectibles || [];
+  const totalCount = data?.metadata.count || 0;
+
+  const table = useReactTable({
+    columns: [],
+    data: collectiblesData,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    rowCount: totalCount,
+    onPaginationChange: setPagination,
+    state: {
+      pagination
+    },
+    meta: data?.metadata
+  });
 
   if (isLoading) {
     return (
@@ -45,8 +82,11 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           className
         )}
       >
+        <CircleAlertIcon className="h-10 w-10 stroke-amber-300" />
+        <Typography variant="small">Failed to get collectibles</Typography>
         <Typography variant="muted">
-          Error fetching collectibles. Please try again later.
+          There was an error attempting to load your collectibles. Please
+          refresh or check again soon.
         </Typography>
       </section>
     );
@@ -70,7 +110,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
 
   return (
     <section>
-      {data.collectibles.map((item, index) => {
+      {table.getRowModel().rows.map((row, index) => {
+        const item = row.original;
         if (!item.instances || item.instances.length === 0) {
           return null;
         }
@@ -88,11 +129,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={firstInstance.image}
-                    alt={firstInstance.name}
-                    className="h-10 w-10 rounded-full"
-                  />
+                  <CollectibleLogo instance={firstInstance} />
                   <div className="flex items-center gap-1">
                     <Typography variant="small">
                       {firstInstance.name}
@@ -107,11 +144,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 {item.instances.map((instance, instanceIndex) => (
                   <Card key={instanceIndex} className="p-0">
                     <CardContent className="p-0">
-                      <img
-                        src={instance.image}
-                        alt={instance.name}
-                        className="h-52 w-full rounded-xl"
-                      />
+                      <CollectibleImageRenderer instance={instance} />
                     </CardContent>
                   </Card>
                 ))}
@@ -120,6 +153,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           </Accordion>
         );
       })}
+      <TablePagination table={table} isFetching={isFetching} />
     </section>
   );
 }
@@ -148,5 +182,55 @@ function CollectiblesListLoading() {
         </AccordionItem>
       </Accordion>
     </div>
+  );
+}
+
+function CollectibleLogo({ instance }: { instance: TokenInstance }) {
+  return (
+    <>
+      {instance.imageType === ImageType.URL && (
+        <img
+          src={instance.image as string}
+          alt={instance.name}
+          className="h-10 w-10 rounded-full"
+        />
+      )}
+      {instance.imageType === ImageType.SVG && (
+        <img
+          src={`data:image/svg+xml;utf8,${encodeURIComponent(instance.image as string)}`}
+          alt={instance.name}
+          className="h-10 w-10 rounded-full"
+        />
+      )}
+      {instance.imageType === ImageType.UNKNOWN && (
+        <div className="bg-input/30 h-10 w-10 rounded-full" />
+      )}
+    </>
+  );
+}
+
+function CollectibleImageRenderer({ instance }: { instance: TokenInstance }) {
+  return (
+    <>
+      {instance.imageType === ImageType.URL && (
+        <CustomMediaRenderer
+          src={instance.image as string}
+          alt={instance.name}
+          className="h-52 w-full rounded-xl object-cover!"
+        />
+      )}
+      {instance.imageType === ImageType.SVG && (
+        <img
+          src={`data:image/svg+xml;utf8,${encodeURIComponent(instance.image as string)}`}
+          alt={instance.name}
+          className="h-52 w-full rounded-xl"
+        />
+      )}
+      {instance.imageType === ImageType.UNKNOWN && (
+        <div className="relative h-0 w-full p-0 pb-[100%]">
+          <DefaultNFTIcon className="absolute top-0 left-0 h-full w-full rounded-xl" />
+        </div>
+      )}
+    </>
   );
 }
