@@ -1,3 +1,4 @@
+import { ethIcon } from '@/consts';
 import { lisk } from '../chains';
 import { NATIVE_TOKEN_ADDRESS } from '../defaults';
 import { newLruMemCache } from '../helpers/cache';
@@ -7,32 +8,32 @@ import {
   // const
   TokenERC,
   TransactionActivity,
+  type Activity,
+  type ActivityMetadata,
+  type ActivityType,
+  type ERC1155Amount,
+  type ERC20Amount,
+  type ERC721Amount,
+  type EtherAmount,
   // type
   type GetActivitiesByAddressParams,
   type GetActivitiesByAddressResult,
-  type Activity,
-  type ActivityType,
   type TokenType,
-  type TransactionAmount,
-  type ActivityMetadata,
-  type EtherAmount,
-  type ERC20Amount,
-  type ERC721Amount,
-  type ERC1155Amount
+  type TransactionAmount
 } from './activity.types';
 import {
-  type BlockscoutTransactionsResponse,
-  type BlockscoutTransaction,
-  type BlockscoutTokenTransfersResponse,
-  type BlockscoutTokenTransfer,
   type BlockscoutNextPageParams,
+  type BlockscoutTokenTransfer,
+  type BlockscoutTokenTransfersResponse,
+  type BlockscoutTotalERC1155,
   type BlockscoutTotalERC721,
-  type BlockscoutTotalERC1155
+  type BlockscoutTransaction,
+  type BlockscoutTransactionsResponse
 } from './blockscout.types';
 import { getBaseApiUrl, getCacheKey, isValidAddress } from './common';
 import {
-  DEFAULT_PAGINATION_OFFSET,
-  DEFAULT_PAGINATION_LIMIT
+  DEFAULT_PAGINATION_LIMIT,
+  DEFAULT_PAGINATION_OFFSET
 } from './constants';
 
 // Activity cache
@@ -224,122 +225,132 @@ export const getActivitiesByAddress = async function (
   const activities: Activity[] = userTransactions
     .slice(offset, offset + limit)
     .map((tx) => {
-      const transactionID = tx.hash;
-      const status = tx.result;
+      try {
+        const transactionID = tx.hash;
+        const status = tx.result;
 
-      let activityType: ActivityType = TransactionActivity.SENT;
+        let activityType: ActivityType = TransactionActivity.SENT;
 
-      if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
-        activityType = TransactionActivity.SENT;
-      } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
-        activityType = TransactionActivity.RECEIVED;
-      } else if (
-        tx.to.is_contract &&
-        tx.token_transfers.find((t) => t.type.toLowerCase() === 'token_minting')
-      ) {
-        activityType = TransactionActivity.MINTED;
-      }
-
-      let amount: TransactionAmount;
-      const amountType = getAmountType(address, tx);
-      switch (amountType) {
-        case TokenERC.ETH: {
-          amount = {
-            type: TokenERC.ETH,
-            value: tx.value,
-            tokenInfo: {
-              address: NATIVE_TOKEN_ADDRESS,
-              name: 'Ether',
-              symbol: 'ETH',
-              decimals: 18,
-              type: TokenERC.ETH
-            }
-          } as EtherAmount;
-          break;
+        if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
+          activityType = TransactionActivity.SENT;
+        } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
+          activityType = TransactionActivity.RECEIVED;
+        } else if (
+          tx.to.is_contract &&
+          tx.token_transfers.find(
+            (t) => t.type.toLowerCase() === 'token_minting'
+          )
+        ) {
+          activityType = TransactionActivity.MINTED;
         }
 
-        case TokenERC.ERC20: {
-          const erc20Tx = tx.token_transfers.find(
-            (e) => e.token.type.toLowerCase() === TokenERC.ERC20
-          );
+        let amount: TransactionAmount;
+        const amountType = getAmountType(address, tx);
+        switch (amountType) {
+          case TokenERC.ETH: {
+            amount = {
+              type: TokenERC.ETH,
+              value: tx.value,
+              tokenInfo: {
+                address: NATIVE_TOKEN_ADDRESS,
+                name: 'Ether',
+                symbol: 'ETH',
+                decimals: 18,
+                type: TokenERC.ETH,
+                icon: ethIcon
+              }
+            } as EtherAmount;
+            break;
+          }
 
-          amount = {
-            type: TokenERC.ERC20,
-            value: tx.value,
-            tokenInfo: {
-              address: erc20Tx?.token.address,
-              name: erc20Tx?.token.name,
-              symbol: erc20Tx?.token.symbol,
-              decimals: erc20Tx?.token.decimals,
+          case TokenERC.ERC20: {
+            const erc20Tx = tx.token_transfers.find(
+              (e) => e.token.type.toLowerCase() === TokenERC.ERC20
+            );
+
+            amount = {
               type: TokenERC.ERC20,
-              icon: erc20Tx?.token.icon_url
-            }
-          } as ERC20Amount;
-          break;
-        }
-
-        case TokenERC.ERC721: {
-          const erc721Tx = tx.token_transfers.find(
-            (e) => e.token.type.toLowerCase() === TokenERC.ERC721
-          );
-          const erc721TxTotal = erc721Tx?.total as BlockscoutTotalERC721;
-
-          amount = {
-            type: TokenERC.ERC721,
-            tokenId: erc721TxTotal.token_id,
-            instance: {
-              id: erc721TxTotal.token_instance.id,
-              isUnique: erc721TxTotal.token_instance.is_unique,
-              owner: erc721TxTotal.token_instance.owner,
+              value: tx.value,
               tokenInfo: {
-                address: erc721Tx?.token.address,
-                name: erc721Tx?.token.name,
-                symbol: erc721Tx?.token.symbol,
-                decimals: erc721Tx?.token.decimals,
-                type: TokenERC.ERC721,
-                icon: erc721Tx?.token.icon_url
+                address: erc20Tx?.token.address,
+                name: erc20Tx?.token.name,
+                symbol: erc20Tx?.token.symbol,
+                decimals: erc20Tx?.token.decimals
+                  ? Number(erc20Tx?.token.decimals)
+                  : 0,
+                type: TokenERC.ERC20,
+                icon: erc20Tx?.token.icon_url
               }
-            }
-          } as unknown as ERC721Amount;
-          break;
+            } as ERC20Amount;
+            break;
+          }
+
+          case TokenERC.ERC721: {
+            const erc721Tx = tx.token_transfers.find(
+              (e) => e.token.type.toLowerCase() === TokenERC.ERC721
+            );
+            const erc721TxTotal = erc721Tx?.total as BlockscoutTotalERC721;
+
+            amount = {
+              type: TokenERC.ERC721,
+              tokenId: erc721TxTotal.token_id,
+              instance: {
+                id: erc721TxTotal.token_instance.id,
+                isUnique: erc721TxTotal.token_instance.is_unique,
+                owner: erc721TxTotal.token_instance.owner,
+                tokenInfo: {
+                  address: erc721Tx?.token.address,
+                  name: erc721Tx?.token.name,
+                  symbol: erc721Tx?.token.symbol,
+                  decimals: erc721Tx?.token.decimals,
+                  type: TokenERC.ERC721,
+                  icon: erc721Tx?.token.icon_url
+                }
+              }
+            } as unknown as ERC721Amount;
+            break;
+          }
+
+          case TokenERC.ERC1155: {
+            const erc1155Tx = tx.token_transfers.find(
+              (e) => e.token.type.toLowerCase() === TokenERC.ERC1155
+            );
+            const erc1155TxTotal = erc1155Tx?.total as BlockscoutTotalERC1155;
+
+            amount = {
+              type: TokenERC.ERC1155,
+              tokenId: erc1155TxTotal.token_id,
+              value: erc1155TxTotal.value,
+              instance: {
+                id: erc1155TxTotal.token_instance.id,
+                isUnique: erc1155TxTotal.token_instance.is_unique,
+                owner: erc1155TxTotal.token_instance.owner,
+                tokenInfo: {
+                  address: erc1155Tx?.token.address,
+                  name: erc1155Tx?.token.name,
+                  symbol: erc1155Tx?.token.symbol,
+                  decimals: erc1155Tx?.token.decimals,
+                  type: TokenERC.ERC1155,
+                  icon: erc1155Tx?.token.icon_url
+                }
+              }
+            } as unknown as ERC1155Amount;
+            break;
+          }
         }
 
-        case TokenERC.ERC1155: {
-          const erc1155Tx = tx.token_transfers.find(
-            (e) => e.token.type.toLowerCase() === TokenERC.ERC1155
-          );
-          const erc1155TxTotal = erc1155Tx?.total as BlockscoutTotalERC1155;
-
-          amount = {
-            type: TokenERC.ERC1155,
-            tokenId: erc1155TxTotal.token_id,
-            value: erc1155TxTotal.value,
-            instance: {
-              id: erc1155TxTotal.token_instance.id,
-              isUnique: erc1155TxTotal.token_instance.is_unique,
-              owner: erc1155TxTotal.token_instance.owner,
-              tokenInfo: {
-                address: erc1155Tx?.token.address,
-                name: erc1155Tx?.token.name,
-                symbol: erc1155Tx?.token.symbol,
-                decimals: erc1155Tx?.token.decimals,
-                type: TokenERC.ERC1155,
-                icon: erc1155Tx?.token.icon_url
-              }
-            }
-          } as unknown as ERC1155Amount;
-          break;
-        }
+        const activity: Activity = {
+          activityType,
+          transactionID,
+          amount,
+          status
+        };
+        return activity;
+      } catch (error) {
+        return null;
       }
-
-      const activity: Activity = {
-        activityType,
-        transactionID,
-        amount,
-        status
-      };
-      return activity;
-    });
+    })
+    .filter((e) => e !== null);
 
   const metadata: ActivityMetadata = {
     count: activities.length,
@@ -398,21 +409,26 @@ export const fillTokenTransactions = async (
           (activityCache.get(cacheKeyTokenTransferTxs) ||
             []) as BlockscoutTokenTransfer[];
 
-        const nextPageParams: BlockscoutNextPageParams | null =
-          (activityCache.get(
-            cacheKeyTokenTransferNextPageParams
-          ) as BlockscoutNextPageParams) || null;
+        const nextPageParams = (() => {
+          const val = activityCache.get(cacheKeyTokenTransferNextPageParams);
+          if (val) {
+            return val as BlockscoutNextPageParams;
+          } else {
+            return val;
+          }
+        })() as BlockscoutNextPageParams | null | undefined;
 
         const tokenTransferTxs = userTokenTransfers.filter(
           (e) => e.transaction_hash === tx.hash
         );
 
         if (
+          nextPageParams !== null &&
           // no matching token transfer transactions exist in cache
-          tokenTransferTxs.length === 0 ||
-          // matching token transfer transactions partially exist in cache
-          (nextPageParams !== null &&
-            tx.block_number <= nextPageParams.block_number)
+          ((tokenTransferTxs.length === 0 && nextPageParams === undefined) ||
+            // matching token transfer transactions partially exist in cache
+            (nextPageParams !== undefined &&
+              tx.block_number <= nextPageParams.block_number))
         ) {
           await updateTokenTransactionsCache(address, chainID);
           continue;
@@ -489,11 +505,7 @@ export const updateTokenTransactionsCache = async (
   userTokenTransfers.push(...blockscoutRes.items);
   activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
 
-  if (blockscoutRes.next_page_params) {
-    activityCache.set(cacheKeyTokenTransferNextPageParams, nextPageParams);
-  } else {
-    activityCache.delete(cacheKeyTokenTransferNextPageParams);
-  }
+  activityCache.set(cacheKeyTokenTransferNextPageParams, nextPageParams);
 };
 
 /*

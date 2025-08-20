@@ -22,9 +22,9 @@ export interface Activity {
 }
 
 export const TransactionActivity = {
-  SENT: 'sent',
-  RECEIVED: 'received',
-  MINTED: 'minted'
+  SENT: 'Sent',
+  RECEIVED: 'Received',
+  MINTED: 'Minted'
 };
 
 type TransactionActivityType = typeof TransactionActivity;
@@ -48,25 +48,30 @@ export type TransactionAmount = { type: string } & (
   | ERC1155Amount
 );
 
-export interface EtherAmount {
-  type: 'eth';
+interface BaseAmount {
   value: string;
   tokenInfo: TokenInfo;
 }
 
-export type ERC20Amount = EtherAmount & { type: 'erc-20' };
+export interface EtherAmount extends BaseAmount {
+  type: 'eth';
+}
 
-export interface ERC721Amount {
-  type: 'erc-721';
+export interface ERC20Amount extends BaseAmount {
+  type: 'erc-20';
+}
+
+interface BaseNFTAmount {
   tokenId: string;
   instance?: NFTInstance;
 }
+export interface ERC721Amount extends BaseNFTAmount {
+  type: 'erc-721';
+}
 
-export interface ERC1155Amount {
+export interface ERC1155Amount extends BaseNFTAmount {
   type: 'erc-1155';
-  tokenId: string;
   value: string;
-  instance?: NFTInstance;
 }
 
 export interface NFTInstance {
@@ -88,7 +93,7 @@ export interface TokenInfo {
   symbol: string;
   decimals: number;
   type: TokenType;
-  icon: string;
+  icon: string | null;
 }
 
 export interface ActivityMetadata {
