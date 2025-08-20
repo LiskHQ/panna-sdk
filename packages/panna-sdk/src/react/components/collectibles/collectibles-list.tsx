@@ -22,6 +22,9 @@ import { Skeleton } from '../ui/skeleton';
 import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
 
+const DEFAULT_LIMIT = 5;
+const DEFAULT_OFFSET = 0;
+
 type CollectiblesListProps = {
   className?: string;
 };
@@ -29,8 +32,8 @@ type CollectiblesListProps = {
 export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
   const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10
+    pageIndex: DEFAULT_OFFSET,
+    pageSize: DEFAULT_LIMIT
   });
   const { isLoading, isFetching, data, isError } = useCollectibles(
     {

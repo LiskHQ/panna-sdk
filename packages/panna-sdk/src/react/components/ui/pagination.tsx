@@ -84,7 +84,7 @@ function PaginationPrevious({
       className={cn(
         'gap-1 rounded-md px-4 py-2 sm:pl-4',
         props.disabled
-          ? 'bg-card text-primary/50 cursor-not-allowed'
+          ? 'bg-card text-primary/50 hover:bg-card dark:hover:bg-card hover:text-primary/50 cursor-not-allowed'
           : 'bg-muted text-foreground',
         className
       )}
@@ -115,7 +115,7 @@ function PaginationNext({
       className={cn(
         'gap-1 rounded-md px-4 py-2 sm:pr-4',
         props.disabled
-          ? 'bg-card text-primary/50 cursor-not-allowed'
+          ? 'bg-card text-primary/50 hover:bg-card dark:hover:bg-card hover:text-primary/50 cursor-not-allowed'
           : 'bg-muted text-foreground',
         className
       )}
