@@ -76,6 +76,7 @@ export const getBaseNFTCollectionsRequestUrl = (
  * //   },
  * //   instances:[{
  * //     id: '1234',
+ * //     imageType: 'unknown',
  * //     image: null,
  * //     name: null
  * //   }, ...]
@@ -90,6 +91,7 @@ export const getBaseNFTCollectionsRequestUrl = (
  * //   },
  * //   instances:[{
  * //     id: '1234',
+ * //     imageType: 'url',
  * //     image: 'https://example.url/NFT-image.jpg',
  * //     name: 'Lisk of Life # 1234'
  * //   }]
@@ -104,6 +106,7 @@ export const getBaseNFTCollectionsRequestUrl = (
  * //   },
  * //   instances:[{
  * //     id: '1234',
+ * //     imageType: 'url',
  * //     image: 'https://example.url/NFT-image.jpg',
  * //     name: 'Iron boy'
  * //   }, ...]
@@ -202,22 +205,7 @@ export const getCollectiblesByAddress = async function (
       const instances: TokenInstance[] = collection.token_instances.map((e) => {
         const instance: TokenInstance = {
           id: e.id,
-          imageType: (() => {
-            if (
-              ['https', 'ipfs', 'data'].find((type) =>
-                (e.image_url || e.metadata?.image_url || '').startsWith(type)
-              )
-            ) {
-              return ImageType.URL;
-            } else if (
-              typeof e.metadata?.image_data === 'string' &&
-              /^<svg[\s>]/i.test(e.metadata.image_data)
-            ) {
-              return ImageType.SVG;
-            } else {
-              return ImageType.UNKNOWN;
-            }
-          })(),
+          imageType: determineImageType(e),
           image:
             e.image_url ||
             e.metadata?.image_url ||
@@ -243,3 +231,22 @@ export const getCollectiblesByAddress = async function (
   const result: GetCollectiblesByAddressResult = { collectibles, metadata };
   return result;
 };
+
+function determineImageType(
+  e: BlockscoutAddressNFTCollection['token_instances'][number]
+): ImageType {
+  if (
+    ['https', 'ipfs', 'data'].find((type) =>
+      (e.image_url || e.metadata?.image_url || '').startsWith(type)
+    )
+  ) {
+    return ImageType.URL;
+  } else if (
+    typeof e.metadata?.image_data === 'string' &&
+    /^<svg[\s>]/i.test(e.metadata.image_data)
+  ) {
+    return ImageType.SVG;
+  } else {
+    return ImageType.UNKNOWN;
+  }
+}

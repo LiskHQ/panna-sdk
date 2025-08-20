@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import { ImageType } from 'src/core';
+import { ImageType, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles } from '@/hooks';
 import { cn } from '@/utils';
 import { DefaultNFTIcon } from '../icons/default-nft-icon';
@@ -126,23 +126,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  {firstInstance.imageType === ImageType.URL && (
-                    <img
-                      src={firstInstance.image as string}
-                      alt={firstInstance.name}
-                      className="h-10 w-10 rounded-full"
-                    />
-                  )}
-                  {firstInstance.imageType === ImageType.SVG && (
-                    <img
-                      src={`data:image/svg+xml;utf8,${encodeURIComponent(firstInstance.image as string)}`}
-                      alt={firstInstance.name}
-                      className="h-10 w-10 rounded-full"
-                    />
-                  )}
-                  {firstInstance.imageType === ImageType.UNKNOWN && (
-                    <div className="bg-input/30 h-10 w-10 rounded-full" />
-                  )}
+                  <CollectibleLogo instance={firstInstance} />
                   <div className="flex items-center gap-1">
                     <Typography variant="small">
                       {firstInstance.name}
@@ -157,25 +141,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 {item.instances.map((instance, instanceIndex) => (
                   <Card key={instanceIndex} className="p-0">
                     <CardContent className="p-0">
-                      {firstInstance.imageType === ImageType.URL && (
-                        <CustomMediaRenderer
-                          src={instance.image as string}
-                          alt={instance.name}
-                          className="h-52 w-full rounded-xl object-cover!"
-                        />
-                      )}
-                      {firstInstance.imageType === ImageType.SVG && (
-                        <img
-                          src={`data:image/svg+xml;utf8,${encodeURIComponent(instance.image as string)}`}
-                          alt={instance.name}
-                          className="h-52 w-full rounded-xl"
-                        />
-                      )}
-                      {firstInstance.imageType === ImageType.UNKNOWN && (
-                        <div className="relative h-0 w-full p-0 pb-[100%]">
-                          <DefaultNFTIcon className="absolute top-0 left-0 h-full w-full rounded-xl" />
-                        </div>
-                      )}
+                      <CollectibleImageRenderer instance={instance} />
                     </CardContent>
                   </Card>
                 ))}
@@ -213,5 +179,55 @@ function CollectiblesListLoading() {
         </AccordionItem>
       </Accordion>
     </div>
+  );
+}
+
+function CollectibleLogo({ instance }: { instance: TokenInstance }) {
+  return (
+    <>
+      {instance.imageType === ImageType.URL && (
+        <img
+          src={instance.image as string}
+          alt={instance.name}
+          className="h-10 w-10 rounded-full"
+        />
+      )}
+      {instance.imageType === ImageType.SVG && (
+        <img
+          src={`data:image/svg+xml;utf8,${encodeURIComponent(instance.image as string)}`}
+          alt={instance.name}
+          className="h-10 w-10 rounded-full"
+        />
+      )}
+      {instance.imageType === ImageType.UNKNOWN && (
+        <div className="bg-input/30 h-10 w-10 rounded-full" />
+      )}
+    </>
+  );
+}
+
+function CollectibleImageRenderer({ instance }: { instance: TokenInstance }) {
+  return (
+    <>
+      {instance.imageType === ImageType.URL && (
+        <CustomMediaRenderer
+          src={instance.image as string}
+          alt={instance.name}
+          className="h-52 w-full rounded-xl object-cover!"
+        />
+      )}
+      {instance.imageType === ImageType.SVG && (
+        <img
+          src={`data:image/svg+xml;utf8,${encodeURIComponent(instance.image as string)}`}
+          alt={instance.name}
+          className="h-52 w-full rounded-xl"
+        />
+      )}
+      {instance.imageType === ImageType.UNKNOWN && (
+        <div className="relative h-0 w-full p-0 pb-[100%]">
+          <DefaultNFTIcon className="absolute top-0 left-0 h-full w-full rounded-xl" />
+        </div>
+      )}
+    </>
   );
 }

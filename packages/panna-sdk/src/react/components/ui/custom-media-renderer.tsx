@@ -8,8 +8,8 @@ type MediaRendererProps = Omit<
   className?: string;
 };
 
-/*
- * CustomMediaRenderer is a wrapper around the MediaRenderer component from thirdweb.
+/**
+ * CustomMediaRenderer is a wrapper around the MediaRenderer component from ThirdWeb.
  * It allows you to pass additional props and ensures that the client is provided from the Panna context.
  */
 
