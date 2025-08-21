@@ -197,7 +197,7 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
  *
  * @param params - Parameters for fetching token fiat prices
  * @param params.chainId - The chain ID of the token
- * @param params.tokenAddress - The address of the token (optional) if not provided, fetches prices for all tokens on the chain
+ * @param params.tokenAddress - (Optional) The address of the token to fetch the prices for. (Default: Fetches prices for all the tokens on the chain)
  * @param params.client - The Panna client instance used for authentication
  * @returns Promise resolving to the token fiat prices
  * @throws Error if the token address is invalid or network request fails
