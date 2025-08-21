@@ -16,6 +16,10 @@ import { usePanna } from './use-panna';
 /**
  * Hook to retrieve collectibles
  * @param params - Parameters for retrieving collectibles
+ * @param params.address - The account address for which to retrieve the collectibles.
+ * @param params.chain - (Optional) Chain object type. (Default: lisk)
+ * @param params.limit - (Optional) The number of items to be returned from the matching result. (Default: 10)
+ * @param params.offset - (Optional) The number of items to be skipped from the matching result. (Default: 0)
  * @returns React Query result with collectible data
  */
 export function useCollectibles(
