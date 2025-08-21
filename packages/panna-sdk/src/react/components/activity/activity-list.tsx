@@ -6,11 +6,14 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Activity, TokenERC } from 'src/core';
+import { Activity, TokenERC, TransactionActivity } from 'src/core';
 import { useActiveAccount } from 'thirdweb/react';
 import { useActivities } from '@/hooks/use-activities';
 import { tokenIconMap } from '@/mocks/token-balances';
 import { cn } from '@/utils';
+import { MintedNFTTxnIcon } from '../icons/minted-nft-txn-icon';
+import { ReceivedTxnIcon } from '../icons/received-txn-icon';
+import { SentTxnIcon } from '../icons/sent-txn-icon';
 import { Skeleton } from '../ui/skeleton';
 import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
@@ -30,7 +33,7 @@ export function ActivityList({ className }: ActivityListProps) {
   });
   const { data, isLoading, isFetching, isError } = useActivities(
     {
-      address: account?.address as string,
+      address: '0xe1287E785D424cd3d0998957388C4770488ed841',
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize
     },
@@ -149,23 +152,50 @@ function renderActivitySymbol(activity: Activity) {
   }
 }
 
+function renderTransactionIcon(activity: Activity) {
+  switch (activity.activityType) {
+    case TransactionActivity.SENT:
+      return <SentTxnIcon className="absolute top-0 left-0" />;
+    case TransactionActivity.RECEIVED:
+      return <ReceivedTxnIcon className="absolute top-0 left-0" />;
+    case TransactionActivity.MINTED:
+      return <MintedNFTTxnIcon className="absolute top-0 left-0" />;
+    default:
+      return null;
+  }
+}
+
 function renderActivityTokenIcon(activity: Activity) {
   switch (activity.amount.type) {
     case TokenERC.ETH:
       return (
-        <img
-          src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
-          alt={activity.amount.tokenInfo?.symbol}
-          className="h-12 w-12 rounded-full"
-        />
+        <div className="relative py-1">
+          {tokenIconMap[activity.amount.tokenInfo?.symbol] ? (
+            <img
+              src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
+              alt={activity.amount.tokenInfo?.symbol}
+              className="h-10 w-10 rounded-full"
+            />
+          ) : (
+            <Skeleton className="h-12 w-12 rounded-full" />
+          )}
+          {renderTransactionIcon(activity)}
+        </div>
       );
     case TokenERC.ERC20:
       return (
-        <img
-          src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
-          alt={activity.amount.tokenInfo?.symbol}
-          className="h-12 w-12 rounded-full"
-        />
+        <div className="relative py-1">
+          {tokenIconMap[activity.amount.tokenInfo?.symbol] ? (
+            <img
+              src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
+              alt={activity.amount.tokenInfo?.symbol}
+              className="h-10 w-10 rounded-full"
+            />
+          ) : (
+            <Skeleton className="h-12 w-12 rounded-full" />
+          )}
+          {renderTransactionIcon(activity)}
+        </div>
       );
     case TokenERC.ERC721:
       {
