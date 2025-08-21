@@ -8,6 +8,7 @@ import {
   // const
   TokenERC,
   TransactionActivity,
+  // type
   type Activity,
   type ActivityMetadata,
   type ActivityType,
@@ -15,7 +16,6 @@ import {
   type ERC20Amount,
   type ERC721Amount,
   type EtherAmount,
-  // type
   type GetActivitiesByAddressParams,
   type GetActivitiesByAddressResult,
   type TokenType,
@@ -38,6 +38,7 @@ import {
 
 // Activity cache
 const activityCache = newLruMemCache('activity');
+const LAST_PAGE_REACHED = 'last_page_reached';
 
 /**
  * Get blockscout transactions endpoint.
@@ -225,26 +226,24 @@ export const getActivitiesByAddress = async function (
   const activities: Activity[] = userTransactions
     .slice(offset, offset + limit)
     .map((tx) => {
+      const transactionID = tx.hash;
+      const status = tx.result;
+
+      let activityType: ActivityType = TransactionActivity.SENT;
+
+      if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
+        activityType = TransactionActivity.SENT;
+      } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
+        activityType = TransactionActivity.RECEIVED;
+      } else if (
+        tx.to.is_contract &&
+        tx.token_transfers.find((t) => t.type.toLowerCase() === 'token_minting')
+      ) {
+        activityType = TransactionActivity.MINTED;
+      }
+
+      let amount: TransactionAmount;
       try {
-        const transactionID = tx.hash;
-        const status = tx.result;
-
-        let activityType: ActivityType = TransactionActivity.SENT;
-
-        if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
-          activityType = TransactionActivity.SENT;
-        } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
-          activityType = TransactionActivity.RECEIVED;
-        } else if (
-          tx.to.is_contract &&
-          tx.token_transfers.find(
-            (t) => t.type.toLowerCase() === 'token_minting'
-          )
-        ) {
-          activityType = TransactionActivity.MINTED;
-        }
-
-        let amount: TransactionAmount;
         const amountType = getAmountType(address, tx);
         switch (amountType) {
           case TokenERC.ETH: {
@@ -346,7 +345,10 @@ export const getActivitiesByAddress = async function (
           status
         };
         return activity;
-      } catch (error) {
+      } catch (err) {
+        console.warn(
+          `Skipping transaction ${transactionID} due to: ${(err as Error).message}`
+        );
         return null;
       }
     })
@@ -409,26 +411,24 @@ export const fillTokenTransactions = async (
           (activityCache.get(cacheKeyTokenTransferTxs) ||
             []) as BlockscoutTokenTransfer[];
 
-        const nextPageParams = (() => {
-          const val = activityCache.get(cacheKeyTokenTransferNextPageParams);
-          if (val) {
-            return val as BlockscoutNextPageParams;
-          } else {
-            return val;
-          }
-        })() as BlockscoutNextPageParams | null | undefined;
+        const nextPageParams:
+          | BlockscoutNextPageParams
+          | typeof LAST_PAGE_REACHED
+          | null =
+          (activityCache.get(cacheKeyTokenTransferNextPageParams) as
+            | BlockscoutNextPageParams
+            | typeof LAST_PAGE_REACHED) || null;
 
         const tokenTransferTxs = userTokenTransfers.filter(
           (e) => e.transaction_hash === tx.hash
         );
 
         if (
-          nextPageParams !== null &&
-          // no matching token transfer transactions exist in cache
-          ((tokenTransferTxs.length === 0 && nextPageParams === undefined) ||
-            // matching token transfer transactions partially exist in cache
-            (nextPageParams !== undefined &&
-              tx.block_number <= nextPageParams.block_number))
+          nextPageParams !== LAST_PAGE_REACHED &&
+          // matching token transfer transactions partially exist in cache
+          ((nextPageParams && tx.block_number <= nextPageParams.block_number) ||
+            // no matching token transfer transactions exist in cache
+            (tokenTransferTxs.length === 0 && nextPageParams === null))
         ) {
           await updateTokenTransactionsCache(address, chainID);
           continue;
@@ -505,7 +505,15 @@ export const updateTokenTransactionsCache = async (
   userTokenTransfers.push(...blockscoutRes.items);
   activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
 
-  activityCache.set(cacheKeyTokenTransferNextPageParams, nextPageParams);
+  if (blockscoutRes.next_page_params) {
+    activityCache.set(
+      cacheKeyTokenTransferNextPageParams,
+      blockscoutRes.next_page_params
+    );
+  } else {
+    // Explicitly set flag when the last page has been reached
+    activityCache.set(cacheKeyTokenTransferNextPageParams, LAST_PAGE_REACHED);
+  }
 };
 
 /*

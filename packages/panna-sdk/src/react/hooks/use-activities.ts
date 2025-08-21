@@ -14,7 +14,6 @@ import {
 } from './constants';
 import { usePanna } from './use-panna';
 
-/* TODO: Add function documentation */
 /**
  * Hook to retrieve activities
  * @param params - Parameters for retrieving activities

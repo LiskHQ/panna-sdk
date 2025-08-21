@@ -1,7 +1,7 @@
 import { PaginationState } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import { Activity } from 'src/core';
+import { Activity, TokenERC } from 'src/core';
 import { useActiveAccount } from 'thirdweb/react';
 import { useActivities } from '@/hooks/use-activities';
 import { tokenIconMap } from '@/mocks/token-balances';
@@ -96,25 +96,25 @@ type ActivityItemProps = {
 
 function renderActivitySymbol(activity: Activity) {
   switch (activity.amount.type) {
-    case 'eth':
+    case TokenERC.ETH:
       return (
         <Typography variant="muted">
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
-    case 'erc-20':
+    case TokenERC.ERC20:
       return (
         <Typography variant="muted">
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
-    case 'erc-721':
+    case TokenERC.ERC721:
       return (
         <Typography variant="muted">
           {activity.amount.instance?.tokenInfo.name}
         </Typography>
       );
-    case 'erc-1155':
+    case TokenERC.ERC1155:
       return (
         <Typography variant="muted">
           {activity.amount.instance?.tokenInfo.name}
@@ -127,7 +127,7 @@ function renderActivitySymbol(activity: Activity) {
 
 function renderActivityTokenIcon(activity: Activity) {
   switch (activity.amount.type) {
-    case 'eth':
+    case TokenERC.ETH:
       return (
         <img
           src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
@@ -135,7 +135,7 @@ function renderActivityTokenIcon(activity: Activity) {
           className="h-12 w-12 rounded-full"
         />
       );
-    case 'erc-20':
+    case TokenERC.ERC20:
       return (
         <img
           src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
@@ -146,9 +146,9 @@ function renderActivityTokenIcon(activity: Activity) {
       {
         /* TODO: Implement NFT icons on API update */
       }
-    case 'erc-721':
+    case TokenERC.ERC721:
       return <Skeleton className="h-12 w-12 rounded-full" />;
-    case 'erc-1155':
+    case TokenERC.ERC1155:
       return <Skeleton className="h-12 w-12 rounded-full" />;
     default:
       return null;
@@ -157,7 +157,7 @@ function renderActivityTokenIcon(activity: Activity) {
 
 function renderActivityNameOrSymbol(activity: Activity) {
   switch (activity.amount.type) {
-    case 'eth':
+    case TokenERC.ETH:
       return (
         <Typography variant="small">
           {(
@@ -167,7 +167,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
-    case 'erc-20':
+    case TokenERC.ERC20:
       return (
         <Typography variant="small">
           {(
@@ -177,9 +177,9 @@ function renderActivityNameOrSymbol(activity: Activity) {
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
-    case 'erc-721':
+    case TokenERC.ERC721:
       return <Typography variant="small">1 Collectible</Typography>;
-    case 'erc-1155':
+    case TokenERC.ERC1155:
       return <Typography variant="small">1 Collectible</Typography>;
     default:
       return null;

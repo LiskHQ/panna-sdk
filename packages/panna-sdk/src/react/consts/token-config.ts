@@ -45,7 +45,7 @@ export const liskTokenConfig: SupportedTokens = {
       address: '0x2eE6Eca46d2406454708a1C80356a6E63b57D404',
       name: 'Lisk Voting Power',
       symbol: 'vpLSK',
-      icon: usdcIcon
+      icon: lskIcon
     }
   ]
 };
