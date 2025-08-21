@@ -1,4 +1,4 @@
-import * as axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 import { newLruMemCache } from './cache';
 import { delay } from './delay';
 
@@ -6,10 +6,10 @@ import { delay } from './delay';
 const requestCache = newLruMemCache('http_request');
 
 // Constants
-const DEFAULT_RETRIES = 0;
-const DEFAULT_RETRY_DELAY_MS = 100;
+export const DEFAULT_RETRIES = 2;
+export const DEFAULT_RETRY_DELAY_MS = 100;
 
-const AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP: Record<string, PannaHttpErr> = {
+export const AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP: Record<string, PannaHttpErr> = {
   UNDEFINED: {
     code: 'ERR_UNKNOWN',
     message: 'Unknown error occured. Retry after some time.'
@@ -66,44 +66,51 @@ const AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP: Record<string, PannaHttpErr> = {
 };
 
 // Internal types
-type RequestParamsConfig = Omit<axios.AxiosRequestConfig, 'url'>;
+type RequestParamsConfig = Omit<AxiosRequestConfig, 'url'>;
 
 // Internal functions
-const isCacheableResponse = (response: axios.AxiosResponse): boolean =>
+export const isCacheableResponse = (response: AxiosResponse): boolean =>
   response.status === HttpStatusCode.Ok;
 
-const requestWithRetries = async (
+export const requestWithRetries = async (
   url: string,
-  requestParams: RequestParamsConfig,
+  requestParams: RequestParamsConfig = {},
   numRetries: number = DEFAULT_RETRIES,
   retryDelayMs: number = DEFAULT_RETRY_DELAY_MS
-): Promise<axios.AxiosResponse> => {
-  let response: axios.AxiosResponse;
-  const ax = new axios.Axios();
+): Promise<AxiosResponse | never> => {
+  const maxRetries = numRetries;
+  const requestConfig = { url, ...requestParams };
 
-  do {
-    response = await ax.request({ url, ...requestParams });
-    if (response.status < HttpStatusCode.InternalServerError) {
-      return response;
-    }
+  // Without the following initial request before the for loop, TS complains:
+  // "Variable 'response' is used before being assigned"
+  let response: AxiosResponse = await axios.request(requestConfig);
 
+  for (
+    ;
+    response.status >= HttpStatusCode.InternalServerError && numRetries;
+    --numRetries
+  ) {
     const backedoffDelayMs =
-      retryDelayMs * Math.pow(2, DEFAULT_RETRIES - numRetries);
+      retryDelayMs * Math.pow(2, maxRetries - numRetries);
     await delay(backedoffDelayMs);
-  } while (--numRetries);
+
+    response = await axios.request(requestConfig);
+  }
 
   return response;
 };
 
-const formatResponseToJSON = (respData: unknown) =>
+export const formatResponseToJSON = (respData: unknown) =>
   typeof respData === 'string' ? JSON.parse(respData) : respData;
 
-const formatAxiosErr = (axiosErrCode: string | undefined): PannaHttpErr => {
+export const formatAxiosErr = (
+  axiosErrCode: string | undefined
+): PannaHttpErr => {
   if (axiosErrCode === undefined) {
     return AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP['UNDEFINED'];
   }
 
-  return AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP[axiosErrCode];
+  return AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP[axiosErrCode.toUpperCase()];
 };
 
 // Exported entities
@@ -124,17 +131,17 @@ export const request = async (
   // If cache exists, return the response from cache
   const cacheKey = JSON.stringify({ url, finalParams }, null, 0);
   if (requestCache.has(cacheKey)) {
-    const response = requestCache.get(cacheKey) as axios.AxiosResponse;
+    const response = requestCache.get(cacheKey) as AxiosResponse;
     return formatResponseToJSON(response.data);
   }
 
   try {
-    const response = await requestWithRetries(
+    const response = (await requestWithRetries(
       url,
       finalParams,
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
-    );
+    )) as AxiosResponse;
 
     if (isCacheableResponse(response)) {
       requestCache.set(cacheKey, response);
@@ -142,13 +149,13 @@ export const request = async (
 
     return formatResponseToJSON(response.data);
   } catch (error) {
-    const axiosErr = error as axios.AxiosError;
+    const axiosErr = error as AxiosError;
     const pannaFormatErr = formatAxiosErr(axiosErr.code);
     return {
       code: pannaFormatErr.code,
       message: pannaFormatErr.message.length
         ? pannaFormatErr.message
         : axiosErr.message
-    };
+    } as PannaHttpErr;
   }
 };
