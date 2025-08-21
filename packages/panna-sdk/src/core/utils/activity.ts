@@ -1,4 +1,4 @@
-import { ethIcon } from '@/consts';
+import { ethIcon } from '../../react/consts';
 import { lisk } from '../chains';
 import { NATIVE_TOKEN_ADDRESS } from '../defaults';
 import { newLruMemCache } from '../helpers/cache';

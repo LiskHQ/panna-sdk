@@ -1,5 +1,5 @@
 import { GetActivitiesByAddressResult } from 'src/core';
-import { ethIcon } from '@/consts';
+import { ethIcon } from '../../react/consts';
 
 export const mockActivities: GetActivitiesByAddressResult = {
   activities: [
