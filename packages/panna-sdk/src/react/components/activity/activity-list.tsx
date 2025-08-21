@@ -1,4 +1,9 @@
-import { PaginationState } from '@tanstack/react-table';
+import {
+  getCoreRowModel,
+  getPaginationRowModel,
+  PaginationState,
+  useReactTable
+} from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Activity, TokenERC } from 'src/core';
@@ -7,6 +12,7 @@ import { useActivities } from '@/hooks/use-activities';
 import { tokenIconMap } from '@/mocks/token-balances';
 import { cn } from '@/utils';
 import { Skeleton } from '../ui/skeleton';
+import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
 
 const DEFAULT_LIMIT = 10;
@@ -22,7 +28,7 @@ export function ActivityList({ className }: ActivityListProps) {
     pageIndex: DEFAULT_OFFSET,
     pageSize: DEFAULT_LIMIT
   });
-  const { data, isLoading, isError } = useActivities(
+  const { data, isLoading, isFetching, isError } = useActivities(
     {
       address: account?.address as string,
       limit: pagination.pageSize,
@@ -32,6 +38,23 @@ export function ActivityList({ className }: ActivityListProps) {
       enabled: !!account?.address
     }
   );
+
+  const activitiesData = data?.activities || [];
+  const totalCount = data?.metadata.count || 0;
+
+  const table = useReactTable({
+    columns: [],
+    data: activitiesData,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    rowCount: totalCount,
+    onPaginationChange: setPagination,
+    state: {
+      pagination
+    },
+    meta: data?.metadata
+  });
 
   if (isLoading) {
     return (
@@ -83,9 +106,10 @@ export function ActivityList({ className }: ActivityListProps) {
 
   return (
     <section className="flex flex-col gap-6">
-      {data.activities.map((activity: Activity) => (
+      {activitiesData.map((activity) => (
         <ActivityItem key={activity.transactionID} activity={activity} />
       ))}
+      <TablePagination table={table} isFetching={isFetching} />
     </section>
   );
 }
@@ -143,10 +167,10 @@ function renderActivityTokenIcon(activity: Activity) {
           className="h-12 w-12 rounded-full"
         />
       );
+    case TokenERC.ERC721:
       {
         /* TODO: Implement NFT icons on API update */
       }
-    case TokenERC.ERC721:
       return <Skeleton className="h-12 w-12 rounded-full" />;
     case TokenERC.ERC1155:
       return <Skeleton className="h-12 w-12 rounded-full" />;
