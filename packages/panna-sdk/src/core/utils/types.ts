@@ -1,4 +1,4 @@
-import { type Chain } from 'thirdweb';
+import { Chain } from '../chains';
 import { type PannaClient } from '../client';
 
 // Parameters for getting account balance
@@ -97,7 +97,7 @@ export interface GetFiatPriceResult {
 interface BaseAccountBalanceInFiatParams {
   address: string;
   client: PannaClient;
-  chain?: Chain;
+  chain: Chain;
   currency?: FiatCurrency;
 }
 
@@ -117,6 +117,16 @@ interface Token {
 export interface AccountFiatBalance {
   amount: number;
   currency: FiatCurrency;
+}
+
+export interface TokenFiatPrice {
+  chainId: number;
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  iconUri?: string;
+  prices: Record<string, number>;
 }
 
 // Result of account fiat balance query

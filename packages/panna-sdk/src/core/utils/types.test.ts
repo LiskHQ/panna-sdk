@@ -1,4 +1,5 @@
 import { type Chain } from 'thirdweb';
+import { liskSepolia } from '../chains';
 import { type PannaClient } from '../client';
 import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import {
@@ -239,12 +240,13 @@ describe('Utils Types', () => {
 
       const params: AccountBalanceInFiatParams = {
         address: '0x1234567890123456789012345678901234567890',
+        chain: liskSepolia,
         client: mockClient
       };
 
       expect(params.address).toBe('0x1234567890123456789012345678901234567890');
       expect(params.client).toBe(mockClient);
-      expect(params.chain).toBeUndefined();
+      expect(params.chain).toBe(liskSepolia);
       expect(params.tokenAddress).toBeUndefined();
       expect(params.currency).toBeUndefined();
     });
@@ -346,13 +348,14 @@ describe('Utils Types', () => {
 
       const params: AccountBalancesInFiatParams = {
         address: '0x1234567890123456789012345678901234567890',
+        chain: liskSepolia,
         client: mockClient,
         tokens: []
       };
 
       expect(params.address).toBe('0x1234567890123456789012345678901234567890');
       expect(params.client).toBe(mockClient);
-      expect(params.chain).toBeUndefined();
+      expect(params.chain).toBe(liskSepolia);
       expect(params.tokens).toEqual([]);
       expect(params.currency).toBeUndefined();
     });
@@ -362,6 +365,7 @@ describe('Utils Types', () => {
 
       const params: AccountBalancesInFiatParams = {
         address: '0x1234567890123456789012345678901234567890',
+        chain: liskSepolia,
         client: mockClient,
         tokens: []
       };
@@ -374,6 +378,7 @@ describe('Utils Types', () => {
 
       const params: AccountBalancesInFiatParams = {
         address: '0x1234567890123456789012345678901234567890',
+        chain: liskSepolia,
         client: mockClient,
         tokens: [
           NATIVE_TOKEN_ADDRESS, // Native token
