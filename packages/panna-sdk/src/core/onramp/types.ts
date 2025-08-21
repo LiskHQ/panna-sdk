@@ -92,3 +92,19 @@ export interface ProviderInfo {
   logoUrl?: string;
   websiteUrl: string;
 }
+
+export interface GetTokenFiatPricesParams {
+  chainId: number;
+  tokenAddress?: string;
+  client: PannaClient;
+}
+
+export interface TokenFiatPrice {
+  chainId: number;
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  iconUri?: string;
+  prices: Record<string, number>;
+}
