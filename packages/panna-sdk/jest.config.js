@@ -32,7 +32,10 @@ module.exports = {
       displayName: 'core',
       testEnvironment: 'node',
       roots: ['<rootDir>/src'],
-      testMatch: ['**/src/core/**/*.test.ts'],
+      testMatch: [
+        '**/src/core/**/*.test.ts',
+        '!**/src/core/**/*.fixture.test.ts'
+      ],
       collectCoverageFrom: ['src/core/**/*.{ts}', '!src/core/**/*.d.ts'],
       moduleFileExtensions: ['ts', 'js', 'json'],
       transform: {

@@ -23,11 +23,11 @@ import {
 } from './utils';
 import * as utils from './utils';
 import {
-  fixtures_convertBalanceToFiat,
-  fiatBalanceSample,
-  fixtures_getPriceInCurrency,
-  fixtures_getTotalValue
-} from './utils.fixtures.test';
+  fixture_convertBalanceToFiat,
+  fixture_fiatBalanceSample,
+  fixture_getPriceInCurrency,
+  fixture_getTotalValue
+} from './utils.fixture.test';
 
 // Mock thirdweb modules
 jest.mock('thirdweb');
@@ -39,7 +39,9 @@ describe('Utils - Unit Tests', () => {
   const mockClient = {} as PannaClient;
   const mockChain = { id: 1 } as Chain;
 
-  jest.spyOn(thirdweb.Bridge, 'tokens').mockResolvedValue(fiatBalanceSample);
+  jest
+    .spyOn(thirdweb.Bridge, 'tokens')
+    .mockResolvedValue(fixture_fiatBalanceSample);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -702,9 +704,9 @@ describe('Utils - Unit Tests', () => {
         displayValue: '1.0'
       };
 
-      const expectedResult = fixtures_convertBalanceToFiat(
+      const expectedResult = fixture_convertBalanceToFiat(
         [mockAccountBalanceResult],
-        fiatBalanceSample
+        fixture_fiatBalanceSample
       );
 
       jest
@@ -755,11 +757,11 @@ describe('Utils - Unit Tests', () => {
         }
       ];
 
-      const mockResults = fixtures_convertBalanceToFiat(
+      const mockResults = fixture_convertBalanceToFiat(
         mockAccountBalanceResult,
-        fiatBalanceSample
+        fixture_fiatBalanceSample
       );
-      const totalValue = fixtures_getTotalValue(mockResults);
+      const totalValue = fixture_getTotalValue(mockResults);
 
       // Mock accountBalanceInFiat to return different results for each call
       let callCount = 0;
@@ -790,24 +792,24 @@ describe('Utils - Unit Tests', () => {
 
       expect(result.tokenBalances).toHaveLength(3);
       expect(result.tokenBalances[0].fiatBalance.amount).toBe(
-        fixtures_getPriceInCurrency(
+        fixture_getPriceInCurrency(
           mockAccountBalanceResult[0].symbol,
           mockAccountBalanceResult[0].value,
-          fiatBalanceSample
+          fixture_fiatBalanceSample
         )
       );
       expect(result.tokenBalances[1].fiatBalance.amount).toBe(
-        fixtures_getPriceInCurrency(
+        fixture_getPriceInCurrency(
           mockAccountBalanceResult[1].symbol,
           mockAccountBalanceResult[1].value,
-          fiatBalanceSample
+          fixture_fiatBalanceSample
         )
       );
       expect(result.tokenBalances[2].fiatBalance.amount).toBe(
-        fixtures_getPriceInCurrency(
+        fixture_getPriceInCurrency(
           mockAccountBalanceResult[2].symbol,
           mockAccountBalanceResult[2].value,
-          fiatBalanceSample
+          fixture_fiatBalanceSample
         )
       );
     });
@@ -989,9 +991,9 @@ describe('Utils - Unit Tests', () => {
         }
       ];
 
-      const mockResults = fixtures_convertBalanceToFiat(
+      const mockResults = fixture_convertBalanceToFiat(
         mockAccountBalanceResult,
-        fiatBalanceSample
+        fixture_fiatBalanceSample
       );
 
       jest.spyOn(utils, 'accountBalance').mockImplementation(() => {
@@ -1010,9 +1012,7 @@ describe('Utils - Unit Tests', () => {
 
       const result = await accountBalancesInFiat(params);
 
-      expect(result.totalValue.amount).toBe(
-        fixtures_getTotalValue(mockResults)
-      );
+      expect(result.totalValue.amount).toBe(fixture_getTotalValue(mockResults));
     });
 
     it('should handle mixed success and failure scenarios', async () => {
@@ -1032,9 +1032,9 @@ describe('Utils - Unit Tests', () => {
           displayValue: '500.0'
         }
       ];
-      const expectedResult = fixtures_convertBalanceToFiat(
+      const expectedResult = fixture_convertBalanceToFiat(
         accountBalanceResult,
-        fiatBalanceSample
+        fixture_fiatBalanceSample
       );
 
       // Mock accountBalance to return different results for each call
@@ -1084,7 +1084,7 @@ describe('Utils - Unit Tests', () => {
 
       // Total should only include successful balances
       expect(result.totalValue.amount).toBe(
-        fixtures_getTotalValue(expectedResult)
+        fixture_getTotalValue(expectedResult)
       );
     });
 
@@ -1140,9 +1140,9 @@ describe('Utils - Unit Tests', () => {
         return Promise.reject(new Error('API timeout'));
       });
 
-      const expectedResult = fixtures_convertBalanceToFiat(
+      const expectedResult = fixture_convertBalanceToFiat(
         [accountBalanceResult],
-        fiatBalanceSample
+        fixture_fiatBalanceSample
       );
 
       const params: AccountBalancesInFiatParams = {
@@ -1191,9 +1191,9 @@ describe('Utils - Unit Tests', () => {
         .spyOn(utils, 'accountBalance')
         .mockResolvedValue(accountBalanceResult);
 
-      const expectedResult = fixtures_convertBalanceToFiat(
+      const expectedResult = fixture_convertBalanceToFiat(
         [accountBalanceResult],
-        fiatBalanceSample
+        fixture_fiatBalanceSample
       );
 
       const params: AccountBalancesInFiatParams = {

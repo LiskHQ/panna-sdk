@@ -18,7 +18,7 @@ export const liskTokenConfig: SupportedTokens = {
       icon: lskIcon
     },
     {
-      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      address: 'NATIVE_TOKEN_ADDRESS',
       name: 'Ethereum',
       symbol: 'ETH',
       icon: ethIcon
@@ -47,7 +47,7 @@ export const liskSepoliaTokenConfig: SupportedTokens = {
       icon: lskIcon
     },
     {
-      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      address: 'NATIVE_TOKEN_ADDRESS',
       name: 'Ethereum',
       symbol: 'ETH',
       icon: ethIcon

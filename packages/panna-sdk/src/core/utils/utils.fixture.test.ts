@@ -5,14 +5,7 @@ import {
   TokenFiatPrice
 } from './types';
 
-// Empty test to pass the test suite
-describe('Utils', () => {
-  it('should have a placeholder test', () => {
-    expect(true).toBe(true);
-  });
-});
-
-export const fiatBalanceSample: TokenFiatPrice[] = [
+export const fixture_fiatBalanceSample: TokenFiatPrice[] = [
   {
     chainId: 1135,
     address: '0xF242275d3a6527d877f2c927a82D9b057609cc71',
@@ -216,7 +209,7 @@ export const fiatBalanceSample: TokenFiatPrice[] = [
   }
 ];
 
-export const fixtures_convertBalanceToFiat = (
+export const fixture_convertBalanceToFiat = (
   balances: AccountBalanceResult[],
   allTokensPrices: TokenFiatPrice[]
 ) => {
@@ -251,11 +244,10 @@ export const fixtures_convertBalanceToFiat = (
 
   return fiatBalances;
 };
-export const fixtures_getTotalValue = (
-  balances: AccountBalanceInFiatResult[]
-) => balances.reduce((total, balance) => total + balance.fiatBalance.amount, 0);
+export const fixture_getTotalValue = (balances: AccountBalanceInFiatResult[]) =>
+  balances.reduce((total, balance) => total + balance.fiatBalance.amount, 0);
 
-export const fixtures_getPriceInCurrency = (
+export const fixture_getPriceInCurrency = (
   symbol: string,
   amount: bigint,
   allTokensPrices: TokenFiatPrice[]
