@@ -2,8 +2,13 @@ import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
-import { useBuyWithFiatQuotes, useSupportedTokens } from '../../hooks';
+import {
+  useBuyWithFiatQuotes,
+  useFiatToCrypto,
+  useSupportedTokens
+} from '../../hooks';
 import type { BuyWithFiatQuote } from '../../types/buy-with-fiat-quote.types';
+import { getEnvironmentChain } from '../../utils';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
@@ -24,6 +29,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
 
   const receiver = activeAccount?.address;
   const { data: supportedTokens = [] } = useSupportedTokens();
+  const chain = getEnvironmentChain();
 
   const tokenAddress = useMemo(() => {
     if (!token?.symbol) return undefined;
@@ -33,14 +39,29 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     return supportedToken?.address;
   }, [token?.symbol, supportedTokens]);
 
+  // Convert fiat amount to crypto amount for API calls
+  const { data: cryptoConversion } = useFiatToCrypto(
+    {
+      chain,
+      tokenAddress,
+      fiatAmount: amount || 0,
+      currency: 'USD'
+    },
+    { enabled: !!amount && amount > 0 }
+  );
+
   const { data: quotes = [], isLoading } = useBuyWithFiatQuotes(
     {
       countryCode: country?.code || '',
       tokenAddress,
-      amount: amount?.toString(),
+      amount: cryptoConversion?.amount?.toString(),
       receiver
     },
-    { enabled: Boolean(country?.code && tokenAddress && amount && receiver) }
+    {
+      enabled: Boolean(
+        country?.code && tokenAddress && cryptoConversion?.amount && receiver
+      )
+    }
   );
 
   const quotesWithBestPrice: (BuyWithFiatQuote & { best?: boolean })[] =

@@ -38,3 +38,5 @@ export {
   createDefaultRetryFn
 } from './constants';
 export { useTotalFiatBalance } from './use-total-fiat-balance';
+export { useCryptoToFiat } from './use-crypto-to-fiat';
+export { useFiatToCrypto } from './use-fiat-to-crypto';

@@ -62,12 +62,19 @@ export function useBuyWithFiatQuotes(
         const enrichedQuotes = await Promise.allSettled(
           providers.map(async (provider): Promise<BuyWithFiatQuote> => {
             try {
+              // Convert decimal amount to smallest units (wei-like) for onRampPrepare
+              // The amount comes as display units (e.g., 0.033 ETH) but onRampPrepare expects smallest units
+              const decimals = 18; // Most ERC-20 tokens use 18 decimals
+              const amountInSmallestUnits = Math.floor(
+                parseFloat(amount!) * Math.pow(10, decimals)
+              );
+
               const prepareResult = await onRampPrepare({
                 client: client!,
                 onRampProvider: provider.id,
                 tokenAddress: tokenAddress!,
                 receiver: receiver!,
-                amount: amount!,
+                amount: amountInSmallestUnits.toString(), // Convert to string for BigInt conversion
                 country: countryCode
               });
 
