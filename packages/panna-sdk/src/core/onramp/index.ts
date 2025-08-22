@@ -1,5 +1,10 @@
 // Export functions
-export { onRampStatus } from './onramp';
+export {
+  onRampStatus,
+  getOnrampProviders,
+  getTokenFiatPrices,
+  onRampPrepare
+} from './onramp';
 
 // Export types
 export type {
@@ -11,8 +16,11 @@ export type {
   OnrampCreatedResult,
   OnrampPendingResult,
   OnrampCompletedResult,
-  OnRampProvider,
   OnrampPrepareResult,
-  OnRampIntent,
-  OnrampPrepareParams
+  OnrampIntent,
+  OnrampPrepareParams,
+  OnrampProvider,
+  GetTokenFiatPricesParams,
+  ProviderInfo,
+  TokenFiatPrice
 } from './types';

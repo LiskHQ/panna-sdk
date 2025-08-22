@@ -48,13 +48,10 @@ export type OnrampStatusResult =
   | OnrampPendingResult
   | OnrampCompletedResult;
 
-// Onramp providers list
-export type OnRampProvider = 'stripe' | 'coinbase' | 'transak';
-
 // Parameters for preparing an onramp
 export interface OnrampPrepareParams {
   client: PannaClient;
-  onRampProvider: OnRampProvider;
+  onRampProvider: OnrampProvider;
   chainId?: number;
   tokenAddress: string;
   receiver: string;
@@ -64,8 +61,8 @@ export interface OnrampPrepareParams {
 }
 
 // OnRamp intent to hold provider info
-export interface OnRampIntent {
-  onRampProvider: OnRampProvider;
+export interface OnrampIntent {
+  onRampProvider: OnrampProvider;
   chainId: number;
   tokenAddress: string;
   receiver: string;
@@ -81,7 +78,7 @@ export interface OnrampPrepareResult {
   destinationAmount: string;
   timestamp?: number;
   expiration?: number;
-  intent?: OnRampIntent;
+  intent?: OnrampIntent;
 }
 
 export type OnrampProvider = 'coinbase' | 'stripe' | 'transak'; // Add more in future
@@ -91,4 +88,20 @@ export interface ProviderInfo {
   displayName: string;
   logoUrl?: string;
   websiteUrl: string;
+}
+
+export interface GetTokenFiatPricesParams {
+  chainId: number;
+  tokenAddress?: string;
+  client: PannaClient;
+}
+
+export interface TokenFiatPrice {
+  chainId: number;
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  iconUri?: string;
+  prices: Record<string, number>;
 }
