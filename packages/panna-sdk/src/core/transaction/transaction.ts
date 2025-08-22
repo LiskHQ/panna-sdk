@@ -6,6 +6,7 @@ import {
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
 import type { Abi } from '../types/external';
+import { removeUndefined } from '../utils/object';
 import type {
   PrepareTransactionParams,
   PrepareTransactionResult,
@@ -270,15 +271,4 @@ export function getContract(params: GetContractParams): GetContractResult {
   };
 
   return thirdwebGetContract(contractParams) as GetContractResult;
-}
-
-/**
- * Removes keys with `undefined` values from an object
- */
-function removeUndefined<T extends Record<string, unknown>>(
-  obj: T
-): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, value]) => value !== undefined)
-  ) as Partial<T>;
 }
