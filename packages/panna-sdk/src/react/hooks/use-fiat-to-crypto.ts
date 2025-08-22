@@ -1,5 +1,7 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { lisk } from 'src/core';
 import type { Chain } from 'thirdweb';
+import { getTokenFiatPrices } from '../../core/onramp';
 import type { FiatCurrency } from '../../core/utils/types';
 import {
   DEFAULT_STALE_TIME,
@@ -36,33 +38,54 @@ export function useFiatToCrypto(
   return useQuery({
     queryKey: ['fiat-to-crypto', chain?.id, tokenAddress, fiatAmount, currency],
     queryFn: async (): Promise<FiatToCryptoResult> => {
-      if (!hasValidAmount) {
+      if (!hasValidAmount || !client || !chain || !tokenAddress) {
         throw new Error('Invalid query state');
       }
 
-      // Mock implementation - replace with actual conversion when ready
-      // Simulate different exchange rates for different tokens
-      let mockRate = 0.00033; // Default rate (e.g., for ETH)
+      try {
+        // Get token prices from the API
+        const tokenPrices = await getTokenFiatPrices({
+          chainId: lisk.id,
+          tokenAddress,
+          client
+        });
 
-      if (tokenAddress) {
-        // Mock different rates for different tokens
-        const addressHash = tokenAddress.slice(-4);
-        const hashNum = parseInt(addressHash, 16);
-        mockRate = (hashNum % 1000) / 1000000; // Random rate between 0.000001 and 0.001
+        console.log({
+          tokenPrices,
+          tokenAddress,
+          chainId: chain.id,
+          currency
+        });
+
+        // Find the token price data
+        const tokenPrice = tokenPrices.find(
+          (token) => token.address.toLowerCase() === tokenAddress.toLowerCase()
+        );
+
+        if (!tokenPrice || !tokenPrice.prices[currency]) {
+          throw new Error(`Price not available for ${currency}`);
+        }
+
+        // Get the price per token in the specified currency
+        const pricePerToken = tokenPrice.prices[currency];
+
+        // Calculate how much crypto we can buy with the fiat amount
+        const cryptoAmount = fiatAmount / pricePerToken;
+
+        return {
+          amount: cryptoAmount,
+          currency
+        };
+      } catch (error) {
+        console.error('Error fetching token prices:', error);
+        throw error;
       }
-
-      const cryptoAmount = fiatAmount * mockRate;
-
-      return {
-        amount: cryptoAmount, // Return as display units (e.g., 0.033 ETH)
-        currency
-      };
     },
     staleTime: DEFAULT_STALE_TIME,
     refetchInterval: DEFAULT_REFETCH_INTERVAL,
     retry: createDefaultRetryFn(!!client, hasValidAmount),
     retryDelay: DEFAULT_RETRY_DELAY,
-    enabled: hasValidAmount,
+    enabled: hasValidAmount && !!client && !!chain && !!tokenAddress,
     ...options
   });
 }
