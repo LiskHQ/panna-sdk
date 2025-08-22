@@ -173,11 +173,6 @@ export function prepareContractCall(
     accessList
   } = params;
 
-  const contractWithTypedAddress = {
-    ...contract,
-    address: contract.address
-  };
-
   const optionalFields = {
     value,
     gas,
@@ -210,7 +205,7 @@ export function prepareContractCall(
       storageKeys: readonly `0x${string}`[];
     }>;
   } = {
-    contract: contractWithTypedAddress,
+    contract,
     method,
     params: methodParams ?? [],
     ...removeUndefined(optionalFields)
