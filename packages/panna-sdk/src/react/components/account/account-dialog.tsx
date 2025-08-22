@@ -47,7 +47,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
     switch (view) {
       case 'main':
         return (
-          <DialogHeader className="items-center gap-0">
+          <DialogHeader className="mb-2 items-center gap-4">
             <div className="flex w-full items-center justify-between gap-2">
               <button type="button" onClick={() => setActiveView('settings')}>
                 <SettingsIcon
