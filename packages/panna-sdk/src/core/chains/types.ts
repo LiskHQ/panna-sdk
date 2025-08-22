@@ -1,3 +1,75 @@
-// Re-export types from the thirdweb/chains package
+// Chain related types copied from thirdweb
+type Icon = {
+  url: string;
+  width: number;
+  height: number;
+  format: string;
+};
 
-export type { Chain, ChainMetadata, ChainOptions } from 'thirdweb/chains';
+type ChainExplorer = {
+  name: string;
+  url: string;
+  icon?: Icon;
+  standard: string;
+};
+
+export type Chain = Readonly<ChainOptions & { rpc: string }>;
+
+export type ChainOptions = {
+  id: number;
+  name?: string;
+  rpc?: string;
+  icon?: Icon;
+  nativeCurrency?: {
+    name?: string;
+    symbol?: string;
+    decimals?: number;
+  };
+  blockExplorers?: Array<{
+    name: string;
+    url: string;
+    apiUrl?: string;
+  }>;
+  testnet?: true;
+  experimental?: {
+    increaseZeroByteCount?: boolean;
+  };
+  faucets?: Array<string>;
+  feeType?: FeeType;
+};
+
+export type ChainMetadata = {
+  name: string;
+  title?: string;
+  chain: string;
+  icon?: Icon;
+  rpc: readonly string[];
+  features?: Readonly<Array<{ name: string }>>;
+  faucets?: readonly string[];
+  nativeCurrency: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+  infoURL?: string;
+  shortName: string;
+  chainId: number;
+  networkId?: number;
+  ens?: {
+    registry: string;
+  };
+  explorers?: Readonly<Array<ChainExplorer>>;
+  testnet: boolean;
+  slug: string;
+  slip44?: number;
+  status?: string;
+  redFlags?: readonly string[];
+  parent?: {
+    chain: string;
+    type: string;
+    bridges?: Readonly<Array<{ url: string }>>;
+  };
+  stackType: string;
+};
+
+export type FeeType = 'legacy' | 'eip1559';

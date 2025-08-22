@@ -18,7 +18,7 @@ export const liskTokenConfig: SupportedTokens = {
       icon: lskIcon
     },
     {
-      address: '0x519cA97c86Df5286e94327Bd7f639cD8619BB309',
+      address: 'NATIVE_TOKEN_ADDRESS',
       name: 'Ethereum',
       symbol: 'ETH',
       icon: ethIcon
@@ -47,7 +47,7 @@ export const liskSepoliaTokenConfig: SupportedTokens = {
       icon: lskIcon
     },
     {
-      address: '0x519cA97c86Df5286e94327Bd7f639cD8619BB309',
+      address: 'NATIVE_TOKEN_ADDRESS',
       name: 'Ethereum',
       symbol: 'ETH',
       icon: ethIcon
@@ -59,7 +59,7 @@ export const liskSepoliaTokenConfig: SupportedTokens = {
       icon: usdtIcon
     },
     {
-      address: '0xed875CABEE46D734F38B5ED453ED1569347c0da8',
+      address: '0x72db95F0716cF79C0efe160F23fB17bF1c161317',
       name: 'USDC',
       symbol: 'USDC',
       icon: usdcIcon

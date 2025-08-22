@@ -1,7 +1,9 @@
+import { Bridge } from 'thirdweb';
 import { convertCryptoToFiat } from 'thirdweb/pay';
 import { toWei as thirdwebToWei } from 'thirdweb/utils';
 import { getWalletBalance } from 'thirdweb/wallets';
 import { getSocialIcon as thirdwebGetSocialIcon } from 'thirdweb/wallets/in-app';
+import { lisk, liskSepolia } from '../chains';
 import {
   DEFAULT_CHAIN,
   DEFAULT_CURRENCY,
@@ -281,6 +283,7 @@ export const accountBalancesInFiat = async function (
   }
 
   const currency = params.currency || DEFAULT_CURRENCY;
+  const chain = params.chain || DEFAULT_CHAIN;
 
   // Create array of promises for parallel execution with wrapped context
   const balancePromises = params.tokens.map((tokenAddress) => {
@@ -302,12 +305,11 @@ export const accountBalancesInFiat = async function (
       tokenAddress === NATIVE_TOKEN_ADDRESS ? undefined : tokenAddress;
 
     // Return promise that captures the token address for error context
-    return accountBalanceInFiat({
+    return accountBalance({
       address: params.address,
       client: params.client,
-      chain: params.chain,
-      tokenAddress: apiTokenAddress,
-      currency: currency
+      chain: chain,
+      tokenAddress: apiTokenAddress
     }).then(
       (result) => ({
         status: 'fulfilled' as const,
@@ -328,7 +330,7 @@ export const accountBalancesInFiat = async function (
   const results = await Promise.allSettled(balancePromises);
 
   // Separate successful and failed results
-  const successfulBalances: AccountBalanceInFiatResult[] = [];
+  const successfulBalances: AccountBalanceResult[] = [];
   const errors: TokenBalanceError[] = [];
 
   results.forEach((result) => {
@@ -336,7 +338,7 @@ export const accountBalancesInFiat = async function (
       result as PromiseFulfilledResult<
         | {
             status: 'fulfilled';
-            value: AccountBalanceInFiatResult;
+            value: AccountBalanceResult;
             tokenAddress: string;
           }
         | { status: 'rejected'; tokenAddress: string; error: string }
@@ -353,8 +355,56 @@ export const accountBalancesInFiat = async function (
     }
   });
 
+  // Get all token prices for lisk chain
+  const allTokensPrices = await Bridge.tokens({
+    chainId: chain.id === liskSepolia.id ? lisk.id : chain.id,
+    client: params.client
+  });
+
+  // Calculate fiat values for successful balances
+  if (successfulBalances.length === 0) {
+    let result: AccountBalancesInFiatResult = {
+      totalValue: { amount: 0, currency: currency },
+      tokenBalances: []
+    };
+    // Only add errors property if there are errors
+    if (errors.length > 0) {
+      result.errors = errors;
+    }
+    return result;
+  }
+  let balances: AccountBalanceInFiatResult[] = [];
+
+  successfulBalances.forEach((balance) => {
+    const tokenPrice = allTokensPrices.find(
+      (token) => token.symbol === balance.symbol
+    );
+    let balanceWithFiat = {
+      token: {
+        symbol: balance.symbol,
+        name: balance.name,
+        decimals: balance.decimals
+      },
+      tokenBalance: {
+        value: balance.value,
+        displayValue: balance.displayValue
+      },
+      fiatBalance: {
+        amount: 0, // Will be calculated below
+        currency
+      }
+    };
+    if (tokenPrice) {
+      balanceWithFiat.fiatBalance.amount =
+        (Number(balanceWithFiat.tokenBalance.value) *
+          tokenPrice.prices[currency]) /
+        10 ** balanceWithFiat.token.decimals;
+      balances.push(balanceWithFiat);
+    }
+  });
+
   // Calculate total value from successful balances only
-  const totalValue = successfulBalances.reduce(
+  const totalValue = balances.reduce(
     (sum, balance) => sum + balance.fiatBalance.amount,
     0
   );
@@ -364,7 +414,7 @@ export const accountBalancesInFiat = async function (
       amount: totalValue,
       currency: currency
     },
-    tokenBalances: successfulBalances
+    tokenBalances: balances
   };
 
   // Only add errors property if there are errors

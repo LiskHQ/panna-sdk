@@ -3,6 +3,7 @@ import * as thirdweb from 'thirdweb';
 import * as thirdwebPay from 'thirdweb/pay';
 import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
+import { liskSepolia } from '../chains';
 import { lisk } from '../chains/chain-definitions/lisk';
 import { type PannaClient } from '../client';
 import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
@@ -22,6 +23,12 @@ import {
   toWei
 } from './utils';
 import * as utils from './utils';
+import {
+  fixture_convertBalanceToFiat,
+  fixture_fiatBalanceSample,
+  fixture_getPriceInCurrency,
+  fixture_getTotalValue
+} from './utils.fixture.test';
 
 // Mock thirdweb modules
 jest.mock('thirdweb');
@@ -32,6 +39,10 @@ jest.mock('thirdweb/wallets/in-app');
 describe('Utils - Unit Tests', () => {
   const mockClient = {} as PannaClient;
   const mockChain = { id: 1 } as Chain;
+
+  jest
+    .spyOn(thirdweb.Bridge, 'tokens')
+    .mockResolvedValue(fixture_fiatBalanceSample);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -686,26 +697,22 @@ describe('Utils - Unit Tests', () => {
     });
 
     it('should calculate balances for single native token', async () => {
-      const mockAccountBalanceInFiatResult = {
-        token: {
-          address: undefined,
-          symbol: 'ETH',
-          name: 'Ethereum',
-          decimals: 18
-        },
-        tokenBalance: {
-          value: BigInt('2000000000000000000'),
-          displayValue: '2.0'
-        },
-        fiatBalance: {
-          amount: 6000.0,
-          currency: DEFAULT_CURRENCY
-        }
+      const mockAccountBalanceResult: AccountBalanceResult = {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        value: BigInt('1000000000000000000'), // 1 ETH
+        displayValue: '1.0'
       };
 
+      const expectedResult = fixture_convertBalanceToFiat(
+        [mockAccountBalanceResult],
+        fixture_fiatBalanceSample
+      );
+
       jest
-        .spyOn(utils, 'accountBalanceInFiat')
-        .mockResolvedValue(mockAccountBalanceInFiatResult);
+        .spyOn(utils, 'accountBalance')
+        .mockResolvedValue(mockAccountBalanceResult);
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -719,68 +726,48 @@ describe('Utils - Unit Tests', () => {
 
       expect(result).toEqual({
         totalValue: {
-          amount: 6000.0,
+          amount: expectedResult[0].fiatBalance.amount,
           currency: DEFAULT_CURRENCY
         },
-        tokenBalances: [mockAccountBalanceInFiatResult]
+        tokenBalances: [expectedResult[0]]
       });
     });
 
     it('should calculate balances for multiple tokens', async () => {
-      const mockResults = [
+      const mockAccountBalanceResult: AccountBalanceResult[] = [
         {
-          token: {
-            address: undefined,
-            symbol: 'ETH',
-            name: 'Ethereum',
-            decimals: 18
-          },
-          tokenBalance: {
-            value: BigInt('1000000000000000000'),
-            displayValue: '1.0'
-          },
-          fiatBalance: {
-            amount: 3000.0,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'ETH',
+          name: 'Ethereum',
+          decimals: 18,
+          value: BigInt('1000000000000000000'), // 1 ETH
+          displayValue: '1.0'
         },
         {
-          token: {
-            address: '0x0987654321098765432109876543210987654321',
-            symbol: 'USDC',
-            name: 'USD Coin',
-            decimals: 6
-          },
-          tokenBalance: {
-            value: BigInt('1000000000'),
-            displayValue: '1000.0'
-          },
-          fiatBalance: {
-            amount: 1000.0,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'USDC.e',
+          name: 'USD Coin',
+          decimals: 6,
+          value: BigInt('1000000000'), // 1000 USDC
+          displayValue: '1000.0'
         },
         {
-          token: {
-            address: '0x1111111111111111111111111111111111111111',
-            symbol: 'USDT',
-            name: 'Tether',
-            decimals: 6
-          },
-          tokenBalance: {
-            value: BigInt('500000000'),
-            displayValue: '500.0'
-          },
-          fiatBalance: {
-            amount: 500.0,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'USDT',
+          name: 'Tether',
+          decimals: 6,
+          value: BigInt('500000000'), // 500 USDT
+          displayValue: '500.0'
         }
       ];
 
+      const mockResults = fixture_convertBalanceToFiat(
+        mockAccountBalanceResult,
+        fixture_fiatBalanceSample
+      );
+      const totalValue = fixture_getTotalValue(mockResults);
+
+      // Mock accountBalanceInFiat to return different results for each call
       let callCount = 0;
-      jest.spyOn(utils, 'accountBalanceInFiat').mockImplementation(() => {
-        const result = mockResults[callCount];
+      jest.spyOn(utils, 'accountBalance').mockImplementation(() => {
+        const result = mockAccountBalanceResult[callCount];
         callCount++;
         return Promise.resolve(result);
       });
@@ -800,18 +787,36 @@ describe('Utils - Unit Tests', () => {
       const result = await accountBalancesInFiat(params);
 
       expect(result.totalValue).toEqual({
-        amount: 4500.0, // 3000 + 1000 + 500
+        amount: totalValue, // 3000 + 1000 + 500
         currency: DEFAULT_CURRENCY
       });
 
       expect(result.tokenBalances).toHaveLength(3);
-      expect(result.tokenBalances[0].fiatBalance.amount).toBe(3000.0);
-      expect(result.tokenBalances[1].fiatBalance.amount).toBe(1000.0);
-      expect(result.tokenBalances[2].fiatBalance.amount).toBe(500.0);
+      expect(result.tokenBalances[0].fiatBalance.amount).toBe(
+        fixture_getPriceInCurrency(
+          mockAccountBalanceResult[0].symbol,
+          mockAccountBalanceResult[0].value,
+          fixture_fiatBalanceSample
+        )
+      );
+      expect(result.tokenBalances[1].fiatBalance.amount).toBe(
+        fixture_getPriceInCurrency(
+          mockAccountBalanceResult[1].symbol,
+          mockAccountBalanceResult[1].value,
+          fixture_fiatBalanceSample
+        )
+      );
+      expect(result.tokenBalances[2].fiatBalance.amount).toBe(
+        fixture_getPriceInCurrency(
+          mockAccountBalanceResult[2].symbol,
+          mockAccountBalanceResult[2].value,
+          fixture_fiatBalanceSample
+        )
+      );
     });
 
     it('should handle empty token array', async () => {
-      const accountBalanceInFiatSpy = jest.spyOn(utils, 'accountBalanceInFiat');
+      const accountBalanceInFiatSpy = jest.spyOn(utils, 'accountBalance');
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -835,24 +840,17 @@ describe('Utils - Unit Tests', () => {
     });
 
     it('should use default USD currency when not specified', async () => {
-      const mockResult = {
-        token: {
-          address: undefined,
-          symbol: 'ETH',
-          name: 'Ethereum',
-          decimals: 18
-        },
-        tokenBalance: {
-          value: BigInt('1000000000000000000'),
-          displayValue: '1.0'
-        },
-        fiatBalance: {
-          amount: 3000.0,
-          currency: DEFAULT_CURRENCY
-        }
+      const accountBalanceResult: AccountBalanceResult = {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        value: BigInt('1000000000000000000'),
+        displayValue: '1.0'
       };
 
-      jest.spyOn(utils, 'accountBalanceInFiat').mockResolvedValue(mockResult);
+      jest
+        .spyOn(utils, 'accountBalance')
+        .mockResolvedValue(accountBalanceResult);
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -871,24 +869,17 @@ describe('Utils - Unit Tests', () => {
     });
 
     it('should support different currencies', async () => {
-      const mockResult = {
-        token: {
-          address: undefined,
-          symbol: 'ETH',
-          name: 'Ethereum',
-          decimals: 18
-        },
-        tokenBalance: {
-          value: BigInt('1000000000000000000'),
-          displayValue: '1.0'
-        },
-        fiatBalance: {
-          amount: 2800.0,
-          currency: 'EUR' as FiatCurrency
-        }
+      const accountBalanceResult: AccountBalanceResult = {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        value: BigInt('1000000000000000000'),
+        displayValue: '1.0'
       };
 
-      jest.spyOn(utils, 'accountBalanceInFiat').mockResolvedValue(mockResult);
+      jest
+        .spyOn(utils, 'accountBalance')
+        .mockResolvedValue(accountBalanceResult);
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -901,11 +892,6 @@ describe('Utils - Unit Tests', () => {
       const result = await accountBalancesInFiat(params);
 
       expect(result.totalValue.currency).toBe('EUR');
-      expect(utils.accountBalanceInFiat).toHaveBeenCalledWith(
-        expect.objectContaining({
-          currency: 'EUR'
-        })
-      );
     });
 
     it('should throw error for invalid wallet address', async () => {
@@ -943,7 +929,7 @@ describe('Utils - Unit Tests', () => {
 
     it('should handle errors from balance fetching with context', async () => {
       const mockError = new Error('Network error');
-      jest.spyOn(utils, 'accountBalanceInFiat').mockRejectedValue(mockError);
+      jest.spyOn(utils, 'accountBalance').mockRejectedValue(mockError);
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -967,7 +953,7 @@ describe('Utils - Unit Tests', () => {
 
     it('should handle errors for native token with proper context', async () => {
       const mockError = new Error('RPC error');
-      jest.spyOn(utils, 'accountBalanceInFiat').mockRejectedValue(mockError);
+      jest.spyOn(utils, 'accountBalance').mockRejectedValue(mockError);
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -989,46 +975,30 @@ describe('Utils - Unit Tests', () => {
     });
 
     it('should calculate correct total with fractional amounts', async () => {
-      const mockResults = [
+      const mockAccountBalanceResult: AccountBalanceResult[] = [
         {
-          token: {
-            address: undefined,
-            symbol: 'ETH',
-            name: 'Ethereum',
-            decimals: 18
-          },
-          tokenBalance: {
-            value: BigInt('1500000000000000000'),
-            displayValue: '1.5'
-          },
-          fiatBalance: {
-            amount: 4500.75,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'ETH',
+          name: 'Ethereum',
+          decimals: 18,
+          value: BigInt('1500000000000000000'), // 1.5 ETH
+          displayValue: '1.5'
         },
         {
-          token: {
-            address: '0x0987654321098765432109876543210987654321',
-            symbol: 'USDC',
-            name: 'USD Coin',
-            decimals: 6
-          },
-          tokenBalance: {
-            value: BigInt('2505500000'),
-            displayValue: '2505.5'
-          },
-          fiatBalance: {
-            amount: 2505.5,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'USDC',
+          name: 'USD Coin',
+          decimals: 6,
+          value: BigInt('2505500000'), // 2505.5 USDC
+          displayValue: '2505.5'
         }
       ];
 
-      let callCount = 0;
-      jest.spyOn(utils, 'accountBalanceInFiat').mockImplementation(() => {
-        const result = mockResults[callCount];
-        callCount++;
-        return Promise.resolve(result);
+      const mockResults = fixture_convertBalanceToFiat(
+        mockAccountBalanceResult,
+        fixture_fiatBalanceSample
+      );
+
+      jest.spyOn(utils, 'accountBalance').mockImplementation(() => {
+        return Promise.resolve(mockAccountBalanceResult.shift()!);
       });
 
       const params: AccountBalancesInFiatParams = {
@@ -1043,58 +1013,43 @@ describe('Utils - Unit Tests', () => {
 
       const result = await accountBalancesInFiat(params);
 
-      expect(result.totalValue.amount).toBe(7006.25); // 4500.75 + 2505.5
+      expect(result.totalValue.amount).toBe(fixture_getTotalValue(mockResults));
     });
 
     it('should handle mixed success and failure scenarios', async () => {
-      const mockResults = [
-        // Success
+      const accountBalanceResult = [
         {
-          token: {
-            address: undefined,
-            symbol: 'ETH',
-            name: 'Ethereum',
-            decimals: 18
-          },
-          tokenBalance: {
-            value: BigInt('1000000000000000000'),
-            displayValue: '1.0'
-          },
-          fiatBalance: {
-            amount: 3000.0,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'ETH',
+          name: 'Ethereum',
+          decimals: 18,
+          value: BigInt('1000000000000000000'), // 1 ETH
+          displayValue: '1.0'
         },
-        // This will fail
-        null,
-        // Success
         {
-          token: {
-            address: '0x1111111111111111111111111111111111111111',
-            symbol: 'USDT',
-            name: 'Tether',
-            decimals: 6
-          },
-          tokenBalance: {
-            value: BigInt('500000000'),
-            displayValue: '500.0'
-          },
-          fiatBalance: {
-            amount: 500.0,
-            currency: DEFAULT_CURRENCY
-          }
+          symbol: 'USDT',
+          name: 'Tether',
+          decimals: 6,
+          value: BigInt('500000000'), // 500 USDT
+          displayValue: '500.0'
         }
       ];
+      const expectedResult = fixture_convertBalanceToFiat(
+        accountBalanceResult,
+        fixture_fiatBalanceSample
+      );
 
-      let callCount = 0;
-      jest.spyOn(utils, 'accountBalanceInFiat').mockImplementation(() => {
-        const result = mockResults[callCount];
-        callCount++;
-        if (callCount === 2) {
-          // Second call fails
+      // Mock accountBalance to return different results for each call
+      const mockResolvedValuesAccountBalance = [
+        accountBalanceResult[0],
+        null,
+        accountBalanceResult[1]
+      ];
+      jest.spyOn(utils, 'accountBalance').mockImplementation(() => {
+        const result = mockResolvedValuesAccountBalance.shift();
+        if (!result) {
           return Promise.reject(new Error('Token not found'));
         }
-        return Promise.resolve(result!);
+        return Promise.resolve(result);
       });
 
       const params: AccountBalancesInFiatParams = {
@@ -1112,8 +1067,12 @@ describe('Utils - Unit Tests', () => {
 
       // Should have 2 successful balances
       expect(result.tokenBalances).toHaveLength(2);
-      expect(result.tokenBalances[0].fiatBalance.amount).toBe(3000.0);
-      expect(result.tokenBalances[1].fiatBalance.amount).toBe(500.0);
+      expect(result.tokenBalances[0].fiatBalance.amount).toBe(
+        expectedResult[0].fiatBalance.amount
+      );
+      expect(result.tokenBalances[1].fiatBalance.amount).toBe(
+        expectedResult[1].fiatBalance.amount
+      );
 
       // Should have 1 error
       expect(result.errors).toBeDefined();
@@ -1125,7 +1084,9 @@ describe('Utils - Unit Tests', () => {
       });
 
       // Total should only include successful balances
-      expect(result.totalValue.amount).toBe(3500.0); // 3000 + 500
+      expect(result.totalValue.amount).toBe(
+        fixture_getTotalValue(expectedResult)
+      );
     });
 
     it('should handle all tokens failing', async () => {
@@ -1165,28 +1126,25 @@ describe('Utils - Unit Tests', () => {
     });
 
     it('should handle mix of invalid addresses and API failures', async () => {
-      jest.spyOn(utils, 'accountBalanceInFiat').mockImplementation((params) => {
+      const accountBalanceResult: AccountBalanceResult = {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        value: BigInt('1000000000000000000'), // 1 ETH
+        displayValue: '1.0'
+      };
+      jest.spyOn(utils, 'accountBalance').mockImplementation((params) => {
         // Only native token succeeds
         if (!params.tokenAddress) {
-          return Promise.resolve({
-            token: {
-              address: undefined,
-              symbol: 'ETH',
-              name: 'Ethereum',
-              decimals: 18
-            },
-            tokenBalance: {
-              value: BigInt('2000000000000000000'),
-              displayValue: '2.0'
-            },
-            fiatBalance: {
-              amount: 6000.0,
-              currency: DEFAULT_CURRENCY
-            }
-          });
+          return Promise.resolve(accountBalanceResult);
         }
         return Promise.reject(new Error('API timeout'));
       });
+
+      const expectedResult = fixture_convertBalanceToFiat(
+        [accountBalanceResult],
+        fixture_fiatBalanceSample
+      );
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -1203,7 +1161,9 @@ describe('Utils - Unit Tests', () => {
 
       // Only native token succeeds
       expect(result.tokenBalances).toHaveLength(1);
-      expect(result.tokenBalances[0].fiatBalance.amount).toBe(6000.0);
+      expect(result.tokenBalances[0].fiatBalance.amount).toBe(
+        expectedResult[0].fiatBalance.amount
+      );
 
       // 2 errors
       expect(result.errors).toBeDefined();
@@ -1214,28 +1174,28 @@ describe('Utils - Unit Tests', () => {
       });
       expect(result.errors![1].error).toContain('API timeout');
 
-      expect(result.totalValue.amount).toBe(6000.0);
+      expect(result.totalValue.amount).toBe(
+        expectedResult[0].fiatBalance.amount
+      );
     });
 
     it('should not include errors property when all succeed', async () => {
-      const mockResult = {
-        token: {
-          address: undefined,
-          symbol: 'ETH',
-          name: 'Ethereum',
-          decimals: 18
-        },
-        tokenBalance: {
-          value: BigInt('1000000000000000000'),
-          displayValue: '1.0'
-        },
-        fiatBalance: {
-          amount: 3000.0,
-          currency: DEFAULT_CURRENCY
-        }
+      const accountBalanceResult: AccountBalanceResult = {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        value: BigInt('1000000000000000000'), // 1 ETH
+        displayValue: '1.0'
       };
 
-      jest.spyOn(utils, 'accountBalanceInFiat').mockResolvedValue(mockResult);
+      jest
+        .spyOn(utils, 'accountBalance')
+        .mockResolvedValue(accountBalanceResult);
+
+      const expectedResult = fixture_convertBalanceToFiat(
+        [accountBalanceResult],
+        fixture_fiatBalanceSample
+      );
 
       const params: AccountBalancesInFiatParams = {
         address: validAddress,
@@ -1249,7 +1209,41 @@ describe('Utils - Unit Tests', () => {
       // Should not have errors property
       expect(result.errors).toBeUndefined();
       expect(result.tokenBalances).toHaveLength(1);
-      expect(result.totalValue.amount).toBe(3000.0);
+      expect(result.totalValue.amount).toBe(
+        expectedResult[0].fiatBalance.amount
+      );
+    });
+
+    it('should use default chain (lisk) when liskSepolia is provided', async () => {
+      const mockAccountBalanceResult: AccountBalanceResult = {
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        value: BigInt('1000000000000000000'), // 1 ETH
+        displayValue: '1.0'
+      };
+
+      jest
+        .spyOn(utils, 'accountBalance')
+        .mockResolvedValue(mockAccountBalanceResult);
+
+      const params: AccountBalancesInFiatParams = {
+        address: validAddress,
+        client: mockClient,
+        chain: liskSepolia, // Using liskSepolia
+        tokens: [NATIVE_TOKEN_ADDRESS],
+        currency: DEFAULT_CURRENCY
+      };
+
+      const result = await accountBalancesInFiat(params);
+
+      expect(thirdweb.Bridge.tokens).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chainId: lisk.id
+        })
+      );
+      expect(result.tokenBalances[0].token.symbol).toBe('ETH');
+      expect(result.totalValue.currency).toBe(DEFAULT_CURRENCY);
     });
   });
 
