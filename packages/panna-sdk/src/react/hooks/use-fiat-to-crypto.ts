@@ -50,13 +50,6 @@ export function useFiatToCrypto(
           client
         });
 
-        console.log({
-          tokenPrices,
-          tokenAddress,
-          chainId: chain.id,
-          currency
-        });
-
         // Find the token price data
         const tokenPrice = tokenPrices.find(
           (token) => token.address.toLowerCase() === tokenAddress.toLowerCase()
