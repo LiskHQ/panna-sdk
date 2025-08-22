@@ -112,13 +112,20 @@ export function prepareTransaction(
  * Prepare a contract method call for execution
  *
  * This function creates a transaction object for calling a specific method on a smart contract.
- * It supports both string method signatures and ABI function objects, providing type safety
- * and parameter validation.
+ * It supports multiple approaches for maximum flexibility and type safety:
+ *
+ * - **String method signatures**: Use Solidity function signatures for dynamic calls
+ * - **Full contract ABI**: Provides autocompletion and full type safety
+ * - **ABI snippets**: Efficient for single method calls without full ABI
+ * - **ABI function objects**: Direct specification of function metadata
+ *
+ * The function automatically infers parameter types and provides compile-time validation
+ * when using ABI-based approaches.
  *
  * @param params - Parameters for preparing the contract call
- * @param params.contract - The contract instance
- * @param params.method - The method signature or ABI function
- * @param params.params - The parameters for the method call
+ * @param params.contract - The contract instance (with or without ABI)
+ * @param params.method - The method signature, ABI function, or method name (when ABI is provided)
+ * @param params.params - The parameters for the method call (types inferred from method)
  * @param params.value - The value to send with the transaction (in wei)
  * @param params.gas - Gas limit for the transaction
  * @param params.gasPrice - Gas price for legacy transactions
@@ -133,27 +140,96 @@ export function prepareTransaction(
  * ```typescript
  * import { prepareContractCall, getContract, toWei, lisk } from 'panna-sdk';
  *
- * // Get a contract instance
+ * // Get a contract instance (without ABI - uses string method signatures)
  * const contract = getContract({
  *   client: pannaClient,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   chain: lisk
  * });
  *
- * // Prepare a contract call with method signature
+ * // 1. Basic usage with method signature (type-safe based on signature)
  * const transaction = prepareContractCall({
  *   contract,
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", toWei("100")]
  * });
  *
- * // Prepare a payable contract call
+ * // 2. With full contract ABI (provides autocompletion and full type safety)
+ * const erc20Contract = getContract({
+ *   client: pannaClient,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   chain: lisk,
+ *   abi: [
+ *     {
+ *       name: "transfer",
+ *       type: "function",
+ *       inputs: [
+ *         { type: "address", name: "to" },
+ *         { type: "uint256", name: "amount" }
+ *       ],
+ *       outputs: [{ type: "bool" }],
+ *       stateMutability: "nonpayable"
+ *     },
+ *     {
+ *       name: "mint",
+ *       type: "function",
+ *       inputs: [{ type: "address", name: "to" }],
+ *       outputs: [],
+ *       stateMutability: "payable"
+ *     }
+ *   ]
+ * });
+ *
+ * const typeSafeCall = prepareContractCall({
+ *   contract: erc20Contract,
+ *   method: "transfer", // Auto-completion and type inference from ABI
+ *   params: ["0x123...", toWei("100")]
+ * });
+ *
+ * // 3. Using ABI snippet (efficient for single method calls)
+ * const snippetCall = prepareContractCall({
+ *   contract,
+ *   method: {
+ *     name: "mintTo",
+ *     type: "function",
+ *     inputs: [
+ *       { type: "address", name: "to" },
+ *       { type: "uint256", name: "amount" }
+ *     ],
+ *     outputs: [{ type: "uint256" }],
+ *     stateMutability: "nonpayable"
+ *   },
+ *   params: ["0x123...", toWei("100")]
+ * });
+ *
+ * // 4. Payable function with value
  * const payableCall = prepareContractCall({
  *   contract,
  *   method: "function mint(address to)",
  *   params: ["0x123..."],
  *   value: toWei("0.1") // 0.1 ETH
  * });
+ *
+ * // 5. Advanced gas configuration (EIP-1559)
+ * const advancedGasCall = prepareContractCall({
+ *   contract,
+ *   method: "function transfer(address to, uint256 amount)",
+ *   params: ["0x123...", toWei("100")],
+ *   maxFeePerGas: BigInt(30000000000), // 30 gwei
+ *   maxPriorityFeePerGas: BigInt(2000000000), // 2 gwei
+ *   gas: BigInt(21000) // Gas limit
+ * });
+ *
+ * // 6. Error handling pattern
+ * try {
+ *   const transaction = prepareContractCall({
+ *     contract,
+ *     method: "function nonExistentFunction()",
+ *     params: []
+ *   });
+ * } catch (error) {
+ *   console.error("Failed to prepare contract call:", error.message);
+ * }
  * ```
  */
 export function prepareContractCall(
