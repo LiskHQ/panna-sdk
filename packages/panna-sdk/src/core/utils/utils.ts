@@ -265,6 +265,7 @@ export const accountBalancesInFiat = async function (
   }
 
   const currency = params.currency || DEFAULT_CURRENCY;
+  const chain = params.chain || DEFAULT_CHAIN;
 
   // Create array of promises for parallel execution with wrapped context
   const balancePromises = params.tokens.map((tokenAddress) => {
@@ -289,7 +290,7 @@ export const accountBalancesInFiat = async function (
     return accountBalance({
       address: params.address,
       client: params.client,
-      chain: params.chain,
+      chain: chain,
       tokenAddress: apiTokenAddress
     }).then(
       (result) => ({
@@ -338,7 +339,7 @@ export const accountBalancesInFiat = async function (
 
   // Get all token prices for lisk chain
   const allTokensPrices = await Bridge.tokens({
-    chainId: params.chain.id === liskSepolia.id ? lisk.id : params.chain.id,
+    chainId: chain.id === liskSepolia.id ? lisk.id : chain.id,
     client: params.client
   });
 
@@ -378,7 +379,7 @@ export const accountBalancesInFiat = async function (
     if (tokenPrice) {
       balanceWithFiat.fiatBalance.amount =
         (Number(balanceWithFiat.tokenBalance.value) *
-          tokenPrice.prices[DEFAULT_CURRENCY]) /
+          tokenPrice.prices[currency]) /
         10 ** balanceWithFiat.token.decimals;
       balances.push(balanceWithFiat);
     }

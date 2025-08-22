@@ -97,7 +97,7 @@ export interface GetFiatPriceResult {
 interface BaseAccountBalanceInFiatParams {
   address: string;
   client: PannaClient;
-  chain: Chain;
+  chain?: Chain;
   currency?: FiatCurrency;
 }
 
