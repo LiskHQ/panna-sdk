@@ -26,7 +26,7 @@ import type {
  * @param params - Parameters for preparing the transaction
  * @param params.client - The Panna client instance
  * @param params.chain - The chain to execute on
- * @param params.to - The recipient address (optional for contract deployments)
+ * @param params.to - (Optional: only for contract deployments) The recipient address
  * @param params.value - The value to send (in wei)
  * @param params.data - The transaction data
  * @param params.gas - Gas limit for the transaction
@@ -218,33 +218,47 @@ export function prepareContractCall(
  * Get a contract instance for interaction
  *
  * This function creates a contract instance that can be used to prepare contract calls.
- * It provides type-safe access to contract methods when an ABI is provided, and enables
- * autocompletion and validation of method calls.
+ *
+ * **With ABI**: Provides full type safety, autocompletion, and validation for all contract methods.
+ * **Without ABI**: The SDK will attempt automatic ABI resolution, or you can use string-based
+ * method signatures (e.g., "function transfer(address to, uint256 amount)") when calling contract methods.
  *
  * @param params - Parameters for getting the contract
  * @param params.client - The Panna client instance
  * @param params.address - The contract address
- * @param params.abi - The contract ABI (optional for basic interactions)
+ * @param params.abi - (Optional) The contract ABI. When provided, enables type-safe method calls with autocompletion. When omitted, the SDK will attempt to resolve the ABI automatically or you can use string-based method signatures with `prepareContractCall`
  * @param params.chain - The chain the contract is deployed on
  * @returns Contract instance ready for interaction
  *
  * @example
  * ```typescript
- * import { getContract, lisk } from 'panna-sdk';
+ * import { getContract, prepareContractCall, lisk } from 'panna-sdk';
  *
- * // Get a contract instance without ABI
+ * // Without ABI - use string-based method signatures
  * const contract = getContract({
  *   client: pannaClient,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   chain: lisk
  * });
  *
- * // Get a contract instance with full ABI (erc20Abi should be defined in your code)
+ * const tx1 = prepareContractCall({
+ *   contract,
+ *   method: "function transfer(address to, uint256 amount)", // String signature
+ *   params: ["0x123...", BigInt("1000000000000000000")]
+ * });
+ *
+ * // With ABI - type-safe with autocompletion
  * const erc20Contract = getContract({
  *   client: pannaClient,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   abi: erc20Abi, // Define this ABI in your code or import from your contract definitions
+ *   abi: erc20Abi, // Full type safety and autocompletion. Define this ABI in your code or import from your contract definitions
  *   chain: lisk
+ * });
+ *
+ * const tx2 = prepareContractCall({
+ *   contract: erc20Contract,
+ *   method: "transfer", // Inferred from ABI with full type checking
+ *   params: ["0x123...", BigInt("1000000000000000000")]
  * });
  * ```
  */
