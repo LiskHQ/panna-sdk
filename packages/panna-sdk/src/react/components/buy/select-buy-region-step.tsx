@@ -88,6 +88,9 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
                     className="max-h-[400px] w-[var(--radix-popover-trigger-width)] overflow-hidden p-0"
                     align="start"
                     sideOffset={4}
+                    onWheel={(e) => {
+                      e.stopPropagation();
+                    }}
                   >
                     <Command className="max-h-[400px] overflow-hidden">
                       <CommandInput
