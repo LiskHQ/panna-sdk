@@ -28,7 +28,7 @@ type SelectBuyTokenStepProps = {
 };
 
 export function SelectBuyTokenStep({ form }: SelectBuyTokenStepProps) {
-  const { next, prev } = useDialogStepper();
+  const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -133,25 +133,15 @@ export function SelectBuyTokenStep({ form }: SelectBuyTokenStepProps) {
           </FormItem>
         )}
       />
-      <footer className="flex w-full items-center gap-2">
-        <Button
-          variant="outline"
-          type="button"
-          className="flex-1"
-          onClick={() => prev()}
-        >
-          Back
-        </Button>
 
-        <Button
-          type="button"
-          className="flex-1"
-          onClick={() => next()}
-          disabled={!form.watch('token')}
-        >
-          Next
-        </Button>
-      </footer>
+      <Button
+        type="button"
+        className="w-full"
+        onClick={() => next()}
+        disabled={!form.watch('token')}
+      >
+        Next
+      </Button>
     </div>
   );
 }

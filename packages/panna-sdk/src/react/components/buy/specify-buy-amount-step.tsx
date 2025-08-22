@@ -14,7 +14,7 @@ type SpecifyBuyAmountStepProps = {
 };
 
 export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
-  const { next, prev } = useDialogStepper();
+  const { next } = useDialogStepper();
   const token = form.watch('token');
   const fiatAmount = form.watch('fiatAmount');
 
@@ -124,24 +124,14 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
           </Button>
         ))}
       </div>
-      <footer className="flex w-full items-center gap-2">
-        <Button
-          variant="outline"
-          type="button"
-          className="flex-1"
-          onClick={() => prev()}
-        >
-          Back
-        </Button>
-        <Button
-          type="button"
-          className="flex-1"
-          onClick={() => next()}
-          disabled={!form.watch('fiatAmount') || form.watch('fiatAmount')! <= 0}
-        >
-          Next
-        </Button>
-      </footer>
+      <Button
+        type="button"
+        className="w-full"
+        onClick={() => next()}
+        disabled={!form.watch('fiatAmount') || form.watch('fiatAmount')! <= 0}
+      >
+        Next
+      </Button>
     </div>
   );
 }

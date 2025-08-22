@@ -18,6 +18,8 @@ export type DialogStepperContextValue = {
   prev: (data?: Record<string, unknown>) => void;
   reset: () => void;
   stepData: Record<string, unknown>;
+  currentStep: number;
+  canGoBack: boolean;
 };
 
 // DialogStepper has local state which is modified on next and previous
@@ -34,7 +36,7 @@ export function DialogStepper({ children }: DialogStepperProps) {
 
   const prev = useCallback((data?: Record<string, unknown>) => {
     setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
-    setStep((prev) => prev - 1);
+    setStep((prev) => Math.max(0, prev - 1));
   }, []);
 
   const reset = useCallback(() => {
@@ -48,8 +50,12 @@ export function DialogStepper({ children }: DialogStepperProps) {
     });
   }, [children]);
 
+  const canGoBack = step > 0;
+
   return (
-    <DialogStepperContext.Provider value={{ next, prev, reset, stepData }}>
+    <DialogStepperContext.Provider
+      value={{ next, prev, reset, stepData, currentStep: step, canGoBack }}
+    >
       {memoizedChildren[step]}
     </DialogStepperContext.Provider>
   );

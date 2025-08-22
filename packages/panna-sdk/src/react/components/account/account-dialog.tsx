@@ -5,7 +5,7 @@ import {
   TagIcon,
   XIcon
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
@@ -22,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '../ui/dialog';
+import type { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { AccountSettingsView } from './account-settings-view';
@@ -34,6 +35,7 @@ type AccountDialogProps = {
 
 export function AccountDialog({ address }: AccountDialogProps) {
   const [activeView, setActiveView] = useState<AccountView>('main');
+  const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({
@@ -92,7 +94,16 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
-              <button type="button" onClick={() => setActiveView('main')}>
+              <button
+                type="button"
+                onClick={() => {
+                  if (buyStepperRef.current?.canGoBack) {
+                    buyStepperRef.current.prev();
+                  } else {
+                    setActiveView('main');
+                  }
+                }}
+              >
                 <ArrowLeftIcon
                   size={20}
                   className="text-muted-foreground hover:text-primary transition-colors"
@@ -162,7 +173,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
       case 'settings':
         return <AccountSettingsView />;
       case 'buy':
-        return <BuyForm onClose={() => setActiveView('main')} />;
+        return (
+          <BuyForm
+            onClose={() => setActiveView('main')}
+            stepperRef={buyStepperRef}
+          />
+        );
     }
   };
 
