@@ -99,7 +99,6 @@ export {
   type OnrampProvider,
   type GetTokenFiatPricesParams,
   type ProviderInfo,
-  type TokenFiatPrice,
 
   // Transaction types
   type PrepareTransactionParams,
