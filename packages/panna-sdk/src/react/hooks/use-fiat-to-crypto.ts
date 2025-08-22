@@ -43,14 +43,12 @@ export function useFiatToCrypto(
       }
 
       try {
-        // Get token prices from the API
         const tokenPrices = await getTokenFiatPrices({
           chainId: lisk.id,
           tokenAddress,
           client
         });
 
-        // Find the token price data
         const tokenPrice = tokenPrices.find(
           (token) => token.address.toLowerCase() === tokenAddress.toLowerCase()
         );
@@ -59,10 +57,8 @@ export function useFiatToCrypto(
           throw new Error(`Price not available for ${currency}`);
         }
 
-        // Get the price per token in the specified currency
         const pricePerToken = tokenPrice.prices[currency];
 
-        // Calculate how much crypto we can buy with the fiat amount
         const cryptoAmount = fiatAmount / pricePerToken;
 
         return {

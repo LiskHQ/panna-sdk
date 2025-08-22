@@ -24,8 +24,6 @@ export function BuyForm({ onClose }: BuyFormProps) {
     mode: 'onChange'
   });
 
-  console.log(form.watch());
-
   return (
     <Form {...form}>
       <form className="space-y-6">
