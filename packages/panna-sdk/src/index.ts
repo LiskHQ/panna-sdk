@@ -70,6 +70,7 @@ export {
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type FiatCurrency,
+  type TokenFiatPrice,
 
   // Onramp functions
   onRampStatus,
