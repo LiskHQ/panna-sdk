@@ -1,7 +1,12 @@
 import { Bridge } from 'thirdweb';
 import { liskSepolia } from '../chains';
 import type { PannaClient } from '../client';
-import { onRampStatus, onRampPrepare, getOnrampProviders } from './onramp';
+import {
+  onRampStatus,
+  onRampPrepare,
+  getOnrampProviders,
+  getTokenFiatPrices
+} from './onramp';
 // import { OnrampProvider } from './constants';
 import type {
   OnrampCreatedResult,
@@ -16,7 +21,8 @@ jest.mock('thirdweb', () => ({
     Onramp: {
       status: jest.fn(),
       prepare: jest.fn()
-    }
+    },
+    tokens: jest.fn()
   }
 }));
 
@@ -343,5 +349,103 @@ describe('getOnrampProviders', () => {
     expect(() => getOnrampProviders('INVALID')).toThrow(
       'Invalid country code: INVALID'
     );
+  });
+});
+
+describe('getTokenFiatPrices', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return token fiat prices for a valid token address', async () => {
+    const mockTokenPrices = [
+      {
+        chainId: 1,
+        address: '0xTokenAddress',
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        iconUri: 'https://example.com/eth.png',
+        prices: {
+          USD: 3000,
+          EUR: 2500
+        }
+      }
+    ];
+
+    (Bridge.tokens as jest.Mock).mockResolvedValue(mockTokenPrices);
+    const params = {
+      client: { clientId: 'test-client' } as PannaClient,
+      tokenAddress: '0xTokenAddress',
+      chainId: liskSepolia.id
+    };
+
+    const result = await getTokenFiatPrices(params);
+    expect(result).toEqual(mockTokenPrices);
+  });
+
+  it('should return fiat prices for all tokens on a chain when tokenAddress is not provided', async () => {
+    const mockTokenPrices = [
+      {
+        chainId: 1,
+        address: '0xTokenAddress',
+        symbol: 'ETH',
+        name: 'Ethereum',
+        decimals: 18,
+        iconUri: 'https://example.com/eth.png',
+        prices: {
+          USD: 3000,
+          EUR: 2500
+        }
+      },
+      {
+        chainId: 1,
+        address: '0xAnotherTokenAddress',
+        symbol: 'USDT',
+        name: 'Tether',
+        decimals: 6,
+        iconUri: 'https://example.com/usdt.png',
+        prices: {
+          USD: 1,
+          EUR: 0.85
+        }
+      }
+    ];
+
+    (Bridge.tokens as jest.Mock).mockResolvedValue(mockTokenPrices);
+    const params = {
+      client: { clientId: 'test-client' } as PannaClient,
+      chainId: liskSepolia.id
+    };
+    const result = await getTokenFiatPrices(params);
+    expect(result).toEqual(mockTokenPrices);
+  });
+
+  it('should throw an error for invalid token address', async () => {
+    const invalidAddressError = new Error('Invalid token address');
+    (Bridge.tokens as jest.Mock).mockRejectedValueOnce(invalidAddressError);
+    // Mocking the error response for invalid token address
+    const params = {
+      client: { clientId: 'test-client' } as PannaClient,
+      tokenAddress: 'invalid-address',
+      chainId: liskSepolia.id
+    };
+    await expect(getTokenFiatPrices(params)).rejects.toThrow(
+      'Invalid token address'
+    );
+  });
+
+  it('should pass correct parameters to Bridge.tokens', async () => {
+    const params = {
+      client: { clientId: 'test-client' } as PannaClient,
+      tokenAddress: '0xTokenAddress',
+      chainId: liskSepolia.id
+    };
+    await getTokenFiatPrices(params);
+    expect(Bridge.tokens).toHaveBeenCalledWith({
+      chainId: liskSepolia.id,
+      tokenAddress: '0xTokenAddress',
+      client: params.client
+    });
   });
 });

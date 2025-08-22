@@ -74,6 +74,9 @@ export {
 
   // Onramp functions
   onRampStatus,
+  getOnrampProviders,
+  getTokenFiatPrices,
+  onRampPrepare,
 
   // Onramp types
   type OnrampStatus,
@@ -84,10 +87,13 @@ export {
   type OnrampCreatedResult,
   type OnrampPendingResult,
   type OnrampCompletedResult,
-  type OnRampProvider,
   type OnrampPrepareResult,
-  type OnRampIntent,
+  type OnrampIntent,
   type OnrampPrepareParams,
+  type OnrampProvider,
+  type GetTokenFiatPricesParams,
+  type ProviderInfo,
+  type TokenFiatPrice,
 
   // Constants
   DEFAULT_CURRENCY,
