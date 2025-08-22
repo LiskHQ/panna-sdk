@@ -1,4 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { toWei } from 'thirdweb/utils';
 import { getOnrampProviders, onRampPrepare } from '../../core/onramp';
 import type { BuyWithFiatQuote } from '../types/buy-with-fiat-quote.types';
 import {
@@ -12,7 +13,7 @@ import { usePanna } from './use-panna';
 type UseBuyWithFiatQuotesParams = {
   countryCode: string;
   tokenAddress?: string;
-  amount?: string;
+  cryptoAmount?: string;
   receiver?: string;
 };
 
@@ -22,19 +23,24 @@ type UseBuyWithFiatQuotesParams = {
  * @returns React Query result with buy with fiat quotes data
  */
 export function useBuyWithFiatQuotes(
-  { countryCode, tokenAddress, amount, receiver }: UseBuyWithFiatQuotesParams,
+  {
+    countryCode,
+    tokenAddress,
+    cryptoAmount,
+    receiver
+  }: UseBuyWithFiatQuotesParams,
   options?: Omit<UseQueryOptions<BuyWithFiatQuote[]>, 'queryKey' | 'queryFn'>
 ) {
   const { client } = usePanna();
   const hasValidCountryCode = Boolean(countryCode);
-  const canEnrich = Boolean(client && tokenAddress && amount && receiver);
+  const canEnrich = Boolean(client && tokenAddress && cryptoAmount && receiver);
 
   return useQuery({
     queryKey: [
       'buy-with-fiat-quotes',
       countryCode,
       tokenAddress,
-      amount,
+      cryptoAmount,
       receiver
     ],
     queryFn: async (): Promise<BuyWithFiatQuote[]> => {
@@ -62,19 +68,14 @@ export function useBuyWithFiatQuotes(
         const enrichedQuotes = await Promise.allSettled(
           providers.map(async (provider): Promise<BuyWithFiatQuote> => {
             try {
-              // Convert decimal amount to smallest units (wei-like) for onRampPrepare
-              // The amount comes as display units (e.g., 0.033 ETH) but onRampPrepare expects smallest units
-              const decimals = 18; // Most ERC-20 tokens use 18 decimals
-              const amountInSmallestUnits = Math.floor(
-                parseFloat(amount!) * Math.pow(10, decimals)
-              );
+              const amountInWei = toWei(cryptoAmount!);
 
               const prepareResult = await onRampPrepare({
                 client: client!,
                 onRampProvider: provider.id,
                 tokenAddress: tokenAddress!,
                 receiver: receiver!,
-                amount: amountInSmallestUnits.toString(), // Convert to string for BigInt conversion
+                amount: amountInWei.toString(),
                 country: countryCode
               });
 

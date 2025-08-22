@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
-import { getEnvironmentChain, getCurrencySymbolForCountry } from '../../utils';
+import { getEnvironmentChain } from '../../utils';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -16,18 +16,11 @@ type SpecifyBuyAmountStepProps = {
 export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   const { next, prev } = useDialogStepper();
   const token = form.watch('token');
-  const fiatAmount = form.watch('amount');
-  const country = form.watch('country');
+  const fiatAmount = form.watch('fiatAmount');
 
   const { data: supportedTokens = [] } = useSupportedTokens();
   const chain = getEnvironmentChain();
 
-  // Get currency symbol based on selected country
-  const currencySymbol = useMemo(() => {
-    return country?.code ? getCurrencySymbolForCountry(country.code) : '$';
-  }, [country?.code]);
-
-  // Get the token address for the selected token
   const tokenAddress = useMemo(() => {
     if (!token?.symbol) return undefined;
     const supportedToken = supportedTokens.find(
@@ -36,7 +29,6 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
     return supportedToken?.address;
   }, [token?.symbol, supportedTokens]);
 
-  // Convert fiat amount to crypto amount to show the estimate
   const {
     data: cryptoConversion,
     isLoading,
@@ -51,6 +43,15 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
     { enabled: !!fiatAmount && fiatAmount > 0 }
   );
 
+  // Update crypto amount in form when conversion changes
+  useEffect(() => {
+    if (cryptoConversion?.amount) {
+      form.setValue('cryptoAmount', cryptoConversion.amount);
+    } else {
+      form.setValue('cryptoAmount', undefined);
+    }
+  }, [cryptoConversion?.amount, form]);
+
   return (
     <div className="flex flex-col items-center gap-6">
       <DialogHeader className="items-center gap-0">
@@ -58,7 +59,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
       </DialogHeader>
       <FormField
         control={form.control}
-        name="amount"
+        name="fiatAmount"
         render={({ field }) => {
           const amountString = field.value?.toString() || '';
 
@@ -71,7 +72,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
                       variant="h2"
                       className="text-muted-foreground pb-0"
                     >
-                      {currencySymbol}
+                      $
                     </Typography>
                     <input
                       type="text"
@@ -99,9 +100,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
                       : isError
                         ? 'Error'
                         : cryptoConversion?.amount
-                          ? cryptoConversion.amount.toFixed(6) +
-                            ' ' +
-                            token?.symbol
+                          ? `≈ ${cryptoConversion.amount.toFixed(6)} ${token?.symbol}`
                           : `0 ${token?.symbol}`}
                   </Typography>
                 </div>
@@ -116,11 +115,12 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
           <Button
             key={value}
             type="button"
-            variant={form.watch('amount') === value ? 'default' : 'secondary'}
-            onClick={() => form.setValue('amount', value)}
+            variant={
+              form.watch('fiatAmount') === value ? 'default' : 'secondary'
+            }
+            onClick={() => form.setValue('fiatAmount', value)}
           >
-            {currencySymbol}
-            {value}
+            ${value}
           </Button>
         ))}
       </div>
@@ -137,7 +137,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
           type="button"
           className="flex-1"
           onClick={() => next()}
-          disabled={!form.watch('amount') || form.watch('amount')! <= 0}
+          disabled={!form.watch('fiatAmount') || form.watch('fiatAmount')! <= 0}
         >
           Next
         </Button>

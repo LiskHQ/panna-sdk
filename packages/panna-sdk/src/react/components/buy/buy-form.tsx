@@ -17,7 +17,8 @@ export function BuyForm({ onClose }: BuyFormProps) {
     defaultValues: {
       country: undefined,
       token: undefined,
-      amount: undefined,
+      fiatAmount: undefined,
+      cryptoAmount: undefined,
       provider: undefined
     },
     mode: 'onChange'

@@ -40,11 +40,12 @@ export const buyWithFiatQuoteSchema = z.object({
 export const buyFormSchema = z.object({
   country: countrySchema.optional(),
   token: tokenSchema.optional(),
-  amount: z
+  fiatAmount: z
     .number()
     .min(0.01, 'Amount must be greater than 0')
     .max(1000000, 'Amount is too large')
     .optional(),
+  cryptoAmount: z.number().optional(),
   provider: buyWithFiatQuoteSchema.optional()
 });
 
