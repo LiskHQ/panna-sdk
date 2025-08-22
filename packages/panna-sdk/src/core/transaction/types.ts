@@ -21,11 +21,11 @@ export interface PrepareTransactionParams {
    * The recipient address. Optional for contract deployment transactions.
    * For regular transfers and contract calls, this should be provided.
    */
-  to?: string;
+  to?: `0x${string}`;
   /** The value to send (in wei) */
   value?: bigint;
   /** The transaction data */
-  data?: string;
+  data?: `0x${string}`;
   /** Gas limit for the transaction */
   gas?: bigint;
   /** Gas price for legacy transactions */
@@ -40,8 +40,8 @@ export interface PrepareTransactionParams {
   extraGas?: bigint;
   /** Access list for EIP-2930 transactions */
   accessList?: Array<{
-    address: string;
-    storageKeys: string[];
+    address: `0x${string}`;
+    storageKeys: readonly `0x${string}`[];
   }>;
 }
 
@@ -60,7 +60,7 @@ export interface PrepareContractCallParams {
     /** The Panna client instance */
     client: PannaClient;
     /** The contract address */
-    address: string;
+    address: `0x${string}`;
     /** The chain the contract is deployed on */
     chain: Chain;
     /** The contract ABI (optional for basic interactions) */
@@ -70,7 +70,7 @@ export interface PrepareContractCallParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   method: string | any;
   /** The parameters for the method call */
-  params?: unknown[];
+  params?: readonly any[];
   /** The value to send with the transaction (in wei) */
   value?: bigint;
   /** Gas limit for the transaction */
@@ -87,8 +87,8 @@ export interface PrepareContractCallParams {
   extraGas?: bigint;
   /** Access list for EIP-2930 transactions */
   accessList?: Array<{
-    address: string;
-    storageKeys: string[];
+    address: `0x${string}`;
+    storageKeys: readonly `0x${string}`[];
   }>;
 }
 
@@ -101,7 +101,7 @@ export interface PrepareContractCallParams {
  */
 export interface PrepareContractCallResult {
   /** The recipient address */
-  to: string;
+  to: `0x${string}`;
   /** The transaction data as a lazy-evaluated function */
   data: () => Promise<string>;
   /** The value to send with the transaction (in wei) */
@@ -117,7 +117,7 @@ export interface GetContractParams {
   /** The Panna client instance */
   client: PannaClient;
   /** The contract address */
-  address: string;
+  address: `0x${string}`;
   /** The contract ABI (optional for basic interactions) */
   abi?: Abi;
   /** The chain the contract is deployed on */

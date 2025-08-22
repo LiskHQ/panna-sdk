@@ -3,6 +3,9 @@ import {
   prepareTransaction as thirdwebPrepareTransaction,
   getContract as thirdwebGetContract
 } from 'thirdweb';
+import type { Chain } from '../chains/types';
+import type { PannaClient } from '../client';
+import type { Abi } from '../types/external';
 import type {
   PrepareTransactionParams,
   PrepareTransactionResult,
@@ -82,8 +85,23 @@ export function prepareTransaction(
     accessList
   } = params;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const prepareParams: any = {
+  const prepareParams: {
+    client: PannaClient;
+    chain: Chain;
+    to?: `0x${string}`;
+    value?: bigint;
+    data?: `0x${string}`;
+    gas?: bigint;
+    gasPrice?: bigint;
+    maxFeePerGas?: bigint;
+    maxPriorityFeePerGas?: bigint;
+    nonce?: number;
+    extraGas?: bigint;
+    accessList?: Array<{
+      address: `0x${string}`;
+      storageKeys: readonly `0x${string}`[];
+    }>;
+  } = {
     client,
     chain,
     ...(to !== undefined && { to }),
@@ -171,11 +189,30 @@ export function prepareContractCall(
     address: contract.address
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const callParams: any = {
+  const callParams: {
+    contract: {
+      client: PannaClient;
+      address: `0x${string}`;
+      chain: Chain;
+      abi?: Abi;
+    };
+    method: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    params: readonly any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+    value?: bigint;
+    gas?: bigint;
+    gasPrice?: bigint;
+    maxFeePerGas?: bigint;
+    maxPriorityFeePerGas?: bigint;
+    nonce?: number;
+    extraGas?: bigint;
+    accessList?: Array<{
+      address: `0x${string}`;
+      storageKeys: readonly `0x${string}`[];
+    }>;
+  } = {
     contract: contractWithTypedAddress,
     method,
-    params: methodParams,
+    params: methodParams ?? [],
     ...(value !== undefined && { value }),
     ...(gas !== undefined && { gas }),
     ...(gasPrice !== undefined && { gasPrice }),
@@ -226,8 +263,12 @@ export function prepareContractCall(
 export function getContract(params: GetContractParams): GetContractResult {
   const { client, address, abi, chain } = params;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const contractParams: any = {
+  const contractParams: {
+    client: PannaClient;
+    address: `0x${string}`;
+    chain: Chain;
+    abi?: Abi;
+  } = {
     client,
     address: address,
     chain,
