@@ -272,6 +272,231 @@ describe('Transaction Functions', () => {
         data: mockDataFunction
       });
     });
+
+    describe('negative scenarios', () => {
+      it('should throw error when contract does not contain the provided method', () => {
+        const mockError = new Error(
+          'Contract does not contain method: nonExistentFunction'
+        );
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: 'function nonExistentFunction()',
+          params: []
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Contract does not contain method: nonExistentFunction'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: 'function nonExistentFunction()',
+          params: []
+        });
+      });
+
+      it('should throw error when method signature is malformed', () => {
+        const mockError = new Error('Invalid method signature: malformed');
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: 'malformed method signature',
+          params: []
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Invalid method signature: malformed'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: 'malformed method signature',
+          params: []
+        });
+      });
+
+      it('should throw error when too few parameters are provided', () => {
+        const mockError = new Error('Expected 2 parameters but got 1');
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789'] // Missing amount parameter
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Expected 2 parameters but got 1'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789']
+        });
+      });
+
+      it('should throw error when too many parameters are provided', () => {
+        const mockError = new Error('Expected 2 parameters but got 3');
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789', BigInt('1000000000000000000'), 'extraParam']
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Expected 2 parameters but got 3'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789', BigInt('1000000000000000000'), 'extraParam']
+        });
+      });
+
+      it('should throw error when parameter types do not match method signature', () => {
+        const mockError = new Error(
+          'Parameter type mismatch: expected uint256 but got string'
+        );
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789', 'invalidAmount'] // Should be BigInt, not string
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Parameter type mismatch: expected uint256 but got string'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789', 'invalidAmount']
+        });
+      });
+
+      it('should throw error for empty method name', () => {
+        const mockError = new Error('Method cannot be empty');
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: '',
+          params: []
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Method cannot be empty'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: '',
+          params: []
+        });
+      });
+
+      it('should throw error when method is undefined', () => {
+        const mockError = new Error('Method is required');
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: undefined as unknown as string,
+          params: []
+        };
+
+        expect(() => prepareContractCall(params)).toThrow('Method is required');
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: undefined,
+          params: []
+        });
+      });
+
+      it('should throw error for ABI function object with non-existent function', () => {
+        const nonExistentAbiFunction = {
+          type: 'function',
+          name: 'nonExistentFunction',
+          inputs: [],
+          outputs: [],
+          stateMutability: 'nonpayable'
+        };
+
+        const mockError = new Error(
+          'Function nonExistentFunction not found in contract ABI'
+        );
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: nonExistentAbiFunction,
+          params: []
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Function nonExistentFunction not found in contract ABI'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: nonExistentAbiFunction,
+          params: []
+        });
+      });
+
+      it('should throw error when ABI function requires parameters but none provided', () => {
+        const transferAbiFunction = {
+          type: 'function',
+          name: 'transfer',
+          inputs: [
+            { type: 'address', name: 'to' },
+            { type: 'uint256', name: 'amount' }
+          ],
+          outputs: [],
+          stateMutability: 'nonpayable'
+        };
+
+        const mockError = new Error(
+          'Function transfer requires 2 parameters but 0 provided'
+        );
+        (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
+          throw mockError;
+        });
+
+        const params = {
+          contract: mockContract,
+          method: transferAbiFunction,
+          params: [] // Should have 2 parameters
+        };
+
+        expect(() => prepareContractCall(params)).toThrow(
+          'Function transfer requires 2 parameters but 0 provided'
+        );
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
+          contract: mockContract,
+          method: transferAbiFunction,
+          params: []
+        });
+      });
+    });
   });
 
   describe('getContract', () => {
