@@ -217,7 +217,7 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
  * });
  * // Prices will be an array of objects with token details and fiat values
  * // Example structure:
- * * [
+ * [
  *   {
  *     chainId: 1,
  *     address: '0x0000000000000000000000000000000000000000',
