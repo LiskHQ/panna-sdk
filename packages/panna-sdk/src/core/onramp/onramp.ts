@@ -4,7 +4,7 @@ import { lisk } from '../chains';
 import { COUNTRY_PROVIDER_MAP, PROVIDERS } from './constants';
 import type {
   GetTokenFiatPricesParams,
-  OnRampIntent,
+  OnrampIntent,
   OnrampPrepareParams,
   OnrampPrepareResult,
   OnrampProvider,
@@ -137,7 +137,7 @@ export async function onRampPrepare(
       purchaseData,
       country: 'US'
     });
-    let intent: OnRampIntent | undefined = result.intent
+    let intent: OnrampIntent | undefined = result.intent
       ? {
           amount: result.intent.amount || '0',
           chainId: result.intent.chainId,
