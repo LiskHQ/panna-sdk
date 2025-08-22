@@ -3,13 +3,15 @@ import { Bridge } from 'thirdweb';
 import { lisk } from '../chains';
 import { COUNTRY_PROVIDER_MAP, PROVIDERS } from './constants';
 import type {
-  OnRampIntent,
+  GetTokenFiatPricesParams,
+  OnrampIntent,
   OnrampPrepareParams,
   OnrampPrepareResult,
   OnrampProvider,
   OnrampStatusParams,
   OnrampStatusResult,
-  ProviderInfo
+  ProviderInfo,
+  TokenFiatPrice
 } from './types';
 
 /**
@@ -135,7 +137,7 @@ export async function onRampPrepare(
       purchaseData,
       country: 'US'
     });
-    let intent: OnRampIntent | undefined = result.intent
+    let intent: OnrampIntent | undefined = result.intent
       ? {
           amount: result.intent.amount || '0',
           chainId: result.intent.chainId,
@@ -188,4 +190,68 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
   const providers: OnrampProvider[] =
     COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
   return providers.map((provider) => PROVIDERS[provider]);
+}
+
+/**
+ * Fetches fiat prices for a specific token or all tokens on a given chain
+ *
+ * @param params - Parameters for fetching token fiat prices
+ * @param params.chainId - The chain ID of the token
+ * @param params.tokenAddress - (Optional) The address of the token to fetch the prices for. (Default: Fetches prices for all the tokens on the chain)
+ * @param params.client - The Panna client instance used for authentication
+ * @returns Promise resolving to the token fiat prices
+ * @throws Error if the token address is invalid or network request fails
+ *
+ * @example
+ * ```ts
+ * // Get fiat prices for a specific token
+ * const prices = await getTokenFiatPrices({
+ *   chainId: 1,
+ *   tokenAddress: '0x0000000000000000000000000000000000000000',
+ *   client: pannaClient
+ * });
+ * // Get fiat prices for all tokens on a chain
+ * const allPrices = await getTokenFiatPrices({
+ *   chainId: 1,
+ *   client: pannaClient
+ * });
+ * // Prices will be an array of objects with token details and fiat values
+ * // Example structure:
+ * [
+ *   {
+ *     chainId: 1,
+ *     address: '0x0000000000000000000000000000000000000000',
+ *     symbol: 'ETH',
+ *     name: 'Ethereum',
+ *     decimals: 18,
+ *     iconUri: 'https://example.com/eth.png',
+ *     prices: {
+ *       USD: 3000,
+ *       EUR: 2500
+ *     }
+ *   },
+ *   {
+ *     chainId: 1,
+ *     address: '0x0000000000000000000000000000000000000001',
+ *     symbol: 'USDT',
+ *     name: 'Tether',
+ *     decimals: 6,
+ *     iconUri: 'https://example.com/usdt.png',
+ *     prices: {
+ *       USD: 1,
+ *       EUR: 0.85
+ *     }
+ *   }
+ * ]
+ */
+export async function getTokenFiatPrices(
+  params: GetTokenFiatPricesParams
+): Promise<TokenFiatPrice[]> {
+  const { chainId, tokenAddress, client } = params;
+
+  return Bridge.tokens({
+    chainId,
+    tokenAddress,
+    client
+  });
 }
