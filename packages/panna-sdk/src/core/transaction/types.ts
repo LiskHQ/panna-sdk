@@ -1,6 +1,6 @@
-import type { Abi } from 'thirdweb/utils';
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
+import type { Abi } from '../types/external';
 
 /**
  * Parameters for preparing a raw transaction
@@ -47,36 +47,9 @@ export interface PrepareTransactionParams {
 
 /**
  * Result from preparing a transaction
+ * This is an alias to PrepareTransactionParams as they have identical structure
  */
-export interface PrepareTransactionResult {
-  /** The Panna client instance */
-  client: PannaClient;
-  /** The chain to execute on */
-  chain: Chain;
-  /** The recipient address (optional for contract deployments) */
-  to?: string;
-  /** The value to send (in wei) */
-  value?: bigint;
-  /** The transaction data */
-  data?: string;
-  /** Gas limit for the transaction */
-  gas?: bigint;
-  /** Gas price for legacy transactions */
-  gasPrice?: bigint;
-  /** Maximum fee per gas for EIP-1559 transactions */
-  maxFeePerGas?: bigint;
-  /** Maximum priority fee per gas for EIP-1559 transactions */
-  maxPriorityFeePerGas?: bigint;
-  /** Transaction nonce */
-  nonce?: number;
-  /** Additional gas to add to the estimated gas */
-  extraGas?: bigint;
-  /** Access list for EIP-2930 transactions */
-  accessList?: Array<{
-    address: string;
-    storageKeys: string[];
-  }>;
-}
+export type PrepareTransactionResult = PrepareTransactionParams;
 
 /**
  * Parameters for preparing a contract call
@@ -153,14 +126,6 @@ export interface GetContractParams {
 
 /**
  * Result from getting a contract instance
+ * This is an alias to GetContractParams as they have identical structure
  */
-export interface GetContractResult {
-  /** The Panna client instance */
-  client: PannaClient;
-  /** The contract address */
-  address: string;
-  /** The contract ABI */
-  abi?: Abi;
-  /** The chain the contract is deployed on */
-  chain: Chain;
-}
+export type GetContractResult = GetContractParams;

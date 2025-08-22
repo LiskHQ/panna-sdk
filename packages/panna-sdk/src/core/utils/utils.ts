@@ -22,14 +22,16 @@ import {
 } from './types';
 
 /**
- * Converts the specified number of tokens to Wei.
- * @param tokens The number of tokens to convert.
+ * Converts the specified number of tokens to Wei (assumes 18 decimals like ETH).
+ * This function works with any token that uses 18 decimal places (ETH standard).
+ * @param tokens The number of tokens to convert (as string, e.g., "1.5").
  * @returns The converted value in Wei.
  * @example
  * ```ts
  * import { toWei } from 'panna-sdk';
  *
- * const value = toWei('1.5'); // 1500000000000000000n
+ * const value = toWei('1.5'); // 1500000000000000000n (1.5 ETH in wei)
+ * const usdcValue = toWei('100'); // Note: Only use for 18-decimal tokens!
  * ```
  */
 export const toWei = function (tokens: string): bigint {
