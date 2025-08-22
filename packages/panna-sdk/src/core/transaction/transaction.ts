@@ -85,35 +85,23 @@ export function prepareTransaction(
     accessList
   } = params;
 
-  const prepareParams: {
-    client: PannaClient;
-    chain: Chain;
-    to?: `0x${string}`;
-    value?: bigint;
-    data?: `0x${string}`;
-    gas?: bigint;
-    gasPrice?: bigint;
-    maxFeePerGas?: bigint;
-    maxPriorityFeePerGas?: bigint;
-    nonce?: number;
-    extraGas?: bigint;
-    accessList?: Array<{
-      address: `0x${string}`;
-      storageKeys: readonly `0x${string}`[];
-    }>;
-  } = {
+  const optionalFields = {
+    to,
+    value,
+    data,
+    gas,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    nonce,
+    extraGas,
+    accessList
+  };
+
+  const prepareParams = {
     client,
     chain,
-    ...(to !== undefined && { to }),
-    ...(value !== undefined && { value }),
-    ...(data !== undefined && { data }),
-    ...(gas !== undefined && { gas }),
-    ...(gasPrice !== undefined && { gasPrice }),
-    ...(maxFeePerGas !== undefined && { maxFeePerGas }),
-    ...(maxPriorityFeePerGas !== undefined && { maxPriorityFeePerGas }),
-    ...(nonce !== undefined && { nonce }),
-    ...(extraGas !== undefined && { extraGas }),
-    ...(accessList !== undefined && { accessList })
+    ...removeUndefined(optionalFields)
   };
 
   return thirdwebPrepareTransaction(prepareParams) as PrepareTransactionResult;
@@ -189,6 +177,17 @@ export function prepareContractCall(
     address: contract.address
   };
 
+  const optionalFields = {
+    value,
+    gas,
+    gasPrice,
+    maxFeePerGas,
+    maxPriorityFeePerGas,
+    nonce,
+    extraGas,
+    accessList
+  };
+
   const callParams: {
     contract: {
       client: PannaClient;
@@ -213,14 +212,7 @@ export function prepareContractCall(
     contract: contractWithTypedAddress,
     method,
     params: methodParams ?? [],
-    ...(value !== undefined && { value }),
-    ...(gas !== undefined && { gas }),
-    ...(gasPrice !== undefined && { gasPrice }),
-    ...(maxFeePerGas !== undefined && { maxFeePerGas }),
-    ...(maxPriorityFeePerGas !== undefined && { maxPriorityFeePerGas }),
-    ...(nonce !== undefined && { nonce }),
-    ...(extraGas !== undefined && { extraGas }),
-    ...(accessList !== undefined && { accessList })
+    ...removeUndefined(optionalFields)
   };
 
   return thirdwebPrepareContractCall(callParams) as PrepareContractCallResult;
@@ -263,6 +255,8 @@ export function prepareContractCall(
 export function getContract(params: GetContractParams): GetContractResult {
   const { client, address, abi, chain } = params;
 
+  const optionalFields = { abi };
+
   const contractParams: {
     client: PannaClient;
     address: `0x${string}`;
@@ -272,8 +266,19 @@ export function getContract(params: GetContractParams): GetContractResult {
     client,
     address: address,
     chain,
-    ...(abi !== undefined && { abi })
+    ...removeUndefined(optionalFields)
   };
 
   return thirdwebGetContract(contractParams) as GetContractResult;
+}
+
+/**
+ * Removes keys with `undefined` values from an object
+ */
+function removeUndefined<T extends Record<string, unknown>>(
+  obj: T
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined)
+  ) as Partial<T>;
 }
