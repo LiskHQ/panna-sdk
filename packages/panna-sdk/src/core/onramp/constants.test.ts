@@ -7,17 +7,23 @@ describe('Onramp Constants', () => {
       coinbase: {
         id: 'coinbase',
         displayName: 'Coinbase',
-        websiteUrl: 'https://www.coinbase.com'
+        description: 'Card, Apple Pay or bank transfer',
+        websiteUrl: 'https://www.coinbase.com',
+        logoUrl: 'https://www.coinbase.com/favicon.ico'
       },
       stripe: {
         id: 'stripe',
         displayName: 'Stripe',
-        websiteUrl: 'https://www.stripe.com'
+        description: 'Card, Apple Pay or bank transfer',
+        websiteUrl: 'https://www.stripe.com',
+        logoUrl: 'https://www.stripe.com/favicon.ico'
       },
       transak: {
         id: 'transak',
         displayName: 'Transak',
-        websiteUrl: 'https://www.transak.com'
+        description: 'Card, Apple Pay or bank transfer',
+        websiteUrl: 'https://www.transak.com',
+        logoUrl: 'https://www.transak.com/favicon.ico'
       }
     });
   });

@@ -294,29 +294,39 @@ describe('getOnrampProviders', () => {
     {
       id: 'transak',
       displayName: 'Transak',
-      websiteUrl: 'https://www.transak.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.transak.com',
+      logoUrl: 'https://www.transak.com/favicon.ico'
     },
     {
       id: 'coinbase',
       displayName: 'Coinbase',
-      websiteUrl: 'https://www.coinbase.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.coinbase.com',
+      logoUrl: 'https://www.coinbase.com/favicon.ico'
     },
     {
       id: 'stripe',
       displayName: 'Stripe',
-      websiteUrl: 'https://www.stripe.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.stripe.com',
+      logoUrl: 'https://www.stripe.com/favicon.ico'
     }
   ];
   const expectedResultForSA = [
     {
       id: 'coinbase',
       displayName: 'Coinbase',
-      websiteUrl: 'https://www.coinbase.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.coinbase.com',
+      logoUrl: 'https://www.coinbase.com/favicon.ico'
     },
     {
       id: 'stripe',
       displayName: 'Stripe',
-      websiteUrl: 'https://www.stripe.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.stripe.com',
+      logoUrl: 'https://www.stripe.com/favicon.ico'
     }
   ];
 
