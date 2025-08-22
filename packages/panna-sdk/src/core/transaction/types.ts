@@ -70,6 +70,7 @@ export interface PrepareContractCallParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   method: string | any;
   /** The parameters for the method call */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params?: readonly any[];
   /** The value to send with the transaction (in wei) */
   value?: bigint;
