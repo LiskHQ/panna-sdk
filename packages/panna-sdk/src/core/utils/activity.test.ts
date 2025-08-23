@@ -2,6 +2,7 @@ import { liskSepolia } from '../chains';
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
+  fillTokenTransactions,
   getActivitiesByAddress,
   getAmountType,
   getBaseTokenTransferRequestUrl,
@@ -9,7 +10,10 @@ import {
 } from './activity';
 import * as fixture from './activity.fixture.test';
 import { TokenERC, TokenType } from './activity.types';
-import { BlockscoutTransaction } from './blockscout.types';
+import {
+  BlockscoutTransaction,
+  BlockscoutTransactionsResponse
+} from './blockscout.types';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
@@ -17,7 +21,6 @@ import {
 } from './constants';
 
 // Mock upstream modules
-jest.mock('../helpers/cache', () => jest.requireActual('../helpers/cache'));
 jest.mock('../helpers/http');
 jest.mock('./activity', () => jest.requireActual('./activity'));
 
@@ -47,12 +50,87 @@ describe('getBaseTokenTransferRequestUrl', () => {
   });
 });
 
-describe('updateTokenTransactionsCache', () => {
-  it.todo('implement test cases');
-});
-
 describe('fillTokenTransactions', () => {
-  it.todo('implement test cases');
+  it('should return empty array when there are no transactions', () => {
+    const params = {
+      address: '0x1AC80cE05cd7715BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia,
+      transactions: []
+    };
+    expect(
+      fillTokenTransactions(
+        params.address,
+        params.chain.id,
+        params.transactions
+      )
+    ).resolves.toBe(params.transactions);
+  });
+
+  it('should assign empty array to token_transfers for each transaction', () => {
+    const params = {
+      address: '0x1AC80cE05cd7715BfBb7cEB2D42ed7874810EB3F',
+      chain: liskSepolia,
+      transactions: fixture.fillTokenTransactions
+        .should_assign_empty_array_to_token_transfers_for_each_transaction
+        .inputTransactions as unknown as BlockscoutTransaction[]
+    };
+
+    (httpUtils.request as jest.Mock).mockResolvedValue(
+      fixture.fillTokenTransactions
+        .should_assign_empty_array_to_token_transfers_for_each_transaction
+        .mockHttpResponse
+    );
+
+    expect(
+      fillTokenTransactions(
+        params.address,
+        params.chain.id,
+        params.transactions
+      )
+    ).resolves.toStrictEqual(
+      fixture.fillTokenTransactions
+        .should_assign_empty_array_to_token_transfers_for_each_transaction
+        .wantResult
+    );
+    expect(httpUtils.request).toHaveBeenCalledTimes(1);
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      1,
+      getBaseTokenTransferRequestUrl(params.address, params.chain.id)
+    );
+  });
+
+  it('should invoke updateTokenTransactionsCache only for eligible contract calls and token activity types', () => {
+    const params = {
+      address: '0x7e0bCc78E317Fa28f73a44567d854b081004622d',
+      chain: liskSepolia,
+      transactions: fixture.fillTokenTransactions
+        .should_invoke_updateTokenTransactionsCache_only_for_eligible_contract_calls_and_token_activity_types
+        .inputTransactions as unknown as BlockscoutTransaction[]
+    };
+
+    (httpUtils.request as jest.Mock).mockResolvedValue(
+      fixture.fillTokenTransactions
+        .should_invoke_updateTokenTransactionsCache_only_for_eligible_contract_calls_and_token_activity_types
+        .mockHttpResponse
+    );
+
+    expect(
+      fillTokenTransactions(
+        params.address,
+        params.chain.id,
+        params.transactions
+      )
+    ).resolves.toStrictEqual(
+      fixture.fillTokenTransactions
+        .should_invoke_updateTokenTransactionsCache_only_for_eligible_contract_calls_and_token_activity_types
+        .wantResult
+    );
+    expect(httpUtils.request).toHaveBeenCalledTimes(1);
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      1,
+      getBaseTokenTransferRequestUrl(params.address, params.chain.id)
+    );
+  });
 });
 
 describe('getAmountType', () => {
@@ -174,15 +252,14 @@ describe('getActivitiesByAddress', () => {
     });
   });
 
-  xit('should return list of activities (lower than default limit)', async () => {
-    const mockRequestResponse =
-      fixture.getActivitiesByAddress
-        .should_return_list_of_activities_lower_than_default_limit
-        .mockRequestResponse;
+  it('should return list of activities (lower than default limit)', async () => {
+    const mockRequestResponse = fixture.getActivitiesByAddress
+      .should_return_list_of_activities_lower_than_default_limit
+      .mockRequestResponse as unknown as BlockscoutTransactionsResponse;
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
-    (activity.fillTokenTransactions as jest.Mock).mockResolvedValue(
-      mockRequestResponse
-    );
+    jest
+      .spyOn(activity, 'fillTokenTransactions')
+      .mockResolvedValue(mockRequestResponse.items);
 
     const params = {
       address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
@@ -190,14 +267,17 @@ describe('getActivitiesByAddress', () => {
     };
     const result = await getActivitiesByAddress(params);
 
-    expect(httpUtils.request).toHaveBeenCalledTimes(2);
+    expect(httpUtils.request).toHaveBeenCalledTimes(1);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      getBaseTransactionsRequestUrl(params.address, liskSepolia.id)
+      getBaseTransactionsRequestUrl(params.address, params.chain.id)
     );
-    expect(httpUtils.request).toHaveBeenNthCalledWith(
-      2,
-      `https://blockscout.lisk.com/api/v2/addresses/${params.address}/token-transfers`
+    expect(activity.fillTokenTransactions).toHaveBeenCalledTimes(1);
+    expect(activity.fillTokenTransactions).toHaveBeenNthCalledWith(
+      1,
+      params.address,
+      params.chain.id,
+      mockRequestResponse.items
     );
     expect(result).toStrictEqual(
       fixture.getActivitiesByAddress
@@ -205,32 +285,30 @@ describe('getActivitiesByAddress', () => {
     );
   });
 
-  xit('should return list of activities (multiple API requests)', async () => {
-    const mockRequestResponse1 =
-      fixture.getActivitiesByAddress
-        .should_return_list_of_activities_multiple_API_requests
-        .mockRequestResponse1;
-    const mockRequestResponse2 =
-      fixture.getActivitiesByAddress
-        .should_return_list_of_activities_multiple_API_requests
-        .mockRequestResponse2;
-    const mockRequestResponse3 =
-      fixture.getActivitiesByAddress
-        .should_return_list_of_activities_multiple_API_requests
-        .mockRequestResponse3;
+  it('should return list of activities (multiple API requests)', async () => {
+    const mockRequestResponse1 = fixture.getActivitiesByAddress
+      .should_return_list_of_activities_multiple_API_requests
+      .mockRequestResponse1 as unknown as BlockscoutTransactionsResponse;
+    const mockRequestResponse2 = fixture.getActivitiesByAddress
+      .should_return_list_of_activities_multiple_API_requests
+      .mockRequestResponse2 as unknown as BlockscoutTransactionsResponse;
+    const mockRequestResponse3 = fixture.getActivitiesByAddress
+      .should_return_list_of_activities_multiple_API_requests
+      .mockRequestResponse3 as unknown as BlockscoutTransactionsResponse;
 
     (httpUtils.request as jest.Mock)
       .mockResolvedValueOnce(mockRequestResponse1)
       .mockResolvedValueOnce(mockRequestResponse2)
       .mockResolvedValueOnce(mockRequestResponse3);
 
-    (activity.fillTokenTransactions as jest.Mock)
-      .mockResolvedValueOnce(mockRequestResponse1)
-      .mockResolvedValueOnce(mockRequestResponse2)
-      .mockResolvedValueOnce(mockRequestResponse3);
+    jest
+      .spyOn(activity, 'fillTokenTransactions')
+      .mockResolvedValueOnce(mockRequestResponse1.items)
+      .mockResolvedValueOnce(mockRequestResponse2.items)
+      .mockResolvedValueOnce(mockRequestResponse3.items);
 
     const params = {
-      address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      address: '0x1AC80cE05cd7715BfBb7cEB2D42ed7874810EB3F',
       chain: liskSepolia,
       offset: 4,
       limit: 4
@@ -240,16 +318,16 @@ describe('getActivitiesByAddress', () => {
 
     const baseRequestUrl = getBaseTransactionsRequestUrl(
       params.address,
-      liskSepolia.id
+      params.chain.id
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
-      `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params.block_number}&index=${mockRequestResponse1.next_page_params.index}`
+      `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params?.block_number}&index=${mockRequestResponse1.next_page_params?.index}&items_count=${mockRequestResponse1.next_page_params?.items_count}`
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       3,
-      `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params.block_number}&index=${mockRequestResponse2.next_page_params.index}`
+      `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params?.block_number}&index=${mockRequestResponse2.next_page_params?.index}&items_count=${mockRequestResponse2.next_page_params?.items_count}`
     );
     expect(result).toStrictEqual(
       fixture.getActivitiesByAddress

@@ -75,29 +75,33 @@ export const isCacheableResponse = (response: AxiosResponse): boolean =>
 export const requestWithRetries = async (
   url: string,
   requestParams: RequestParamsConfig = {},
-  numRetries: number = DEFAULT_RETRIES,
+  maxRetries: number = DEFAULT_RETRIES,
   retryDelayMs: number = DEFAULT_RETRY_DELAY_MS
-): Promise<AxiosResponse | never> => {
-  const maxRetries = numRetries;
+) => {
   const requestConfig = { url, ...requestParams };
 
-  // Without the following initial request before the for loop, TS complains:
-  // "Variable 'response' is used before being assigned"
-  let response: AxiosResponse = await axios.request(requestConfig);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await axios.request(requestConfig);
+      if (
+        response.status < HttpStatusCode.InternalServerError ||
+        attempt === maxRetries // On final retry, return the API response
+      ) {
+        return response;
+      }
+    } catch (err) {
+      // Propagate the error only after final retry
+      if (attempt === maxRetries) {
+        throw err;
+      }
+    }
 
-  for (
-    ;
-    response.status >= HttpStatusCode.InternalServerError && numRetries;
-    --numRetries
-  ) {
-    const backedoffDelayMs =
-      retryDelayMs * Math.pow(2, maxRetries - numRetries);
-    await delay(backedoffDelayMs);
-
-    response = await axios.request(requestConfig);
+    // Wait only if the current attempt is not the final one
+    if (attempt < maxRetries) {
+      const backedoffDelayMs = retryDelayMs * Math.pow(2, maxRetries - attempt);
+      await delay(backedoffDelayMs);
+    }
   }
-
-  return response;
 };
 
 export const formatResponseToJSON = (respData: unknown) =>
@@ -129,7 +133,7 @@ export const request = async (
   const finalParams = { method, validateStatus: () => true, ...restParams };
 
   // If cache exists, return the response from cache
-  const cacheKey = JSON.stringify({ url, finalParams }, null, 0);
+  const cacheKey = `${url}:${JSON.stringify(finalParams, Object.keys(finalParams).sort())}`;
   if (requestCache.has(cacheKey)) {
     const response = requestCache.get(cacheKey) as AxiosResponse;
     return formatResponseToJSON(response.data);
@@ -153,9 +157,8 @@ export const request = async (
     const pannaFormatErr = formatAxiosErr(axiosErr.code);
     return {
       code: pannaFormatErr.code,
-      message: pannaFormatErr.message.length
-        ? pannaFormatErr.message
-        : axiosErr.message
+      message:
+        pannaFormatErr.message || axiosErr.message || 'Unknown error occurred'
     } as PannaHttpErr;
   }
 };

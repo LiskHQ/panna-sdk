@@ -104,8 +104,9 @@ describe('requestWithRetries', () => {
     const result = await requestWithRetries(MOCK_REQUEST_URL);
     const endTime = Date.now();
 
-    expect(axios.request).toHaveBeenCalledTimes(1 + DEFAULT_RETRIES);
-    for (let i = 1; i <= 1 + DEFAULT_RETRIES; i++) {
+    const expectedNumTries = 1 + DEFAULT_RETRIES;
+    expect(axios.request).toHaveBeenCalledTimes(expectedNumTries);
+    for (let i = 1; i <= expectedNumTries; i++) {
       expect(axios.request).toHaveBeenNthCalledWith(i, {
         url: MOCK_REQUEST_URL
       });
@@ -159,16 +160,24 @@ describe('requestWithRetries', () => {
     });
     jest.spyOn(delay, 'delay');
 
-    expect.assertions(4); // Because of for expect calls below
-    requestWithRetries(MOCK_REQUEST_URL).catch((e) =>
+    expect.assertions(5); // All the expect(*) calls below must be enforced
+    const startTime = Date.now();
+    await requestWithRetries(MOCK_REQUEST_URL).catch((e) =>
       expect(e instanceof AxiosError).toBeTruthy()
     );
+    const endTime = Date.now();
 
-    expect(axios.request).toHaveBeenCalledTimes(1);
+    const expectedNumTries = 1 + DEFAULT_RETRIES;
+    expect(axios.request).toHaveBeenCalledTimes(expectedNumTries);
     expect(axios.request).toHaveBeenCalledWith({
       url: MOCK_REQUEST_URL
     });
-    expect(delay.delay).not.toHaveBeenCalled();
+
+    const expectedNumRetries = expectedNumTries - 1;
+    expect(delay.delay).toHaveBeenCalledTimes(expectedNumRetries);
+    expect(endTime - startTime).toBeGreaterThanOrEqual(
+      DEFAULT_RETRY_DELAY_MS * (Math.pow(2, expectedNumRetries) - 1)
+    );
   });
 });
 
