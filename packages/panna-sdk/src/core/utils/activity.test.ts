@@ -3602,7 +3602,7 @@ describe('getActivitiesByAddress', () => {
           has_error_in_internal_transactions: false
         }
       ],
-      next_page_params: { block_number: 123, index: 1, items_count: 3 }
+      next_page_params: { block_number: 123, index: 1 }
     };
     const mockRequestResponse2 = {
       items: [
@@ -3814,7 +3814,7 @@ describe('getActivitiesByAddress', () => {
           has_error_in_internal_transactions: false
         }
       ],
-      next_page_params: { block_number: 456, index: 3, items_count: 5 }
+      next_page_params: { block_number: 456, index: 3 }
     };
     const mockRequestResponse3 = {
       items: [
@@ -4312,11 +4312,11 @@ describe('getActivitiesByAddress', () => {
     expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
-      `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params.block_number}&index=${mockRequestResponse1.next_page_params.index}&items_count=${mockRequestResponse1.next_page_params.items_count}`
+      `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params.block_number}&index=${mockRequestResponse1.next_page_params.index}`
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       3,
-      `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params.block_number}&index=${mockRequestResponse2.next_page_params.index}&items_count=${mockRequestResponse2.next_page_params.items_count}`
+      `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params.block_number}&index=${mockRequestResponse2.next_page_params.index}`
     );
     expect(result).toStrictEqual({
       activities: [

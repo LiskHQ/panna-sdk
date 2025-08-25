@@ -490,7 +490,7 @@ export const updateTokenTransactionsCache = async (
   const requestUrl =
     nextPageParams === null
       ? baseRequestUrl
-      : `${baseRequestUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}&items_count=${nextPageParams.items_count}`;
+      : `${baseRequestUrl}?block_number=${nextPageParams.block_number}&index=${nextPageParams.index}`;
 
   const response = await httpUtils.request(requestUrl);
 
