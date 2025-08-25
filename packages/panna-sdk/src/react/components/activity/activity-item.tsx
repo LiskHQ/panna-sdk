@@ -1,12 +1,15 @@
 import { ArrowDownIcon, SendIcon, StarIcon } from 'lucide-react';
 import {
   Activity,
+  ERC1155Amount,
+  ERC20Amount,
+  ERC721Amount,
+  EtherAmount,
   TokenERC,
   TransactionActivity,
   TransactionAmount
 } from 'src/core';
 import { tokenIconMap } from '@/mocks/token-balances';
-import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
 const DECIMAL_PLACES = 5;
@@ -80,18 +83,29 @@ function renderTransactionIcon(activity: Activity) {
 }
 
 function renderActivityTokenIcon(activity: Activity) {
+  const tokenSymbol =
+    (activity.amount as EtherAmount | ERC20Amount).tokenInfo?.symbol ||
+    (activity.amount as ERC721Amount | ERC1155Amount)?.instance?.tokenInfo
+      ?.symbol;
+
+  const icon = tokenSymbol ? tokenIconMap[tokenSymbol] : null;
+
   switch (activity.amount.type) {
     case TokenERC.ETH:
       return (
         <div className="relative py-1">
-          {tokenIconMap[activity.amount.tokenInfo?.symbol] ? (
+          {icon ? (
             <img
-              src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
+              src={icon}
               alt={activity.amount.tokenInfo?.symbol}
               className="h-10 w-10 rounded-full"
             />
           ) : (
-            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
+              <Typography variant="muted" className="text-xs">
+                {tokenSymbol?.[0]}
+              </Typography>
+            </div>
           )}
           {renderTransactionIcon(activity)}
         </div>
@@ -99,14 +113,18 @@ function renderActivityTokenIcon(activity: Activity) {
     case TokenERC.ERC20:
       return (
         <div className="relative py-1">
-          {tokenIconMap[activity.amount.tokenInfo?.symbol] ? (
+          {icon ? (
             <img
-              src={tokenIconMap[activity.amount.tokenInfo?.symbol]}
+              src={icon}
               alt={activity.amount.tokenInfo?.symbol}
               className="h-10 w-10 rounded-full"
             />
           ) : (
-            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
+              <Typography variant="muted" className="text-xs">
+                {tokenSymbol?.[0]}
+              </Typography>
+            </div>
           )}
           {renderTransactionIcon(activity)}
         </div>
@@ -115,9 +133,21 @@ function renderActivityTokenIcon(activity: Activity) {
       {
         /* TODO: Implement NFT icons on API update */
       }
-      return <Skeleton className="h-12 w-12 rounded-full" />;
+      return (
+        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
+          <Typography variant="muted" className="text-xs">
+            {tokenSymbol?.[0]}
+          </Typography>
+        </div>
+      );
     case TokenERC.ERC1155:
-      return <Skeleton className="h-12 w-12 rounded-full" />;
+      return (
+        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
+          <Typography variant="muted" className="text-xs">
+            {tokenSymbol?.[0]}
+          </Typography>
+        </div>
+      );
     default:
       console.warn(
         `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
