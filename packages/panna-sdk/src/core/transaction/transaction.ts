@@ -1,7 +1,8 @@
 import {
   prepareContractCall as thirdwebPrepareContractCall,
   prepareTransaction as thirdwebPrepareTransaction,
-  getContract as thirdwebGetContract
+  getContract as thirdwebGetContract,
+  sendTransaction as thirdwebSendTransaction
 } from 'thirdweb';
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
@@ -13,7 +14,9 @@ import type {
   PrepareContractCallParams,
   PrepareContractCallResult,
   GetContractParams,
-  GetContractResult
+  GetContractResult,
+  SendTransactionParams,
+  SendTransactionResult
 } from './types';
 
 /**
@@ -356,4 +359,109 @@ export function getContract(params: GetContractParams): GetContractResult {
   };
 
   return thirdwebGetContract(contractParams) as GetContractResult;
+}
+
+/**
+ * Send a prepared transaction to the blockchain
+ *
+ * This function executes a previously prepared transaction on the blockchain.
+ * It requires a connected wallet/account to sign and send the transaction.
+ * The transaction can be prepared using `prepareTransaction` for raw transactions
+ * or `prepareContractCall` for smart contract interactions.
+ *
+ * @param params - Parameters for sending the transaction
+ * @param params.transaction - The prepared transaction object from `prepareTransaction` or `prepareContractCall`
+ * @param params.account - The connected wallet/account to send the transaction from
+ * @returns Promise resolving to the transaction result with transaction hash
+ *
+ * @example
+ * ```typescript
+ * import { sendTransaction, prepareTransaction, createAccount, lisk } from 'panna-sdk';
+ *
+ * // 1. Create and connect an account
+ * const account = createAccount({ partnerId: 'your-partner-id' });
+ * // ... connect the account (see wallet documentation)
+ *
+ * // 2. Prepare a transaction
+ * const transaction = prepareTransaction({
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   value: toWei("1") // 1 ETH
+ * });
+ *
+ * // 3. Send the transaction
+ * const result = await sendTransaction({
+ *   account,
+ *   transaction
+ * });
+ *
+ * console.log("Transaction sent:", result.transactionHash);
+ *
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Send a contract call transaction
+ * import { sendTransaction, prepareContractCall, getContract } from 'panna-sdk';
+ *
+ * const contract = getContract({
+ *   client: pannaClient,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   chain: lisk
+ * });
+ *
+ * const transaction = prepareContractCall({
+ *   contract,
+ *   method: "function transfer(address to, uint256 amount)",
+ *   params: ["0x123...", toWei("100")]
+ * });
+ *
+ * const result = await sendTransaction({
+ *   account: connectedAccount,
+ *   transaction
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Error handling pattern
+ * try {
+ *   const result = await sendTransaction({
+ *     account,
+ *     transaction
+ *   });
+ *
+ *   console.log("Success! Transaction hash:", result.transactionHash);
+ * } catch (error) {
+ *   if (error.message.includes("insufficient funds")) {
+ *     console.error("Not enough balance to send transaction");
+ *   } else if (error.message.includes("user rejected")) {
+ *     console.error("User rejected the transaction");
+ *   } else {
+ *     console.error("Transaction failed:", error.message);
+ *   }
+ * }
+ * ```
+ */
+export async function sendTransaction(
+  params: SendTransactionParams
+): Promise<SendTransactionResult> {
+  const { transaction, account } = params;
+
+  try {
+    const result = await thirdwebSendTransaction({
+      transaction,
+      account
+    });
+
+    return result as SendTransactionResult;
+  } catch (error) {
+    // Re-throw with more context
+    throw new Error(
+      `Failed to send transaction: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
 }

@@ -1,3 +1,5 @@
+import type { PreparedTransaction } from 'thirdweb';
+import type { Account } from 'thirdweb/wallets';
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
 import type { Abi } from '../types/external';
@@ -130,3 +132,22 @@ export interface GetContractParams {
  * This is an alias to GetContractParams as they have identical structure
  */
 export type GetContractResult = GetContractParams;
+
+/**
+ * Parameters for sending a transaction to the blockchain
+ */
+export interface SendTransactionParams {
+  /** The wallet/account to send the transaction from */
+  account: Account;
+  /** The prepared transaction to send (from prepareTransaction or prepareContractCall) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transaction: PreparedTransaction<any>;
+}
+
+/**
+ * Result from sending a transaction
+ */
+export interface SendTransactionResult {
+  /** The transaction hash */
+  transactionHash: `0x${string}`;
+}

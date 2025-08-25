@@ -4,14 +4,16 @@ import type { PannaClient } from '../client';
 import {
   prepareTransaction,
   prepareContractCall,
-  getContract
+  getContract,
+  sendTransaction
 } from './transaction';
 
 // Mock thirdweb module
 jest.mock('thirdweb', () => ({
   prepareTransaction: jest.fn(),
   prepareContractCall: jest.fn(),
-  getContract: jest.fn()
+  getContract: jest.fn(),
+  sendTransaction: jest.fn()
 }));
 
 describe('Transaction Functions', () => {
@@ -564,6 +566,144 @@ describe('Transaction Functions', () => {
         chain: mockChain
       });
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('sendTransaction', () => {
+    const mockAccount = {
+      address: '0x123456789abcdef123456789abcdef123456789ab' as `0x${string}`,
+      signTransaction: jest.fn(),
+      signMessage: jest.fn(),
+      sendTransaction: jest.fn(),
+      signTypedData: jest.fn()
+    };
+
+    const mockPreparedTransaction = {
+      client: mockClient,
+      chain: mockChain,
+      to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+      value: BigInt('1000000000000000000')
+    };
+
+    it('should send a prepared transaction successfully', async () => {
+      const mockTransactionHash =
+        '0xabcdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef12' as `0x${string}`;
+      const mockResult = {
+        transactionHash: mockTransactionHash
+      };
+
+      (thirdweb.sendTransaction as jest.Mock).mockResolvedValue(mockResult);
+
+      const params = {
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      };
+
+      const result = await sendTransaction(params);
+
+      expect(thirdweb.sendTransaction).toHaveBeenCalledWith({
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should send a prepared contract call transaction successfully', async () => {
+      const mockDataFunction = jest.fn().mockResolvedValue('0xa9059cbb');
+      const mockPreparedContractCall = {
+        client: mockClient,
+        chain: mockChain,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        data: mockDataFunction,
+        value: BigInt('100000000000000000')
+      };
+
+      const mockTransactionHash =
+        '0xdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234' as `0x${string}`;
+      const mockResult = {
+        transactionHash: mockTransactionHash
+      };
+
+      (thirdweb.sendTransaction as jest.Mock).mockResolvedValue(mockResult);
+
+      const params = {
+        account: mockAccount,
+        transaction: mockPreparedContractCall
+      };
+
+      const result = await sendTransaction(params);
+
+      expect(thirdweb.sendTransaction).toHaveBeenCalledWith({
+        account: mockAccount,
+        transaction: mockPreparedContractCall
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should throw error with context when thirdweb sendTransaction fails', async () => {
+      const mockError = new Error('insufficient funds for gas * price + value');
+      (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(mockError);
+
+      const params = {
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      };
+
+      await expect(sendTransaction(params)).rejects.toThrow(
+        'Failed to send transaction: insufficient funds for gas * price + value'
+      );
+
+      expect(thirdweb.sendTransaction).toHaveBeenCalledWith({
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      });
+    });
+
+    it('should throw error with context when thirdweb sendTransaction fails with unknown error', async () => {
+      const mockError = 'Unknown error object';
+      (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(mockError);
+
+      const params = {
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      };
+
+      await expect(sendTransaction(params)).rejects.toThrow(
+        'Failed to send transaction: Unknown error'
+      );
+
+      expect(thirdweb.sendTransaction).toHaveBeenCalledWith({
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      });
+    });
+
+    it('should handle user rejection error', async () => {
+      const mockError = new Error('User rejected the transaction');
+      (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(mockError);
+
+      const params = {
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      };
+
+      await expect(sendTransaction(params)).rejects.toThrow(
+        'Failed to send transaction: User rejected the transaction'
+      );
+    });
+
+    it('should handle network error', async () => {
+      const mockError = new Error('Network request failed');
+      (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(mockError);
+
+      const params = {
+        account: mockAccount,
+        transaction: mockPreparedTransaction
+      };
+
+      await expect(sendTransaction(params)).rejects.toThrow(
+        'Failed to send transaction: Network request failed'
+      );
     });
   });
 });
