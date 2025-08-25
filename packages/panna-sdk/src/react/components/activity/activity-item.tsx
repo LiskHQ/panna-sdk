@@ -58,19 +58,19 @@ function renderTransactionIcon(activity: Activity) {
     case TransactionActivity.SENT:
       return (
         <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-yellow-300 p-0.75">
-          <SendIcon size={12} />
+          <SendIcon size={10} />
         </div>
       );
     case TransactionActivity.RECEIVED:
       return (
         <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-green-300 p-0.75">
-          <ArrowDownIcon size={12} />
+          <ArrowDownIcon size={10} />
         </div>
       );
     case TransactionActivity.MINTED:
       return (
         <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-purple-300 p-0.75">
-          <StarIcon size={12} />
+          <StarIcon size={10} />
         </div>
       );
     default:
@@ -134,18 +134,20 @@ function renderActivityTokenIcon(activity: Activity) {
         /* TODO: Implement NFT icons on API update */
       }
       return (
-        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
+        <div className="bg-muted relative flex h-10 w-10 items-center justify-center rounded-full">
           <Typography variant="muted" className="text-xs">
             {tokenSymbol?.[0]}
           </Typography>
+          {renderTransactionIcon(activity)}
         </div>
       );
     case TokenERC.ERC1155:
       return (
-        <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-full">
+        <div className="bg-muted relative flex h-10 w-10 items-center justify-center rounded-full">
           <Typography variant="muted" className="text-xs">
             {tokenSymbol?.[0]}
           </Typography>
+          {renderTransactionIcon(activity)}
         </div>
       );
     default:
