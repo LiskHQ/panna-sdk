@@ -21,6 +21,5 @@ export type {
   OnrampPrepareParams,
   OnrampProvider,
   GetTokenFiatPricesParams,
-  ProviderInfo,
-  TokenFiatPrice
+  ProviderInfo
 } from './types';

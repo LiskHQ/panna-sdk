@@ -21,6 +21,11 @@ export {
   prepareLogin,
   unlinkAccount,
 
+  // Transaction functions
+  prepareTransaction,
+  prepareContractCall,
+  getContract,
+
   // Wallet/Account types and enums
   EcosystemId,
   LoginStrategy,
@@ -49,6 +54,7 @@ export {
   getSocialIcon,
   getFiatPrice,
   isValidAddress,
+  toWei,
 
   // Utils types
   type AccountBalanceParams,
@@ -93,7 +99,14 @@ export {
   type OnrampProvider,
   type GetTokenFiatPricesParams,
   type ProviderInfo,
-  type TokenFiatPrice,
+
+  // Transaction types
+  type PrepareTransactionParams,
+  type PrepareTransactionResult,
+  type PrepareContractCallParams,
+  type PrepareContractCallResult,
+  type GetContractParams,
+  type GetContractResult,
 
   // Constants
   DEFAULT_CURRENCY,

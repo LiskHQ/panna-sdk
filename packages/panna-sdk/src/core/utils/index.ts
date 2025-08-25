@@ -6,3 +6,4 @@ export * from './activity';
 export * from './activity.types';
 export * from './collectible';
 export * from './collectible.types';
+export * from './object';

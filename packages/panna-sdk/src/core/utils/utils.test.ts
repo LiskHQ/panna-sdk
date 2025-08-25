@@ -19,7 +19,8 @@ import {
   accountBalanceInFiat,
   accountBalancesInFiat,
   getFiatPrice,
-  getSocialIcon
+  getSocialIcon,
+  toWei
 } from './utils';
 import * as utils from './utils';
 import {
@@ -1243,6 +1244,29 @@ describe('Utils - Unit Tests', () => {
       );
       expect(result.tokenBalances[0].token.symbol).toBe('ETH');
       expect(result.totalValue.currency).toBe(DEFAULT_CURRENCY);
+    });
+  });
+
+  describe('toWei', () => {
+    it('should convert string tokens to wei bigint', () => {
+      const result = toWei('1');
+      expect(result).toBe(BigInt('1000000000000000000'));
+      expect(typeof result).toBe('bigint');
+    });
+
+    it('should handle decimal values', () => {
+      const result = toWei('1.5');
+      expect(result).toBe(BigInt('1500000000000000000'));
+    });
+
+    it('should handle small decimal values', () => {
+      const result = toWei('0.001');
+      expect(result).toBe(BigInt('1000000000000000'));
+    });
+
+    it('should handle zero', () => {
+      const result = toWei('0');
+      expect(result).toBe(BigInt('0'));
     });
   });
 });
