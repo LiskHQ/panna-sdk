@@ -77,13 +77,12 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
 
 // Since we internally maintain a list of tokens for a supported network,
 // we can use that to map the token symbols to their icons in the mock balances.
-const tokenIconMap = liskTokenConfig[lisk.id].reduce<Record<string, string>>(
-  (acc, token) => {
-    acc[token.symbol] = token.icon ?? liskTokenConfig[lisk.id][0].icon!; // Fallback to the Lisk icon if not defined
-    return acc;
-  },
-  {}
-);
+export const tokenIconMap = liskTokenConfig[lisk.id].reduce<
+  Record<string, string>
+>((acc, token) => {
+  acc[token.symbol] = token.icon ?? liskTokenConfig[lisk.id][0].icon!; // Fallback to the Lisk icon if not defined
+  return acc;
+}, {});
 
 export const mockTokenBalances: TokenBalance[] = mockAccountBalances.map(
   (balance) => {

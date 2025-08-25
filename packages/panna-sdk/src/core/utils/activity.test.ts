@@ -4,8 +4,8 @@ import * as activity from './activity';
 import {
   getActivitiesByAddress,
   getAmountType,
-  getBaseTransactionsRequestUrl,
-  getBaseTokenTransferRequestUrl
+  getBaseTokenTransferRequestUrl,
+  getBaseTransactionsRequestUrl
 } from './activity';
 import { TokenERC, TokenType } from './activity.types';
 import { BlockscoutTransaction } from './blockscout.types';
@@ -3215,7 +3215,7 @@ describe('getActivitiesByAddress', () => {
     expect(result).toStrictEqual({
       activities: [
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3232,7 +3232,7 @@ describe('getActivitiesByAddress', () => {
             '0x3dc796c0ac01958eccb6036c5690643e3730f03bc3f9416cc55051366d16f737'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3249,7 +3249,7 @@ describe('getActivitiesByAddress', () => {
             '0x97b41ed9540bdb247b0f52501c3990cf376874a05adff0a76cef23602cc580d5'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3266,7 +3266,7 @@ describe('getActivitiesByAddress', () => {
             '0x7957c0323b7fed9da521ab09ac0d4d81ff2ddeaa89a1a7b75738ed23a95769fd'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3283,7 +3283,7 @@ describe('getActivitiesByAddress', () => {
             '0x3e50f83636069d59795f0604ed8f2983a1c8dd2ae0f563337486b2362258def8'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3300,7 +3300,7 @@ describe('getActivitiesByAddress', () => {
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3317,7 +3317,7 @@ describe('getActivitiesByAddress', () => {
             '0x210b5c866acf8e2fa873cb6d678b5dbb7c08f1a3e0c188b11f284fa16996fe16'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -3334,7 +3334,7 @@ describe('getActivitiesByAddress', () => {
             '0x055ab631e36bae1c152edb323351f3cc217e465939eb25504675d8201196782e'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xac485391EB2d7D88253a7F1eF18C37f4242D1A24',
@@ -3352,7 +3352,7 @@ describe('getActivitiesByAddress', () => {
             '0x426e9555a435cef173103d817b63a86cf8a96888bcc6fc47e405fff608e08d1e'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xac485391EB2d7D88253a7F1eF18C37f4242D1A24',
@@ -3602,7 +3602,7 @@ describe('getActivitiesByAddress', () => {
           has_error_in_internal_transactions: false
         }
       ],
-      next_page_params: { block_number: 123, index: 1, items_count: 3 }
+      next_page_params: { block_number: 123, index: 1 }
     };
     const mockRequestResponse2 = {
       items: [
@@ -3814,7 +3814,7 @@ describe('getActivitiesByAddress', () => {
           has_error_in_internal_transactions: false
         }
       ],
-      next_page_params: { block_number: 456, index: 3, items_count: 5 }
+      next_page_params: { block_number: 456, index: 3 }
     };
     const mockRequestResponse3 = {
       items: [
@@ -4312,16 +4312,16 @@ describe('getActivitiesByAddress', () => {
     expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
-      `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params.block_number}&index=${mockRequestResponse1.next_page_params.index}&items_count=${mockRequestResponse1.next_page_params.items_count}`
+      `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params.block_number}&index=${mockRequestResponse1.next_page_params.index}`
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       3,
-      `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params.block_number}&index=${mockRequestResponse2.next_page_params.index}&items_count=${mockRequestResponse2.next_page_params.items_count}`
+      `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params.block_number}&index=${mockRequestResponse2.next_page_params.index}`
     );
     expect(result).toStrictEqual({
       activities: [
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -4338,7 +4338,7 @@ describe('getActivitiesByAddress', () => {
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -4355,7 +4355,7 @@ describe('getActivitiesByAddress', () => {
             '0x210b5c866acf8e2fa873cb6d678b5dbb7c08f1a3e0c188b11f284fa16996fe16'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -4372,7 +4372,7 @@ describe('getActivitiesByAddress', () => {
             '0x055ab631e36bae1c152edb323351f3cc217e465939eb25504675d8201196782e'
         },
         {
-          activityType: 'sent',
+          activityType: 'Sent',
           amount: {
             tokenInfo: {
               address: '0xac485391EB2d7D88253a7F1eF18C37f4242D1A24',

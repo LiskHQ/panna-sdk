@@ -25,6 +25,7 @@ export {
 } from 'thirdweb/react';
 
 export { usePanna } from './use-panna';
+export { useActivities } from './use-activities';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
 export {

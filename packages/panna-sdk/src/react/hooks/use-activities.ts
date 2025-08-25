@@ -1,9 +1,10 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { getCollectiblesByAddress, isValidAddress } from 'src/core';
 import {
-  GetCollectiblesByAddressParams,
-  GetCollectiblesByAddressResult
-} from 'src/core/utils/collectible.types';
+  getActivitiesByAddress,
+  GetActivitiesByAddressParams,
+  GetActivitiesByAddressResult,
+  isValidAddress
+} from 'src/core';
 import { generatePaginationQueryFilter } from '@/utils/query-utils';
 import {
   createDefaultRetryFn,
@@ -14,18 +15,18 @@ import {
 import { usePanna } from './use-panna';
 
 /**
- * Hook to retrieve collectibles
- * @param params - Parameters for retrieving collectibles
+ * Hook to retrieve activities
+ * @param params - Parameters for retrieving activities
  * @param params.address - The account address for which to retrieve the collectibles.
  * @param params.chain - (Optional) Chain object type. (Default: lisk)
  * @param params.limit - (Optional) The number of items to be returned from the matching result. (Default: 10)
  * @param params.offset - (Optional) The number of items to be skipped from the matching result. (Default: 0)
- * @returns React Query result with collectible data
+ * @returns React Query result with activity data
  */
-export function useCollectibles(
-  { address, chain, limit, offset }: GetCollectiblesByAddressParams,
+export function useActivities(
+  { address, chain, limit, offset }: GetActivitiesByAddressParams,
   options?: Omit<
-    UseQueryOptions<GetCollectiblesByAddressResult>,
+    UseQueryOptions<GetActivitiesByAddressResult>,
     'queryKey' | 'queryFn'
   >
 ) {
@@ -35,9 +36,9 @@ export function useCollectibles(
   const variables = { address, chain, ...queryFilter };
 
   return useQuery({
-    queryKey: ['collectibles', JSON.stringify(variables)],
-    queryFn: async (): Promise<GetCollectiblesByAddressResult> => {
-      return await getCollectiblesByAddress({
+    queryKey: ['activities', JSON.stringify(variables)],
+    queryFn: async (): Promise<GetActivitiesByAddressResult> => {
+      return await getActivitiesByAddress({
         address,
         chain,
         limit,
