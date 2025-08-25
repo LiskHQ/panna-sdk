@@ -1,8 +1,6 @@
+import { ArrowDownIcon, SendIcon, StarIcon } from 'lucide-react';
 import { Activity, TokenERC, TransactionActivity } from 'src/core';
 import { tokenIconMap } from '@/mocks/token-balances';
-import { MintedNFTTxnIcon } from '../icons/minted-nft-txn-icon';
-import { ReceivedTxnIcon } from '../icons/received-txn-icon';
-import { SentTxnIcon } from '../icons/sent-txn-icon';
 import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
@@ -44,11 +42,23 @@ function renderActivitySymbol(activity: Activity) {
 function renderTransactionIcon(activity: Activity) {
   switch (activity.activityType) {
     case TransactionActivity.SENT:
-      return <SentTxnIcon className="absolute top-0 left-0" />;
+      return (
+        <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-yellow-300 p-0.75">
+          <SendIcon size={12} />
+        </div>
+      );
     case TransactionActivity.RECEIVED:
-      return <ReceivedTxnIcon className="absolute top-0 left-0" />;
+      return (
+        <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-green-300 p-0.75">
+          <ArrowDownIcon size={12} />
+        </div>
+      );
     case TransactionActivity.MINTED:
-      return <MintedNFTTxnIcon className="absolute top-0 left-0" />;
+      return (
+        <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-purple-300 p-0.75">
+          <StarIcon size={12} />
+        </div>
+      );
     default:
       return null;
   }
