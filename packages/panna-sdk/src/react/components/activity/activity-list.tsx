@@ -33,7 +33,7 @@ export function ActivityList({ className }: ActivityListProps) {
   });
   const { data, isLoading, isFetching, isError } = useActivities(
     {
-      address: '0xe1287E785D424cd3d0998957388C4770488ed841',
+      address: account?.address as string,
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize
     },
