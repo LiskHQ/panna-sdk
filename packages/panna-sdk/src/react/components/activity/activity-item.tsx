@@ -1,8 +1,15 @@
 import { ArrowDownIcon, SendIcon, StarIcon } from 'lucide-react';
-import { Activity, TokenERC, TransactionActivity } from 'src/core';
+import {
+  Activity,
+  TokenERC,
+  TransactionActivity,
+  TransactionAmount
+} from 'src/core';
 import { tokenIconMap } from '@/mocks/token-balances';
 import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
+
+const DECIMAL_PLACES = 5;
 
 type ActivityItemProps = {
   activity: Activity;
@@ -35,6 +42,10 @@ function renderActivitySymbol(activity: Activity) {
         </Typography>
       );
     default:
+      console.warn(
+        `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
+        activity
+      );
       return null;
   }
 }
@@ -60,6 +71,10 @@ function renderTransactionIcon(activity: Activity) {
         </div>
       );
     default:
+      console.warn(
+        `Unsupported activity type: ${activity.activityType}`,
+        activity
+      );
       return null;
   }
 }
@@ -104,6 +119,10 @@ function renderActivityTokenIcon(activity: Activity) {
     case TokenERC.ERC1155:
       return <Skeleton className="h-12 w-12 rounded-full" />;
     default:
+      console.warn(
+        `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
+        activity
+      );
       return null;
   }
 }
@@ -116,7 +135,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
-          ).toFixed(8)}{' '}
+          ).toFixed(DECIMAL_PLACES)}{' '}
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
@@ -126,7 +145,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
-          ).toFixed(8)}{' '}
+          ).toFixed(DECIMAL_PLACES)}{' '}
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
@@ -135,6 +154,10 @@ function renderActivityNameOrSymbol(activity: Activity) {
     case TokenERC.ERC1155:
       return <Typography variant="small">1 Collectible</Typography>;
     default:
+      console.warn(
+        `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
+        activity
+      );
       return null;
   }
 }

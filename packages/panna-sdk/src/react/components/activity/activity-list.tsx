@@ -55,8 +55,6 @@ export function ActivityList({ className }: ActivityListProps) {
     meta: data?.metadata
   });
 
-  console.log({ data, activitiesData, isLoading, isFetching, isError });
-
   if (isLoading) {
     return (
       <section
