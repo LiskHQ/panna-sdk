@@ -31,12 +31,6 @@ export const liskTokenConfig: SupportedTokens = {
     },
     {
       address: '0xF242275d3a6527d877f2c927a82D9b057609cc71',
-      name: 'USDC',
-      symbol: 'USDC',
-      icon: usdcIcon
-    },
-    {
-      address: '0xF242275d3a6527d877f2c927a82D9b057609cc71',
       name: 'Bridged USDC (Lisk)',
       symbol: 'USDC.e',
       icon: usdcIcon
