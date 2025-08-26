@@ -8,7 +8,7 @@ import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useActiveAccount } from 'thirdweb/react';
 import { useActivities } from '@/hooks/use-activities';
-import { cn } from '@/utils';
+import { cn, getEnvironmentChain } from '@/utils';
 import { Skeleton } from '../ui/skeleton';
 import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
@@ -31,7 +31,8 @@ export function ActivityList({ className }: ActivityListProps) {
     {
       address: account?.address as string,
       limit: pagination.pageSize,
-      offset: pagination.pageIndex * pagination.pageSize
+      offset: pagination.pageIndex * pagination.pageSize,
+      chain: getEnvironmentChain()
     },
     {
       enabled: !!account?.address
