@@ -106,7 +106,7 @@ describe('CollectiblesList', () => {
       data: {
         collectibles: [
           {
-            token: { symbol: 'COLL', name: 'Collectible One' },
+            token: { symbol: 'COLL', name: 'Collectibles' },
             numInstancesOwned: 2,
             instances: [
               {
@@ -130,7 +130,7 @@ describe('CollectiblesList', () => {
     });
 
     render(<CollectiblesList />);
-    expect(screen.getByText('Collectible One')).toBeVisible();
+    expect(screen.getByText('Collectibles')).toBeVisible();
     expect(screen.getByText('(2)')).toBeVisible();
     expect(screen.getAllByAltText('Collectible One')[1]).toBeVisible();
     expect(screen.getByAltText('Collectible Two')).toBeVisible();
