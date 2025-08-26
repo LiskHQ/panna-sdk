@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Country schema
 export const countrySchema = z.object({
-  code: z.string().min(2, 'Country code is required'),
+  code: z.string().length(2, 'Country code is required'),
   name: z.string().min(1, 'Country name is required'),
   flag: z.string().min(1, 'Country flag is required')
 });
@@ -40,11 +40,7 @@ export const buyWithFiatQuoteSchema = z.object({
 export const buyFormSchema = z.object({
   country: countrySchema.optional(),
   token: tokenSchema.optional(),
-  fiatAmount: z
-    .number()
-    .min(0.01, 'Amount must be greater than 0')
-    .max(1000000, 'Amount is too large')
-    .optional(),
+  fiatAmount: z.number().gt(0, 'Amount must be greater than 0').optional(),
   cryptoAmount: z.number().optional(),
   provider: buyWithFiatQuoteSchema.optional()
 });
