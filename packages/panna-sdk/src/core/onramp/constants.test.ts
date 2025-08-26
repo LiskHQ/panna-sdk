@@ -23,7 +23,7 @@ describe('Onramp Constants', () => {
         displayName: 'Transak',
         description: 'Card, Apple Pay or bank transfer',
         websiteUrl: 'https://www.transak.com',
-        logoUrl: 'https://www.transak.com/favicon.ico'
+        logoUrl: 'https://www.transak.com/favicon.png'
       }
     });
   });
