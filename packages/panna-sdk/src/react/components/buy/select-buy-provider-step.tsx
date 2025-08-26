@@ -2,6 +2,7 @@ import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
+import { extractNumericPrice } from '../../../core/utils/utils';
 import { useBuyWithFiatQuotes, useSupportedTokens } from '../../hooks';
 import type { BuyWithFiatQuote } from '../../types/buy-with-fiat-quote.types';
 import { Badge } from '../ui/badge';
@@ -26,7 +27,9 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { data: supportedTokens = [] } = useSupportedTokens();
 
   const tokenAddress = useMemo(() => {
-    if (!token?.symbol) return undefined;
+    if (!token?.symbol) {
+      return undefined;
+    }
     const supportedToken = supportedTokens.find(
       (t) => t.symbol === token.symbol
     );
@@ -52,7 +55,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
       const quotesWithParsedPrices = quotes.map((quote) => {
         const numericPrice =
           quote.price && !quote.error
-            ? parseFloat(quote.price.replace(/[^\d.-]/g, ''))
+            ? extractNumericPrice(quote.price)
             : Infinity;
 
         return {

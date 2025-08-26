@@ -55,6 +55,8 @@ export {
   getFiatPrice,
   isValidAddress,
   toWei,
+  extractNumericPrice,
+  REGEX_EXTRACT_NUMERIC_PRICE,
 
   // Utils types
   type AccountBalanceParams,

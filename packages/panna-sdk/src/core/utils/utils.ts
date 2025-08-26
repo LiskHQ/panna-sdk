@@ -424,3 +424,34 @@ export const accountBalancesInFiat = async function (
 
   return result;
 };
+
+/**
+ * Regex to extract numeric price from formatted currency strings
+ *
+ * Matches digits, decimal points, and minus signs while removing:
+ * - Currency symbols ($, €, £, etc.)
+ * - Thousands separators (commas, spaces)
+ * - Any other non-numeric characters
+ *
+ * Examples:
+ * - "$123.45" → "123.45"
+ * - "€1,234.56" → "1234.56"
+ * - "£-10.00" → "-10.00"
+ * - "Loading..." → "" (empty, will become NaN)
+ * - "N/A" → "" (empty, will become NaN)
+ */
+export const REGEX_EXTRACT_NUMERIC_PRICE = /[^\d.-]/g;
+
+/**
+ * Extract numeric value from a formatted price string
+ * @param priceString - Formatted price string (e.g., "$123.45", "€1,234.56")
+ * @returns Numeric value or Infinity if parsing fails
+ */
+export function extractNumericPrice(priceString: string): number {
+  if (!priceString) return Infinity;
+
+  const numericString = priceString.replace(REGEX_EXTRACT_NUMERIC_PRICE, '');
+  const parsed = parseFloat(numericString);
+
+  return isNaN(parsed) ? Infinity : parsed;
+}
