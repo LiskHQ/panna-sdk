@@ -65,15 +65,15 @@ export const liskSepoliaTokenConfig: SupportedTokens = {
       icon: ethIcon
     },
     {
-      address: '0x2728DD8B45B788e26d12B13Db5A244e5403e7eda',
+      address: '0xd26Be7331EDd458c7Afa6D8B7fcB7a9e1Bb68909',
       name: 'Tether',
       symbol: 'USDT',
       icon: usdtIcon
     },
     {
-      address: '0x72db95F0716cF79C0efe160F23fB17bF1c161317',
+      address: '0x0E82fDDAd51cc3ac12b69761C45bBCB9A2Bf3C83',
       name: 'USDC',
-      symbol: 'USDC',
+      symbol: 'USDC.e',
       icon: usdcIcon
     }
   ]
