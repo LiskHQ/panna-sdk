@@ -7,6 +7,7 @@ import {
   getContract,
   sendTransaction
 } from './transaction';
+import * as transaction from './transaction';
 
 // Mock thirdweb module
 jest.mock('thirdweb', () => ({
@@ -15,6 +16,7 @@ jest.mock('thirdweb', () => ({
   getContract: jest.fn(),
   sendTransaction: jest.fn()
 }));
+jest.mock('./transaction', () => jest.requireActual('./transaction'));
 
 describe('Transaction Functions', () => {
   const mockClient = { clientId: 'test-client' } as PannaClient;
@@ -27,6 +29,74 @@ describe('Transaction Functions', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('getContract', () => {
+    it('should get a contract instance with minimal parameters', () => {
+      const mockResult = {
+        client: mockClient,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        chain: mockChain
+      };
+
+      (thirdweb.getContract as jest.Mock).mockReturnValue(mockResult);
+
+      const params = {
+        client: mockClient,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        chain: mockChain
+      };
+
+      const result = getContract(params);
+
+      expect(thirdweb.getContract).toHaveBeenCalledWith({
+        client: mockClient,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        chain: mockChain
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should get a contract instance with ABI', () => {
+      const mockAbi = [
+        {
+          type: 'function' as const,
+          name: 'transfer',
+          inputs: [
+            { type: 'address', name: 'to' },
+            { type: 'uint256', name: 'amount' }
+          ],
+          outputs: [],
+          stateMutability: 'nonpayable' as const
+        }
+      ];
+
+      const mockResult = {
+        client: mockClient,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        abi: mockAbi,
+        chain: mockChain
+      };
+
+      (thirdweb.getContract as jest.Mock).mockReturnValue(mockResult);
+
+      const params = {
+        client: mockClient,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        abi: mockAbi,
+        chain: mockChain
+      };
+
+      const result = getContract(params);
+
+      expect(thirdweb.getContract).toHaveBeenCalledWith({
+        client: mockClient,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        abi: mockAbi,
+        chain: mockChain
+      });
+      expect(result).toEqual(mockResult);
+    });
   });
 
   describe('prepareTransaction', () => {
@@ -151,15 +221,18 @@ describe('Transaction Functions', () => {
       };
 
       (thirdweb.prepareContractCall as jest.Mock).mockReturnValue(mockResult);
+      jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
       const params = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function transfer(address to, uint256 amount)',
         params: ['0x123456789', BigInt('1000000000000000000')]
       };
 
       const result = prepareContractCall(params);
 
+      expect(transaction.getContract).toHaveBeenCalledTimes(1);
+      expect(transaction.getContract).toHaveBeenCalledWith({ ...mockContract });
       expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
         contract: mockContract,
         method: 'function transfer(address to, uint256 amount)',
@@ -182,9 +255,10 @@ describe('Transaction Functions', () => {
       };
 
       (thirdweb.prepareContractCall as jest.Mock).mockReturnValue(mockResult);
+      jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
       const params = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function mint(address to)',
         params: ['0x123456789'],
         value: BigInt('100000000000000000')
@@ -192,6 +266,8 @@ describe('Transaction Functions', () => {
 
       const result = prepareContractCall(params);
 
+      expect(transaction.getContract).toHaveBeenCalledTimes(1);
+      expect(transaction.getContract).toHaveBeenCalledWith({ ...mockContract });
       expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
         contract: mockContract,
         method: 'function mint(address to)',
@@ -215,14 +291,17 @@ describe('Transaction Functions', () => {
       };
 
       (thirdweb.prepareContractCall as jest.Mock).mockReturnValue(mockResult);
+      jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
       const params = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function totalSupply()'
       };
 
       const result = prepareContractCall(params);
 
+      expect(transaction.getContract).toHaveBeenCalledTimes(1);
+      expect(transaction.getContract).toHaveBeenCalledWith({ ...mockContract });
       expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
         contract: mockContract,
         method: 'function totalSupply()',
@@ -255,15 +334,18 @@ describe('Transaction Functions', () => {
       };
 
       (thirdweb.prepareContractCall as jest.Mock).mockReturnValue(mockResult);
+      jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
       const params = {
-        contract: mockContract,
+        ...mockContract,
         method: mockAbiFunction,
         params: ['0x123456789', BigInt('1000000000000000000')]
       };
 
       const result = prepareContractCall(params);
 
+      expect(transaction.getContract).toHaveBeenCalledTimes(1);
+      expect(transaction.getContract).toHaveBeenCalledWith({ ...mockContract });
       expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
         contract: mockContract,
         method: mockAbiFunction,
@@ -283,9 +365,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: 'function nonExistentFunction()',
           params: []
         };
@@ -293,6 +376,11 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Contract does not contain method: nonExistentFunction'
         );
+
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: 'function nonExistentFunction()',
@@ -305,9 +393,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: 'malformed method signature',
           params: []
         };
@@ -315,6 +404,10 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Invalid method signature: malformed'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: 'malformed method signature',
@@ -327,9 +420,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: 'function transfer(address to, uint256 amount)',
           params: ['0x123456789'] // Missing amount parameter
         };
@@ -337,6 +431,10 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Expected 2 parameters but got 1'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: 'function transfer(address to, uint256 amount)',
@@ -349,9 +447,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: 'function transfer(address to, uint256 amount)',
           params: ['0x123456789', BigInt('1000000000000000000'), 'extraParam']
         };
@@ -359,6 +458,10 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Expected 2 parameters but got 3'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: 'function transfer(address to, uint256 amount)',
@@ -373,9 +476,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: 'function transfer(address to, uint256 amount)',
           params: ['0x123456789', 'invalidAmount'] // Should be BigInt, not string
         };
@@ -383,6 +487,10 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Parameter type mismatch: expected uint256 but got string'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: 'function transfer(address to, uint256 amount)',
@@ -395,9 +503,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: '',
           params: []
         };
@@ -405,6 +514,10 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Method cannot be empty'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: '',
@@ -417,14 +530,19 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: undefined as unknown as string,
           params: []
         };
 
         expect(() => prepareContractCall(params)).toThrow('Method is required');
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: undefined,
@@ -447,9 +565,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: nonExistentAbiFunction,
           params: []
         };
@@ -457,6 +576,10 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Function nonExistentFunction not found in contract ABI'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: nonExistentAbiFunction,
@@ -482,9 +605,10 @@ describe('Transaction Functions', () => {
         (thirdweb.prepareContractCall as jest.Mock).mockImplementation(() => {
           throw mockError;
         });
+        jest.spyOn(transaction, 'getContract').mockReturnValue(mockContract);
 
         const params = {
-          contract: mockContract,
+          ...mockContract,
           method: transferAbiFunction,
           params: [] // Should have 2 parameters
         };
@@ -492,80 +616,37 @@ describe('Transaction Functions', () => {
         expect(() => prepareContractCall(params)).toThrow(
           'Function transfer requires 2 parameters but 0 provided'
         );
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract
+        });
         expect(thirdweb.prepareContractCall).toHaveBeenCalledWith({
           contract: mockContract,
           method: transferAbiFunction,
           params: []
         });
       });
-    });
-  });
 
-  describe('getContract', () => {
-    it('should get a contract instance with minimal parameters', () => {
-      const mockResult = {
-        client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        chain: mockChain
-      };
+      it('should throw error when getContract invocation fails', () => {
+        jest.spyOn(transaction, 'getContract').mockImplementation(() => {
+          throw new Error('Invalid input');
+        });
 
-      (thirdweb.getContract as jest.Mock).mockReturnValue(mockResult);
+        const params = {
+          ...mockContract,
+          address: '0xinvalidAddress' as `0x${string}`,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789', BigInt('1000000000000000000')]
+        };
 
-      const params = {
-        client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        chain: mockChain
-      };
-
-      const result = getContract(params);
-
-      expect(thirdweb.getContract).toHaveBeenCalledWith({
-        client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        chain: mockChain
+        expect(() => prepareContractCall(params)).toThrow('Invalid input');
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract,
+          address: params.address
+        });
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledTimes(0);
       });
-      expect(result).toEqual(mockResult);
-    });
-
-    it('should get a contract instance with ABI', () => {
-      const mockAbi = [
-        {
-          type: 'function' as const,
-          name: 'transfer',
-          inputs: [
-            { type: 'address', name: 'to' },
-            { type: 'uint256', name: 'amount' }
-          ],
-          outputs: [],
-          stateMutability: 'nonpayable' as const
-        }
-      ];
-
-      const mockResult = {
-        client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        abi: mockAbi,
-        chain: mockChain
-      };
-
-      (thirdweb.getContract as jest.Mock).mockReturnValue(mockResult);
-
-      const params = {
-        client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        abi: mockAbi,
-        chain: mockChain
-      };
-
-      const result = getContract(params);
-
-      expect(thirdweb.getContract).toHaveBeenCalledWith({
-        client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        abi: mockAbi,
-        chain: mockChain
-      });
-      expect(result).toEqual(mockResult);
     });
   });
 

@@ -56,19 +56,7 @@ export type PrepareTransactionResult = PrepareTransactionParams;
 /**
  * Parameters for preparing a contract call
  */
-export interface PrepareContractCallParams {
-  /** The contract instance */
-  contract: {
-    /** The Panna client instance */
-    client: PannaClient;
-    /** The contract address */
-    address: `0x${string}`;
-    /** The chain the contract is deployed on */
-    chain: Chain;
-    /** The contract ABI (optional for basic interactions) */
-    abi?: Abi;
-  };
-  /** The method signature or ABI function */
+export interface PrepareContractCallParams extends GetContractParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   method: string | any;
   /** The parameters for the method call */
