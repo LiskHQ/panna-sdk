@@ -1,5 +1,5 @@
 import { SupportedTokens } from 'thirdweb/react';
-import { lisk, liskSepolia } from '../../core';
+import { lisk, liskSepolia, NATIVE_TOKEN_ADDRESS } from '../../core';
 
 const lskIcon = 'https://portal-assets.lisk.com/logo/lisk-profile-w.svg';
 export const ethIcon =
@@ -18,7 +18,7 @@ export const liskTokenConfig: SupportedTokens = {
       icon: lskIcon
     },
     {
-      address: 'NATIVE_TOKEN_ADDRESS',
+      address: NATIVE_TOKEN_ADDRESS,
       name: 'Ethereum',
       symbol: 'ETH',
       icon: ethIcon
@@ -59,7 +59,7 @@ export const liskSepoliaTokenConfig: SupportedTokens = {
       icon: lskIcon
     },
     {
-      address: 'NATIVE_TOKEN_ADDRESS',
+      address: NATIVE_TOKEN_ADDRESS,
       name: 'Ethereum',
       symbol: 'ETH',
       icon: ethIcon

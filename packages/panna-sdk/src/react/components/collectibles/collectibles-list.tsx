@@ -8,7 +8,7 @@ import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { ImageType, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles } from '@/hooks';
-import { cn } from '@/utils';
+import { cn, getEnvironmentChain } from '@/utils';
 import { DefaultNFTIcon } from '../icons/default-nft-icon';
 import {
   Accordion,
@@ -39,7 +39,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     {
       address: account?.address as string,
       limit: pagination.pageSize,
-      offset: pagination.pageIndex * pagination.pageSize
+      offset: pagination.pageIndex * pagination.pageSize,
+      chain: getEnvironmentChain()
     },
     {
       enabled: !!account?.address
@@ -131,9 +132,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 <div className="flex items-center gap-3">
                   <CollectibleLogo instance={firstInstance} />
                   <div className="flex items-center gap-1">
-                    <Typography variant="small">
-                      {firstInstance.name}
-                    </Typography>
+                    <Typography variant="small">{item.token.name}</Typography>
                     <Typography variant="muted">
                       ({item.numInstancesOwned})
                     </Typography>
