@@ -106,7 +106,7 @@ describe('CollectiblesList', () => {
       data: {
         collectibles: [
           {
-            token: { symbol: 'COLL' },
+            token: { symbol: 'COLL', name: 'Collectible One' },
             numInstancesOwned: 2,
             instances: [
               {
