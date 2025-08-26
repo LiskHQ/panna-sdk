@@ -1,6 +1,7 @@
 import * as thirdweb from 'thirdweb';
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
+import type { Address } from '../types/external';
 import {
   prepareTransaction,
   prepareContractCall,
@@ -23,7 +24,7 @@ describe('Transaction Functions', () => {
   const mockChain = { id: 1, name: 'Ethereum' } as Chain;
   const mockContract = {
     client: mockClient,
-    address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+    address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
     chain: mockChain
   };
 
@@ -35,7 +36,7 @@ describe('Transaction Functions', () => {
     it('should get a contract instance with minimal parameters', () => {
       const mockResult = {
         client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         chain: mockChain
       };
 
@@ -43,7 +44,7 @@ describe('Transaction Functions', () => {
 
       const params = {
         client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         chain: mockChain
       };
 
@@ -51,7 +52,7 @@ describe('Transaction Functions', () => {
 
       expect(thirdweb.getContract).toHaveBeenCalledWith({
         client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         chain: mockChain
       });
       expect(result).toEqual(mockResult);
@@ -73,7 +74,7 @@ describe('Transaction Functions', () => {
 
       const mockResult = {
         client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         abi: mockAbi,
         chain: mockChain
       };
@@ -82,7 +83,7 @@ describe('Transaction Functions', () => {
 
       const params = {
         client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         abi: mockAbi,
         chain: mockChain
       };
@@ -91,7 +92,7 @@ describe('Transaction Functions', () => {
 
       expect(thirdweb.getContract).toHaveBeenCalledWith({
         client: mockClient,
-        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         abi: mockAbi,
         chain: mockChain
       });
@@ -102,7 +103,7 @@ describe('Transaction Functions', () => {
   describe('prepareTransaction', () => {
     it('should prepare a basic transaction', () => {
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000')
       };
 
@@ -111,7 +112,7 @@ describe('Transaction Functions', () => {
       const params = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000')
       };
 
@@ -120,7 +121,7 @@ describe('Transaction Functions', () => {
       expect(thirdweb.prepareTransaction).toHaveBeenCalledWith({
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000')
       });
       expect(result).toEqual(mockResult);
@@ -128,8 +129,8 @@ describe('Transaction Functions', () => {
 
     it('should prepare a transaction with custom data', () => {
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        data: '0x123456' as `0x${string}`
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
+        data: '0x123456' as Address
       };
 
       (thirdweb.prepareTransaction as jest.Mock).mockReturnValue(mockResult);
@@ -137,8 +138,8 @@ describe('Transaction Functions', () => {
       const params = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        data: '0x123456' as `0x${string}`
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
+        data: '0x123456' as Address
       };
 
       const result = prepareTransaction(params);
@@ -146,8 +147,8 @@ describe('Transaction Functions', () => {
       expect(thirdweb.prepareTransaction).toHaveBeenCalledWith({
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
-        data: '0x123456' as `0x${string}`
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
+        data: '0x123456' as Address
       });
       expect(result).toEqual(mockResult);
     });
@@ -162,7 +163,7 @@ describe('Transaction Functions', () => {
       const params = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address
       };
 
       const result = prepareTransaction(params);
@@ -177,7 +178,7 @@ describe('Transaction Functions', () => {
 
     it('should prepare a transaction with gas parameters', () => {
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000'),
         gasPrice: BigInt('20000000000'),
         gas: BigInt('21000')
@@ -188,7 +189,7 @@ describe('Transaction Functions', () => {
       const params = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000'),
         gasPrice: BigInt('20000000000'),
         gas: BigInt('21000'),
@@ -200,7 +201,7 @@ describe('Transaction Functions', () => {
       expect(thirdweb.prepareTransaction).toHaveBeenCalledWith({
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000'),
         gasPrice: BigInt('20000000000'),
         gas: BigInt('21000'),
@@ -214,9 +215,9 @@ describe('Transaction Functions', () => {
     it('should prepare a basic contract call', () => {
       const mockDataFunction = jest
         .fn()
-        .mockResolvedValue('0xa9059cbb' as `0x${string}`);
+        .mockResolvedValue('0xa9059cbb' as Address);
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction
       };
 
@@ -239,7 +240,7 @@ describe('Transaction Functions', () => {
         params: ['0x123456789', BigInt('1000000000000000000')]
       });
       expect(result).toEqual({
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction
       });
     });
@@ -247,9 +248,9 @@ describe('Transaction Functions', () => {
     it('should prepare a payable contract call', () => {
       const mockDataFunction = jest
         .fn()
-        .mockResolvedValue('0x40c10f19' as `0x${string}`);
+        .mockResolvedValue('0x40c10f19' as Address);
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction,
         value: BigInt('100000000000000000')
       };
@@ -275,7 +276,7 @@ describe('Transaction Functions', () => {
         value: BigInt('100000000000000000')
       });
       expect(result).toEqual({
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction,
         value: BigInt('100000000000000000')
       });
@@ -284,9 +285,9 @@ describe('Transaction Functions', () => {
     it('should prepare a contract call without parameters', () => {
       const mockDataFunction = jest
         .fn()
-        .mockResolvedValue('0x18160ddd' as `0x${string}`);
+        .mockResolvedValue('0x18160ddd' as Address);
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction
       };
 
@@ -308,7 +309,7 @@ describe('Transaction Functions', () => {
         params: []
       });
       expect(result).toEqual({
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction
       });
     });
@@ -327,9 +328,9 @@ describe('Transaction Functions', () => {
 
       const mockDataFunction = jest
         .fn()
-        .mockResolvedValue('0xa9059cbb' as `0x${string}`);
+        .mockResolvedValue('0xa9059cbb' as Address);
       const mockResult = {
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction
       };
 
@@ -352,7 +353,7 @@ describe('Transaction Functions', () => {
         params: ['0x123456789', BigInt('1000000000000000000')]
       });
       expect(result).toEqual({
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction
       });
     });
@@ -634,7 +635,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           ...mockContract,
-          address: '0xinvalidAddress' as `0x${string}`,
+          address: '0xinvalidAddress' as Address,
           method: 'function transfer(address to, uint256 amount)',
           params: ['0x123456789', BigInt('1000000000000000000')]
         };
@@ -652,7 +653,7 @@ describe('Transaction Functions', () => {
 
   describe('sendTransaction', () => {
     const mockAccount = {
-      address: '0x123456789abcdef123456789abcdef123456789ab' as `0x${string}`,
+      address: '0x123456789abcdef123456789abcdef123456789ab' as Address,
       signTransaction: jest.fn(),
       signMessage: jest.fn(),
       sendTransaction: jest.fn(),
@@ -662,13 +663,13 @@ describe('Transaction Functions', () => {
     const mockPreparedTransaction = {
       client: mockClient,
       chain: mockChain,
-      to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+      to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
       value: BigInt('1000000000000000000')
     };
 
     it('should send a prepared transaction successfully', async () => {
       const mockTransactionHash =
-        '0xabcdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef12' as `0x${string}`;
+        '0xabcdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef12' as Address;
       const mockResult = {
         transactionHash: mockTransactionHash
       };
@@ -694,13 +695,13 @@ describe('Transaction Functions', () => {
       const mockPreparedContractCall = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         data: mockDataFunction,
         value: BigInt('100000000000000000')
       };
 
       const mockTransactionHash =
-        '0xdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234' as `0x${string}`;
+        '0xdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234' as Address;
       const mockResult = {
         transactionHash: mockTransactionHash
       };

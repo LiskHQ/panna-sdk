@@ -1,5 +1,6 @@
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
+import type { Address } from '../types/external';
 import type {
   PrepareTransactionParams,
   PrepareTransactionResult,
@@ -14,7 +15,7 @@ describe('Transaction Types', () => {
   const mockChain = { id: 1, name: 'Ethereum' } as Chain;
   const mockContract = {
     client: mockClient,
-    address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+    address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
     chain: mockChain
   };
 
@@ -320,7 +321,7 @@ describe('Transaction Types', () => {
       const mockThirdwebParams = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000'),
         gasPrice: BigInt('20000000000')
       };

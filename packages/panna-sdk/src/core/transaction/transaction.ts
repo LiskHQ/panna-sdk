@@ -6,7 +6,7 @@ import {
 } from 'thirdweb';
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
-import type { Abi } from '../types/external';
+import type { Abi, Address, Hex } from '../types/external';
 import { removeUndefined } from '../utils/object';
 import type {
   PrepareTransactionParams,
@@ -283,8 +283,8 @@ export const prepareContractCall = (
     nonce?: number;
     extraGas?: bigint;
     accessList?: Array<{
-      address: `0x${string}`;
-      storageKeys: readonly `0x${string}`[];
+      address: Address;
+      storageKeys: readonly Hex[];
     }>;
   } = {
     contract,
@@ -340,7 +340,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
 
   const contractParams: {
     client: PannaClient;
-    address: `0x${string}`;
+    address: Address;
     chain: Chain;
     abi?: Abi;
   } = {
@@ -365,6 +365,12 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  * @param params.transaction - The prepared transaction object from `prepareTransaction` or `prepareContractCall`
  * @param params.account - The connected wallet/account to send the transaction from
  * @returns Promise resolving to the transaction result with transaction hash
+ * @throws Error when the transaction fails due to:
+ *   - Insufficient funds for gas and value
+ *   - User rejection of the transaction
+ *   - Network connectivity issues
+ *   - Invalid transaction parameters
+ *   - Contract execution errors
  *
  * @example
  * ```typescript
