@@ -624,6 +624,27 @@ describe('Transaction Functions', () => {
           params: []
         });
       });
+
+      it('should throw error when getContract invocation fails', () => {
+        jest.spyOn(transaction, 'getContract').mockImplementation(() => {
+          throw new Error('Invalid input');
+        });
+
+        const params = {
+          ...mockContract,
+          address: '0xinvalidAddress' as `0x${string}`,
+          method: 'function transfer(address to, uint256 amount)',
+          params: ['0x123456789', BigInt('1000000000000000000')]
+        };
+
+        expect(() => prepareContractCall(params)).toThrow('Invalid input');
+        expect(transaction.getContract).toHaveBeenCalledTimes(1);
+        expect(transaction.getContract).toHaveBeenCalledWith({
+          ...mockContract,
+          address: params.address
+        });
+        expect(thirdweb.prepareContractCall).toHaveBeenCalledTimes(0);
+      });
     });
   });
 });

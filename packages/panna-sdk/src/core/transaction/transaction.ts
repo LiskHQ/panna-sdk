@@ -138,6 +138,7 @@ export const prepareTransaction = (
  * @param params.extraGas - (Optional) Additional gas to add to the estimated gas
  * @param params.accessList - (Optional) Access list for EIP-2930 transactions
  * @returns Prepared contract call transaction
+ * @throws Error when invalid client, address or chain is provided
  *
  * @example
  * ```typescript
@@ -307,10 +308,11 @@ export const prepareContractCall = (
  * @param params.address - The contract address
  * @param params.abi - (Optional) The contract ABI. When provided, enables type-safe method calls with autocompletion. When omitted, the SDK will attempt to resolve the ABI automatically or you can use string-based method signatures with `prepareContractCall`
  * @returns Contract instance ready for interaction
+ * @throws Error when invalid client, address or chain is provided
  *
  * @example
  * ```typescript
- * import { getContract, prepareContractCall, lisk } from 'panna-sdk';
+ * import { getContract, lisk } from 'panna-sdk';
  *
  * // Without ABI - use string-based method signatures
  * const contract = getContract({
@@ -319,24 +321,12 @@ export const prepareContractCall = (
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  * });
  *
- * const tx1 = prepareContractCall({
- *   contract,
- *   method: "function transfer(address to, uint256 amount)", // String signature
- *   params: ["0x123...", BigInt("1000000000000000000")]
- * });
- *
  * // With ABI - type-safe with autocompletion
  * const erc20Contract = getContract({
  *   client: pannaClient,
  *   chain: lisk
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: erc20Abi, // Full type safety and autocompletion. Define this ABI in your code or import from your contract definitions
- * });
- *
- * const tx2 = prepareContractCall({
- *   contract: erc20Contract,
- *   method: "transfer", // Inferred from ABI with full type checking
- *   params: ["0x123...", BigInt("1000000000000000000")]
  * });
  * ```
  */
