@@ -317,14 +317,14 @@ export const prepareContractCall = (
  * // Without ABI - use string-based method signatures
  * const contract = getContract({
  *   client: pannaClient,
- *   chain: lisk
+ *   chain: lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  * });
  *
  * // With ABI - type-safe with autocompletion
  * const erc20Contract = getContract({
  *   client: pannaClient,
- *   chain: lisk
+ *   chain: lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: erc20Abi, // Full type safety and autocompletion. Define this ABI in your code or import from your contract definitions
  * });
