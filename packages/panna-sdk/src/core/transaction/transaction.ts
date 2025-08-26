@@ -68,9 +68,9 @@ import type {
  * });
  * ```
  */
-export function prepareTransaction(
+export const prepareTransaction = (
   params: PrepareTransactionParams
-): PrepareTransactionResult {
+): PrepareTransactionResult => {
   const {
     client,
     chain,
@@ -106,7 +106,7 @@ export function prepareTransaction(
   };
 
   return thirdwebPrepareTransaction(prepareParams) as PrepareTransactionResult;
-}
+};
 
 /**
  * Prepare a contract method call for execution
@@ -123,42 +123,41 @@ export function prepareTransaction(
  * when using ABI-based approaches.
  *
  * @param params - Parameters for preparing the contract call
- * @param params.contract - The contract instance (with or without ABI)
+ * @param params.client - The Panna client instance
+ * @param params.chain - The chain the contract is deployed on
+ * @param params.address - The contract address
+ * @param params.abi - (Optional) The contract ABI. When provided, enables type-safe method calls with autocompletion. When omitted, the SDK will attempt to resolve the ABI automatically or you can use string-based method signatures with `prepareContractCall`
  * @param params.method - The method signature, ABI function, or method name (when ABI is provided)
- * @param params.params - The parameters for the method call (types inferred from method)
- * @param params.value - The value to send with the transaction (in wei)
- * @param params.gas - Gas limit for the transaction
- * @param params.gasPrice - Gas price for legacy transactions
- * @param params.maxFeePerGas - Maximum fee per gas for EIP-1559 transactions
- * @param params.maxPriorityFeePerGas - Maximum priority fee per gas for EIP-1559
- * @param params.nonce - Transaction nonce
- * @param params.extraGas - Additional gas to add to the estimated gas
- * @param params.accessList - Access list for EIP-2930 transactions
+ * @param params.params - (Optional) The parameters for the method call (types are automatically inferred from method)
+ * @param params.value - (Optional) The value to send with the transaction (in wei)
+ * @param params.gas - (Optional) Gas limit for the transaction
+ * @param params.gasPrice - (Optional) Gas price for legacy transactions
+ * @param params.maxFeePerGas - (Optional) Maximum fee per gas for EIP-1559 transactions
+ * @param params.maxPriorityFeePerGas - (Optional) Maximum priority fee per gas for EIP-1559
+ * @param params.nonce - (Optional) Transaction nonce
+ * @param params.extraGas - (Optional) Additional gas to add to the estimated gas
+ * @param params.accessList - (Optional) Access list for EIP-2930 transactions
  * @returns Prepared contract call transaction
+ * @throws Error when invalid client, address or chain is provided
  *
  * @example
  * ```typescript
- * import { prepareContractCall, getContract, toWei, lisk } from 'panna-sdk';
- *
- * // Get a contract instance (without ABI - uses string method signatures)
- * const contract = getContract({
- *   client: pannaClient,
- *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   chain: lisk
- * });
+ * import { prepareContractCall, toWei, lisk } from 'panna-sdk';
  *
  * // 1. Basic usage with method signature (type-safe based on signature)
  * const transaction = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", toWei("100")]
  * });
  *
  * // 2. With full contract ABI (provides autocompletion and full type safety)
- * const erc20Contract = getContract({
+ * const typeSafeCall = prepareContractCall({
  *   client: pannaClient,
- *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: [
  *     {
  *       name: "transfer",
@@ -177,18 +176,16 @@ export function prepareTransaction(
  *       outputs: [],
  *       stateMutability: "payable"
  *     }
- *   ]
- * });
- *
- * const typeSafeCall = prepareContractCall({
- *   contract: erc20Contract,
+ *   ],
  *   method: "transfer", // Auto-completion and type inference from ABI
  *   params: ["0x123...", toWei("100")]
  * });
  *
  * // 3. Using ABI snippet (efficient for single method calls)
  * const snippetCall = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: {
  *     name: "mintTo",
  *     type: "function",
@@ -204,7 +201,9 @@ export function prepareTransaction(
  *
  * // 4. Payable function with value
  * const payableCall = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function mint(address to)",
  *   params: ["0x123..."],
  *   value: toWei("0.1") // 0.1 ETH
@@ -212,7 +211,9 @@ export function prepareTransaction(
  *
  * // 5. Advanced gas configuration (EIP-1559)
  * const advancedGasCall = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", toWei("100")],
  *   maxFeePerGas: BigInt(30000000000), // 30 gwei
@@ -223,7 +224,9 @@ export function prepareTransaction(
  * // 6. Error handling pattern
  * try {
  *   const transaction = prepareContractCall({
- *     contract,
+ *     client: pannaClient,
+ *     chain: lisk,
+ *     address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *     method: "function nonExistentFunction()",
  *     params: []
  *   });
@@ -232,11 +235,14 @@ export function prepareTransaction(
  * }
  * ```
  */
-export function prepareContractCall(
+export const prepareContractCall = (
   params: PrepareContractCallParams
-): PrepareContractCallResult {
+): PrepareContractCallResult => {
   const {
-    contract,
+    client,
+    address,
+    chain,
+    abi,
     method,
     params: methodParams,
     value,
@@ -260,13 +266,10 @@ export function prepareContractCall(
     accessList
   };
 
+  const contract = getContract({ client, address, chain, abi });
+
   const callParams: {
-    contract: {
-      client: PannaClient;
-      address: `0x${string}`;
-      chain: Chain;
-      abi?: Abi;
-    };
+    contract: GetContractParams;
     method: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     params: readonly any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
     value?: bigint;
@@ -288,7 +291,7 @@ export function prepareContractCall(
   };
 
   return thirdwebPrepareContractCall(callParams) as PrepareContractCallResult;
-}
+};
 
 /**
  * Get a contract instance for interaction
@@ -301,44 +304,33 @@ export function prepareContractCall(
  *
  * @param params - Parameters for getting the contract
  * @param params.client - The Panna client instance
+ * @param params.chain - The chain the contract is deployed on
  * @param params.address - The contract address
  * @param params.abi - (Optional) The contract ABI. When provided, enables type-safe method calls with autocompletion. When omitted, the SDK will attempt to resolve the ABI automatically or you can use string-based method signatures with `prepareContractCall`
- * @param params.chain - The chain the contract is deployed on
  * @returns Contract instance ready for interaction
+ * @throws Error when invalid client, address or chain is provided
  *
  * @example
  * ```typescript
- * import { getContract, prepareContractCall, lisk } from 'panna-sdk';
+ * import { getContract, lisk } from 'panna-sdk';
  *
  * // Without ABI - use string-based method signatures
  * const contract = getContract({
  *   client: pannaClient,
+ *   chain: lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   chain: lisk
- * });
- *
- * const tx1 = prepareContractCall({
- *   contract,
- *   method: "function transfer(address to, uint256 amount)", // String signature
- *   params: ["0x123...", BigInt("1000000000000000000")]
  * });
  *
  * // With ABI - type-safe with autocompletion
  * const erc20Contract = getContract({
  *   client: pannaClient,
+ *   chain: lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: erc20Abi, // Full type safety and autocompletion. Define this ABI in your code or import from your contract definitions
- *   chain: lisk
- * });
- *
- * const tx2 = prepareContractCall({
- *   contract: erc20Contract,
- *   method: "transfer", // Inferred from ABI with full type checking
- *   params: ["0x123...", BigInt("1000000000000000000")]
  * });
  * ```
  */
-export function getContract(params: GetContractParams): GetContractResult {
+export const getContract = (params: GetContractParams): GetContractResult => {
   const { client, address, abi, chain } = params;
 
   const optionalFields = { abi };
@@ -356,4 +348,4 @@ export function getContract(params: GetContractParams): GetContractResult {
   };
 
   return thirdwebGetContract(contractParams) as GetContractResult;
-}
+};

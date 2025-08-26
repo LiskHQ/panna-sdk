@@ -111,18 +111,20 @@ describe('Transaction Types', () => {
   describe('PrepareContractCallParams', () => {
     it('should accept valid minimal parameters', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function totalSupply()'
       };
 
       expect(params).toBeDefined();
-      expect(params.contract).toBe(mockContract);
+      expect(params.client).toBe(mockContract.client);
+      expect(params.chain).toBe(mockContract.chain);
+      expect(params.address).toBe(mockContract.address);
       expect(params.method).toBe('function totalSupply()');
     });
 
     it('should accept gas parameters', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function transfer(address to, uint256 amount)',
         params: ['0x123456789', BigInt('1000000000000000000')],
         value: BigInt('100000000000000000'),
@@ -141,7 +143,7 @@ describe('Transaction Types', () => {
 
     it('should accept method with parameters', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function transfer(address to, uint256 amount)',
         params: ['0x123456789', BigInt('1000000000000000000')]
       };
@@ -154,7 +156,7 @@ describe('Transaction Types', () => {
 
     it('should accept value for payable methods', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function mint(address to)',
         params: ['0x123456789'],
         value: BigInt('100000000000000000')
@@ -174,7 +176,7 @@ describe('Transaction Types', () => {
       };
 
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: abiFunction,
         params: ['0x123456789', BigInt('1000000000000000000')]
       };
