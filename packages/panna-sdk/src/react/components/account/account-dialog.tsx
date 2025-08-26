@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { truncateAddress } from '@/utils/address';
+import { type StringValues } from '../../../core/utils/types';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
@@ -27,14 +28,22 @@ import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { AccountSettingsView } from './account-settings-view';
 
-type AccountView = 'main' | 'settings' | 'buy';
+enum AccountViewEnum {
+  Main = 'main',
+  Settings = 'settings',
+  Buy = 'buy'
+}
+
+type AccountView = `${StringValues<typeof AccountViewEnum>}`;
 
 type AccountDialogProps = {
   address: string;
 };
 
 export function AccountDialog({ address }: AccountDialogProps) {
-  const [activeView, setActiveView] = useState<AccountView>('main');
+  const [activeView, setActiveView] = useState<AccountView>(
+    AccountViewEnum.Main
+  );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
@@ -45,11 +54,14 @@ export function AccountDialog({ address }: AccountDialogProps) {
 
   const renderHeader = (view: AccountView) => {
     switch (view) {
-      case 'main':
+      case AccountViewEnum.Main:
         return (
           <DialogHeader className="mb-2 items-center gap-4">
             <div className="flex w-full items-center justify-between gap-2">
-              <button type="button" onClick={() => setActiveView('settings')}>
+              <button
+                type="button"
+                onClick={() => setActiveView(AccountViewEnum.Settings)}
+              >
                 <SettingsIcon
                   size={20}
                   className="text-muted-foreground hover:text-primary transition-colors"
@@ -70,11 +82,14 @@ export function AccountDialog({ address }: AccountDialogProps) {
             </div>
           </DialogHeader>
         );
-      case 'settings':
+      case AccountViewEnum.Settings:
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
-              <button type="button" onClick={() => setActiveView('main')}>
+              <button
+                type="button"
+                onClick={() => setActiveView(AccountViewEnum.Main)}
+              >
                 <ArrowLeftIcon
                   size={20}
                   className="text-muted-foreground hover:text-primary transition-colors"
@@ -90,7 +105,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
         );
-      case 'buy':
+      case AccountViewEnum.Buy:
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
@@ -100,7 +115,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
                   if (buyStepperRef.current?.canGoBack) {
                     buyStepperRef.current.prev();
                   } else {
-                    setActiveView('main');
+                    setActiveView(AccountViewEnum.Main);
                   }
                 }}
               >
@@ -124,7 +139,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
 
   const renderContent = (view: AccountView) => {
     switch (view) {
-      case 'main':
+      case AccountViewEnum.Main:
         return (
           <div className="flex flex-col items-center gap-8">
             <div className="flex w-full items-center gap-4">
@@ -136,7 +151,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 type="button"
                 variant="outline"
                 className="flex-1"
-                onClick={() => setActiveView('buy')}
+                onClick={() => setActiveView(AccountViewEnum.Buy)}
               >
                 <TagIcon />
                 Buy
@@ -170,12 +185,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
             </Tabs>
           </div>
         );
-      case 'settings':
+      case AccountViewEnum.Settings:
         return <AccountSettingsView />;
-      case 'buy':
+      case AccountViewEnum.Buy:
         return (
           <BuyForm
-            onClose={() => setActiveView('main')}
+            onClose={() => setActiveView(AccountViewEnum.Main)}
             stepperRef={buyStepperRef}
           />
         );

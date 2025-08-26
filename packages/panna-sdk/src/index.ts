@@ -78,6 +78,9 @@ export {
   type FiatCurrency,
   type TokenFiatPrice,
 
+  // Utility types
+  type StringValues,
+
   // Onramp functions
   onRampStatus,
   getOnrampProviders,
