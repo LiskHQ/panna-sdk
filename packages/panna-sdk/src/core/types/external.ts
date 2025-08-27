@@ -5,3 +5,8 @@
 
 // Thirdweb type re-exports
 export type { Abi } from 'thirdweb/utils';
+export type { PreparedTransaction } from 'thirdweb';
+export type { Account } from 'thirdweb/wallets';
+
+// Viem type re-exports
+export type { Address, Hex } from 'viem';
