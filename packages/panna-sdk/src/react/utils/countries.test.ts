@@ -58,16 +58,16 @@ jest.mock('i18n-iso-countries', () => ({
   })
 }));
 
-// Mock the COUNTRIES array
+// Mock the COUNTRIES array (sorted alphabetically by name to match the real implementation)
 jest.mock('../consts', () => ({
   COUNTRIES: [
-    { code: 'US', name: 'United States', flag: '🇺🇸' },
-    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
-    { code: 'DE', name: 'Germany', flag: '🇩🇪' },
-    { code: 'FR', name: 'France', flag: '🇫🇷' },
-    { code: 'CA', name: 'Canada', flag: '🇨🇦' },
     { code: 'AU', name: 'Australia', flag: '🇦🇺' },
-    { code: 'JP', name: 'Japan', flag: '🇯🇵' }
+    { code: 'CA', name: 'Canada', flag: '🇨🇦' },
+    { code: 'FR', name: 'France', flag: '🇫🇷' },
+    { code: 'DE', name: 'Germany', flag: '🇩🇪' },
+    { code: 'JP', name: 'Japan', flag: '🇯🇵' },
+    { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
+    { code: 'US', name: 'United States', flag: '🇺🇸' }
   ]
 }));
 

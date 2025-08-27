@@ -37,6 +37,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "country-flag-icons": "^1.5.19",
     "country-to-currency": "^2.0.2",
     "currency-symbol-map": "^5.1.0",
     "i18n-iso-countries": "^7.14.0",

@@ -9,10 +9,8 @@ import type { Country } from '../types/country.types';
 // Register English locale for i18n-iso-countries
 countries.registerLocale(enLocale);
 
-// Export countries sorted alphabetically by name
-export const COUNTRIES_SORTED = COUNTRIES.sort((a, b) =>
-  a.name.localeCompare(b.name)
-);
+// Countries are already sorted alphabetically by name in the main COUNTRIES array
+export const COUNTRIES_SORTED = COUNTRIES;
 
 /**
  * Get country by ISO 3166-1 alpha-2 or alpha-3 country code
