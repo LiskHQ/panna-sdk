@@ -39,6 +39,7 @@
     "cmdk": "^1.1.1",
     "country-to-currency": "^2.0.2",
     "currency-symbol-map": "^5.1.0",
+    "i18n-iso-countries": "^7.14.0",
     "input-otp": "^1.4.2",
     "iso-3166-1-alpha-2": "^1.0.2",
     "libphonenumber-js": "^1.12.10",
