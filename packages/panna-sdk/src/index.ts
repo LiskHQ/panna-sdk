@@ -25,6 +25,7 @@ export {
   prepareTransaction,
   prepareContractCall,
   getContract,
+  sendTransaction,
 
   // Wallet/Account types and enums
   EcosystemId,
@@ -112,6 +113,8 @@ export {
   type PrepareContractCallResult,
   type GetContractParams,
   type GetContractResult,
+  type SendTransactionParams,
+  type SendTransactionResult,
 
   // Constants
   DEFAULT_CURRENCY,

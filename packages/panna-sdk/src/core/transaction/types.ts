@@ -1,6 +1,12 @@
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
-import type { Abi } from '../types/external';
+import type {
+  Abi,
+  PreparedTransaction,
+  Account,
+  Address,
+  Hex
+} from '../types/external';
 
 /**
  * Parameters for preparing a raw transaction
@@ -21,11 +27,11 @@ export interface PrepareTransactionParams {
    * The recipient address. Optional for contract deployment transactions.
    * For regular transfers and contract calls, this should be provided.
    */
-  to?: `0x${string}`;
+  to?: Address;
   /** The value to send (in wei) */
   value?: bigint;
   /** The transaction data */
-  data?: `0x${string}`;
+  data?: Hex;
   /** Gas limit for the transaction */
   gas?: bigint;
   /** Gas price for legacy transactions */
@@ -40,8 +46,8 @@ export interface PrepareTransactionParams {
   extraGas?: bigint;
   /** Access list for EIP-2930 transactions */
   accessList?: Array<{
-    address: `0x${string}`;
-    storageKeys: readonly `0x${string}`[];
+    address: Address;
+    storageKeys: readonly Hex[];
   }>;
 }
 
@@ -54,19 +60,7 @@ export type PrepareTransactionResult = PrepareTransactionParams;
 /**
  * Parameters for preparing a contract call
  */
-export interface PrepareContractCallParams {
-  /** The contract instance */
-  contract: {
-    /** The Panna client instance */
-    client: PannaClient;
-    /** The contract address */
-    address: `0x${string}`;
-    /** The chain the contract is deployed on */
-    chain: Chain;
-    /** The contract ABI (optional for basic interactions) */
-    abi?: Abi;
-  };
-  /** The method signature or ABI function */
+export interface PrepareContractCallParams extends GetContractParams {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   method: string | any;
   /** The parameters for the method call */
@@ -88,8 +82,8 @@ export interface PrepareContractCallParams {
   extraGas?: bigint;
   /** Access list for EIP-2930 transactions */
   accessList?: Array<{
-    address: `0x${string}`;
-    storageKeys: readonly `0x${string}`[];
+    address: Address;
+    storageKeys: readonly Hex[];
   }>;
 }
 
@@ -102,7 +96,7 @@ export interface PrepareContractCallParams {
  */
 export interface PrepareContractCallResult {
   /** The recipient address */
-  to: `0x${string}`;
+  to: Address;
   /** The transaction data as a lazy-evaluated function */
   data: () => Promise<string>;
   /** The value to send with the transaction (in wei) */
@@ -118,7 +112,7 @@ export interface GetContractParams {
   /** The Panna client instance */
   client: PannaClient;
   /** The contract address */
-  address: `0x${string}`;
+  address: Address;
   /** The contract ABI (optional for basic interactions) */
   abi?: Abi;
   /** The chain the contract is deployed on */
@@ -130,3 +124,22 @@ export interface GetContractParams {
  * This is an alias to GetContractParams as they have identical structure
  */
 export type GetContractResult = GetContractParams;
+
+/**
+ * Parameters for sending a transaction to the blockchain
+ */
+export interface SendTransactionParams {
+  /** The wallet/account to send the transaction from */
+  account: Account;
+  /** The prepared transaction to send (from prepareTransaction or prepareContractCall) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  transaction: PreparedTransaction<any>;
+}
+
+/**
+ * Result from sending a transaction
+ */
+export interface SendTransactionResult {
+  /** The transaction hash */
+  transactionHash: Address;
+}

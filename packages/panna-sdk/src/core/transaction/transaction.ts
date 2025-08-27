@@ -1,11 +1,12 @@
 import {
   prepareContractCall as thirdwebPrepareContractCall,
   prepareTransaction as thirdwebPrepareTransaction,
-  getContract as thirdwebGetContract
+  getContract as thirdwebGetContract,
+  sendTransaction as thirdwebSendTransaction
 } from 'thirdweb';
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
-import type { Abi } from '../types/external';
+import type { Abi, Address, Hex } from '../types/external';
 import { removeUndefined } from '../utils/object';
 import type {
   PrepareTransactionParams,
@@ -13,7 +14,9 @@ import type {
   PrepareContractCallParams,
   PrepareContractCallResult,
   GetContractParams,
-  GetContractResult
+  GetContractResult,
+  SendTransactionParams,
+  SendTransactionResult
 } from './types';
 
 /**
@@ -68,9 +71,9 @@ import type {
  * });
  * ```
  */
-export function prepareTransaction(
+export const prepareTransaction = (
   params: PrepareTransactionParams
-): PrepareTransactionResult {
+): PrepareTransactionResult => {
   const {
     client,
     chain,
@@ -106,7 +109,7 @@ export function prepareTransaction(
   };
 
   return thirdwebPrepareTransaction(prepareParams) as PrepareTransactionResult;
-}
+};
 
 /**
  * Prepare a contract method call for execution
@@ -123,42 +126,41 @@ export function prepareTransaction(
  * when using ABI-based approaches.
  *
  * @param params - Parameters for preparing the contract call
- * @param params.contract - The contract instance (with or without ABI)
+ * @param params.client - The Panna client instance
+ * @param params.chain - The chain the contract is deployed on
+ * @param params.address - The contract address
+ * @param params.abi - (Optional) The contract ABI. When provided, enables type-safe method calls with autocompletion. When omitted, the SDK will attempt to resolve the ABI automatically or you can use string-based method signatures with `prepareContractCall`
  * @param params.method - The method signature, ABI function, or method name (when ABI is provided)
- * @param params.params - The parameters for the method call (types inferred from method)
- * @param params.value - The value to send with the transaction (in wei)
- * @param params.gas - Gas limit for the transaction
- * @param params.gasPrice - Gas price for legacy transactions
- * @param params.maxFeePerGas - Maximum fee per gas for EIP-1559 transactions
- * @param params.maxPriorityFeePerGas - Maximum priority fee per gas for EIP-1559
- * @param params.nonce - Transaction nonce
- * @param params.extraGas - Additional gas to add to the estimated gas
- * @param params.accessList - Access list for EIP-2930 transactions
+ * @param params.params - (Optional) The parameters for the method call (types are automatically inferred from method)
+ * @param params.value - (Optional) The value to send with the transaction (in wei)
+ * @param params.gas - (Optional) Gas limit for the transaction
+ * @param params.gasPrice - (Optional) Gas price for legacy transactions
+ * @param params.maxFeePerGas - (Optional) Maximum fee per gas for EIP-1559 transactions
+ * @param params.maxPriorityFeePerGas - (Optional) Maximum priority fee per gas for EIP-1559
+ * @param params.nonce - (Optional) Transaction nonce
+ * @param params.extraGas - (Optional) Additional gas to add to the estimated gas
+ * @param params.accessList - (Optional) Access list for EIP-2930 transactions
  * @returns Prepared contract call transaction
+ * @throws Error when invalid client, address or chain is provided
  *
  * @example
  * ```typescript
- * import { prepareContractCall, getContract, toWei, lisk } from 'panna-sdk';
- *
- * // Get a contract instance (without ABI - uses string method signatures)
- * const contract = getContract({
- *   client: pannaClient,
- *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   chain: lisk
- * });
+ * import { prepareContractCall, toWei, lisk } from 'panna-sdk';
  *
  * // 1. Basic usage with method signature (type-safe based on signature)
  * const transaction = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", toWei("100")]
  * });
  *
  * // 2. With full contract ABI (provides autocompletion and full type safety)
- * const erc20Contract = getContract({
+ * const typeSafeCall = prepareContractCall({
  *   client: pannaClient,
- *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: [
  *     {
  *       name: "transfer",
@@ -177,18 +179,16 @@ export function prepareTransaction(
  *       outputs: [],
  *       stateMutability: "payable"
  *     }
- *   ]
- * });
- *
- * const typeSafeCall = prepareContractCall({
- *   contract: erc20Contract,
+ *   ],
  *   method: "transfer", // Auto-completion and type inference from ABI
  *   params: ["0x123...", toWei("100")]
  * });
  *
  * // 3. Using ABI snippet (efficient for single method calls)
  * const snippetCall = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: {
  *     name: "mintTo",
  *     type: "function",
@@ -204,7 +204,9 @@ export function prepareTransaction(
  *
  * // 4. Payable function with value
  * const payableCall = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function mint(address to)",
  *   params: ["0x123..."],
  *   value: toWei("0.1") // 0.1 ETH
@@ -212,7 +214,9 @@ export function prepareTransaction(
  *
  * // 5. Advanced gas configuration (EIP-1559)
  * const advancedGasCall = prepareContractCall({
- *   contract,
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", toWei("100")],
  *   maxFeePerGas: BigInt(30000000000), // 30 gwei
@@ -223,7 +227,9 @@ export function prepareTransaction(
  * // 6. Error handling pattern
  * try {
  *   const transaction = prepareContractCall({
- *     contract,
+ *     client: pannaClient,
+ *     chain: lisk,
+ *     address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *     method: "function nonExistentFunction()",
  *     params: []
  *   });
@@ -232,11 +238,14 @@ export function prepareTransaction(
  * }
  * ```
  */
-export function prepareContractCall(
+export const prepareContractCall = (
   params: PrepareContractCallParams
-): PrepareContractCallResult {
+): PrepareContractCallResult => {
   const {
-    contract,
+    client,
+    address,
+    chain,
+    abi,
     method,
     params: methodParams,
     value,
@@ -260,13 +269,10 @@ export function prepareContractCall(
     accessList
   };
 
+  const contract = getContract({ client, address, chain, abi });
+
   const callParams: {
-    contract: {
-      client: PannaClient;
-      address: `0x${string}`;
-      chain: Chain;
-      abi?: Abi;
-    };
+    contract: GetContractParams;
     method: any; // eslint-disable-line @typescript-eslint/no-explicit-any
     params: readonly any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
     value?: bigint;
@@ -277,8 +283,8 @@ export function prepareContractCall(
     nonce?: number;
     extraGas?: bigint;
     accessList?: Array<{
-      address: `0x${string}`;
-      storageKeys: readonly `0x${string}`[];
+      address: Address;
+      storageKeys: readonly Hex[];
     }>;
   } = {
     contract,
@@ -288,7 +294,7 @@ export function prepareContractCall(
   };
 
   return thirdwebPrepareContractCall(callParams) as PrepareContractCallResult;
-}
+};
 
 /**
  * Get a contract instance for interaction
@@ -301,51 +307,40 @@ export function prepareContractCall(
  *
  * @param params - Parameters for getting the contract
  * @param params.client - The Panna client instance
+ * @param params.chain - The chain the contract is deployed on
  * @param params.address - The contract address
  * @param params.abi - (Optional) The contract ABI. When provided, enables type-safe method calls with autocompletion. When omitted, the SDK will attempt to resolve the ABI automatically or you can use string-based method signatures with `prepareContractCall`
- * @param params.chain - The chain the contract is deployed on
  * @returns Contract instance ready for interaction
+ * @throws Error when invalid client, address or chain is provided
  *
  * @example
  * ```typescript
- * import { getContract, prepareContractCall, lisk } from 'panna-sdk';
+ * import { getContract, lisk } from 'panna-sdk';
  *
  * // Without ABI - use string-based method signatures
  * const contract = getContract({
  *   client: pannaClient,
+ *   chain: lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   chain: lisk
- * });
- *
- * const tx1 = prepareContractCall({
- *   contract,
- *   method: "function transfer(address to, uint256 amount)", // String signature
- *   params: ["0x123...", BigInt("1000000000000000000")]
  * });
  *
  * // With ABI - type-safe with autocompletion
  * const erc20Contract = getContract({
  *   client: pannaClient,
+ *   chain: lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: erc20Abi, // Full type safety and autocompletion. Define this ABI in your code or import from your contract definitions
- *   chain: lisk
- * });
- *
- * const tx2 = prepareContractCall({
- *   contract: erc20Contract,
- *   method: "transfer", // Inferred from ABI with full type checking
- *   params: ["0x123...", BigInt("1000000000000000000")]
  * });
  * ```
  */
-export function getContract(params: GetContractParams): GetContractResult {
+export const getContract = (params: GetContractParams): GetContractResult => {
   const { client, address, abi, chain } = params;
 
   const optionalFields = { abi };
 
   const contractParams: {
     client: PannaClient;
-    address: `0x${string}`;
+    address: Address;
     chain: Chain;
     abi?: Abi;
   } = {
@@ -356,4 +351,115 @@ export function getContract(params: GetContractParams): GetContractResult {
   };
 
   return thirdwebGetContract(contractParams) as GetContractResult;
+};
+
+/**
+ * Send a prepared transaction to the blockchain
+ *
+ * This function executes a previously prepared transaction on the blockchain.
+ * It requires a connected wallet/account to sign and send the transaction.
+ * The transaction can be prepared using `prepareTransaction` for raw transactions
+ * or `prepareContractCall` for smart contract interactions.
+ *
+ * @param params - Parameters for sending the transaction
+ * @param params.transaction - The prepared transaction object from `prepareTransaction` or `prepareContractCall`
+ * @param params.account - The connected wallet/account to send the transaction from
+ * @returns Promise resolving to the transaction result with transaction hash
+ * @throws Error when the transaction fails due to:
+ *   - Insufficient funds for gas and value
+ *   - User rejection of the transaction
+ *   - Network connectivity issues
+ *   - Invalid transaction parameters
+ *   - Contract execution errors
+ *
+ * @example
+ * ```typescript
+ * import { sendTransaction, prepareTransaction, createAccount, lisk } from 'panna-sdk';
+ *
+ * // 1. Create and connect an account
+ * const account = createAccount({ partnerId: 'your-partner-id' });
+ * // ... connect the account (see wallet documentation)
+ *
+ * // 2. Prepare a transaction
+ * const transaction = prepareTransaction({
+ *   client: pannaClient,
+ *   chain: lisk,
+ *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   value: toWei("1") // 1 ETH
+ * });
+ *
+ * // 3. Send the transaction
+ * const result = await sendTransaction({
+ *   account,
+ *   transaction
+ * });
+ *
+ * console.log("Transaction sent:", result.transactionHash);
+ *
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Send a contract call transaction
+ * import { sendTransaction, prepareContractCall, getContract } from 'panna-sdk';
+ *
+ * const contract = getContract({
+ *   client: pannaClient,
+ *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   chain: lisk
+ * });
+ *
+ * const transaction = prepareContractCall({
+ *   contract,
+ *   method: "function transfer(address to, uint256 amount)",
+ *   params: ["0x123...", toWei("100")]
+ * });
+ *
+ * const result = await sendTransaction({
+ *   account: connectedAccount,
+ *   transaction
+ * });
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Error handling pattern
+ * try {
+ *   const result = await sendTransaction({
+ *     account,
+ *     transaction
+ *   });
+ *
+ *   console.log("Success! Transaction hash:", result.transactionHash);
+ * } catch (error) {
+ *   if (error.message.includes("insufficient funds")) {
+ *     console.error("Not enough balance to send transaction");
+ *   } else if (error.message.includes("user rejected")) {
+ *     console.error("User rejected the transaction");
+ *   } else {
+ *     console.error("Transaction failed:", error.message);
+ *   }
+ * }
+ * ```
+ */
+export async function sendTransaction(
+  params: SendTransactionParams
+): Promise<SendTransactionResult> {
+  const { transaction, account } = params;
+
+  try {
+    const result = await thirdwebSendTransaction({
+      transaction,
+      account
+    });
+
+    return result as SendTransactionResult;
+  } catch (error) {
+    // Re-throw with more context
+    throw new Error(
+      `Failed to send transaction: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
 }

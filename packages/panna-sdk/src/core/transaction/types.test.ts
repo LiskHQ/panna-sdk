@@ -1,5 +1,6 @@
 import type { Chain } from '../chains/types';
 import type { PannaClient } from '../client';
+import type { Address } from '../types/external';
 import type {
   PrepareTransactionParams,
   PrepareTransactionResult,
@@ -14,7 +15,7 @@ describe('Transaction Types', () => {
   const mockChain = { id: 1, name: 'Ethereum' } as Chain;
   const mockContract = {
     client: mockClient,
-    address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+    address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
     chain: mockChain
   };
 
@@ -111,18 +112,20 @@ describe('Transaction Types', () => {
   describe('PrepareContractCallParams', () => {
     it('should accept valid minimal parameters', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function totalSupply()'
       };
 
       expect(params).toBeDefined();
-      expect(params.contract).toBe(mockContract);
+      expect(params.client).toBe(mockContract.client);
+      expect(params.chain).toBe(mockContract.chain);
+      expect(params.address).toBe(mockContract.address);
       expect(params.method).toBe('function totalSupply()');
     });
 
     it('should accept gas parameters', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function transfer(address to, uint256 amount)',
         params: ['0x123456789', BigInt('1000000000000000000')],
         value: BigInt('100000000000000000'),
@@ -141,7 +144,7 @@ describe('Transaction Types', () => {
 
     it('should accept method with parameters', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function transfer(address to, uint256 amount)',
         params: ['0x123456789', BigInt('1000000000000000000')]
       };
@@ -154,7 +157,7 @@ describe('Transaction Types', () => {
 
     it('should accept value for payable methods', () => {
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: 'function mint(address to)',
         params: ['0x123456789'],
         value: BigInt('100000000000000000')
@@ -174,7 +177,7 @@ describe('Transaction Types', () => {
       };
 
       const params: PrepareContractCallParams = {
-        contract: mockContract,
+        ...mockContract,
         method: abiFunction,
         params: ['0x123456789', BigInt('1000000000000000000')]
       };
@@ -318,7 +321,7 @@ describe('Transaction Types', () => {
       const mockThirdwebParams = {
         client: mockClient,
         chain: mockChain,
-        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as `0x${string}`,
+        to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address,
         value: BigInt('1000000000000000000'),
         gasPrice: BigInt('20000000000')
       };
