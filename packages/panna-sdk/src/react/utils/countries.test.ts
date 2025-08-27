@@ -3,7 +3,7 @@ import {
   getCurrencyForCountry,
   getCurrencySymbol,
   getCurrencySymbolForCountry,
-  COUNTRIES_WITH_POPULAR_FIRST
+  COUNTRIES_SORTED
 } from './countries';
 
 // Mock the external packages
@@ -354,35 +354,21 @@ describe('Countries Utility Functions', () => {
     });
   });
 
-  describe('COUNTRIES_WITH_POPULAR_FIRST', () => {
-    it('should be an array with popular countries first', () => {
-      expect(Array.isArray(COUNTRIES_WITH_POPULAR_FIRST)).toBe(true);
-      expect(COUNTRIES_WITH_POPULAR_FIRST.length).toBeGreaterThan(0);
+  describe('COUNTRIES_SORTED', () => {
+    it('should be an array sorted alphabetically', () => {
+      expect(Array.isArray(COUNTRIES_SORTED)).toBe(true);
+      expect(COUNTRIES_SORTED.length).toBeGreaterThan(0);
     });
 
-    it('should start with popular countries', () => {
-      const popularCodes = [
-        'US',
-        'GB',
-        'CA',
-        'AU',
-        'DE',
-        'FR',
-        'ES',
-        'IT',
-        'NL',
-        'BR'
-      ];
-      const firstFewCountries = COUNTRIES_WITH_POPULAR_FIRST.slice(0, 6); // Check first 6 that exist in our mock
-
-      firstFewCountries.forEach((country) => {
-        expect(popularCodes).toContain(country.code);
-      });
+    it('should be sorted alphabetically by name', () => {
+      const names = COUNTRIES_SORTED.map((country) => country.name);
+      const sortedNames = [...names].sort();
+      expect(names).toEqual(sortedNames);
     });
 
     it('should contain all countries from the original array', () => {
       // Since we mocked 7 countries, we should have all 7 in the result
-      expect(COUNTRIES_WITH_POPULAR_FIRST).toHaveLength(7);
+      expect(COUNTRIES_SORTED).toHaveLength(7);
     });
   });
 

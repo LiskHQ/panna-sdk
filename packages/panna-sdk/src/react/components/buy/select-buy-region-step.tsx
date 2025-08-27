@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { Country } from '../../types/country.types';
 import {
-  COUNTRIES_WITH_POPULAR_FIRST,
+  COUNTRIES_SORTED,
   getCountryByCode,
   detectUserCountry
 } from '../../utils';
@@ -48,9 +48,7 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
 
       // Set default country: detected > US > first available
       const defaultCountry =
-        detectedCountry ||
-        getCountryByCode('US') ||
-        COUNTRIES_WITH_POPULAR_FIRST[0];
+        detectedCountry || getCountryByCode('US') || COUNTRIES_SORTED[0];
       if (defaultCountry) {
         form.setValue('country', defaultCountry);
       }
@@ -100,25 +98,8 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
                       />
                       <CommandList className="max-h-[300px] overflow-y-auto">
                         <CommandEmpty>No country found.</CommandEmpty>
-                        <CommandGroup heading="Popular">
-                          {COUNTRIES_WITH_POPULAR_FIRST.slice(0, 10).map(
-                            (c) => (
-                              <CommandItem
-                                key={c.code}
-                                value={c.name}
-                                onSelect={() => handleCountrySelect(c)}
-                              >
-                                <span className="text-xl">{c.flag}</span>
-                                {c.name}
-                                {field.value?.code === c.code && (
-                                  <CheckIcon className="ml-auto opacity-100" />
-                                )}
-                              </CommandItem>
-                            )
-                          )}
-                        </CommandGroup>
-                        <CommandGroup heading="All Countries">
-                          {COUNTRIES_WITH_POPULAR_FIRST.slice(10).map((c) => (
+                        <CommandGroup>
+                          {COUNTRIES_SORTED.map((c) => (
                             <CommandItem
                               key={c.code}
                               value={c.name}

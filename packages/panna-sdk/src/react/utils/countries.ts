@@ -9,32 +9,10 @@ import type { Country } from '../types/country.types';
 // Register English locale for i18n-iso-countries
 countries.registerLocale(enLocale);
 
-// Popular countries based on common usage
-const POPULAR_COUNTRY_CODES = [
-  'US',
-  'GB',
-  'CA',
-  'AU',
-  'DE',
-  'FR',
-  'ES',
-  'IT',
-  'NL',
-  'BR'
-];
-
-const POPULAR_COUNTRIES = POPULAR_COUNTRY_CODES.map((code) =>
-  COUNTRIES.find((country) => country.code === code)
-).filter(Boolean) as Country[];
-
-const OTHER_COUNTRIES = COUNTRIES.filter(
-  (country) => !POPULAR_COUNTRY_CODES.includes(country.code)
-).sort((a, b) => a.name.localeCompare(b.name));
-
-export const COUNTRIES_WITH_POPULAR_FIRST = [
-  ...POPULAR_COUNTRIES,
-  ...OTHER_COUNTRIES
-];
+// Export countries sorted alphabetically by name
+export const COUNTRIES_SORTED = COUNTRIES.sort((a, b) =>
+  a.name.localeCompare(b.name)
+);
 
 /**
  * Get country by ISO 3166-1 alpha-2 or alpha-3 country code
