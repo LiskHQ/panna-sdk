@@ -1,6 +1,7 @@
 import { Bridge } from 'thirdweb';
 import { liskSepolia } from '../chains';
 import type { PannaClient } from '../client';
+import { DEFAULT_CURRENCY } from '../defaults';
 import {
   onRampStatus,
   onRampPrepare,
@@ -65,7 +66,7 @@ describe('onRampStatus', () => {
       purchaseData: {
         userId: 'user-456',
         purchaseAmount: 100,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       }
     };
 
@@ -174,7 +175,7 @@ describe('onRampPrepare', () => {
   const expectedPrepareResult = {
     id: 'session-prepare-1',
     link: 'https://onramp.example.com/session-prepare-1',
-    currency: 'USD',
+    currency: DEFAULT_CURRENCY,
     currencyAmount: '100',
     destinationAmount: '11',
     timestamp: 1710000000,

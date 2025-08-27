@@ -1,5 +1,9 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { accountBalancesInFiat, isValidAddress } from 'src/core';
+import {
+  accountBalancesInFiat,
+  DEFAULT_CURRENCY,
+  isValidAddress
+} from 'src/core';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import type { FiatCurrency } from '../../core/utils/types';
 import { usePanna } from './use-panna';
@@ -13,7 +17,7 @@ type UseTotalFiatBalanceParams = {
  * Hook to retrieve the total fiat balance across all supported tokens
  */
 export function useTotalFiatBalance(
-  { address, currency = 'USD' }: UseTotalFiatBalanceParams,
+  { address, currency = DEFAULT_CURRENCY }: UseTotalFiatBalanceParams,
   options?: Omit<UseQueryOptions<number>, 'queryKey' | 'queryFn'>
 ) {
   const { client } = usePanna();

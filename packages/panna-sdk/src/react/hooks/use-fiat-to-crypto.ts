@@ -1,5 +1,5 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { lisk } from 'src/core';
+import { DEFAULT_CURRENCY, lisk } from 'src/core';
 import type { Chain } from 'thirdweb';
 import { getTokenFiatPrices } from '../../core/onramp';
 import type { FiatCurrency } from '../../core/utils/types';
@@ -29,7 +29,12 @@ type FiatToCryptoResult = {
  * @returns React Query result with crypto amount data
  */
 export function useFiatToCrypto(
-  { chain, tokenAddress, fiatAmount, currency = 'USD' }: UseFiatToCryptoParams,
+  {
+    chain,
+    tokenAddress,
+    fiatAmount,
+    currency = DEFAULT_CURRENCY
+  }: UseFiatToCryptoParams,
   options?: Omit<UseQueryOptions<FiatToCryptoResult>, 'queryKey' | 'queryFn'>
 ) {
   const { client } = usePanna();

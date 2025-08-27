@@ -6,6 +6,7 @@ import {
   XIcon
 } from 'lucide-react';
 import { useState, useRef } from 'react';
+import { DEFAULT_CURRENCY } from 'src/core';
 import { truncateAddress } from '@/utils/address';
 import { type StringValues } from '../../../core/utils/types';
 import { useTotalFiatBalance } from '../../hooks';
@@ -49,7 +50,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({
       address,
-      currency: 'USD'
+      currency: DEFAULT_CURRENCY
     });
 
   const renderHeader = (view: AccountView) => {

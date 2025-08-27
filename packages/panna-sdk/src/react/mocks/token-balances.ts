@@ -1,4 +1,4 @@
-import { lisk } from 'src/core';
+import { DEFAULT_CURRENCY, lisk } from 'src/core';
 import { liskTokenConfig } from '@/consts';
 import { AccountBalanceInFiatResult } from '../../core/utils/types';
 
@@ -22,7 +22,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
     },
     fiatBalance: {
       amount: 4200.5,
-      currency: 'USD'
+      currency: DEFAULT_CURRENCY
     }
   },
   {
@@ -38,7 +38,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
     },
     fiatBalance: {
       amount: 1500.0,
-      currency: 'USD'
+      currency: DEFAULT_CURRENCY
     }
   },
   {
@@ -54,7 +54,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
     },
     fiatBalance: {
       amount: 5000.0,
-      currency: 'USD'
+      currency: DEFAULT_CURRENCY
     }
   },
   {
@@ -70,7 +70,7 @@ const mockAccountBalances: AccountBalanceInFiatResult[] = [
     },
     fiatBalance: {
       amount: 2500.0,
-      currency: 'USD'
+      currency: DEFAULT_CURRENCY
     }
   }
 ];

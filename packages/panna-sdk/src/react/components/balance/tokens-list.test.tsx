@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { DEFAULT_CURRENCY } from 'src/core';
 import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '../../hooks/use-token-balances';
 import { TokensList } from './tokens-list';
@@ -65,7 +66,7 @@ describe('TokensList', () => {
             displayValue: '123.456789'
           },
           fiatBalance: {
-            currency: 'USD',
+            currency: DEFAULT_CURRENCY,
             amount: 100.12
           }
         }

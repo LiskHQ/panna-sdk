@@ -1,5 +1,6 @@
 import { useMemo, useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { DEFAULT_CURRENCY } from 'src/core';
 import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
 import { getEnvironmentChain } from '../../utils';
 import { Button } from '../ui/button';
@@ -38,7 +39,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
       chain,
       tokenAddress,
       fiatAmount: fiatAmount || 0,
-      currency: 'USD'
+      currency: DEFAULT_CURRENCY
     },
     { enabled: !!fiatAmount && fiatAmount > 0 }
   );

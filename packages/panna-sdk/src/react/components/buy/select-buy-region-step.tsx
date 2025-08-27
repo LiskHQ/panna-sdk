@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { Country } from '../../types/country.types';
 import {
-  getCountriesWithPopularFirst,
+  COUNTRIES_WITH_POPULAR_FIRST,
   getCountryByCode,
   detectUserCountry
 } from '../../utils';
@@ -36,7 +36,6 @@ type SelectBuyRegionStepProps = {
 export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
   const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
-  const countries = getCountriesWithPopularFirst();
 
   // Auto-detect and set user's country on mount
   useEffect(() => {
@@ -49,12 +48,14 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
 
       // Set default country: detected > US > first available
       const defaultCountry =
-        detectedCountry || getCountryByCode('US') || countries[0];
+        detectedCountry ||
+        getCountryByCode('US') ||
+        COUNTRIES_WITH_POPULAR_FIRST[0];
       if (defaultCountry) {
         form.setValue('country', defaultCountry);
       }
     }
-  }, [form, countries]);
+  }, [form]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -100,22 +101,24 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
                       <CommandList className="max-h-[300px] overflow-y-auto">
                         <CommandEmpty>No country found.</CommandEmpty>
                         <CommandGroup heading="Popular">
-                          {countries.slice(0, 10).map((c) => (
-                            <CommandItem
-                              key={c.code}
-                              value={c.name}
-                              onSelect={() => handleCountrySelect(c)}
-                            >
-                              <span className="text-xl">{c.flag}</span>
-                              {c.name}
-                              {field.value?.code === c.code && (
-                                <CheckIcon className="ml-auto opacity-100" />
-                              )}
-                            </CommandItem>
-                          ))}
+                          {COUNTRIES_WITH_POPULAR_FIRST.slice(0, 10).map(
+                            (c) => (
+                              <CommandItem
+                                key={c.code}
+                                value={c.name}
+                                onSelect={() => handleCountrySelect(c)}
+                              >
+                                <span className="text-xl">{c.flag}</span>
+                                {c.name}
+                                {field.value?.code === c.code && (
+                                  <CheckIcon className="ml-auto opacity-100" />
+                                )}
+                              </CommandItem>
+                            )
+                          )}
                         </CommandGroup>
                         <CommandGroup heading="All Countries">
-                          {countries.slice(10).map((c) => (
+                          {COUNTRIES_WITH_POPULAR_FIRST.slice(10).map((c) => (
                             <CommandItem
                               key={c.code}
                               value={c.name}
