@@ -234,7 +234,7 @@ export const accountBalanceInFiat = async function (
  *     '0x...', // USDC
  *     '0x...'  // DAI
  *   ],
- *   currency: DEFAULT_CURRENCY
+ *   currency: 'USD'
  * });
  * // result: {
  * //   totalValue: { amount: 5250.75, currency: 'USD' },
@@ -263,7 +263,7 @@ export const accountBalanceInFiat = async function (
  * //         value: 2250750000n, // 2250.75 USDC
  * //         displayValue: '2250.75'
  * //       },
- * //       fiatBalance: { amount: 2250.75, currency: DEFAULT_CURRENCY }
+ * //       fiatBalance: { amount: 2250.75, currency: 'USD' }
  * //     }
  * //   ],
  * //   errors: [
