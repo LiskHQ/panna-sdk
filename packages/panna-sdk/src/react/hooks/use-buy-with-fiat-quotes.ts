@@ -27,10 +27,10 @@ type UseBuyWithFiatQuotesParams = {
  *
  * @param params - Parameters for retrieving buy with fiat quotes
  * @param params.countryCode - ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB', 'DE'). Must be a valid country code from the ISO standard.
- * @param params.tokenAddress - Optional. The contract address of the token to purchase (e.g., '0x...'). Required for enriched quotes with pricing.
- * @param params.cryptoAmount - Optional. The amount of cryptocurrency to purchase as a string (e.g., '1.5', '100'). Required for enriched quotes with pricing.
- * @param params.receiver - Optional. The wallet address that will receive the purchased tokens (e.g., '0x...'). Required for enriched quotes with pricing.
- * @param options - Optional React Query options (excluding 'queryKey' and 'queryFn')
+ * @param params.tokenAddress - (Optional) The contract address of the token to purchase (e.g., '0x...'). Required for enriched quotes with pricing.
+ * @param params.cryptoAmount - (Optional) The amount of cryptocurrency to purchase as a string (e.g., '1.5', '100'). Required for enriched quotes with pricing.
+ * @param params.receiver - (Optional) The wallet address that will receive the purchased tokens (e.g., '0x...'). Required for enriched quotes with pricing.
+ * @param options - (Optional) React Query options (excluding 'queryKey' and 'queryFn')
  *
  * @returns React Query result with buy with fiat quotes data
  *
