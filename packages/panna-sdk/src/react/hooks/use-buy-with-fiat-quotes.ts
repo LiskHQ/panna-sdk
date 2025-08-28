@@ -11,6 +11,8 @@ import {
 } from './constants';
 import { usePanna } from './use-panna';
 
+const CURRENCY_DECIMAL_PLACES = 2;
+
 type UseBuyWithFiatQuotesParams = {
   /** ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB', 'DE'). Must be a valid country code from the ISO standard. */
   countryCode: string;
@@ -115,7 +117,7 @@ export function useBuyWithFiatQuotes(
                 providerDescription: provider.description,
                 providerLogoUrl: provider.logoUrl,
                 prepareResult,
-                price: `$${parseFloat(prepareResult.currencyAmount).toFixed(2)}`
+                price: `$${parseFloat(prepareResult.currencyAmount).toFixed(CURRENCY_DECIMAL_PLACES)}`
               };
             } catch (error) {
               console.warn(
