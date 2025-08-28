@@ -1,8 +1,9 @@
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
-import { DEFAULT_CURRENCY, lisk } from 'src/core';
+import { DEFAULT_CURRENCY, lisk, liskSepolia } from 'src/core';
 import type { Chain } from 'thirdweb';
 import { getTokenFiatPrices } from '../../core/onramp';
 import type { FiatCurrency } from '../../core/utils/types';
+import { getEnvironmentChain } from '../utils';
 import {
   DEFAULT_STALE_TIME,
   DEFAULT_REFETCH_INTERVAL,
@@ -14,6 +15,7 @@ import { usePanna } from './use-panna';
 type UseFiatToCryptoParams = {
   chain?: Chain;
   tokenAddress?: string;
+  tokenSymbol?: string;
   fiatAmount: number;
   currency?: FiatCurrency;
 };
@@ -32,6 +34,7 @@ export function useFiatToCrypto(
   {
     chain,
     tokenAddress,
+    tokenSymbol,
     fiatAmount,
     currency = DEFAULT_CURRENCY
   }: UseFiatToCryptoParams,
@@ -41,7 +44,14 @@ export function useFiatToCrypto(
   const hasValidAmount = fiatAmount > 0;
 
   return useQuery({
-    queryKey: ['fiat-to-crypto', chain?.id, tokenAddress, fiatAmount, currency],
+    queryKey: [
+      'fiat-to-crypto',
+      chain?.id,
+      tokenAddress,
+      tokenSymbol,
+      fiatAmount,
+      currency
+    ],
     queryFn: async (): Promise<FiatToCryptoResult> => {
       if (!hasValidAmount || !client || !chain || !tokenAddress) {
         throw new Error('Invalid query state');
@@ -54,9 +64,17 @@ export function useFiatToCrypto(
           client
         });
 
-        const tokenPrice = tokenPrices.find(
-          (token) => token.address.toLowerCase() === tokenAddress.toLowerCase()
-        );
+        const currentChain = getEnvironmentChain();
+        const isLiskSepolia = currentChain.id === liskSepolia.id;
+
+        const tokenPrice = tokenPrices.find((token) => {
+          if (isLiskSepolia && tokenSymbol) {
+            // Special case for liskSepolia: use symbol comparison
+            return token.symbol === tokenSymbol;
+          }
+          // Default: use address comparison for security
+          return token.address.toLowerCase() === tokenAddress.toLowerCase();
+        });
 
         if (!tokenPrice || !tokenPrice.prices[currency]) {
           throw new Error(`Price not available for ${currency}`);

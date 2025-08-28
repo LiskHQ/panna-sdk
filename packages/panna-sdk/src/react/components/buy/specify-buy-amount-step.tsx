@@ -44,6 +44,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
     {
       chain,
       tokenAddress,
+      tokenSymbol: token?.symbol,
       fiatAmount: fiatAmount || 0,
       currency: DEFAULT_CURRENCY
     },
