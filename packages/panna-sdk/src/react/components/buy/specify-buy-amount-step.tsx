@@ -10,6 +10,8 @@ import { FormControl, FormField, FormItem, FormMessage } from '../ui/form';
 import { Typography } from '../ui/typography';
 import type { BuyFormData } from './schema';
 
+const DECIMAL_NUMBER_REGEX = /^\d*\.?\d*$/;
+
 type SpecifyBuyAmountStepProps = {
   form: UseFormReturn<BuyFormData>;
 };
@@ -23,9 +25,11 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   const chain = getEnvironmentChain();
 
   const tokenAddress = useMemo(() => {
-    if (!token?.symbol) return undefined;
+    if (!token?.symbol) {
+      return undefined;
+    }
     const supportedToken = supportedTokens.find(
-      (t) => t.symbol === token.symbol
+      (supportedToken) => supportedToken.symbol === token.symbol
     );
     return supportedToken?.address;
   }, [token?.symbol, supportedTokens]);
@@ -82,7 +86,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
                       value={amountString}
                       onChange={(e) => {
                         const value = e.target.value;
-                        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        if (value === '' || DECIMAL_NUMBER_REGEX.test(value)) {
                           const numericValue = parseFloat(value);
                           if (!isNaN(numericValue)) {
                             field.onChange(numericValue);
