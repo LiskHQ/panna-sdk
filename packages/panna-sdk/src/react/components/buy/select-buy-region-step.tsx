@@ -1,6 +1,7 @@
 import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { DEFAULT_COUNTRY_CODE } from 'src/core';
 import type { Country } from '../../types/country.types';
 import {
   COUNTRIES_SORTED,
@@ -48,7 +49,9 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
 
       // Set default country: detected > US > first available
       const defaultCountry =
-        detectedCountry || getCountryByCode('US') || COUNTRIES_SORTED[0];
+        detectedCountry ||
+        getCountryByCode(DEFAULT_COUNTRY_CODE) ||
+        COUNTRIES_SORTED[0];
       if (defaultCountry) {
         form.setValue('country', defaultCountry);
       }
