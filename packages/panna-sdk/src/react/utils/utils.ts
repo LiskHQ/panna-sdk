@@ -1,5 +1,6 @@
 import { lisk, liskSepolia } from '../../core';
 import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
+import { getCountryByCode } from './countries';
 
 /**
  * Get the supported tokens for a given chain.
@@ -38,4 +39,46 @@ export function getEnvironmentChain() {
  */
 export function getAAChain(testingStatus?: boolean | undefined) {
   return getChain(testingStatus);
+}
+
+/**
+ * Detect user's country based on browser locale with validation.
+ * Returns a validated 2-letter country code that exists in our supported countries.
+ * @returns The detected and validated country code or null if detection/validation fails
+ */
+export function detectUserCountry(): string | null {
+  try {
+    // Method 1: Browser locale detection (e.g., "en-US", "fr-FR")
+    const locale = navigator.language || navigator.languages?.[0];
+    if (locale && locale.includes('-')) {
+      const countryCode = locale.split('-')[1]?.toUpperCase();
+      if (countryCode) {
+        // Validate the detected country code exists in our supported countries
+        const country = getCountryByCode(countryCode);
+        if (country) {
+          return country.code; // Return the validated 2-letter code
+        }
+      }
+    }
+
+    // Method 2: Try additional browser locales if available
+    if (navigator.languages && navigator.languages.length > 1) {
+      for (let i = 1; i < navigator.languages.length; i++) {
+        const altLocale = navigator.languages[i];
+        if (altLocale && altLocale.includes('-')) {
+          const countryCode = altLocale.split('-')[1]?.toUpperCase();
+          if (countryCode) {
+            const country = getCountryByCode(countryCode);
+            if (country) {
+              return country.code;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 }

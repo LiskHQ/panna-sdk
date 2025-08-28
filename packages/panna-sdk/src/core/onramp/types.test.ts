@@ -1,4 +1,5 @@
 import type { PannaClient } from '../client';
+import { DEFAULT_CURRENCY } from '../defaults';
 import type {
   OnrampStatus,
   OnrampTransaction,
@@ -35,14 +36,14 @@ describe('Onramp Types', () => {
     const purchaseData: OnrampPurchaseData = {
       sessionId: 'session-123',
       amount: '100',
-      currency: 'USD',
+      currency: DEFAULT_CURRENCY,
       customField: { nested: true },
       metadata: ['tag1', 'tag2']
     };
 
     expect(purchaseData.sessionId).toBe('session-123');
     expect(purchaseData.amount).toBe('100');
-    expect(purchaseData.currency).toBe('USD');
+    expect(purchaseData.currency).toBe(DEFAULT_CURRENCY);
     expect(purchaseData.customField).toEqual({ nested: true });
     expect(purchaseData.metadata).toEqual(['tag1', 'tag2']);
   });

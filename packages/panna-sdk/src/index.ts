@@ -56,6 +56,8 @@ export {
   getFiatPrice,
   isValidAddress,
   toWei,
+  extractNumericPrice,
+  REGEX_EXTRACT_NUMERIC_PRICE,
 
   // Utils types
   type AccountBalanceParams,
@@ -78,6 +80,9 @@ export {
   type GetFiatPriceResult,
   type FiatCurrency,
   type TokenFiatPrice,
+
+  // Utility types
+  type StringValues,
 
   // Onramp functions
   onRampStatus,

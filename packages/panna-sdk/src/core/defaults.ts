@@ -8,6 +8,11 @@ import type { FiatCurrency } from './utils/types';
 export const DEFAULT_CURRENCY: FiatCurrency = 'USD';
 
 /**
+ * Default country used throughout the SDK when no country is specified
+ */
+export const DEFAULT_COUNTRY_CODE = 'US';
+
+/**
  * Default blockchain used throughout the SDK when no chain is specified
  */
 export const DEFAULT_CHAIN = lisk;

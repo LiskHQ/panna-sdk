@@ -20,7 +20,9 @@ import {
   accountBalancesInFiat,
   getFiatPrice,
   getSocialIcon,
-  toWei
+  toWei,
+  extractNumericPrice,
+  REGEX_EXTRACT_NUMERIC_PRICE
 } from './utils';
 import * as utils from './utils';
 import {
@@ -1267,6 +1269,176 @@ describe('Utils - Unit Tests', () => {
     it('should handle zero', () => {
       const result = toWei('0');
       expect(result).toBe(BigInt('0'));
+    });
+  });
+
+  describe('extractNumericPrice', () => {
+    describe('currency symbols', () => {
+      it('should extract numeric value from USD formatted price', () => {
+        expect(extractNumericPrice('$123.45')).toBe(123.45);
+        expect(extractNumericPrice('$1,234.56')).toBe(1234.56);
+        expect(extractNumericPrice('$10,000.00')).toBe(10000.0);
+      });
+
+      it('should extract numeric value from EUR formatted price', () => {
+        expect(extractNumericPrice('€123.45')).toBe(123.45);
+        expect(extractNumericPrice('€1,234.56')).toBe(1234.56);
+        expect(extractNumericPrice('1,234.56 €')).toBe(1234.56);
+      });
+
+      it('should extract numeric value from GBP formatted price', () => {
+        expect(extractNumericPrice('£123.45')).toBe(123.45);
+        expect(extractNumericPrice('£1,234.56')).toBe(1234.56);
+      });
+
+      it('should extract numeric value from other currency symbols', () => {
+        expect(extractNumericPrice('¥1234')).toBe(1234);
+        expect(extractNumericPrice('₹123.45')).toBe(123.45);
+        expect(extractNumericPrice('₿0.001')).toBe(0.001);
+      });
+    });
+
+    describe('negative values', () => {
+      it('should handle negative prices correctly', () => {
+        expect(extractNumericPrice('$-123.45')).toBe(-123.45);
+        expect(extractNumericPrice('-$123.45')).toBe(-123.45);
+        expect(extractNumericPrice('£-10.00')).toBe(-10.0);
+        expect(extractNumericPrice('-€1,234.56')).toBe(-1234.56);
+      });
+    });
+
+    describe('thousands separators', () => {
+      it('should handle comma separators', () => {
+        expect(extractNumericPrice('$1,234.56')).toBe(1234.56);
+        expect(extractNumericPrice('€10,000,000.00')).toBe(10000000.0);
+        expect(extractNumericPrice('£1,000,000,000.99')).toBe(1000000000.99);
+      });
+
+      it('should handle space separators', () => {
+        expect(extractNumericPrice('1 234.56 €')).toBe(1234.56);
+        expect(extractNumericPrice('10 000 000.00 USD')).toBe(10000000.0);
+      });
+
+      it('should handle mixed separators and formatting', () => {
+        expect(extractNumericPrice('USD $1,234.56')).toBe(1234.56);
+        expect(extractNumericPrice('Price: €1 234.56')).toBe(1234.56);
+        expect(extractNumericPrice('Total: £10,000.00 GBP')).toBe(10000.0);
+      });
+    });
+
+    describe('decimal values', () => {
+      it('should handle various decimal places', () => {
+        expect(extractNumericPrice('$123')).toBe(123);
+        expect(extractNumericPrice('$123.4')).toBe(123.4);
+        expect(extractNumericPrice('$123.45')).toBe(123.45);
+        expect(extractNumericPrice('$123.456')).toBe(123.456);
+        expect(extractNumericPrice('$0.001')).toBe(0.001);
+      });
+
+      it('should handle leading zeros', () => {
+        expect(extractNumericPrice('$0.50')).toBe(0.5);
+        expect(extractNumericPrice('$00.50')).toBe(0.5);
+        expect(extractNumericPrice('$000.001')).toBe(0.001);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should return Infinity for empty string', () => {
+        expect(extractNumericPrice('')).toBe(Infinity);
+      });
+
+      it('should return Infinity for null/undefined input', () => {
+        expect(extractNumericPrice(null as unknown as string)).toBe(Infinity);
+        expect(extractNumericPrice(undefined as unknown as string)).toBe(
+          Infinity
+        );
+      });
+
+      it('should return Infinity for non-numeric strings', () => {
+        expect(extractNumericPrice('Loading...')).toBe(Infinity);
+        expect(extractNumericPrice('N/A')).toBe(Infinity);
+        expect(extractNumericPrice('Error')).toBe(Infinity);
+        expect(extractNumericPrice('Invalid')).toBe(Infinity);
+        expect(extractNumericPrice('--')).toBe(Infinity);
+      });
+
+      it('should handle strings with only symbols', () => {
+        expect(extractNumericPrice('$')).toBe(Infinity);
+        expect(extractNumericPrice('€')).toBe(Infinity);
+        expect(extractNumericPrice('£')).toBe(Infinity);
+        expect(extractNumericPrice('$€£')).toBe(Infinity);
+      });
+
+      it('should handle zero values', () => {
+        expect(extractNumericPrice('$0')).toBe(0);
+        expect(extractNumericPrice('$0.00')).toBe(0);
+        expect(extractNumericPrice('€0,00')).toBe(0);
+        expect(extractNumericPrice('Free')).toBe(Infinity);
+      });
+    });
+
+    describe('real-world scenarios', () => {
+      it('should handle onramp provider price formats', () => {
+        // Common formats from different providers
+        expect(extractNumericPrice('$123.45')).toBe(123.45); // Coinbase style
+        expect(extractNumericPrice('123.45 USD')).toBe(123.45); // Stripe style
+        expect(extractNumericPrice('USD 123.45')).toBe(123.45); // Transak style
+        expect(extractNumericPrice('$1,234.56 USD')).toBe(1234.56); // Mixed format
+      });
+
+      it('should handle loading and error states', () => {
+        expect(extractNumericPrice('Loading...')).toBe(Infinity);
+        expect(extractNumericPrice('Calculating...')).toBe(Infinity);
+        expect(extractNumericPrice('Error fetching price')).toBe(Infinity);
+        expect(extractNumericPrice('Service unavailable')).toBe(Infinity);
+      });
+
+      it('should handle various quote formats', () => {
+        expect(extractNumericPrice('Quote: $123.45')).toBe(123.45);
+        expect(extractNumericPrice('Best price: €1,234.56')).toBe(1234.56);
+        expect(extractNumericPrice('Total cost: £10,000.00')).toBe(10000.0);
+        expect(extractNumericPrice('Fee: $5.99')).toBe(5.99);
+      });
+    });
+
+    describe('REGEX_EXTRACT_NUMERIC_PRICE constant', () => {
+      it('should be exported and usable', () => {
+        expect(REGEX_EXTRACT_NUMERIC_PRICE).toBeDefined();
+        expect(REGEX_EXTRACT_NUMERIC_PRICE).toBeInstanceOf(RegExp);
+      });
+
+      it('should match the expected pattern', () => {
+        const testString = '$123.45';
+        const result = testString.replace(REGEX_EXTRACT_NUMERIC_PRICE, '');
+        expect(result).toBe('123.45');
+      });
+
+      it('should have global flag for multiple replacements', () => {
+        expect(REGEX_EXTRACT_NUMERIC_PRICE.global).toBe(true);
+      });
+    });
+
+    describe('performance and consistency', () => {
+      it('should handle large numbers correctly', () => {
+        expect(extractNumericPrice('$999,999,999.99')).toBe(999999999.99);
+        expect(extractNumericPrice('€1,000,000,000.00')).toBe(1000000000.0);
+      });
+
+      it('should be consistent with repeated calls', () => {
+        const testCases = [
+          '$123.45',
+          '€1,234.56',
+          'Loading...',
+          'N/A',
+          '$0.00'
+        ];
+
+        testCases.forEach((testCase) => {
+          const result1 = extractNumericPrice(testCase);
+          const result2 = extractNumericPrice(testCase);
+          expect(result1).toBe(result2);
+        });
+      });
     });
   });
 });

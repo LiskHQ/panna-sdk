@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { accountBalancesInFiat } from 'src/core';
+import { accountBalancesInFiat, DEFAULT_CURRENCY } from 'src/core';
 import { TokenBalance as UITokenBalance } from '@/mocks/token-balances';
 import { createQueryClientWrapper } from '../utils/test-utils';
 import { useTokenBalances } from './use-token-balances';
@@ -49,7 +49,7 @@ describe('useTokenBalances', () => {
 
   it('returns token balances with icons mapped from supported tokens', async () => {
     mockedAccountBalancesInFiat.mockResolvedValue({
-      totalValue: { amount: 100, currency: 'USD' },
+      totalValue: { amount: 100, currency: DEFAULT_CURRENCY },
       tokenBalances: [
         {
           token: {
@@ -59,7 +59,7 @@ describe('useTokenBalances', () => {
             decimals: 18
           },
           tokenBalance: { value: BigInt(1), displayValue: '1' },
-          fiatBalance: { amount: 60, currency: 'USD' }
+          fiatBalance: { amount: 60, currency: DEFAULT_CURRENCY }
         },
         {
           token: {
@@ -69,7 +69,7 @@ describe('useTokenBalances', () => {
             decimals: 18
           },
           tokenBalance: { value: BigInt(2), displayValue: '2' },
-          fiatBalance: { amount: 40, currency: 'USD' }
+          fiatBalance: { amount: 40, currency: DEFAULT_CURRENCY }
         }
       ]
     });

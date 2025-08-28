@@ -1,6 +1,11 @@
 import { Chain } from '../chains';
 import { type PannaClient } from '../client';
 
+// Utility type to extract string values from an object
+export type StringValues<T> = {
+  [K in keyof T]: T[K] extends string ? T[K] : never;
+}[keyof T];
+
 // Parameters for getting account balance
 export interface AccountBalanceParams {
   address: string;

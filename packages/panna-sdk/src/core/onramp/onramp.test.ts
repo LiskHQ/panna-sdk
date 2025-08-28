@@ -1,6 +1,7 @@
 import { Bridge } from 'thirdweb';
 import { liskSepolia } from '../chains';
 import type { PannaClient } from '../client';
+import { DEFAULT_CURRENCY } from '../defaults';
 import {
   onRampStatus,
   onRampPrepare,
@@ -65,7 +66,7 @@ describe('onRampStatus', () => {
       purchaseData: {
         userId: 'user-456',
         purchaseAmount: 100,
-        currency: 'USD'
+        currency: DEFAULT_CURRENCY
       }
     };
 
@@ -174,7 +175,7 @@ describe('onRampPrepare', () => {
   const expectedPrepareResult = {
     id: 'session-prepare-1',
     link: 'https://onramp.example.com/session-prepare-1',
-    currency: 'USD',
+    currency: DEFAULT_CURRENCY,
     currencyAmount: '100',
     destinationAmount: '11',
     timestamp: 1710000000,
@@ -294,29 +295,39 @@ describe('getOnrampProviders', () => {
     {
       id: 'transak',
       displayName: 'Transak',
-      websiteUrl: 'https://www.transak.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.transak.com',
+      logoUrl: 'https://www.transak.com/favicon.png'
     },
     {
       id: 'coinbase',
       displayName: 'Coinbase',
-      websiteUrl: 'https://www.coinbase.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.coinbase.com',
+      logoUrl: 'https://www.coinbase.com/favicon.ico'
     },
     {
       id: 'stripe',
       displayName: 'Stripe',
-      websiteUrl: 'https://www.stripe.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.stripe.com',
+      logoUrl: 'https://www.stripe.com/favicon.ico'
     }
   ];
   const expectedResultForSA = [
     {
       id: 'coinbase',
       displayName: 'Coinbase',
-      websiteUrl: 'https://www.coinbase.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.coinbase.com',
+      logoUrl: 'https://www.coinbase.com/favicon.ico'
     },
     {
       id: 'stripe',
       displayName: 'Stripe',
-      websiteUrl: 'https://www.stripe.com'
+      description: 'Card, Apple Pay or bank transfer',
+      websiteUrl: 'https://www.stripe.com',
+      logoUrl: 'https://www.stripe.com/favicon.ico'
     }
   ];
 
