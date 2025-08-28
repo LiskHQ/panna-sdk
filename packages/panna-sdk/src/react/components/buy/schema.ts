@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
-// Country schema - supports both 2-letter (ISO 3166-1 alpha-2) and 3-letter (ISO 3166-1 alpha-3) codes
+// Country schema - supports only 2-letter (ISO 3166-1 alpha-2) codes as required by core functions
 export const countrySchema = z.object({
   code: z
     .string()
-    .min(2, 'Country code must be at least 2 characters')
-    .max(3, 'Country code must be at most 3 characters')
-    .regex(/^[A-Z]{2,3}$/, 'Country code must be 2-3 uppercase letters'),
+    .length(2, 'Country code must be exactly 2 characters')
+    .regex(/^[A-Z]{2}$/, 'Country code must be 2 uppercase letters'),
   name: z.string().min(1, 'Country name is required'),
   flag: z.string().min(1, 'Country flag is required')
 });

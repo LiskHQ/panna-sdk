@@ -77,7 +77,11 @@ export function getCurrencyForCountry(countryCode: string): string {
  * Get currency symbol for a currency code
  */
 export function getCurrencySymbol(currencyCode: string): string {
-  return getSymbolFromCurrency(currencyCode) || '$';
+  return (
+    getSymbolFromCurrency(currencyCode) ||
+    getSymbolFromCurrency(DEFAULT_CURRENCY) ||
+    '$'
+  );
 }
 
 /**
