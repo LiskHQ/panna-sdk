@@ -22,29 +22,25 @@ export function getCountryByCode(code: string): Country | undefined {
 
   const normalizedCode = code.toUpperCase();
 
-  // Handle 2-letter codes (current format)
-  if (normalizedCode.length === 2) {
-    // Validate it's a valid ISO 3166-1 alpha-2 code
-    if (!countries.isValid(normalizedCode)) {
-      return undefined;
-    }
-    return COUNTRIES.find((country) => country.code === normalizedCode);
+  // Validate it's a valid ISO 3166-1 alpha-2 or ISO 3166-1 alpha-3 code
+  if (!countries.isValid(normalizedCode)) {
+    return undefined;
   }
 
-  // Handle 3-letter codes by converting to 2-letter
-  if (normalizedCode.length === 3) {
-    // Validate it's a valid ISO 3166-1 alpha-3 code
-    if (!countries.isValid(normalizedCode)) {
-      return undefined;
+  switch (normalizedCode.length) {
+    case 2:
+      // Handle 2-letter codes (current format)
+      return COUNTRIES.find((country) => country.code === normalizedCode);
+    case 3: {
+      // Handle 3-letter codes by converting to 2-letter
+      const alpha2Code = countries.alpha3ToAlpha2(normalizedCode);
+      return alpha2Code
+        ? COUNTRIES.find((country) => country.code === alpha2Code)
+        : undefined;
     }
-    const alpha2Code = countries.alpha3ToAlpha2(normalizedCode);
-    return alpha2Code
-      ? COUNTRIES.find((country) => country.code === alpha2Code)
-      : undefined;
+    default:
+      return undefined;
   }
-
-  // Invalid length
-  return undefined;
 }
 
 /**
