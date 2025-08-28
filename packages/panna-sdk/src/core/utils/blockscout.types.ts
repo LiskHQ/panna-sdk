@@ -1,23 +1,23 @@
 export interface BlockscoutTransactionsResponse {
   items: BlockscoutTransaction[];
-  next_page_params: BlockscoutNextPageParams;
+  next_page_params: BlockscoutNextPageParams | null;
 }
 
 export interface BlockscoutTokenTransfersResponse {
   items: BlockscoutTokenTransfer[];
-  next_page_params: BlockscoutNextPageParams;
+  next_page_params: BlockscoutNextPageParams | null;
 }
 
 export interface BlockscoutNextPageParams {
   block_number: number;
   index: number;
-  items_count: number;
+  items_count?: number;
 }
 
 export interface BlockscoutTransaction {
   timestamp: string;
   fee: BlockscoutFee;
-  gas_limit: string;
+  gas_limit: number;
   block_number: number;
   status: BlockscoutTransactionStatus;
   method: string | null;
@@ -49,13 +49,6 @@ export interface BlockscoutTransaction {
   revert_reason: string | null;
   confirmation_duration: BlockscoutTransactionConfirmationDuration;
   transaction_tag: string | null;
-  l1_gas_used: string;
-  l1_gas_price: string;
-  l1_fee_scalar: string;
-  op_withdrawals: [];
-  authorization_list: [];
-  l1_fee: string;
-  historic_exchange_rate: string;
 }
 
 interface BlockscoutFee {
@@ -67,18 +60,18 @@ type BlockscoutTransactionStatus = 'ok' | 'error';
 
 export interface BlockscoutAddressParam {
   hash: string;
-  implementations: BlockscoutAddressParamImplementation[];
+  implementations?: BlockscoutAddressParamImplementation[];
   implementation_name?: string;
   name: string | null;
-  ens_domain_name: string | null;
-  metadata: BlockscoutAddressParamMetadata | null;
-  is_scam: boolean;
+  ens_domain_name?: string | null;
+  metadata?: BlockscoutAddressParamMetadata | null; // TODO: Re-validate against actual API
+  is_scam?: boolean;
   is_contract: boolean;
   private_tags: BlockscoutAddressTag[];
   watchlist_names: BlockscoutWatchlistName[];
   public_tags: BlockscoutAddressTag[];
   is_verified: boolean;
-  proxy_type: string | null;
+  proxy_type?: string | null;
 }
 
 interface BlockscoutAddressParamImplementation {
@@ -112,11 +105,11 @@ interface BlockscoutWatchlistName {
 
 export interface BlockscoutTokenTransfer {
   block_hash: string;
-  block_number: number;
+  block_number?: number;
   from: BlockscoutAddressParam;
   log_index: number;
-  method: string | null;
-  timestamp: string | null;
+  method?: string | null;
+  timestamp?: string | null;
   to: BlockscoutAddressParam;
   token: BlockscoutTokenInfo;
   total: BlockscoutTotal;
@@ -130,14 +123,13 @@ export interface BlockscoutTokenInfo {
   name: string;
   decimals: string | null;
   symbol: string;
-  address: string;
-  address_hash: string;
+  address?: string;
+  address_hash?: string;
   type: string;
-  holders: string;
-  holders_count: string;
+  holders_count?: string;
   exchange_rate: string | null;
   total_supply: string | null;
-  volume_24h: string | null;
+  volume_24h?: string | null;
 }
 
 type BlockscoutTotal =
@@ -152,37 +144,40 @@ export interface BlockscoutTotalERC20 {
 
 export interface BlockscoutTotalERC721 {
   token_id: string;
-  token_instance: BlockscoutNFTInstance;
+  token_instance?: BlockscoutNFTInstance;
 }
 
 export interface BlockscoutTotalERC1155 {
   token_id: string;
   decimals: string | null;
   value: string;
-  token_instance: BlockscoutNFTInstance;
+  token_instance?: BlockscoutNFTInstance;
 }
 
 interface BlockscoutNFTInstance {
   is_unique: boolean | null;
   id: string;
   holder_address_hash?: string;
-  image_url: string;
-  animation_url: string | null;
-  external_app_url: string;
-  metadata: BlockscoutNFTInstanceMetadata;
+  image_url?: string;
+  animation_url?: string | null;
+  external_app_url?: string;
+  metadata?: BlockscoutNFTInstanceMetadata;
   owner: BlockscoutAddressParam | null;
   token: BlockscoutTokenInfo;
-  media_type: string | null;
-  media_url: string | null;
-  thumbnails: string | null;
+  media_type?: string | null;
+  media_url?: string | null;
+  thumbnails?: string | null;
 }
 
 interface BlockscoutNFTInstanceMetadata {
-  attributes: BlockscoutNFTInstanceMetadataAttribute[];
-  description: string;
-  external_url: string;
-  image: string;
+  year: string;
+  tags: string[];
   name: string;
+  image_url: string;
+  home_url: string;
+  external_url: string;
+  description: string;
+  attributes: BlockscoutNFTInstanceMetadataAttribute[];
 }
 
 interface BlockscoutNFTInstanceMetadataAttribute {
@@ -305,7 +300,7 @@ export interface BlockscoutNFTNextPageParams {
 }
 
 export interface BlockscoutAddressNFTCollection {
-  amount: string;
+  amount?: string;
   token: BlockscoutTokenInfo;
   token_instances: BlockscoutAddressNFTInstanceCollection[];
 }
@@ -313,10 +308,10 @@ export interface BlockscoutAddressNFTCollection {
 export interface BlockscoutAddressNFTInstanceCollection {
   is_unique: boolean;
   id: string;
-  holder_address_hash: string;
-  image_url: string;
-  animation_url: string;
-  external_app_url: string;
+  holder_address_hash?: string;
+  image_url?: string;
+  animation_url?: string;
+  external_app_url?: string;
   metadata: BlockscoutAddressNFTInstanceCollectionMetadata;
   owner: BlockscoutAddressParam;
   token: string | null;

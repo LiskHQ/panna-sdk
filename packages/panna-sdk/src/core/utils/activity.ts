@@ -36,9 +36,9 @@ import {
   DEFAULT_PAGINATION_OFFSET
 } from './constants';
 
-// Activity cache
-const activityCache = newLruMemCache('activity');
-const LAST_PAGE_REACHED = 'last_page_reached';
+// Global constants
+const ACTIVITY_CACHE_ID = 'activity';
+export const LAST_PAGE_REACHED = 'last_page_reached';
 
 /**
  * Get blockscout transactions endpoint.
@@ -160,6 +160,9 @@ export const getActivitiesByAddress = async function (
     throw new Error('Invalid address format');
   }
 
+  // Activity cache
+  const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
+
   // Set default pagination params
   const {
     address,
@@ -183,7 +186,7 @@ export const getActivitiesByAddress = async function (
     null;
 
   const baseTxRequestUrl = getBaseTransactionsRequestUrl(address, chain.id);
-  while (userTransactions.length <= offset + limit) {
+  for (; userTransactions.length <= offset + limit; ) {
     // No new pages exist, avoid unnecessary API calls
     if (userTransactions.length && nextPageParams === null) {
       break;
@@ -224,12 +227,11 @@ export const getActivitiesByAddress = async function (
   }
 
   const activities: Activity[] = userTransactions
-    .slice(offset, offset + limit)
     .map((tx) => {
       const transactionID = tx.hash;
       const status = tx.result;
 
-      let activityType: ActivityType = TransactionActivity.SENT;
+      let activityType: ActivityType = TransactionActivity.UNKNOWN;
 
       if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
         activityType = TransactionActivity.SENT;
@@ -240,6 +242,13 @@ export const getActivitiesByAddress = async function (
         tx.token_transfers.find((t) => t.type.toLowerCase() === 'token_minting')
       ) {
         activityType = TransactionActivity.MINTED;
+      }
+
+      if (activityType === TransactionActivity.UNKNOWN) {
+        console.warn(
+          `Unable to determine transaction activity type for tx: ${transactionID}, skipping...`
+        );
+        return null; // Skip unknown transactions gracefully
       }
 
       let amount: TransactionAmount;
@@ -271,7 +280,7 @@ export const getActivitiesByAddress = async function (
               type: TokenERC.ERC20,
               value: tx.value,
               tokenInfo: {
-                address: erc20Tx?.token.address,
+                address: erc20Tx?.token.address_hash || erc20Tx?.token.address,
                 name: erc20Tx?.token.name,
                 symbol: erc20Tx?.token.symbol,
                 decimals: erc20Tx?.token.decimals
@@ -294,11 +303,12 @@ export const getActivitiesByAddress = async function (
               type: TokenERC.ERC721,
               tokenId: erc721TxTotal.token_id,
               instance: {
-                id: erc721TxTotal.token_instance.id,
-                isUnique: erc721TxTotal.token_instance.is_unique,
-                owner: erc721TxTotal.token_instance.owner,
+                id: erc721TxTotal.token_instance?.id,
+                isUnique: erc721TxTotal.token_instance?.is_unique,
+                owner: erc721TxTotal.token_instance?.owner,
                 tokenInfo: {
-                  address: erc721Tx?.token.address,
+                  address:
+                    erc721Tx?.token.address_hash || erc721Tx?.token.address,
                   name: erc721Tx?.token.name,
                   symbol: erc721Tx?.token.symbol,
                   decimals: erc721Tx?.token.decimals,
@@ -321,11 +331,12 @@ export const getActivitiesByAddress = async function (
               tokenId: erc1155TxTotal.token_id,
               value: erc1155TxTotal.value,
               instance: {
-                id: erc1155TxTotal.token_instance.id,
-                isUnique: erc1155TxTotal.token_instance.is_unique,
-                owner: erc1155TxTotal.token_instance.owner,
+                id: erc1155TxTotal.token_instance?.id,
+                isUnique: erc1155TxTotal.token_instance?.is_unique,
+                owner: erc1155TxTotal.token_instance?.owner,
                 tokenInfo: {
-                  address: erc1155Tx?.token.address,
+                  address:
+                    erc1155Tx?.token.address_hash || erc1155Tx?.token.address,
                   name: erc1155Tx?.token.name,
                   symbol: erc1155Tx?.token.symbol,
                   decimals: erc1155Tx?.token.decimals,
@@ -352,7 +363,8 @@ export const getActivitiesByAddress = async function (
         return null;
       }
     })
-    .filter((e) => e !== null);
+    .filter((e) => e !== null)
+    .slice(offset, offset + limit);
 
   const metadata: ActivityMetadata = {
     count: activities.length,
@@ -382,6 +394,9 @@ export const fillTokenTransactions = async (
   if (transactions.length === 0) {
     return transactions;
   }
+
+  // Activity cache
+  const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
 
   const cacheKeyTokenTransferTxs = getCacheKey(
     address,
@@ -461,6 +476,9 @@ export const updateTokenTransactionsCache = async (
   address: string,
   chainID: number
 ): Promise<void> => {
+  // Activity cache
+  const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
+
   const cacheKeyTokenTransferTxs = getCacheKey(
     address,
     chainID,

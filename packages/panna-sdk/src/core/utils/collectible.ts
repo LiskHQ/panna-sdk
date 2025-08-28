@@ -199,7 +199,7 @@ export const getCollectiblesByAddress = async function (
         name: collection.token.name,
         symbol: collection.token.symbol,
         type: collection.token.type.toLowerCase(),
-        address: collection.token.address,
+        address: collection.token.address as string,
         icon: collection.token.icon_url
       };
 
