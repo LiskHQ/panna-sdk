@@ -22,6 +22,7 @@ export interface Activity {
 }
 
 export const TransactionActivity = {
+  UNKNOWN: 'unknown',
   SENT: 'Sent',
   RECEIVED: 'Received',
   MINTED: 'Minted'

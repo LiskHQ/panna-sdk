@@ -1,4 +1,4 @@
-import * as axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 import { newLruMemCache } from './cache';
 import { delay } from './delay';
 
@@ -6,10 +6,10 @@ import { delay } from './delay';
 const requestCache = newLruMemCache('http_request');
 
 // Constants
-const DEFAULT_RETRIES = 0;
-const DEFAULT_RETRY_DELAY_MS = 100;
+export const DEFAULT_RETRIES = 2;
+export const DEFAULT_RETRY_DELAY_MS = 100;
 
-const AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP: Record<string, PannaHttpErr> = {
+export const AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP: Record<string, PannaHttpErr> = {
   UNDEFINED: {
     code: 'ERR_UNKNOWN',
     message: 'Unknown error occured. Retry after some time.'
@@ -66,44 +66,55 @@ const AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP: Record<string, PannaHttpErr> = {
 };
 
 // Internal types
-type RequestParamsConfig = Omit<axios.AxiosRequestConfig, 'url'>;
+type RequestParamsConfig = Omit<AxiosRequestConfig, 'url'>;
 
 // Internal functions
-const isCacheableResponse = (response: axios.AxiosResponse): boolean =>
+export const isCacheableResponse = (response: AxiosResponse): boolean =>
   response.status === HttpStatusCode.Ok;
 
-const requestWithRetries = async (
+export const requestWithRetries = async (
   url: string,
-  requestParams: RequestParamsConfig,
-  numRetries: number = DEFAULT_RETRIES,
+  requestParams: RequestParamsConfig = {},
+  maxRetries: number = DEFAULT_RETRIES,
   retryDelayMs: number = DEFAULT_RETRY_DELAY_MS
-): Promise<axios.AxiosResponse> => {
-  let response: axios.AxiosResponse;
-  const ax = new axios.Axios();
+) => {
+  const requestConfig = { url, ...requestParams };
 
-  do {
-    response = await ax.request({ url, ...requestParams });
-    if (response.status < HttpStatusCode.InternalServerError) {
-      return response;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const response = await axios.request(requestConfig);
+      if (
+        response.status < HttpStatusCode.InternalServerError ||
+        attempt === maxRetries // On final retry, return the API response
+      ) {
+        return response;
+      }
+    } catch (err) {
+      // Propagate the error only after final retry
+      if (attempt === maxRetries) {
+        throw err;
+      }
     }
 
-    const backedoffDelayMs =
-      retryDelayMs * Math.pow(2, DEFAULT_RETRIES - numRetries);
-    await delay(backedoffDelayMs);
-  } while (--numRetries);
-
-  return response;
+    // Wait only if the current attempt is not the final one
+    if (attempt < maxRetries) {
+      const backedoffDelayMs = retryDelayMs * Math.pow(2, maxRetries - attempt);
+      await delay(backedoffDelayMs);
+    }
+  }
 };
 
-const formatResponseToJSON = (respData: unknown) =>
+export const formatResponseToJSON = (respData: unknown) =>
   typeof respData === 'string' ? JSON.parse(respData) : respData;
 
-const formatAxiosErr = (axiosErrCode: string | undefined): PannaHttpErr => {
+export const formatAxiosErr = (
+  axiosErrCode: string | undefined
+): PannaHttpErr => {
   if (axiosErrCode === undefined) {
     return AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP['UNDEFINED'];
   }
 
-  return AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP[axiosErrCode];
+  return AXIOS_ERR_CODE_TO_CUSTOM_ERR_MAP[axiosErrCode.toUpperCase()];
 };
 
 // Exported entities
@@ -122,19 +133,19 @@ export const request = async (
   const finalParams = { method, validateStatus: () => true, ...restParams };
 
   // If cache exists, return the response from cache
-  const cacheKey = JSON.stringify({ url, finalParams }, null, 0);
+  const cacheKey = `${url}:${JSON.stringify(finalParams, Object.keys(finalParams).sort())}`;
   if (requestCache.has(cacheKey)) {
-    const response = requestCache.get(cacheKey) as axios.AxiosResponse;
+    const response = requestCache.get(cacheKey) as AxiosResponse;
     return formatResponseToJSON(response.data);
   }
 
   try {
-    const response = await requestWithRetries(
+    const response = (await requestWithRetries(
       url,
       finalParams,
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
-    );
+    )) as AxiosResponse;
 
     if (isCacheableResponse(response)) {
       requestCache.set(cacheKey, response);
@@ -142,13 +153,12 @@ export const request = async (
 
     return formatResponseToJSON(response.data);
   } catch (error) {
-    const axiosErr = error as axios.AxiosError;
+    const axiosErr = error as AxiosError;
     const pannaFormatErr = formatAxiosErr(axiosErr.code);
     return {
       code: pannaFormatErr.code,
-      message: pannaFormatErr.message.length
-        ? pannaFormatErr.message
-        : axiosErr.message
-    };
+      message:
+        pannaFormatErr.message || axiosErr.message || 'Unknown error occurred'
+    } as PannaHttpErr;
   }
 };
