@@ -12,6 +12,7 @@ export const countrySchema = z.object({
 
 // Token schema
 export const tokenSchema = z.object({
+  address: z.string().min(1, 'Token address is required'),
   symbol: z.string().min(1, 'Token symbol is required'),
   name: z.string().min(1, 'Token name is required'),
   icon: z.string().optional()

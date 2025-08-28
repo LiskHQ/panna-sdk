@@ -2,9 +2,11 @@ import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
+import { liskSepolia } from '../../../core';
 import { extractNumericPrice } from '../../../core/utils/utils';
 import { useBuyWithFiatQuotes, useSupportedTokens } from '../../hooks';
 import type { BuyWithFiatQuote } from '../../types/buy-with-fiat-quote.types';
+import { getEnvironmentChain } from '../../utils';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
@@ -27,14 +29,28 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { data: supportedTokens = [] } = useSupportedTokens();
 
   const tokenAddress = useMemo(() => {
-    if (!token?.symbol) {
+    if (!token?.address) {
       return undefined;
     }
-    const supportedToken = supportedTokens.find(
-      (t) => t.symbol === token.symbol
-    );
-    return supportedToken?.address;
-  }, [token?.symbol, supportedTokens]);
+
+    const currentChain = getEnvironmentChain();
+    const isLiskSepolia = currentChain.id === liskSepolia.id;
+
+    const supportedToken = supportedTokens.find((supportedToken) => {
+      if (isLiskSepolia) {
+        // Special case for liskSepolia: use symbol comparison
+        return supportedToken.symbol === token.symbol;
+      }
+      return supportedToken.address === token.address;
+    });
+
+    if (!supportedToken) {
+      console.warn('Token not found in supported tokens list:', token);
+      return undefined;
+    }
+
+    return supportedToken.address;
+  }, [token?.address, token?.symbol, supportedTokens]);
 
   const { data: quotes = [], isLoading } = useBuyWithFiatQuotes(
     {

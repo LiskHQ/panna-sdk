@@ -96,7 +96,7 @@ export function SelectBuyTokenStep({ form }: SelectBuyTokenStepProps) {
                       <CommandGroup>
                         {tokens.map((t) => (
                           <CommandItem
-                            key={t.symbol}
+                            key={t.address}
                             value={`${t.symbol} ${t.name}`}
                             onSelect={() => {
                               field.onChange(t);
@@ -118,7 +118,7 @@ export function SelectBuyTokenStep({ form }: SelectBuyTokenStepProps) {
                                 {t.name}
                               </span>
                             </div>
-                            {field.value?.symbol === t.symbol && (
+                            {field.value?.address === t.address && (
                               <CheckIcon className="ml-auto opacity-100" />
                             )}
                           </CommandItem>

@@ -25,14 +25,16 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   const chain = getEnvironmentChain();
 
   const tokenAddress = useMemo(() => {
-    if (!token?.symbol) {
+    if (!token?.address) {
       return undefined;
     }
+    // Since the token now comes with address from the form, we can use it directly
+    // but still validate it exists in our supported tokens list for security
     const supportedToken = supportedTokens.find(
-      (supportedToken) => supportedToken.symbol === token.symbol
+      (supportedToken) => supportedToken.address === token.address
     );
     return supportedToken?.address;
-  }, [token?.symbol, supportedTokens]);
+  }, [token?.address, supportedTokens]);
 
   const {
     data: cryptoConversion,
