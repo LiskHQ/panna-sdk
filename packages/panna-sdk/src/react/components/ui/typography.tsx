@@ -18,8 +18,8 @@ const typographyVariants = cva('text-foreground', {
         'relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold',
       lead: 'text-xl text-muted-foreground',
       large: 'text-lg font-semibold',
-      small: 'text-sm font-normal leading-none',
-      muted: 'text-sm text-muted-foreground'
+      small: 'text-sm font-normal leading-6',
+      muted: 'text-sm text-muted-foreground leading-6'
     }
   },
   defaultVariants: {

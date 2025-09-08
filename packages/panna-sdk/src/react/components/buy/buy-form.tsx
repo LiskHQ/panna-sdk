@@ -19,7 +19,7 @@ type BuyFormProps = {
   stepperRef: ReturnType<typeof useRef<DialogStepperContextValue | null>>;
 };
 
-function StepperRefProvider({
+export function StepperRefProvider({
   stepperRef,
   children
 }: {
