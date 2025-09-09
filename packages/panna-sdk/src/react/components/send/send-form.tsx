@@ -16,11 +16,21 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
   const form = useForm({
     resolver: zodResolver(sendFormSchema),
     defaultValues: {
-      token: {
-        address: '',
-        symbol: '',
-        name: '',
-        icon: ''
+      tokenInfo: {
+        token: {
+          decimals: 0,
+          symbol: '',
+          name: '',
+          icon: ''
+        },
+        tokenBalance: {
+          value: 0n,
+          displayValue: '0'
+        },
+        fiatBalance: {
+          amount: 0,
+          currency: ''
+        }
       },
       recipientAddress: '',
       amount: 0

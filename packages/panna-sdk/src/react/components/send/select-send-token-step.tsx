@@ -5,7 +5,6 @@ import { useActiveAccount } from 'thirdweb/react';
 import { currencyMap } from '@/consts/currencies';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance, tokenIconMap } from '@/mocks/token-balances';
-import { Token } from '@/types/token.types';
 import { Button } from '../ui/button';
 import {
   Command,
@@ -44,6 +43,14 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     }
   );
 
+  // Trigger fields validation and move to next step if valid
+  const handleFormSubmit = async () => {
+    const isFieldValid = await form.trigger();
+    if (isFieldValid) {
+      next();
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <DialogHeader className="items-center gap-0">
@@ -51,9 +58,9 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
       </DialogHeader>
       <FormField
         control={form.control}
-        name="token"
+        name="tokenInfo"
         render={({ field }) => {
-          const handleTokenSelect = (selectedToken: Token) => {
+          const handleTokenSelect = (selectedToken: TokenBalance) => {
             field.onChange(selectedToken);
             setOpen(false);
           };
@@ -68,18 +75,18 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
                       variant="outline"
                       className="flex h-14 w-full justify-between"
                     >
-                      {field.value?.name ? (
+                      {field.value?.token.name ? (
                         <TokenItem
                           tokenData={
                             tokens.find(
-                              (t) => t.token.name === field.value?.name
+                              (t) => t.token.name === field.value?.token.name
                             )!
                           }
                         />
                       ) : (
                         <Typography variant="small">Select asset</Typography>
                       )}
-                      {!field.value?.name && (
+                      {!field.value?.token.name && (
                         <ChevronDownIcon className="opacity-50" />
                       )}
                     </Button>
@@ -104,9 +111,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
                             <CommandItem
                               key={tokenData.token.symbol}
                               value={tokenData.token.name}
-                              onSelect={() =>
-                                handleTokenSelect(tokenData.token)
-                              }
+                              onSelect={() => handleTokenSelect(tokenData)}
                               className="flex w-full justify-between"
                             >
                               <TokenItem tokenData={tokenData} />
@@ -148,6 +153,14 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
                 size="sm"
                 type="button"
                 className="bg-muted hover:bg-border! h-6 p-2"
+                onClick={() =>
+                  form.setValue(
+                    'amount',
+                    Number(
+                      form.getValues('tokenInfo')?.tokenBalance.displayValue
+                    ) || 0
+                  )
+                }
               >
                 Max
               </Button>
@@ -155,7 +168,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
             <FormControl>
               <Input
                 {...field}
-                placeholder={`0 ${form.watch('token')?.symbol || 'ETH'}`}
+                placeholder={`0 ${form.watch('tokenInfo')?.token.symbol || 'ETH'}`}
               />
             </FormControl>
             <FormMessage />
@@ -164,8 +177,8 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
       />
       <Button
         type="button"
-        onClick={() => next()}
-        disabled={!form.formState.isValid}
+        onClick={() => handleFormSubmit()}
+        disabled={!form.watch('tokenInfo')}
       >
         Next
       </Button>
