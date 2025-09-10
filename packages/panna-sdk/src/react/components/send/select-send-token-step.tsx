@@ -2,6 +2,7 @@ import { ChevronDownIcon } from 'lucide-react';
 import { useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
+import { formatEther } from 'viem';
 import { currencyMap } from '@/consts/currencies';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance, tokenIconMap } from '@/mocks/token-balances';
@@ -169,6 +170,12 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
               <Input
                 {...field}
                 placeholder={`0 ${form.watch('tokenInfo')?.token.symbol || 'ETH'}`}
+                endAdornment={
+                  <AmountDisplay
+                    amount={form.watch('amount') || 0}
+                    tokenInfo={form.watch('tokenInfo') as TokenBalance}
+                  />
+                }
               />
             </FormControl>
             <FormMessage />
@@ -218,5 +225,36 @@ function TokenItem({ tokenData }: TokenItemProps) {
         </Typography>
       </div>
     </>
+  );
+}
+
+type AmountDisplayProps = {
+  amount: number;
+  tokenInfo: TokenBalance;
+};
+
+function AmountDisplay({ amount, tokenInfo }: AmountDisplayProps) {
+  const renderAmount = () => {
+    // This function calculates the fiat equivalent of the crypto amount
+    // using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
+    // We multiply by 10 ^ 18 to retain precision during division
+    // then format the result from wei to ether
+    return Number(
+      formatEther(
+        BigInt(
+          tokenInfo.fiatBalance.amount *
+            amount *
+            10 ** tokenInfo.token.decimals *
+            10 ** 18
+        ) / (tokenInfo.tokenBalance.value || BigInt(1))
+      )
+    ).toFixed(2);
+  };
+
+  return (
+    <Typography variant="muted" className="pr-3">
+      ~{currencyMap[tokenInfo.fiatBalance.currency]}
+      {renderAmount()}
+    </Typography>
   );
 }
