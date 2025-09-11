@@ -1,6 +1,6 @@
-import { ChevronDownIcon } from 'lucide-react';
-import { useState } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import { ArrowDownUpIcon, ChevronDownIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { type UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
 import { formatEther } from 'viem';
 import { currencyMap } from '@/consts/currencies';
@@ -43,6 +43,89 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
       enabled: !!account?.address
     }
   );
+  const [primaryInput, setPrimaryInput] = useState<'crypto' | 'fiat'>('fiat');
+  const [secondaryInput, setSecondaryInput] = useState<'crypto' | 'fiat'>(
+    'crypto'
+  );
+  const [secondaryAmount, setSecondaryAmount] = useState<number>(0);
+
+  useEffect(() => {
+    if (primaryInput === 'fiat') {
+      setSecondaryAmount(
+        renderCryptoAmount() ? Number(renderCryptoAmount()) : 0
+      );
+    } else {
+      setSecondaryAmount(renderFiatAmount() ? Number(renderFiatAmount()) : 0);
+    }
+  }, [form.watch('amount')]);
+
+  const renderFiatAmount = () => {
+    // This function calculates the fiat equivalent of the crypto amount
+    // using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
+    // We multiply by 10 ^ 18 to retain precision during division
+    // then format the result from wei to ether
+    const tokenInfo = form.watch('tokenInfo') as TokenBalance;
+    const amount = form.watch('amount') || 0;
+
+    return Number(
+      formatEther(
+        BigInt(
+          tokenInfo.fiatBalance.amount *
+            amount *
+            10 ** tokenInfo.token.decimals *
+            10 ** 18
+        ) / (tokenInfo.tokenBalance.value || BigInt(1))
+      )
+    ).toFixed(2);
+  };
+
+  const renderCryptoAmount = () => {
+    const tokenInfo = form.watch('tokenInfo') as TokenBalance;
+    const amount = form.watch('amount') || 0;
+
+    return Number(
+      formatEther(
+        (tokenInfo.tokenBalance.value * BigInt(amount * 10 ** 18)) /
+          BigInt(
+            (tokenInfo.fiatBalance.amount || 1) * 10 ** tokenInfo.token.decimals
+          )
+      )
+    ).toFixed(6);
+  };
+
+  // Swap primary and secondary input types
+  const handleInputSwap = () => {
+    setPrimaryInput(secondaryInput);
+    setSecondaryInput(primaryInput);
+
+    if (primaryInput === 'fiat') {
+      setSecondaryAmount(form.getValues('amount') || 0);
+      form.setValue(
+        'amount',
+        renderCryptoAmount() ? Number(renderCryptoAmount()) : 0
+      );
+    } else {
+      setSecondaryAmount(form.getValues('amount') || 0);
+      form.setValue(
+        'amount',
+        renderFiatAmount() ? Number(renderFiatAmount()) : 0
+      );
+    }
+  };
+
+  const handleMaxValue = () => {
+    if (primaryInput === 'crypto') {
+      form.setValue(
+        'amount',
+        Number(form.getValues('tokenInfo')?.tokenBalance.displayValue) || 0
+      );
+    } else {
+      form.setValue(
+        'amount',
+        Number(form.getValues('tokenInfo')?.fiatBalance.amount) || 0
+      );
+    }
+  };
 
   // Trigger fields validation and move to next step if valid
   const handleFormSubmit = async () => {
@@ -154,14 +237,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
                 size="sm"
                 type="button"
                 className="bg-muted hover:bg-border! h-6 p-2"
-                onClick={() =>
-                  form.setValue(
-                    'amount',
-                    Number(
-                      form.getValues('tokenInfo')?.tokenBalance.displayValue
-                    ) || 0
-                  )
-                }
+                onClick={() => handleMaxValue()}
               >
                 Max
               </Button>
@@ -170,10 +246,14 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
               <Input
                 {...field}
                 placeholder={`0 ${form.watch('tokenInfo')?.token.symbol || 'ETH'}`}
+                className="[&>input]:h-13"
                 endAdornment={
                   <AmountDisplay
-                    amount={form.watch('amount') || 0}
                     tokenInfo={form.watch('tokenInfo') as TokenBalance}
+                    primaryInput={primaryInput}
+                    secondaryInput={secondaryInput}
+                    secondaryAmount={secondaryAmount}
+                    handleInputSwap={handleInputSwap}
                   />
                 }
               />
@@ -229,32 +309,44 @@ function TokenItem({ tokenData }: TokenItemProps) {
 }
 
 type AmountDisplayProps = {
-  amount: number;
   tokenInfo: TokenBalance;
+  primaryInput: 'crypto' | 'fiat';
+  secondaryInput: 'crypto' | 'fiat';
+  secondaryAmount: number;
+  handleInputSwap: () => void;
 };
 
-function AmountDisplay({ amount, tokenInfo }: AmountDisplayProps) {
-  const renderAmount = () => {
-    // This function calculates the fiat equivalent of the crypto amount
-    // using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
-    // We multiply by 10 ^ 18 to retain precision during division
-    // then format the result from wei to ether
-    return Number(
-      formatEther(
-        BigInt(
-          tokenInfo.fiatBalance.amount *
-            amount *
-            10 ** tokenInfo.token.decimals *
-            10 ** 18
-        ) / (tokenInfo.tokenBalance.value || BigInt(1))
-      )
-    ).toFixed(2);
-  };
-
+function AmountDisplay({
+  tokenInfo,
+  primaryInput,
+  secondaryInput,
+  secondaryAmount,
+  handleInputSwap
+}: AmountDisplayProps) {
   return (
-    <Typography variant="muted" className="pr-3">
-      ~{currencyMap[tokenInfo.fiatBalance.currency]}
-      {renderAmount()}
-    </Typography>
+    <div className="flex items-center gap-3 pr-3">
+      <div className="flex flex-col text-right">
+        <Typography variant="small">
+          {primaryInput === 'fiat'
+            ? tokenInfo.fiatBalance.currency
+            : `${tokenInfo.token.symbol}`}
+        </Typography>
+        <Typography variant="muted">
+          {tokenInfo.token.name && (
+            <>
+              {secondaryInput === 'crypto'
+                ? `${secondaryAmount} ${tokenInfo.token.symbol}`
+                : `${currencyMap[tokenInfo.fiatBalance.currency]}${secondaryAmount}`}
+            </>
+          )}
+        </Typography>
+      </div>
+      {tokenInfo.token.name && (
+        <ArrowDownUpIcon
+          className="stroke-foreground"
+          onClick={handleInputSwap}
+        />
+      )}
+    </div>
   );
 }
