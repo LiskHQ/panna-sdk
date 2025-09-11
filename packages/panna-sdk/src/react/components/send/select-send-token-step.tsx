@@ -49,6 +49,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
   );
   const [secondaryAmount, setSecondaryAmount] = useState<number>(0);
   const [inputSwap, setInputSwap] = useState<boolean>(false);
+  const amount = form.watch('amount') || 0;
 
   useEffect(() => {
     // Update secondary amount when primary amount changes on input
@@ -64,7 +65,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     } else {
       setInputSwap(false);
     }
-  }, [form.watch('amount')]);
+  }, [amount]);
 
   const renderFiatAmount = () => {
     // This function calculates the fiat equivalent of the crypto amount
@@ -72,7 +73,6 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     // We multiply by 10 ^ 18 to retain precision during division
     // then format the result from wei to ether
     const tokenInfo = form.watch('tokenInfo') as TokenBalance;
-    const amount = form.watch('amount') || 0;
 
     return Number(
       formatEther(
@@ -88,7 +88,6 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
 
   const renderCryptoAmount = () => {
     const tokenInfo = form.watch('tokenInfo') as TokenBalance;
-    const amount = form.watch('amount') || 0;
 
     return Number(
       formatEther(
@@ -249,7 +248,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
             <FormControl>
               <Input
                 {...field}
-                placeholder={`0 ${form.watch('tokenInfo')?.token.symbol || 'ETH'}`}
+                placeholder={`0 ${form.watch('tokenInfo')?.token.symbol || 'LSK'}`}
                 className="[&>input]:h-13"
                 endAdornment={
                   <AmountDisplay
