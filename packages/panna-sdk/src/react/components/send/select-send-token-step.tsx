@@ -51,6 +51,10 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
   const [inputSwap, setInputSwap] = useState<boolean>(false);
   const amount = form.watch('amount') || 0;
 
+  // @Todo: Using primaryAmountInput, improve experience when
+  // user goes back to this step from the summary step
+  // Currently, it resets to fiat primary input always
+
   useEffect(() => {
     // Update secondary amount when primary amount changes on input
     // rather than on input swap
@@ -108,9 +112,11 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     if (primaryInput === 'fiat') {
       setSecondaryAmount(form.getValues('amount') || 0);
       form.setValue('amount', secondaryAmount);
+      form.setValue('primaryAmountInput', 'crypto');
     } else {
       setSecondaryAmount(form.getValues('amount') || 0);
       form.setValue('amount', secondaryAmount);
+      form.setValue('primaryAmountInput', 'fiat');
     }
   };
 
@@ -134,6 +140,13 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
   const handleFormSubmit = async () => {
     const isFieldValid = await form.trigger();
     if (isFieldValid) {
+      if (primaryInput === 'fiat') {
+        form.setValue('cryptoAmount', secondaryAmount);
+        form.setValue('fiatAmount', amount);
+      } else {
+        form.setValue('fiatAmount', secondaryAmount);
+        form.setValue('cryptoAmount', amount);
+      }
       next();
     }
   };

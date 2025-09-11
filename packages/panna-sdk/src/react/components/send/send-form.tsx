@@ -6,6 +6,7 @@ import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { sendFormSchema } from './schema';
 import { SelectSendTokenStep } from './select-send-token-step';
+import { SendSummaryStep } from './send-summary-step';
 
 type SendFormProps = {
   stepperRef: ReturnType<typeof useRef<DialogStepperContextValue | null>>;
@@ -33,7 +34,10 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
         }
       },
       recipientAddress: '',
-      amount: 0
+      amount: 0,
+      fiatAmount: 0,
+      cryptoAmount: 0,
+      primaryAmountInput: 'fiat'
     }
   });
 
@@ -44,12 +48,10 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
           <StepperRefProvider stepperRef={stepperRef}>
             <SelectSendTokenStep form={form} />
           </StepperRefProvider>
-          {/* <SendSpecifyAmountStep form={form} />
-                    <SendEnterRecipientStep form={form} />
+          <SendSummaryStep form={form} />
+          {/*   <SendEnterRecipientStep form={form} />
                     <SendReviewStep form={form} onClose={onClose} />
                     <ProcessingSendStep /> */}
-          <div></div>
-          <div></div>
         </DialogStepper>
       </form>
     </Form>

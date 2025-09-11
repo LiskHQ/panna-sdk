@@ -38,7 +38,10 @@ export const sendFormSchema = z
       .refine(isValidAddress, {
         message: 'Please enter a valid address'
       }),
-    amount: z.number({ coerce: true }).gt(0, 'Amount must be greater than 0')
+    amount: z.number({ coerce: true }).gt(0, 'Amount must be greater than 0'),
+    fiatAmount: z.number().optional(),
+    cryptoAmount: z.number().optional(),
+    primaryAmountInput: z.union([z.literal('fiat'), z.literal('crypto')])
   })
   .superRefine((data, ctx) => {
     if (
