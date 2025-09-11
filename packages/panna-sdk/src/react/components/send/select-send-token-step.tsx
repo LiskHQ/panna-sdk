@@ -48,14 +48,21 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     'crypto'
   );
   const [secondaryAmount, setSecondaryAmount] = useState<number>(0);
+  const [inputSwap, setInputSwap] = useState<boolean>(false);
 
   useEffect(() => {
-    if (primaryInput === 'fiat') {
-      setSecondaryAmount(
-        renderCryptoAmount() ? Number(renderCryptoAmount()) : 0
-      );
+    // Update secondary amount when primary amount changes on input
+    // rather than on input swap
+    if (!inputSwap) {
+      if (primaryInput === 'fiat') {
+        setSecondaryAmount(
+          renderCryptoAmount() ? Number(renderCryptoAmount()) : 0
+        );
+      } else {
+        setSecondaryAmount(renderFiatAmount() ? Number(renderFiatAmount()) : 0);
+      }
     } else {
-      setSecondaryAmount(renderFiatAmount() ? Number(renderFiatAmount()) : 0);
+      setInputSwap(false);
     }
   }, [form.watch('amount')]);
 
@@ -95,21 +102,16 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
 
   // Swap primary and secondary input types
   const handleInputSwap = () => {
+    setInputSwap(true);
     setPrimaryInput(secondaryInput);
     setSecondaryInput(primaryInput);
 
     if (primaryInput === 'fiat') {
       setSecondaryAmount(form.getValues('amount') || 0);
-      form.setValue(
-        'amount',
-        renderCryptoAmount() ? Number(renderCryptoAmount()) : 0
-      );
+      form.setValue('amount', secondaryAmount);
     } else {
       setSecondaryAmount(form.getValues('amount') || 0);
-      form.setValue(
-        'amount',
-        renderFiatAmount() ? Number(renderFiatAmount()) : 0
-      );
+      form.setValue('amount', secondaryAmount);
     }
   };
 
@@ -122,7 +124,9 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     } else {
       form.setValue(
         'amount',
-        Number(form.getValues('tokenInfo')?.fiatBalance.amount) || 0
+        Number(
+          Number(form.getValues('tokenInfo')?.fiatBalance.amount).toFixed(2)
+        ) || 0
       );
     }
   };
