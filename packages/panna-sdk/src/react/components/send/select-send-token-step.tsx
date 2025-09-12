@@ -29,11 +29,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
 
-type SelectSendTokenStepProps = {
+type SendSelectTokenStepProps = {
   form: UseFormReturn<SendFormData>;
 };
 
-export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
+export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
   const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
   const account = useActiveAccount();
