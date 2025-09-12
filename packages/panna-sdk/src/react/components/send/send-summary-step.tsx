@@ -4,6 +4,7 @@ import { FiatCurrency } from 'src/core';
 import { currencyMap } from '@/consts/currencies';
 import { Button } from '../ui/button';
 import { DialogHeader } from '../ui/dialog';
+import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
 
@@ -12,6 +13,7 @@ type SendSummaryStepProps = {
 };
 
 export function SendSummaryStep({ form }: SendSummaryStepProps) {
+  const { next } = useDialogStepper();
   const currency = (form.getValues('tokenInfo.fiatBalance.currency') ||
     'USD') as FiatCurrency;
 
@@ -41,7 +43,7 @@ export function SendSummaryStep({ form }: SendSummaryStepProps) {
           {form.getValues('recipientAddress')}
         </Typography>
       </div>
-      <Button>Send</Button>
+      <Button onClick={() => next()}>Send</Button>
     </div>
   );
 }
