@@ -5,7 +5,7 @@ import { StepperRefProvider } from '../buy/buy-form';
 import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { sendFormSchema } from './schema';
-import { SendSelectTokenStep } from './select-send-token-step';
+import { SendSelectTokenStep } from './send-select-token-step';
 import { SendSummaryStep } from './send-summary-step';
 
 type SendFormProps = {
@@ -51,9 +51,6 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
           <StepperRefProvider stepperRef={stepperRef}>
             <SendSummaryStep form={form} />
           </StepperRefProvider>
-          {/*   <SendEnterRecipientStep form={form} />
-                    <SendReviewStep form={form} onClose={onClose} />
-                    <ProcessingSendStep /> */}
         </DialogStepper>
       </form>
     </Form>
