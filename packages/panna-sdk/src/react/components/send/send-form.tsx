@@ -48,7 +48,9 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
           <StepperRefProvider stepperRef={stepperRef}>
             <SelectSendTokenStep form={form} />
           </StepperRefProvider>
-          <SendSummaryStep form={form} />
+          <StepperRefProvider stepperRef={stepperRef}>
+            <SendSummaryStep form={form} />
+          </StepperRefProvider>
           {/*   <SendEnterRecipientStep form={form} />
                     <SendReviewStep form={form} onClose={onClose} />
                     <ProcessingSendStep /> */}

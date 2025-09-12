@@ -45,10 +45,11 @@ export const sendFormSchema = z
   })
   .superRefine((data, ctx) => {
     if (
-      data.tokenInfo.token.name &&
-      data.amount >
-        Number(data.tokenInfo.tokenBalance.value) /
-          10 ** data.tokenInfo.token.decimals
+      (data.tokenInfo.token.name &&
+        data.cryptoAmount! >
+          Number(data.tokenInfo.tokenBalance.value) /
+            10 ** data.tokenInfo.token.decimals) ||
+      data.fiatAmount! > data.tokenInfo.fiatBalance.amount
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

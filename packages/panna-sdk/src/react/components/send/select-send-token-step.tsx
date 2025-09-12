@@ -138,15 +138,16 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
 
   // Trigger fields validation and move to next step if valid
   const handleFormSubmit = async () => {
+    if (primaryInput === 'fiat') {
+      form.setValue('cryptoAmount', secondaryAmount);
+      form.setValue('fiatAmount', Number(amount));
+    } else {
+      form.setValue('fiatAmount', secondaryAmount);
+      form.setValue('cryptoAmount', Number(amount));
+    }
+
     const isFieldValid = await form.trigger();
     if (isFieldValid) {
-      if (primaryInput === 'fiat') {
-        form.setValue('cryptoAmount', secondaryAmount);
-        form.setValue('fiatAmount', amount);
-      } else {
-        form.setValue('fiatAmount', secondaryAmount);
-        form.setValue('cryptoAmount', amount);
-      }
       next();
     }
   };
