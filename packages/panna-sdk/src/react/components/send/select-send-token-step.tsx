@@ -50,6 +50,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
   const [secondaryAmount, setSecondaryAmount] = useState<number>(0);
   const [inputSwap, setInputSwap] = useState<boolean>(false);
   const amount = form.watch('amount') || 0;
+  const tokenInfo = form.watch('tokenInfo') as TokenBalance;
 
   // @Todo: Using primaryAmountInput, improve experience when
   // user goes back to this step from the summary step
@@ -76,8 +77,6 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
     // using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
     // We multiply by 10 ^ 18 to retain precision during division
     // then format the result from wei to ether
-    const tokenInfo = form.watch('tokenInfo') as TokenBalance;
-
     return Number(
       formatEther(
         BigInt(
@@ -91,8 +90,6 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
   };
 
   const renderCryptoAmount = () => {
-    const tokenInfo = form.watch('tokenInfo') as TokenBalance;
-
     return Number(
       formatEther(
         (tokenInfo.tokenBalance.value * BigInt(amount * 10 ** 18)) /
@@ -262,11 +259,11 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
             <FormControl>
               <Input
                 {...field}
-                placeholder={`0 ${form.watch('tokenInfo')?.token.symbol || 'LSK'}`}
+                placeholder={`0 ${tokenInfo.token.symbol || 'LSK'}`}
                 className="[&>input]:h-13"
                 endAdornment={
                   <AmountDisplay
-                    tokenInfo={form.watch('tokenInfo') as TokenBalance}
+                    tokenInfo={tokenInfo}
                     primaryInput={primaryInput}
                     secondaryInput={secondaryInput}
                     secondaryAmount={secondaryAmount}
@@ -282,7 +279,7 @@ export function SelectSendTokenStep({ form }: SelectSendTokenStepProps) {
       <Button
         type="button"
         onClick={() => handleFormSubmit()}
-        disabled={!form.watch('tokenInfo')}
+        disabled={!tokenInfo.token.name}
       >
         Next
       </Button>
