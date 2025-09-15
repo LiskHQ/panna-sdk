@@ -52,6 +52,16 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
   const amount = form.watch('amount') || 0;
   const tokenInfo = form.watch('tokenInfo') as TokenBalance;
 
+  useEffect(() => {
+    // Set default token to ETH when tokens are loaded
+    if (tokens.length && !tokenInfo.token.name) {
+      const defaultToken = tokens.find(
+        (token) => token.token.symbol === 'ETH'
+      ) as TokenBalance;
+      form.setValue('tokenInfo', defaultToken);
+    }
+  }, [tokens]);
+
   // @Todo: Using primaryAmountInput, improve experience when
   // user goes back to this step from the summary step
   // Currently, it resets to fiat primary input always
@@ -181,12 +191,10 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
                               (t) => t.token.name === field.value?.token.name
                             )!
                           }
+                          withSelect
                         />
                       ) : (
                         <Typography variant="small">Select asset</Typography>
-                      )}
-                      {!field.value?.token.name && (
-                        <ChevronDownIcon className="opacity-50" />
                       )}
                     </Button>
                   </PopoverTrigger>
@@ -290,9 +298,10 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
 
 type TokenItemProps = {
   tokenData: TokenBalance;
+  withSelect?: boolean;
 };
 
-function TokenItem({ tokenData }: TokenItemProps) {
+function TokenItem({ tokenData, withSelect = false }: TokenItemProps) {
   return (
     <>
       <div className="flex gap-3 text-left">
@@ -305,10 +314,20 @@ function TokenItem({ tokenData }: TokenItemProps) {
             />
           ) : null}
         </div>
-        <div className="flex flex-col">
-          <Typography variant="small">{tokenData.token.symbol}</Typography>
-          <Typography variant="muted">{tokenData.token.name}</Typography>
-        </div>
+        {withSelect ? (
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Typography variant="small">{tokenData.token.symbol}</Typography>
+              <ChevronDownIcon className="opacity-50" />
+            </div>
+            <Typography variant="muted">{tokenData.token.name}</Typography>
+          </div>
+        ) : (
+          <div className="flex flex-col">
+            <Typography variant="small">{tokenData.token.symbol}</Typography>
+            <Typography variant="muted">{tokenData.token.name}</Typography>
+          </div>
+        )}
       </div>
       <div className="flex flex-col text-right">
         <Typography variant="small">
