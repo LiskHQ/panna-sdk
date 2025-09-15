@@ -81,7 +81,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
       formatEther(
         BigInt(
           tokenInfo.fiatBalance.amount *
-            amount *
+            (!isNaN(amount) ? amount : 0) *
             10 ** tokenInfo.token.decimals *
             10 ** 18
         ) / (tokenInfo.tokenBalance.value || BigInt(1))
@@ -92,7 +92,8 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
   const renderCryptoAmount = () => {
     return Number(
       formatEther(
-        (tokenInfo.tokenBalance.value * BigInt(amount * 10 ** 18)) /
+        (tokenInfo.tokenBalance.value *
+          BigInt((!isNaN(amount) ? amount : 0) * 10 ** 18)) /
           BigInt(
             (tokenInfo.fiatBalance.amount || 1) * 10 ** tokenInfo.token.decimals
           )
