@@ -1,0 +1,31 @@
+ARG NODE_VERSION=22
+
+## Stage 1
+
+FROM node:$NODE_VERSION-alpine AS base
+
+## Stage 2
+
+FROM base AS builder-base
+RUN apk add --no-cache libc6-compat
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable && \
+    corepack use pnpm
+
+## Stage 3
+
+FROM builder-base AS builder
+WORKDIR /app
+COPY . .
+ARG NEXT_PUBLIC_CLIENT_ID=""
+ENV NEXT_PUBLIC_CLIENT_ID=${NEXT_PUBLIC_CLIENT_ID}
+ARG NEXT_PUBLIC_PARTNER_ID=""
+ENV NEXT_PUBLIC_PARTNER_ID=${NEXT_PUBLIC_PARTNER_ID}
+
+ARG BUILD_APP=example-app
+RUN cd apps/${BUILD_APP} &&\
+    pnpm install --frozen-lockfile
+
+WORKDIR /app/apps/${BUILD_APP}
+CMD ["pnpm", "run", "dev"]
