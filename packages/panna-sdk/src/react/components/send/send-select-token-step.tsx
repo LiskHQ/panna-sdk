@@ -62,10 +62,6 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     }
   }, [tokens]);
 
-  // @Todo: Using primaryAmountInput, improve experience when
-  // user goes back to this step from the summary step
-  // Currently, it resets to fiat primary input always
-
   useEffect(() => {
     // Update secondary amount when primary amount changes on input
     // rather than on input swap
@@ -81,6 +77,19 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
       setInputSwap(false);
     }
   }, [amount]);
+
+  useEffect(() => {
+    // Upon returning to this step from summary step,
+    // set the primary and secondary inputs based on
+    // what was previously selected
+    const primaryInputAmount = form.getValues('primaryAmountInput');
+    if (primaryInputAmount === 'crypto') {
+      setInputSwap(true);
+      setSecondaryAmount(renderFiatAmount() ? Number(renderFiatAmount()) : 0);
+      setPrimaryInput('crypto');
+      setSecondaryInput('fiat');
+    }
+  }, []);
 
   const renderFiatAmount = () => {
     // This function calculates the fiat equivalent of the crypto amount
@@ -306,7 +315,7 @@ function TokenItem({ tokenData, withSelect = false }: TokenItemProps) {
     <>
       <div className="flex gap-3 text-left">
         <div className="flex items-center justify-center">
-          {tokenData.token.symbol ? (
+          {tokenData?.token.symbol ? (
             <img
               className="h-5 w-5"
               src={tokenIconMap[tokenData.token.symbol]}
