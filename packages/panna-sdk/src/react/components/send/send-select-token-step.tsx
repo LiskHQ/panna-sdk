@@ -47,9 +47,9 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
   const [secondaryInput, setSecondaryInput] = useState<'crypto' | 'fiat'>(
     'crypto'
   );
-  const [secondaryAmount, setSecondaryAmount] = useState<number>(0);
+  const [secondaryAmount, setSecondaryAmount] = useState<string>('0');
   const [inputSwap, setInputSwap] = useState<boolean>(false);
-  const amount = form.watch('amount') || 0;
+  const amount = form.watch('amount') || '0';
   const tokenInfo = form.watch('tokenInfo') as TokenBalance;
 
   useEffect(() => {
@@ -67,11 +67,9 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     // rather than on input swap
     if (!inputSwap) {
       if (primaryInput === 'fiat') {
-        setSecondaryAmount(
-          renderCryptoAmount() ? Number(renderCryptoAmount()) : 0
-        );
+        setSecondaryAmount(renderCryptoAmount() ? renderCryptoAmount() : '0');
       } else {
-        setSecondaryAmount(renderFiatAmount() ? Number(renderFiatAmount()) : 0);
+        setSecondaryAmount(renderFiatAmount() ? renderFiatAmount() : '0');
       }
     } else {
       setInputSwap(false);
@@ -85,7 +83,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     const primaryInputAmount = form.getValues('primaryAmountInput');
     if (primaryInputAmount === 'crypto') {
       setInputSwap(true);
-      setSecondaryAmount(renderFiatAmount() ? Number(renderFiatAmount()) : 0);
+      setSecondaryAmount(renderFiatAmount() ? renderFiatAmount() : '0');
       setPrimaryInput('crypto');
       setSecondaryInput('fiat');
     }
@@ -100,7 +98,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
       formatEther(
         BigInt(
           tokenInfo.fiatBalance.amount *
-            (!isNaN(amount) ? amount : 0) *
+            (!isNaN(Number(amount)) ? Number(amount) : 0) *
             10 ** tokenInfo.token.decimals *
             10 ** 18
         ) / (tokenInfo.tokenBalance.value || BigInt(1))
@@ -112,7 +110,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     return Number(
       formatEther(
         (tokenInfo.tokenBalance.value *
-          BigInt((!isNaN(amount) ? amount : 0) * 10 ** 18)) /
+          BigInt((!isNaN(Number(amount)) ? Number(amount) : 0) * 10 ** 18)) /
           BigInt(
             (tokenInfo.fiatBalance.amount || 1) * 10 ** tokenInfo.token.decimals
           )
@@ -127,11 +125,11 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     setSecondaryInput(primaryInput);
 
     if (primaryInput === 'fiat') {
-      setSecondaryAmount(form.getValues('amount') || 0);
+      setSecondaryAmount(amount);
       form.setValue('amount', secondaryAmount);
       form.setValue('primaryAmountInput', 'crypto');
     } else {
-      setSecondaryAmount(form.getValues('amount') || 0);
+      setSecondaryAmount(amount);
       form.setValue('amount', secondaryAmount);
       form.setValue('primaryAmountInput', 'fiat');
     }
@@ -139,17 +137,9 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
 
   const handleMaxValue = () => {
     if (primaryInput === 'crypto') {
-      form.setValue(
-        'amount',
-        Number(form.getValues('tokenInfo')?.tokenBalance.displayValue) || 0
-      );
+      form.setValue('amount', tokenInfo.tokenBalance.displayValue || '0');
     } else {
-      form.setValue(
-        'amount',
-        Number(
-          Number(form.getValues('tokenInfo')?.fiatBalance.amount).toFixed(2)
-        ) || 0
-      );
+      form.setValue('amount', tokenInfo.fiatBalance.amount.toFixed(2) || '0');
     }
   };
 
@@ -157,10 +147,10 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
   const handleFormSubmit = async () => {
     if (primaryInput === 'fiat') {
       form.setValue('cryptoAmount', secondaryAmount);
-      form.setValue('fiatAmount', Number(amount));
+      form.setValue('fiatAmount', amount);
     } else {
       form.setValue('fiatAmount', secondaryAmount);
-      form.setValue('cryptoAmount', Number(amount));
+      form.setValue('cryptoAmount', amount);
     }
 
     const isFieldValid = await form.trigger();
@@ -355,7 +345,7 @@ type AmountDisplayProps = {
   tokenInfo: TokenBalance;
   primaryInput: 'crypto' | 'fiat';
   secondaryInput: 'crypto' | 'fiat';
-  secondaryAmount: number;
+  secondaryAmount: string;
   handleInputSwap: () => void;
 };
 

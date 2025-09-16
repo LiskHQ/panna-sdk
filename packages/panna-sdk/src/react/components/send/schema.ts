@@ -38,18 +38,25 @@ export const sendFormSchema = z
       .refine(isValidAddress, {
         message: 'Please enter a valid address'
       }),
-    amount: z.number({ coerce: true }).gt(0, 'Amount must be greater than 0'),
-    fiatAmount: z.number().optional(),
-    cryptoAmount: z.number().optional(),
+    amount: z
+      .string()
+      .min(1, 'Amount is required')
+      .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+        message: 'Amount must be a number greater than 0'
+      }),
+    fiatAmount: z.string().optional(),
+    cryptoAmount: z.string().optional(),
     primaryAmountInput: z.union([z.literal('fiat'), z.literal('crypto')])
   })
   .superRefine((data, ctx) => {
+    const amountNum = Number(data.amount);
     if (
       (data.tokenInfo.token.name &&
-        data.cryptoAmount! >
+        Number(data.cryptoAmount!) >
           Number(data.tokenInfo.tokenBalance.value) /
             10 ** data.tokenInfo.token.decimals) ||
-      data.fiatAmount! > data.tokenInfo.fiatBalance.amount
+      Number(data.fiatAmount!) > data.tokenInfo.fiatBalance.amount ||
+      isNaN(amountNum)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

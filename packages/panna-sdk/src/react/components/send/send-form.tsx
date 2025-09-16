@@ -36,9 +36,9 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
         }
       },
       recipientAddress: '',
-      amount: 0,
-      fiatAmount: 0,
-      cryptoAmount: 0,
+      amount: '',
+      fiatAmount: '0',
+      cryptoAmount: '0',
       primaryAmountInput: 'fiat'
     }
   });
