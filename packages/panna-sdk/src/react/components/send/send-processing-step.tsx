@@ -9,6 +9,7 @@ import {
   toWei
 } from 'src/core';
 import { useActiveAccount, usePanna } from '@/hooks';
+import { Address } from '../../../core/types/external';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -22,13 +23,14 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
   const { client } = usePanna();
   const { next } = useDialogStepper();
   const account = useActiveAccount();
+  let initializeTokenSend = true;
 
   // @Todo: Possibly create hook for this logic
   useEffect(() => {
     const transaction = prepareTransaction({
       client,
       chain: process.env.NODE_ENV === 'development' ? liskSepolia : lisk,
-      to: form.getValues('recipientAddress') as `0x${string}`,
+      to: form.getValues('recipientAddress') as Address,
       value: BigInt(toWei(String(form.getValues('cryptoAmount'))))
     });
     console.log('Prepared transaction:', transaction);
@@ -55,7 +57,10 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
       }
     }
 
-    sendToken();
+    if (initializeTokenSend) {
+      sendToken();
+      initializeTokenSend = false;
+    }
   }, []);
 
   return (

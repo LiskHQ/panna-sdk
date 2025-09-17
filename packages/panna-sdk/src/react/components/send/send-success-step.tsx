@@ -19,7 +19,13 @@ export function SendSuccessStep({ onClose }: SendSuccessStepProps) {
           <Typography variant="muted">Your transfer is complete.</Typography>
         </div>
       </div>
-      <Button variant="secondary" className="bg-muted w-full" onClick={onClose}>
+      <Button
+        variant="secondary"
+        className="bg-muted w-full"
+        onClick={() => {
+          onClose();
+        }}
+      >
         Close
       </Button>
     </div>
