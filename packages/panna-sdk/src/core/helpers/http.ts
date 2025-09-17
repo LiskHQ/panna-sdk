@@ -130,7 +130,8 @@ export const request = async (
   params: RequestParamsConfig = {}
 ): Promise<Record<string, unknown> | PannaHttpErr> => {
   const { method = 'get', ...restParams } = params;
-  const finalParams = { method, validateStatus: () => true, ...restParams };
+  const validateStatus = () => true;
+  const finalParams = { method, validateStatus, ...restParams };
 
   // If cache exists, return the response from cache
   const cacheKey = `${url}:${JSON.stringify(finalParams, Object.keys(finalParams).sort())}`;

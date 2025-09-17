@@ -8,10 +8,20 @@ export interface BlockscoutTokenTransfersResponse {
   next_page_params: BlockscoutNextPageParams | null;
 }
 
+export interface BlockscoutInternalTransactionsResponse {
+  items: BlockscoutInternalTransaction[];
+  next_page_params: BlockscoutInternalTransactionNextPageParams | null;
+}
+
 export interface BlockscoutNextPageParams {
   block_number: number;
   index: number;
   items_count?: number;
+}
+
+export interface BlockscoutInternalTransactionNextPageParams
+  extends BlockscoutNextPageParams {
+  transaction_index: number;
 }
 
 export interface BlockscoutTransaction {
@@ -49,6 +59,21 @@ export interface BlockscoutTransaction {
   revert_reason: string | null;
   confirmation_duration: BlockscoutTransactionConfirmationDuration;
   transaction_tag: string | null;
+}
+
+export interface BlockscoutInternalTransaction {
+  block_number: number;
+  created_contract: BlockscoutAddressParam | null;
+  error: string | null;
+  from: BlockscoutAddressParam;
+  gas_limit: string;
+  index: number;
+  success: boolean;
+  timestamp: string;
+  to: BlockscoutAddressParam;
+  transaction_hash: string;
+  type: string;
+  value: string;
 }
 
 interface BlockscoutFee {

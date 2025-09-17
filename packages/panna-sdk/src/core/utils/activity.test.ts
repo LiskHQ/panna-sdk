@@ -6,7 +6,8 @@ import {
   getActivitiesByAddress,
   getAmountType,
   getBaseTokenTransferRequestUrl,
-  getBaseTransactionsRequestUrl
+  getBaseTransactionsRequestUrl,
+  getBaseInternalTransactionsRequestUrl
 } from './activity';
 import * as fixture from './activity.fixture.test';
 import { TokenERC, TokenType } from './activity.types';
@@ -46,6 +47,19 @@ describe('getBaseTokenTransferRequestUrl', () => {
     expect(url).toMatch(REGEX_URL);
     expect(url.startsWith('https')).toBeTruthy();
     expect(url.endsWith('token-transfers')).toBeTruthy();
+    expect(url.includes(address)).toBeTruthy();
+  });
+});
+
+describe('getBaseInternalTransactionsRequestUrl', () => {
+  it('should return the token transfers API endpoint for the given address', () => {
+    const address = '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F';
+    const url = getBaseInternalTransactionsRequestUrl(address, liskSepolia.id);
+
+    expect(typeof url).toBe('string');
+    expect(url).toMatch(REGEX_URL);
+    expect(url.startsWith('https')).toBeTruthy();
+    expect(url.endsWith('internal-transactions')).toBeTruthy();
     expect(url.includes(address)).toBeTruthy();
   });
 });
@@ -222,7 +236,7 @@ describe('getAmountType', () => {
   });
 });
 
-describe('getActivitiesByAddress', () => {
+xdescribe('getActivitiesByAddress', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });

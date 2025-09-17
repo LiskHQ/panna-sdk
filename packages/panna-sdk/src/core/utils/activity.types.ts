@@ -1,4 +1,12 @@
 import { type Chain } from 'thirdweb';
+import { LAST_PAGE_REACHED } from './activity';
+import {
+  type BlockscoutAddressParam,
+  type BlockscoutTransaction,
+  type BlockscoutTokenTransfer,
+  type BlockscoutTransactionType,
+  type BlockscoutNextPageParams
+} from './blockscout.types';
 
 // Parameters for fetching account activities
 export interface GetActivitiesByAddressParams {
@@ -103,3 +111,20 @@ export interface ActivityMetadata {
   limit: number;
   hasNextPage: boolean;
 }
+
+export type PreProcessedActivity = Partial<BlockscoutTransaction> & {
+  block_number: number;
+  timestamp: string;
+  from: BlockscoutAddressParam;
+  to: BlockscoutAddressParam;
+  hash: string;
+  token_transfers: BlockscoutTokenTransfer[];
+  transaction_types: BlockscoutTransactionType[];
+  result: string;
+  status: string;
+};
+
+export type CachedBlockscoutNextPageParams =
+  | BlockscoutNextPageParams
+  | typeof LAST_PAGE_REACHED
+  | null;

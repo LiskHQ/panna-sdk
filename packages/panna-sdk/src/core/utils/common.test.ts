@@ -4,7 +4,8 @@ import {
   CHAIN_ID_API_URL_MAP,
   getBaseApiUrl,
   getCacheKey,
-  isValidAddress
+  isValidAddress,
+  buildQueryString
 } from './common';
 
 describe('getCacheKey', () => {
@@ -177,5 +178,107 @@ describe('getBaseApiUrl', () => {
     expect(baseUrl.startsWith('https://')).toBeTruthy();
     expect(baseUrl.includes('lisk.com')).toBeTruthy();
     expect(baseUrl.includes('sepolia')).toBeTruthy();
+  });
+});
+
+describe('buildQueryString', () => {
+  it('should return an empty string for null params', () => {
+    const queryString = buildQueryString(null);
+    expect(queryString).toBe('');
+  });
+
+  it('should return an empty string for undefined params', () => {
+    const queryString = buildQueryString(undefined);
+    expect(queryString).toBe('');
+  });
+
+  it('should return an empty string for empty params', () => {
+    const queryString = buildQueryString({});
+    expect(queryString).toBe('');
+  });
+
+  it('should return a valid query string for single param', () => {
+    const queryString = buildQueryString({ page: 1 });
+    expect(queryString).toBe('?page=1');
+  });
+
+  it('should return a valid query string for multiple params', () => {
+    const queryString = buildQueryString({
+      page: 2,
+      limit: 50,
+      search: 'test'
+    });
+    // Order of parameters in the query string may vary
+    const possibleResults = [
+      '?page=2&limit=50&search=test',
+      '?page=2&search=test&limit=50',
+      '?limit=50&page=2&search=test',
+      '?limit=50&search=test&page=2',
+      '?search=test&page=2&limit=50',
+      '?search=test&limit=50&page=2'
+    ];
+    expect(possibleResults).toContain(queryString);
+  });
+
+  it('should handle boolean and numeric values correctly', () => {
+    const queryString = buildQueryString({
+      active: true,
+      verified: false,
+      count: 10
+    });
+    const possibleResults = [
+      '?active=true&verified=false&count=10',
+      '?active=true&count=10&verified=false',
+      '?verified=false&active=true&count=10',
+      '?verified=false&count=10&active=true',
+      '?count=10&active=true&verified=false',
+      '?count=10&verified=false&active=true'
+    ];
+    expect(possibleResults).toContain(queryString);
+  });
+
+  it('should encode special characters in parameter values', () => {
+    const queryString = buildQueryString({
+      search: 'test value',
+      filter: 'name/age'
+    });
+    const possibleResults = [
+      '?search=test%20value&filter=name%2Fage',
+      '?filter=name%2Fage&search=test%20value'
+    ];
+    expect(possibleResults).toContain(queryString);
+  });
+
+  it('should skip parameters with undefined or null values', () => {
+    const queryString = buildQueryString({
+      page: 1,
+      limit: undefined,
+      search: null,
+      sort: 'asc'
+    });
+    const possibleResults = ['?page=1&sort=asc', '?sort=asc&page=1'];
+    expect(possibleResults).toContain(queryString);
+  });
+
+  it('should handle array values by repeating the key', () => {
+    const queryString = buildQueryString({
+      tags: ['tag1', 'tag2', 'tag3'],
+      category: 'books'
+    });
+    const possibleResults = [
+      '?tags=tag1&tags=tag2&tags=tag3&category=books',
+      '?tags=tag1&tags=tag3&tags=tag2&category=books',
+      '?tags=tag2&tags=tag1&tags=tag3&category=books',
+      '?tags=tag2&tags=tag3&tags=tag1&category=books',
+      '?tags=tag3&tags=tag1&tags=tag2&category=books',
+      '?tags=tag3&tags=tag2&tags=tag1&category=books',
+      '?category=books&tags=tag1&tags=tag2&tags=tag3',
+      '?category=books&tags=tag1&tags=tag3&tags=tag2',
+      '?category=books&tags=tag2&tags=tag1&tags=tag3',
+      '?category=books&tags=tag2&tags=tag3&tags=tag1',
+      '?category=books&tags=tag3&tags=tag1&tags=tag2',
+      '?category=books&tags=tag3&tags=tag2&tags=tag1'
+    ];
+    expect(possibleResults).toContain(queryString);
   });
 });
