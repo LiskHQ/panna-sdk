@@ -2,10 +2,10 @@ import { ArrowDownUpIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
-import { formatEther, formatUnits } from 'viem';
 import { currencyMap } from '@/consts/currencies';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance, tokenIconMap } from '@/mocks/token-balances';
+import { renderCryptoAmount, renderFiatAmount } from '@/utils';
 import { Button } from '../ui/button';
 import {
   Command,
@@ -67,9 +67,17 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     // rather than on input swap
     if (!inputSwap) {
       if (primaryInput === 'fiat') {
-        setSecondaryAmount(renderCryptoAmount() ? renderCryptoAmount() : '0');
+        setSecondaryAmount(
+          renderCryptoAmount(tokenInfo, amount)
+            ? renderCryptoAmount(tokenInfo, amount)
+            : '0'
+        );
       } else {
-        setSecondaryAmount(renderFiatAmount() ? renderFiatAmount() : '0');
+        setSecondaryAmount(
+          renderFiatAmount(tokenInfo, amount)
+            ? renderFiatAmount(tokenInfo, amount)
+            : '0'
+        );
       }
     } else {
       setInputSwap(false);
@@ -83,51 +91,15 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     const primaryInputAmount = form.getValues('primaryAmountInput');
     if (primaryInputAmount === 'crypto') {
       setInputSwap(true);
-      setSecondaryAmount(renderFiatAmount() ? renderFiatAmount() : '0');
+      setSecondaryAmount(
+        renderFiatAmount(tokenInfo, amount)
+          ? renderFiatAmount(tokenInfo, amount)
+          : '0'
+      );
       setPrimaryInput('crypto');
       setSecondaryInput('fiat');
     }
   }, []);
-
-  const renderFiatAmount = () => {
-    // This function calculates the fiat equivalent of the crypto amount
-    // using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
-    // We multiply by 10 ^ 18 to retain precision during division
-    // then format the result from wei to ether
-    return Number(
-      formatEther(
-        BigInt(
-          tokenInfo.fiatBalance.amount *
-            (!isNaN(Number(amount)) ? Number(amount) : 0) *
-            10 ** tokenInfo.token.decimals *
-            10 ** 18
-        ) / (tokenInfo.tokenBalance.value || BigInt(1))
-      )
-    ).toFixed(2);
-  };
-
-  const renderCryptoAmount = () => {
-    // This function calculates the crypto equivalent of the fiat amount
-    // using the formula: (tokenBalance * inputAmount) / (fiatBalance * tokenDecimals)
-    return Number(
-      formatUnits(
-        (tokenInfo.tokenBalance.value *
-          BigInt(
-            (!isNaN(Number(amount)) ? Number(amount) : 0) *
-              10 ** tokenInfo.token.decimals
-          )) /
-          BigInt(
-            Number(
-              tokenInfo.fiatBalance.amount
-                ? Number(tokenInfo.fiatBalance.amount).toFixed(2)
-                : '1'
-            ) *
-              10 ** tokenInfo.token.decimals
-          ),
-        tokenInfo.token.decimals
-      )
-    ).toFixed(6);
-  };
 
   // Swap primary and secondary input types
   const handleInputSwap = () => {
