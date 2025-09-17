@@ -4,10 +4,12 @@ import { UseFormReturn } from 'react-hook-form';
 import {
   lisk,
   liskSepolia,
+  prepareContractCall,
   prepareTransaction,
   sendTransaction,
   toWei
 } from 'src/core';
+import { tokenConfig } from '@/consts';
 import { useActiveAccount, usePanna } from '@/hooks';
 import { Address } from '../../../core/types/external';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
@@ -24,16 +26,37 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
   const { next } = useDialogStepper();
   const account = useActiveAccount();
   let initializeTokenSend = true;
+  const tokenData = form.getValues('tokenInfo.token');
+  const cryptoAmount = form.getValues('cryptoAmount') || '0';
 
   // @Todo: Possibly create hook for this logic
   useEffect(() => {
-    const transaction = prepareTransaction({
-      client,
-      chain: process.env.NODE_ENV === 'development' ? liskSepolia : lisk,
-      to: form.getValues('recipientAddress') as Address,
-      value: BigInt(toWei(String(form.getValues('cryptoAmount'))))
-    });
-    console.log('Prepared transaction:', transaction);
+    let transaction: any;
+    const chain = process.env.NODE_ENV === 'development' ? liskSepolia : lisk;
+    const currentTokenConfig = tokenConfig[chain.id];
+    if (tokenData.symbol === 'ETH') {
+      transaction = prepareTransaction({
+        client,
+        chain,
+        to: form.getValues('recipientAddress') as Address,
+        value: BigInt(toWei(cryptoAmount))
+      });
+      console.log('Prepared transaction:', transaction);
+    } else {
+      transaction = prepareContractCall({
+        method: 'function transfer(address to, uint256 value)',
+        params: [
+          form.getValues('recipientAddress') as Address,
+          BigInt(Number(cryptoAmount) * 10 ** tokenData.decimals)
+        ],
+        address: currentTokenConfig.find(
+          (token) => token.symbol === tokenData.symbol
+        )?.address as Address,
+        chain,
+        client
+      });
+      console.log('contract call result: ', transaction);
+    }
 
     async function sendToken() {
       try {
