@@ -87,15 +87,15 @@ export function detectUserCountry(): string | null {
 
 /**
  * Renders the fiat amount based on the token information and amount.
+ * This function calculates the fiat equivalent of the crypto amount
+ * using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
+ * We multiply by 10 ^ 18 to retain precision during division
+ * then format the result from wei to ether
  * @param tokenInfo - The token information
  * @param amount - The amount to convert
  * @returns The rendered fiat amount
  */
 export const renderFiatAmount = (tokenInfo: TokenBalance, amount: string) => {
-  // This function calculates the fiat equivalent of the crypto amount
-  // using the formula: (fiatBalance * inputAmount * tokenDecimals) / tokenBalance
-  // We multiply by 10 ^ 18 to retain precision during division
-  // then format the result from wei to ether
   return Number(
     formatEther(
       BigInt(
@@ -103,20 +103,22 @@ export const renderFiatAmount = (tokenInfo: TokenBalance, amount: string) => {
           (!isNaN(Number(amount)) ? Number(amount) : 0) *
           10 ** tokenInfo.token.decimals *
           10 ** 18
-      ) / (tokenInfo.tokenBalance.value || BigInt(1))
+      ) /
+        (tokenInfo.tokenBalance.value ||
+          BigInt(1 * 10 ** tokenInfo.token.decimals))
     )
   ).toFixed(2);
 };
 
 /**
  * Renders the crypto amount based on the token information and amount.
+ * This function calculates the crypto equivalent of the fiat amount
+ * using the formula: (tokenBalance * inputAmount) / (fiatBalance * tokenDecimals)
  * @param tokenInfo - The token information
  * @param amount - The amount to convert
  * @returns The rendered crypto amount
  */
 export const renderCryptoAmount = (tokenInfo: TokenBalance, amount: string) => {
-  // This function calculates the crypto equivalent of the fiat amount
-  // using the formula: (tokenBalance * inputAmount) / (fiatBalance * tokenDecimals)
   return Number(
     formatUnits(
       (tokenInfo.tokenBalance.value *
