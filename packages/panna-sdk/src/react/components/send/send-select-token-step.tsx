@@ -289,6 +289,14 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
                     handleInputSwap={handleInputSwap}
                   />
                 }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Only allow digits and a single period
+                  if (/^\d*\.?\d*$/.test(value)) {
+                    field.onChange(value);
+                  }
+                }}
+                inputMode="decimal"
               />
             </FormControl>
             <FormMessage />
