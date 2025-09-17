@@ -2,7 +2,7 @@ import { ArrowDownUpIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
-import { formatEther } from 'viem';
+import { formatEther, formatUnits } from 'viem';
 import { currencyMap } from '@/consts/currencies';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance, tokenIconMap } from '@/mocks/token-balances';
@@ -107,13 +107,24 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
   };
 
   const renderCryptoAmount = () => {
+    // This function calculates the crypto equivalent of the fiat amount
+    // using the formula: (tokenBalance * inputAmount) / (fiatBalance * tokenDecimals)
     return Number(
-      formatEther(
+      formatUnits(
         (tokenInfo.tokenBalance.value *
-          BigInt((!isNaN(Number(amount)) ? Number(amount) : 0) * 10 ** 18)) /
           BigInt(
-            (tokenInfo.fiatBalance.amount || 1) * 10 ** tokenInfo.token.decimals
-          )
+            (!isNaN(Number(amount)) ? Number(amount) : 0) *
+              10 ** tokenInfo.token.decimals
+          )) /
+          BigInt(
+            Number(
+              tokenInfo.fiatBalance.amount
+                ? Number(tokenInfo.fiatBalance.amount).toFixed(2)
+                : '1'
+            ) *
+              10 ** tokenInfo.token.decimals
+          ),
+        tokenInfo.token.decimals
       )
     ).toFixed(6);
   };
