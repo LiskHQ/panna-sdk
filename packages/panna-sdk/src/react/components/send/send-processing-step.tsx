@@ -5,13 +5,15 @@ import {
   lisk,
   liskSepolia,
   prepareContractCall,
+  PrepareContractCallResult,
   prepareTransaction,
+  PrepareTransactionResult,
   sendTransaction,
   toWei
 } from 'src/core';
 import { tokenConfig } from '@/consts';
 import { useActiveAccount, usePanna } from '@/hooks';
-import { Address } from '../../../core/types/external';
+import { Address, PreparedTransaction } from '../../../core/types/external';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -31,7 +33,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
 
   // @Todo: Possibly create hook for this logic
   useEffect(() => {
-    let transaction: any;
+    let transaction: PrepareTransactionResult | PrepareContractCallResult;
     const chain = process.env.NODE_ENV === 'development' ? liskSepolia : lisk;
     const currentTokenConfig = tokenConfig[chain.id];
     if (tokenData.symbol === 'ETH') {
@@ -62,7 +64,8 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
       try {
         const result = await sendTransaction({
           account: account!,
-          transaction
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          transaction: transaction as PreparedTransaction<any>
         });
 
         console.log('Success! Transaction hash:', result.transactionHash);
