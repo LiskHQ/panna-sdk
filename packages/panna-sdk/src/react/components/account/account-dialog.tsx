@@ -48,7 +48,8 @@ export function AccountDialog({ address }: AccountDialogProps) {
     AccountViewEnum.Main
   );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
-  const sendStepperRef = useRef<DialogStepperContextValue | null>(null);
+  const [sendStepperContext, setSendStepperContext] =
+    useState<DialogStepperContextValue | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({
@@ -142,21 +143,25 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (sendStepperRef.current?.canGoBack) {
-                    sendStepperRef.current.prev();
-                  } else {
-                    setActiveView(AccountViewEnum.Main);
-                  }
-                }}
-              >
-                <ArrowLeftIcon
-                  size={20}
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                />
-              </button>
+              {sendStepperContext?.stepData?.hideBackButton ? (
+                <div />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (sendStepperContext?.canGoBack) {
+                      sendStepperContext.prev();
+                    } else {
+                      setActiveView(AccountViewEnum.Main);
+                    }
+                  }}
+                >
+                  <ArrowLeftIcon
+                    size={20}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  />
+                </button>
+              )}
               <DialogClose>
                 <XIcon
                   size={20}
@@ -235,7 +240,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
       case AccountViewEnum.Send:
         return (
           <SendForm
-            stepperRef={sendStepperRef}
+            onStepperChange={setSendStepperContext}
             onClose={() => setActiveView(AccountViewEnum.Main)}
           />
         );

@@ -1,8 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRef } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { StepperRefProvider } from '../buy/buy-form';
-import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
+import {
+  DialogStepper,
+  DialogStepperContextValue,
+  useDialogStepper
+} from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { sendFormSchema } from './schema';
 import { SendProcessingStep } from './send-processing-step';
@@ -11,11 +14,27 @@ import { SendSuccessStep } from './send-success-step';
 import { SendSummaryStep } from './send-summary-step';
 
 type SendFormProps = {
-  stepperRef: ReturnType<typeof useRef<DialogStepperContextValue | null>>;
+  onStepperChange: (stepper: DialogStepperContextValue | null) => void;
   onClose: () => void;
 };
 
-export function SendForm({ stepperRef, onClose }: SendFormProps) {
+export function StepperContextProvider({
+  onStepperChange,
+  children
+}: {
+  onStepperChange: (stepper: DialogStepperContextValue | null) => void;
+  children: React.ReactNode;
+}) {
+  const stepperContext = useDialogStepper();
+
+  useEffect(() => {
+    onStepperChange(stepperContext);
+  }, []);
+
+  return <>{children}</>;
+}
+
+export function SendForm({ onStepperChange, onClose }: SendFormProps) {
   const form = useForm({
     resolver: zodResolver(sendFormSchema),
     defaultValues: {
@@ -47,18 +66,18 @@ export function SendForm({ stepperRef, onClose }: SendFormProps) {
     <Form {...form}>
       <form className="space-y-6">
         <DialogStepper>
-          <StepperRefProvider stepperRef={stepperRef}>
+          <StepperContextProvider onStepperChange={onStepperChange}>
             <SendSelectTokenStep form={form} />
-          </StepperRefProvider>
-          <StepperRefProvider stepperRef={stepperRef}>
+          </StepperContextProvider>
+          <StepperContextProvider onStepperChange={onStepperChange}>
             <SendSummaryStep form={form} />
-          </StepperRefProvider>
-          <StepperRefProvider stepperRef={stepperRef}>
+          </StepperContextProvider>
+          <StepperContextProvider onStepperChange={onStepperChange}>
             <SendProcessingStep form={form} />
-          </StepperRefProvider>
-          <StepperRefProvider stepperRef={stepperRef}>
+          </StepperContextProvider>
+          <StepperContextProvider onStepperChange={onStepperChange}>
             <SendSuccessStep onClose={onClose} />
-          </StepperRefProvider>
+          </StepperContextProvider>
         </DialogStepper>
       </form>
     </Form>

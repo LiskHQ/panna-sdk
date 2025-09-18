@@ -43,7 +43,7 @@ export function SendSummaryStep({ form }: SendSummaryStepProps) {
           {form.getValues('recipientAddress')}
         </Typography>
       </div>
-      <Button type="button" onClick={() => next()}>
+      <Button type="button" onClick={() => next({ hideBackButton: true })}>
         Send
       </Button>
     </div>
