@@ -122,7 +122,18 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     if (primaryInput === 'crypto') {
       form.setValue('amount', tokenInfo.tokenBalance.displayValue || '0');
     } else {
-      form.setValue('amount', tokenInfo.fiatBalance.amount.toFixed(2) || '0');
+      // Rounding down the fiat amount to 2 decimal places
+      // to avoid slight disparity due to rounding
+      // e.g. If fiat balance is 0.89982424, setting amount to
+      // 0.90 would render fiat amount greater than
+      // token fiat balance then throw "Insufficient balance" error.
+      // Instead, we set it to 0.89
+      form.setValue(
+        'amount',
+        Number(Math.floor(tokenInfo.fiatBalance.amount * 100) / 100).toFixed(
+          2
+        ) || '0'
+      );
     }
   };
 
@@ -325,7 +336,9 @@ function TokenItem({ tokenData, withSelect = false }: TokenItemProps) {
         </Typography>
         <Typography variant="muted">
           {currencyMap[tokenData.fiatBalance.currency]}
-          {tokenData.fiatBalance.amount.toFixed(2)}
+          {Number(Math.floor(tokenData.fiatBalance.amount * 100) / 100).toFixed(
+            2
+          )}
         </Typography>
       </div>
     </>

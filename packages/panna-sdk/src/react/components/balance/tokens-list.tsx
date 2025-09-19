@@ -100,7 +100,7 @@ function TokenItem({ token }: TokenItemProps) {
         </Typography>
         <Typography variant="muted">
           {currencyMap[token.fiatBalance.currency]}
-          {token.fiatBalance.amount.toFixed(2)}
+          {Number(Math.floor(token.fiatBalance.amount * 100) / 100).toFixed(2)}
         </Typography>
       </div>
     </div>
