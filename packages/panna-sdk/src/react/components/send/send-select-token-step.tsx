@@ -66,19 +66,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
     // Update secondary amount when primary amount changes on input
     // rather than on input swap
     if (!inputSwap) {
-      if (primaryInput === 'fiat') {
-        setSecondaryAmount(
-          renderCryptoAmount(tokenInfo, amount)
-            ? renderCryptoAmount(tokenInfo, amount)
-            : '0'
-        );
-      } else {
-        setSecondaryAmount(
-          renderFiatAmount(tokenInfo, amount)
-            ? renderFiatAmount(tokenInfo, amount)
-            : '0'
-        );
-      }
+      handleAmountChange(tokenInfo, amount);
     } else {
       setInputSwap(false);
     }
@@ -100,6 +88,22 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
       setSecondaryInput('fiat');
     }
   }, []);
+
+  const handleAmountChange = (tokenData: TokenBalance, inputAmount: string) => {
+    if (primaryInput === 'fiat') {
+      setSecondaryAmount(
+        renderCryptoAmount(tokenData, inputAmount)
+          ? renderCryptoAmount(tokenData, inputAmount)
+          : '0'
+      );
+    } else {
+      setSecondaryAmount(
+        renderFiatAmount(tokenData, inputAmount)
+          ? renderFiatAmount(tokenData, inputAmount)
+          : '0'
+      );
+    }
+  };
 
   // Swap primary and secondary input types
   const handleInputSwap = () => {
@@ -164,6 +168,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
         render={({ field }) => {
           const handleTokenSelect = (selectedToken: TokenBalance) => {
             field.onChange(selectedToken);
+            handleAmountChange(selectedToken, amount);
             setOpen(false);
           };
 
