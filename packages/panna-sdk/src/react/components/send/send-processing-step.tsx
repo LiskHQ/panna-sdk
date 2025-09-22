@@ -1,5 +1,5 @@
 import { Loader2Icon } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import {
   lisk,
@@ -27,7 +27,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
   const { client } = usePanna();
   const { next } = useDialogStepper();
   const account = useActiveAccount();
-  let initializeTokenSend = true;
+  const initializeTokenSend = useRef(true);
   const tokenData = form.getValues('tokenInfo.token');
   const cryptoAmount = form.getValues('cryptoAmount') || '0';
 
@@ -43,7 +43,6 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
         to: form.getValues('recipientAddress') as Address,
         value: BigInt(toWei(cryptoAmount))
       });
-      console.log('Prepared transaction:', transaction);
     } else {
       transaction = prepareContractCall({
         method: 'function transfer(address to, uint256 value)',
@@ -57,7 +56,6 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
         chain,
         client
       });
-      console.log('contract call result: ', transaction);
     }
 
     async function sendToken() {
@@ -68,7 +66,9 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
           transaction: transaction as PreparedTransaction<any>
         });
 
-        console.log('Success! Transaction hash:', result.transactionHash);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Success! Transaction hash:', result.transactionHash);
+        }
         next();
       } catch (error) {
         const errorMessage =
@@ -83,9 +83,9 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
       }
     }
 
-    if (initializeTokenSend) {
+    if (initializeTokenSend.current) {
       sendToken();
-      initializeTokenSend = false;
+      initializeTokenSend.current = false;
     }
   }, []);
 
