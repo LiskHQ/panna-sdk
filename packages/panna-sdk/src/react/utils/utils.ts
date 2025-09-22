@@ -111,30 +111,56 @@ export const renderFiatAmount = (tokenInfo: TokenBalance, amount: string) => {
 };
 
 /**
- * Renders the crypto amount based on the token information and amount.
- * This function calculates the crypto equivalent of the fiat amount
- * using the formula: (tokenBalance * inputAmount) / (fiatBalance * tokenDecimals)
- * @param tokenInfo - The token information
- * @param amount - The amount to convert
- * @returns The rendered crypto amount
+ * Renders the crypto amount based on the token information and fiat input amount.
+ * Calculates crypto equivalent using: (tokenBalance * inputAmount) / fiatBalance
+ *
+ * @param tokenInfo - The token information containing balances and metadata
+ * @param amount - The amount to convert (as string)
+ * @returns The rendered crypto amount formatted to 6 decimal places, or "0.000000" if invalid
  */
 export const renderCryptoAmount = (tokenInfo: TokenBalance, amount: string) => {
-  return Number(
-    formatUnits(
-      (tokenInfo.tokenBalance.value *
-        BigInt(
-          (!isNaN(Number(amount)) ? Number(amount) : 0) *
-            10 ** tokenInfo.token.decimals
-        )) /
-        BigInt(
-          Number(
-            tokenInfo.fiatBalance.amount
-              ? Number(tokenInfo.fiatBalance.amount).toFixed(2)
-              : '1'
-          ) *
-            10 ** tokenInfo.token.decimals
-        ),
-      tokenInfo.token.decimals
-    )
-  ).toFixed(6);
+  // Input validation
+  if (!tokenInfo?.tokenBalance?.value || !tokenInfo?.token?.decimals) {
+    return '0.000000';
+  }
+
+  // Parse and validate the input amount
+  const numericAmount = parseFloat(amount);
+  if (isNaN(numericAmount) || numericAmount < 0) {
+    return '0.000000';
+  }
+
+  // Handle zero or invalid fiat balance
+  const fiatAmount = tokenInfo.fiatBalance?.amount
+    ? parseFloat(String(tokenInfo.fiatBalance.amount))
+    : 1;
+
+  if (fiatAmount <= 0) {
+    return '0.000000';
+  }
+
+  try {
+    const { decimals } = tokenInfo.token;
+    const tokenBalance = tokenInfo.tokenBalance.value;
+
+    // Convert input amount to BigInt with proper decimal scaling
+    // Using parseFloat ensures we handle decimal inputs correctly
+    const scaledInputAmount = BigInt(
+      Math.floor(numericAmount * 10 ** decimals)
+    );
+
+    // Convert fiat amount to BigInt with proper decimal scaling
+    const scaledFiatAmount = BigInt(Math.floor(fiatAmount * 10 ** decimals));
+
+    // Perform the calculation: (tokenBalance * inputAmount) / fiatBalance
+    const result = (tokenBalance * scaledInputAmount) / scaledFiatAmount;
+
+    // Format the result back to human-readable format
+    const formattedResult = formatUnits(result, decimals);
+
+    return Number(formattedResult).toFixed(6);
+  } catch (error) {
+    console.warn('Error calculating crypto amount:', error);
+    return '0.000000';
+  }
 };
