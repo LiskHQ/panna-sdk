@@ -1,10 +1,14 @@
+import { DEFAULT_CURRENCY } from 'src/core';
+import { TokenBalance } from '@/mocks/token-balances';
 import { getCountryByCode } from './countries';
 import {
   detectUserCountry,
-  getSupportedTokens,
+  getAAChain,
   getChain,
   getEnvironmentChain,
-  getAAChain
+  getSupportedTokens,
+  renderCryptoAmount,
+  renderFiatAmount
 } from './utils';
 
 // Mock the countries utility
@@ -408,6 +412,199 @@ describe('detectUserCountry', () => {
 
       expect(mockGetCountryByCode).toHaveBeenCalledWith('US'); // Should be uppercase
       expect(result).toBe('US');
+    });
+  });
+});
+
+describe('render functions', () => {
+  describe('renderFiatAmount', () => {
+    it('should correctly render fiat amount for valid input', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY }, // $2 per token
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('1000000000000000000'),
+          displayValue: '100.0'
+        } // 1 token
+      };
+      const amount = '1'; // 1 token
+      const result = renderFiatAmount(tokenInfo, amount);
+
+      // Calculation: (2 * 1 * 10^18 * 10^18) / 10^18 = 2 * 10^18
+      // formatEther(2 * 10^18) = "2.0"
+      expect(result).toBe('2.00');
+    });
+
+    it('should return 0.00 for non-numeric amount', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('1000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = 'abc';
+
+      const result = renderFiatAmount(tokenInfo, amount);
+      expect(result).toBe('0.00');
+    });
+
+    it('should handle zero token balance gracefully', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: { value: BigInt(0), displayValue: '0.00' }
+      };
+      const amount = '1';
+
+      const result = renderFiatAmount(tokenInfo, amount);
+      // Should avoid division by zero, fallback to BigInt(1 * 10 ** tokenInfo.token.decimals)
+      expect(result).not.toBe('Infinity');
+      expect(result).toBe('2.00');
+    });
+
+    it('should handle missing tokenBalance.value', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 5.32, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {}
+      };
+      const amount = '1';
+
+      const result = renderFiatAmount(tokenInfo as TokenBalance, amount);
+      expect(result).not.toBe('Infinity');
+      expect(result).toBe('5.32');
+    });
+
+    it('should handle large amounts correctly', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 1.5, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = '100000000';
+
+      const result = renderFiatAmount(tokenInfo, amount);
+      // Calculation: (1.5 * 100000000 * 10^18 * 10^18) / 10^20 = 1.5 * 100000000 * 10^16
+      // formatEther(1.5 * 1000000 * 10^18) = "1500000.0"
+      expect(result).toBe('1500000.00');
+    });
+  });
+
+  describe('renderCryptoAmount', () => {
+    it('should correctly render crypto amount for valid input', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY }, // $2 per token
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        } // 100 tokens
+      };
+      const amount = '2'; // $2
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      // Calculation: (100 tokens * 2 * 10^18) / (2 * 10^18) = 100 tokens
+      // formatUnits(100 tokens, 18) = "100.0"
+      expect(result).toBe('100.000000');
+    });
+
+    it('should return 0.000000 for non-numeric amount', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = 'abc';
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      expect(result).toBe('0.000000');
+    });
+
+    it('should handle zero fiat balance gracefully', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 0, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('0'),
+          displayValue: '0.00'
+        }
+      };
+      const amount = '2';
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      // Should avoid division by zero, fallback to '1'
+      expect(result).not.toBe('Infinity');
+      expect(result).toBe('0.000000');
+    });
+
+    it('should handle large fiat amounts correctly', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 1000, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = '1000';
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      // Calculation: (1 token * 1000 * 10^18) / (1000 * 10^18) = 1 token
+      // formatUnits(1 token, 18) = "1.0"
+      expect(result).toBe('100.000000');
     });
   });
 });

@@ -1,4 +1,4 @@
-import { CheckIcon, ChevronRightIcon } from 'lucide-react';
+import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_COUNTRY_CODE } from 'src/core';
@@ -83,7 +83,7 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
                         <span className="text-xl">{field.value?.flag}</span>
                         {field.value?.name ?? 'Select country'}
                       </span>
-                      <ChevronRightIcon className="opacity-50" />
+                      <ChevronDownIcon className="opacity-50" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent

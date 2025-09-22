@@ -1,3 +1,4 @@
+import { currencyMap } from '@/consts/currencies';
 import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance } from '@/mocks/token-balances';
@@ -77,16 +78,6 @@ type TokenItemProps = {
   token: TokenBalance;
 };
 
-const currencyMap = {
-  USD: '$',
-  EUR: '€',
-  GBP: '£',
-  CAD: 'C$',
-  AUD: 'A$',
-  JPY: '¥',
-  NZD: 'NZ$'
-};
-
 function TokenItem({ token }: TokenItemProps) {
   return (
     <div className="flex w-full justify-between">
@@ -98,27 +89,19 @@ function TokenItem({ token }: TokenItemProps) {
             className="h-10 w-10"
           />
         </div>
-        <div className="flex flex-col">
-          <div>
-            <Typography variant="small">{token.token.name}</Typography>
-          </div>
-          <div>
-            <Typography variant="muted">{token.token.symbol}</Typography>
-          </div>
+        <div className="flex flex-col justify-center">
+          <Typography variant="small">{token.token.name}</Typography>
+          <Typography variant="muted">{token.token.symbol}</Typography>
         </div>
       </div>
-      <div className="flex flex-col text-right">
-        <div>
-          <Typography variant="small">
-            {Number(token.tokenBalance.displayValue).toFixed(6)}
-          </Typography>
-        </div>
-        <div>
-          <Typography variant="muted">
-            {currencyMap[token.fiatBalance.currency]}
-            {token.fiatBalance.amount.toFixed(2)}
-          </Typography>
-        </div>
+      <div className="flex flex-col justify-center text-right">
+        <Typography variant="small">
+          {Number(token.tokenBalance.displayValue).toFixed(6)}
+        </Typography>
+        <Typography variant="muted">
+          {currencyMap[token.fiatBalance.currency]}
+          {Number(Math.floor(token.fiatBalance.amount * 100) / 100).toFixed(2)}
+        </Typography>
       </div>
     </div>
   );

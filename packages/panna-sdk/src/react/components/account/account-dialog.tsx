@@ -5,7 +5,7 @@ import {
   TagIcon,
   XIcon
 } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { DEFAULT_CURRENCY } from 'src/core';
 import { truncateAddress } from '@/utils/address';
 import { type StringValues } from '../../../core/utils/types';
@@ -14,6 +14,7 @@ import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
+import { SendForm } from '../send/send-form';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -32,7 +33,8 @@ import { AccountSettingsView } from './account-settings-view';
 enum AccountViewEnum {
   Main = 'main',
   Settings = 'settings',
-  Buy = 'buy'
+  Buy = 'buy',
+  Send = 'send'
 }
 
 type AccountView = `${StringValues<typeof AccountViewEnum>}`;
@@ -46,6 +48,8 @@ export function AccountDialog({ address }: AccountDialogProps) {
     AccountViewEnum.Main
   );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
+  const [sendStepperContext, setSendStepperContext] =
+    useState<DialogStepperContextValue | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({
@@ -135,6 +139,39 @@ export function AccountDialog({ address }: AccountDialogProps) {
             {/* No dialog title for Buy flow; each step renders its own title */}
           </DialogHeader>
         );
+      case AccountViewEnum.Send:
+        return (
+          <DialogHeader className="items-center gap-0">
+            <div className="flex w-full items-center justify-between gap-2">
+              {sendStepperContext?.stepData?.hideBackButton ? (
+                <div />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (sendStepperContext?.canGoBack) {
+                      sendStepperContext.prev();
+                    } else {
+                      setActiveView(AccountViewEnum.Main);
+                    }
+                  }}
+                >
+                  <ArrowLeftIcon
+                    size={20}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  />
+                </button>
+              )}
+              <DialogClose>
+                <XIcon
+                  size={20}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                />
+              </DialogClose>
+            </div>
+            {/* No dialog title for Send flow; each step renders its own title */}
+          </DialogHeader>
+        );
     }
   };
 
@@ -144,7 +181,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <div className="flex flex-col items-center gap-8">
             <div className="flex w-full items-center gap-4">
-              <Button type="button" variant="outline" className="flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => setActiveView(AccountViewEnum.Send)}
+              >
                 <SendIcon />
                 Send
               </Button>
@@ -193,6 +235,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
           <BuyForm
             onClose={() => setActiveView(AccountViewEnum.Main)}
             stepperRef={buyStepperRef}
+          />
+        );
+      case AccountViewEnum.Send:
+        return (
+          <SendForm
+            onStepperChange={setSendStepperContext}
+            onClose={() => setActiveView(AccountViewEnum.Main)}
           />
         );
     }

@@ -376,9 +376,13 @@ export const accountBalancesInFiat = async function (
   let balances: AccountBalanceInFiatResult[] = [];
 
   successfulBalances.forEach((balance) => {
-    const tokenPrice = allTokensPrices.find(
-      (token) => token.symbol === balance.symbol
-    );
+    const tokenPrice = allTokensPrices.find((token) => {
+      if (balance.symbol === 'USDC.e' && token.symbol === 'USDC') {
+        // Special case for mapping Lisk Bridged USDC.e mapping to USDC
+        return true;
+      }
+      return token.symbol === balance.symbol;
+    });
     let balanceWithFiat = {
       token: {
         symbol: balance.symbol,
