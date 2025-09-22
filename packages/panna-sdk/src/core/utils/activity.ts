@@ -24,9 +24,9 @@ import {
   type CachedBlockscoutNextPageParams
 } from './activity.types';
 import {
-  type BlockscoutTotalERC20,
   type BlockscoutTokenTransfer,
   type BlockscoutTokenTransfersResponse,
+  type BlockscoutTotalERC20,
   type BlockscoutTotalERC1155,
   type BlockscoutTotalERC721,
   type BlockscoutTransaction,
@@ -71,19 +71,6 @@ export const getBaseTokenTransferRequestUrl = (
 ): string => {
   const BASE_API_URL = getBaseApiUrl(chainID);
   return `${BASE_API_URL}/addresses/${address}/token-transfers`;
-};
-
-/**
- * Get blockscout internal transactions endpoint.
- * @param address The address for which to return the internal transactions API endpoint.
- * @returns Blockscout internal transactions API endpoint for the supplied address.
- */
-export const getBaseInternalTransactionsRequestUrl = (
-  address: string,
-  chainID: number
-): string => {
-  const BASE_API_URL = getBaseApiUrl(chainID);
-  return `${BASE_API_URL}/addresses/${address}/internal-transactions`;
 };
 
 /*
@@ -221,7 +208,7 @@ export const getActivitiesByAddress = async function (
     if (
       activityCache.get(cacheKeyActivitiesLoadingStatus) === LAST_PAGE_REACHED
     ) {
-      // Break the loop to avoid further API calls if all user activities are available in cache
+      // Break the loop to avoid unnecessary API calls if all user activities are available in cache
       break;
     }
 
@@ -257,7 +244,7 @@ export const getActivitiesByAddress = async function (
 
     preProcessedActivities.push(...userTransactions);
     userTokenTransfers.forEach((tt) => {
-      const preparedTx = {
+      const mockedTx = {
         block_number: tt.block_number,
         timestamp: tt.timestamp,
         from: tt.from,
@@ -269,7 +256,7 @@ export const getActivitiesByAddress = async function (
         status: 'ok'
       } as PreProcessedActivity;
 
-      preProcessedActivities.push(preparedTx);
+      preProcessedActivities.push(mockedTx);
     });
     preProcessedActivities.sort((a, b) => b.block_number - a.block_number);
 
@@ -605,11 +592,9 @@ export const updateTokenTransactionsCache = async (
     return; // No more pages to fetch
   }
 
-  let userTokenTransfers: BlockscoutTokenTransfer[] = activityCache.has(
+  let userTokenTransfers: BlockscoutTokenTransfer[] = (activityCache.get(
     cacheKeyTokenTransferTxs
-  )
-    ? (activityCache.get(cacheKeyTokenTransferTxs) as BlockscoutTokenTransfer[])
-    : [];
+  ) || []) as BlockscoutTokenTransfer[];
 
   const baseRequestUrl = getBaseTokenTransferRequestUrl(address, chainID);
   const requestUrl = baseRequestUrl.concat(buildQueryString(nextPageParams));
