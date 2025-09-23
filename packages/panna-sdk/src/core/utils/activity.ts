@@ -33,7 +33,9 @@ import {
   type BlockscoutTotalERC1155,
   type BlockscoutTotalERC721,
   type BlockscoutTransaction,
-  type BlockscoutTransactionsResponse
+  type BlockscoutTransactionsResponse,
+  type BlockscoutNextPageParams,
+  type BlockscoutInternalTransactionNextPageParams
 } from './blockscout.types';
 import {
   getBaseApiUrl,
@@ -194,55 +196,30 @@ export const getActivitiesByAddress = async function (
     limit = DEFAULT_PAGINATION_LIMIT
   } = params;
 
-  const cacheKeyActivities = getCacheKey(address, chain.id, 'activities');
-  const cacheKeyInternalTxs = getCacheKey(
-    address,
-    chain.id,
-    'internal_transactions'
-  );
-  const cacheKeyTransactions = getCacheKey(address, chain.id, 'transactions');
-  const cacheKeyTokenTransferTxs = getCacheKey(
-    address,
-    chain.id,
-    'token_transfers'
-  );
-  const cacheKeyActivitiesLoadingStatus = getCacheKey(
+  const ckActivities = getCacheKey(address, chain.id, 'activities');
+  const ckInternalTxs = getCacheKey(address, chain.id, 'internal_transactions');
+  const ckTransactions = getCacheKey(address, chain.id, 'transactions');
+  const ckTokenTransferTxs = getCacheKey(address, chain.id, 'token_transfers');
+  const ckActivitiesLoadingStatus = getCacheKey(
     address,
     chain.id,
     'activities_next_page_params'
   );
-  const cacheKeyInternalTxsNextPageParams = getCacheKey(
-    address,
-    chain.id,
-    'internal_transactions_next_params'
-  );
-  const cacheKeyTransactionsNextPageParams = getCacheKey(
-    address,
-    chain.id,
-    'transactions_next_params'
-  );
-  const cacheKeyTokenTransferNextPageParams = getCacheKey(
-    address,
-    chain.id,
-    'token_transfers_next_params'
-  );
 
   const preProcessedActivities: PreProcessedActivity[] = (activityCache.get(
-    cacheKeyActivities
+    ckActivities
   ) || []) as PreProcessedActivity[];
   for (; preProcessedActivities.length <= offset + limit; ) {
-    if (
-      activityCache.get(cacheKeyActivitiesLoadingStatus) === LAST_PAGE_REACHED
-    ) {
+    if (activityCache.get(ckActivitiesLoadingStatus) === LAST_PAGE_REACHED) {
       // Break the loop to avoid unnecessary API calls if all user activities are available in cache
       break;
     }
 
-    const userInternalTxs = (activityCache.get(cacheKeyInternalTxs) ||
+    const userInternalTxs = (activityCache.get(ckInternalTxs) ||
       []) as BlockscoutInternalTransaction[];
-    const userTransactions = (activityCache.get(cacheKeyTransactions) ||
+    const userTransactions = (activityCache.get(ckTransactions) ||
       []) as BlockscoutTransaction[];
-    const userTokenTransfers = (activityCache.get(cacheKeyTokenTransferTxs) ||
+    const userTokenTransfers = (activityCache.get(ckTokenTransferTxs) ||
       []) as BlockscoutTokenTransfer[];
 
     if (
@@ -251,38 +228,8 @@ export const getActivitiesByAddress = async function (
         userTokenTransfers.length <=
       offset + limit
     ) {
-      //TODO: Optimize the below logic to call only one of the update* functions based on the least block height
-      const userInternalTxsNextPageParams: CachedBlockscoutNextPageParams =
-        (activityCache.get(cacheKeyInternalTxsNextPageParams) ||
-          null) as CachedBlockscoutNextPageParams;
-      if (
-        (userInternalTxsNextPageParams as unknown as string) !==
-        LAST_PAGE_REACHED
-      ) {
-        await updateInternalTransactionsCache(address, chain.id);
-      }
-
-      const userTxsNextPageParams: CachedBlockscoutNextPageParams =
-        (activityCache.get(cacheKeyTransactionsNextPageParams) ||
-          null) as CachedBlockscoutNextPageParams;
-      if ((userTxsNextPageParams as unknown as string) !== LAST_PAGE_REACHED) {
-        await updateTransactionsCache(address, chain.id);
-      }
-
-      const userTTxsNextPageParams: CachedBlockscoutNextPageParams =
-        (activityCache.get(cacheKeyTokenTransferNextPageParams) ||
-          null) as CachedBlockscoutNextPageParams;
-      if ((userTTxsNextPageParams as unknown as string) !== LAST_PAGE_REACHED) {
-        await updateTokenTransactionsCache(address, chain.id);
-      }
-
-      if (
-        (userInternalTxsNextPageParams as unknown as string) ===
-          LAST_PAGE_REACHED &&
-        (userTxsNextPageParams as unknown as string) === LAST_PAGE_REACHED &&
-        (userTTxsNextPageParams as unknown as string) === LAST_PAGE_REACHED
-      ) {
-        activityCache.set(cacheKeyActivitiesLoadingStatus, LAST_PAGE_REACHED);
+      if (await updateRequiredCache(address, chain.id)) {
+        activityCache.set(ckActivitiesLoadingStatus, LAST_PAGE_REACHED);
       } else {
         continue; // To avoid duplication of entries in preProcessedActivities
       }
@@ -327,7 +274,7 @@ export const getActivitiesByAddress = async function (
     });
     preProcessedActivities.sort((a, b) => b.block_number - a.block_number);
 
-    activityCache.set(cacheKeyActivities, preProcessedActivities);
+    activityCache.set(ckActivities, preProcessedActivities);
   }
 
   const activities: Activity[] = preProcessedActivities
@@ -509,15 +456,15 @@ export const updateTransactionsCache = async (
   // Activity cache
   const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
 
-  const cacheKeyTransactions = getCacheKey(address, chainID, 'transactions');
-  const cacheKeyTransactionsNextPageParams = getCacheKey(
+  const ckTransactions = getCacheKey(address, chainID, 'transactions');
+  const ckTransactionsNPP = getCacheKey(
     address,
     chainID,
     'transactions_next_params'
   );
 
   let nextPageParams: CachedBlockscoutNextPageParams = (activityCache.get(
-    cacheKeyTransactionsNextPageParams
+    ckTransactionsNPP
   ) || null) as CachedBlockscoutNextPageParams;
 
   if ((nextPageParams as unknown as string) === LAST_PAGE_REACHED) {
@@ -525,7 +472,7 @@ export const updateTransactionsCache = async (
   }
 
   let userTransactions: BlockscoutTransaction[] = (activityCache.get(
-    cacheKeyTransactions
+    ckTransactions
   ) || []) as BlockscoutTransaction[];
 
   const baseRequestUrl = getBaseTransactionsRequestUrl(address, chainID);
@@ -543,16 +490,13 @@ export const updateTransactionsCache = async (
   userTransactions.push(
     ...(await fillTokenTransactions(address, chainID, blockscoutRes.items))
   );
-  activityCache.set(cacheKeyTransactions, userTransactions);
+  activityCache.set(ckTransactions, userTransactions);
 
   if (blockscoutRes.next_page_params) {
-    activityCache.set(
-      cacheKeyTransactionsNextPageParams,
-      blockscoutRes.next_page_params
-    );
+    activityCache.set(ckTransactionsNPP, blockscoutRes.next_page_params);
   } else {
     // Explicitly set flag when the last page has been reached
-    activityCache.set(cacheKeyTransactionsNextPageParams, LAST_PAGE_REACHED);
+    activityCache.set(ckTransactionsNPP, LAST_PAGE_REACHED);
   }
 };
 
@@ -575,12 +519,8 @@ export const fillTokenTransactions = async (
   // Activity cache
   const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
 
-  const cacheKeyTokenTransferTxs = getCacheKey(
-    address,
-    chainID,
-    'token_transfers'
-  );
-  const cacheKeyTokenTransferNextPageParams = getCacheKey(
+  const ckTokenTransferTxs = getCacheKey(address, chainID, 'token_transfers');
+  const ckTokenTransferNPP = getCacheKey(
     address,
     chainID,
     'token_transfers_next_params'
@@ -600,11 +540,11 @@ export const fillTokenTransactions = async (
       let shouldRetryAfterUpdatingTTCache: boolean = true;
       do {
         const userTokenTransfers: BlockscoutTokenTransfer[] =
-          (activityCache.get(cacheKeyTokenTransferTxs) ||
+          (activityCache.get(ckTokenTransferTxs) ||
             []) as BlockscoutTokenTransfer[];
 
         const nextPageParams: CachedBlockscoutNextPageParams =
-          (activityCache.get(cacheKeyTokenTransferNextPageParams) ||
+          (activityCache.get(ckTokenTransferNPP) ||
             null) as CachedBlockscoutNextPageParams;
 
         const tokenTransferTxs = userTokenTransfers.filter(
@@ -628,7 +568,7 @@ export const fillTokenTransactions = async (
         // Evict the token transfers from the cache for the given transaction,
         // since they are already included (above) within the transaction itself
         activityCache.set(
-          cacheKeyTokenTransferTxs,
+          ckTokenTransferTxs,
           userTokenTransfers.filter((e) => e.transaction_hash != tx.hash)
         );
       } while (shouldRetryAfterUpdatingTTCache);
@@ -652,19 +592,15 @@ export const updateTokenTransactionsCache = async (
   // Activity cache
   const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
 
-  const cacheKeyTokenTransferTxs = getCacheKey(
-    address,
-    chainID,
-    'token_transfers'
-  );
-  const cacheKeyTokenTransferNextPageParams = getCacheKey(
+  const ckTokenTransferTxs = getCacheKey(address, chainID, 'token_transfers');
+  const ckTokenTransferNPP = getCacheKey(
     address,
     chainID,
     'token_transfers_next_params'
   );
 
   let nextPageParams: CachedBlockscoutNextPageParams = (activityCache.get(
-    cacheKeyTokenTransferNextPageParams
+    ckTokenTransferNPP
   ) || null) as CachedBlockscoutNextPageParams;
 
   if ((nextPageParams as unknown as string) === LAST_PAGE_REACHED) {
@@ -672,7 +608,7 @@ export const updateTokenTransactionsCache = async (
   }
 
   let userTokenTransfers: BlockscoutTokenTransfer[] = (activityCache.get(
-    cacheKeyTokenTransferTxs
+    ckTokenTransferTxs
   ) || []) as BlockscoutTokenTransfer[];
 
   const baseRequestUrl = getBaseTokenTransferRequestUrl(address, chainID);
@@ -688,16 +624,13 @@ export const updateTokenTransactionsCache = async (
 
   const blockscoutRes = response as unknown as BlockscoutTokenTransfersResponse;
   userTokenTransfers.push(...blockscoutRes.items);
-  activityCache.set(cacheKeyTokenTransferTxs, userTokenTransfers);
+  activityCache.set(ckTokenTransferTxs, userTokenTransfers);
 
   if (blockscoutRes.next_page_params) {
-    activityCache.set(
-      cacheKeyTokenTransferNextPageParams,
-      blockscoutRes.next_page_params
-    );
+    activityCache.set(ckTokenTransferNPP, blockscoutRes.next_page_params);
   } else {
     // Explicitly set flag when the last page has been reached
-    activityCache.set(cacheKeyTokenTransferNextPageParams, LAST_PAGE_REACHED);
+    activityCache.set(ckTokenTransferNPP, LAST_PAGE_REACHED);
   }
 };
 
@@ -715,19 +648,15 @@ export const updateInternalTransactionsCache = async (
   // Activity cache
   const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
 
-  const cacheKeyInternalTxs = getCacheKey(
-    address,
-    chainID,
-    'internal_transactions'
-  );
-  const cacheKeyInternalTxsNextPageParams = getCacheKey(
+  const ckInternalTxs = getCacheKey(address, chainID, 'internal_transactions');
+  const ckInternalTxsNPP = getCacheKey(
     address,
     chainID,
     'internal_transactions_next_params'
   );
 
   let nextPageParams: CachedBlockscoutNextPageParams = (activityCache.get(
-    cacheKeyInternalTxsNextPageParams
+    ckInternalTxsNPP
   ) || null) as CachedBlockscoutNextPageParams;
 
   if ((nextPageParams as unknown as string) === LAST_PAGE_REACHED) {
@@ -735,7 +664,7 @@ export const updateInternalTransactionsCache = async (
   }
 
   let userInternalTxs: BlockscoutInternalTransaction[] = (activityCache.get(
-    cacheKeyInternalTxs
+    ckInternalTxs
   ) || []) as BlockscoutInternalTransaction[];
 
   const baseRequestUrl = getBaseInternalTransactionsRequestUrl(
@@ -770,16 +699,13 @@ export const updateInternalTransactionsCache = async (
       userInternalTxs.push(itx);
     }
   });
-  activityCache.set(cacheKeyInternalTxs, userInternalTxs);
+  activityCache.set(ckInternalTxs, userInternalTxs);
 
   if (blockscoutRes.next_page_params) {
-    activityCache.set(
-      cacheKeyInternalTxsNextPageParams,
-      blockscoutRes.next_page_params
-    );
+    activityCache.set(ckInternalTxsNPP, blockscoutRes.next_page_params);
   } else {
     // Explicitly set flag when the last page has been reached
-    activityCache.set(cacheKeyInternalTxsNextPageParams, LAST_PAGE_REACHED);
+    activityCache.set(ckInternalTxsNPP, LAST_PAGE_REACHED);
   }
 };
 
@@ -831,4 +757,102 @@ export const getAmountType = (
 
   // Assume default to be ETH
   return TokenERC.ETH;
+};
+
+/**
+ * Update the necessary caches to build activity history for the given address (one page with one invocation, per cache, as applicable).
+ * @param address - The address for which the caches are to be updated.
+ * @param chainID - Chain identifier for which the caches are to be updated.
+ * @returns boolean - true if all pages have been fetched, false otherwise.
+ */
+export const updateRequiredCache = async (
+  address: string,
+  chainID: number
+): Promise<boolean> => {
+  const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
+
+  const ckInternalTxsNPP = getCacheKey(
+    address,
+    chainID,
+    'internal_transactions_next_params'
+  );
+  const ckTransactionsNPP = getCacheKey(
+    address,
+    chainID,
+    'transactions_next_params'
+  );
+  const ckTokenTransferNPP = getCacheKey(
+    address,
+    chainID,
+    'token_transfers_next_params'
+  );
+
+  const userInternalTxsNPP: CachedBlockscoutNextPageParams = (activityCache.get(
+    ckInternalTxsNPP
+  ) || null) as CachedBlockscoutNextPageParams;
+  const userTxsNPP: CachedBlockscoutNextPageParams = (activityCache.get(
+    ckTransactionsNPP
+  ) || null) as CachedBlockscoutNextPageParams;
+  const userTTxsNPP: CachedBlockscoutNextPageParams = (activityCache.get(
+    ckTokenTransferNPP
+  ) || null) as CachedBlockscoutNextPageParams;
+
+  // No more pages to fetch, return immediately
+  if (
+    userInternalTxsNPP === LAST_PAGE_REACHED &&
+    userTxsNPP === LAST_PAGE_REACHED &&
+    userTTxsNPP === LAST_PAGE_REACHED
+  ) {
+    return true;
+  }
+
+  // No cache exists, initialize cache and return immediately
+  if (
+    userInternalTxsNPP === null ||
+    userTxsNPP === null ||
+    userTTxsNPP === null
+  ) {
+    await Promise.allSettled([
+      updateInternalTransactionsCache(address, chainID),
+      updateTransactionsCache(address, chainID),
+      updateTokenTransactionsCache(address, chainID)
+    ]);
+    return false;
+  }
+
+  // Determine the highest block height among the next page params of all 3 transaction types
+  // and update the cache for that transaction type only to optimize the number of API calls being made
+  // (assuming that the activities are being fetched in descending order of block height)
+  // If any of the next page params is Number.NEGATIVE_INFINITY, it indicates that there are no more pages to fetch
+  const lastBNInternalTxns =
+    (
+      userInternalTxsNPP as unknown as BlockscoutInternalTransactionNextPageParams
+    )?.block_number || Number.NEGATIVE_INFINITY;
+  const lastBNTransactions =
+    (userTxsNPP as unknown as BlockscoutNextPageParams)?.block_number ||
+    Number.NEGATIVE_INFINITY;
+  const lastBNTokenTransferTxns =
+    (userTTxsNPP as unknown as BlockscoutNextPageParams)?.block_number ||
+    Number.NEGATIVE_INFINITY;
+
+  const maxBlockNumber = Math.max(
+    lastBNInternalTxns,
+    lastBNTransactions,
+    lastBNTokenTransferTxns
+  );
+
+  switch (maxBlockNumber) {
+    case lastBNInternalTxns:
+      await updateInternalTransactionsCache(address, chainID);
+      break;
+
+    case lastBNTransactions:
+      await updateTransactionsCache(address, chainID);
+      break;
+
+    case lastBNTokenTransferTxns:
+      await updateTokenTransactionsCache(address, chainID);
+      break;
+  }
+  return false;
 };

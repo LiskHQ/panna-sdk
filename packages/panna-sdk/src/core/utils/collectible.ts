@@ -131,21 +131,20 @@ export const getCollectiblesByAddress = async function (
     limit = DEFAULT_PAGINATION_LIMIT
   } = params;
 
-  const cacheKeyCollectibles = getCacheKey(address, chain.id, 'collectibles');
-  const cacheKeyNextPageParams = getCacheKey(
+  const ckCollectibles = getCacheKey(address, chain.id, 'collectibles');
+  const ckNextPageParams = getCacheKey(
     address,
     chain.id,
     'collectibles_next_params'
   );
 
   const userCollections: BlockscoutAddressNFTCollection[] =
-    (collectibleCache.get(cacheKeyCollectibles) ||
+    (collectibleCache.get(ckCollectibles) ||
       []) as BlockscoutAddressNFTCollection[];
 
   let nextPageParams: BlockscoutNFTNextPageParams | null =
-    (collectibleCache.get(
-      cacheKeyNextPageParams
-    ) as BlockscoutNFTNextPageParams) || null;
+    (collectibleCache.get(ckNextPageParams) as BlockscoutNFTNextPageParams) ||
+    null;
 
   const baseCollectionsRequestUrl = getBaseNFTCollectionsRequestUrl(
     address,
@@ -176,8 +175,8 @@ export const getCollectiblesByAddress = async function (
     userCollections.push(...blockscoutRes.items);
     nextPageParams = blockscoutRes.next_page_params;
 
-    collectibleCache.set(cacheKeyCollectibles, userCollections);
-    collectibleCache.set(cacheKeyNextPageParams, nextPageParams);
+    collectibleCache.set(ckCollectibles, userCollections);
+    collectibleCache.set(ckNextPageParams, nextPageParams);
 
     // Continue the loop only if more pages exist
     // Second condition ensures handling of no existing collections
@@ -185,7 +184,7 @@ export const getCollectiblesByAddress = async function (
       nextPageParams === null &&
       userCollections.length >= blockscoutRes.items.length
     ) {
-      collectibleCache.delete(cacheKeyNextPageParams);
+      collectibleCache.delete(ckNextPageParams);
       break;
     }
   }
