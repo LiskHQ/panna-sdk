@@ -1,4 +1,4 @@
-import { ArrowDownIcon, SendIcon, StarIcon } from 'lucide-react';
+import { ArrowDownIcon, SendIcon, StarIcon, RepeatIcon } from 'lucide-react';
 import {
   Activity,
   ERC1155Amount,
@@ -71,6 +71,12 @@ function renderTransactionIcon(activity: Activity) {
       return (
         <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-purple-300 p-0.75">
           <StarIcon size={10} />
+        </div>
+      );
+    case TransactionActivity.SELF_TRANSFER:
+      return (
+        <div className="text-primary-foreground border-background absolute top-0 left-0 rounded-full border bg-blue-300 p-0.75">
+          <RepeatIcon size={10} />
         </div>
       );
     default:

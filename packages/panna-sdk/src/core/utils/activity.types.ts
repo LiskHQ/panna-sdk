@@ -30,10 +30,11 @@ export interface Activity {
 }
 
 export const TransactionActivity = {
-  UNKNOWN: 'unknown',
+  UNKNOWN: 'Unknown',
   SENT: 'Sent',
   RECEIVED: 'Received',
-  MINTED: 'Minted'
+  MINTED: 'Minted',
+  SELF_TRANSFER: 'Self transfer'
 };
 
 type TransactionActivityType = typeof TransactionActivity;

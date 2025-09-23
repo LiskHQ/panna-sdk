@@ -276,6 +276,11 @@ export const getActivitiesByAddress = async function (
         tx.token_transfers.find((t) => t.type.toLowerCase() === 'token_minting')
       ) {
         activityType = TransactionActivity.MINTED;
+      } else if (
+        tx.from.hash.toLowerCase() === tx.to.hash.toLowerCase() &&
+        tx.from.hash.toLowerCase() === address.toLowerCase()
+      ) {
+        activityType = TransactionActivity.SELF_TRANSFER;
       } else if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
         activityType = TransactionActivity.SENT;
       } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
