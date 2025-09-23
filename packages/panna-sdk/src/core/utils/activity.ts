@@ -8,22 +8,25 @@ import {
   // const
   TokenERC,
   TransactionActivity,
+  InternalTransactionType,
   // type
   type Activity,
   type ActivityMetadata,
   type ActivityType,
+  type CachedBlockscoutNextPageParams,
   type ERC1155Amount,
   type ERC20Amount,
   type ERC721Amount,
   type EtherAmount,
   type GetActivitiesByAddressParams,
   type GetActivitiesByAddressResult,
-  type TokenType,
-  type TransactionAmount,
   type PreProcessedActivity,
-  type CachedBlockscoutNextPageParams
+  type TokenType,
+  type TransactionAmount
 } from './activity.types';
 import {
+  type BlockscoutInternalTransaction,
+  type BlockscoutInternalTransactionsResponse,
   type BlockscoutTokenTransfer,
   type BlockscoutTokenTransfersResponse,
   type BlockscoutTotalERC20,
@@ -71,6 +74,19 @@ export const getBaseTokenTransferRequestUrl = (
 ): string => {
   const BASE_API_URL = getBaseApiUrl(chainID);
   return `${BASE_API_URL}/addresses/${address}/token-transfers`;
+};
+
+/**
+ * Get blockscout internal transactions endpoint.
+ * @param address The address for which to return the internal transactions API endpoint.
+ * @returns Blockscout internal transactions API endpoint for the supplied address.
+ */
+export const getBaseInternalTransactionsRequestUrl = (
+  address: string,
+  chainID: number
+): string => {
+  const BASE_API_URL = getBaseApiUrl(chainID);
+  return `${BASE_API_URL}/addresses/${address}/internal-transactions`;
 };
 
 /*
@@ -179,6 +195,11 @@ export const getActivitiesByAddress = async function (
   } = params;
 
   const cacheKeyActivities = getCacheKey(address, chain.id, 'activities');
+  const cacheKeyInternalTxs = getCacheKey(
+    address,
+    chain.id,
+    'internal_transactions'
+  );
   const cacheKeyTransactions = getCacheKey(address, chain.id, 'transactions');
   const cacheKeyTokenTransferTxs = getCacheKey(
     address,
@@ -189,6 +210,11 @@ export const getActivitiesByAddress = async function (
     address,
     chain.id,
     'activities_next_page_params'
+  );
+  const cacheKeyInternalTxsNextPageParams = getCacheKey(
+    address,
+    chain.id,
+    'internal_transactions_next_params'
   );
   const cacheKeyTransactionsNextPageParams = getCacheKey(
     address,
@@ -212,12 +238,30 @@ export const getActivitiesByAddress = async function (
       break;
     }
 
+    const userInternalTxs = (activityCache.get(cacheKeyInternalTxs) ||
+      []) as BlockscoutInternalTransaction[];
     const userTransactions = (activityCache.get(cacheKeyTransactions) ||
       []) as BlockscoutTransaction[];
     const userTokenTransfers = (activityCache.get(cacheKeyTokenTransferTxs) ||
       []) as BlockscoutTokenTransfer[];
 
-    if (userTransactions.length + userTokenTransfers.length <= offset + limit) {
+    if (
+      userInternalTxs.length +
+        userTransactions.length +
+        userTokenTransfers.length <=
+      offset + limit
+    ) {
+      //TODO: Optimize the below logic to call only one of the update* functions based on the least block height
+      const userInternalTxsNextPageParams: CachedBlockscoutNextPageParams =
+        (activityCache.get(cacheKeyInternalTxsNextPageParams) ||
+          null) as CachedBlockscoutNextPageParams;
+      if (
+        (userInternalTxsNextPageParams as unknown as string) !==
+        LAST_PAGE_REACHED
+      ) {
+        await updateInternalTransactionsCache(address, chain.id);
+      }
+
       const userTxsNextPageParams: CachedBlockscoutNextPageParams =
         (activityCache.get(cacheKeyTransactionsNextPageParams) ||
           null) as CachedBlockscoutNextPageParams;
@@ -233,6 +277,8 @@ export const getActivitiesByAddress = async function (
       }
 
       if (
+        (userInternalTxsNextPageParams as unknown as string) ===
+          LAST_PAGE_REACHED &&
         (userTxsNextPageParams as unknown as string) === LAST_PAGE_REACHED &&
         (userTTxsNextPageParams as unknown as string) === LAST_PAGE_REACHED
       ) {
@@ -243,6 +289,27 @@ export const getActivitiesByAddress = async function (
     }
 
     preProcessedActivities.push(...userTransactions);
+    userInternalTxs.forEach((itx) => {
+      const mockedTx = {
+        block_number: itx.block_number,
+        timestamp: itx.timestamp,
+        from: itx.from,
+        to: itx.to,
+        hash: itx.transaction_hash,
+        value: itx.value,
+        token_transfers: [],
+        transaction_types: [
+          'contract_call',
+          'internal_transaction',
+          'coin_transfer'
+        ],
+        result: itx.success ? 'success' : 'error',
+        status: itx.success ? 'ok' : 'error',
+        internal_tx_type: itx.type
+      } as PreProcessedActivity;
+
+      preProcessedActivities.push(mockedTx);
+    });
     userTokenTransfers.forEach((tt) => {
       const mockedTx = {
         block_number: tt.block_number,
@@ -281,10 +348,16 @@ export const getActivitiesByAddress = async function (
         tx.from.hash.toLowerCase() === address.toLowerCase()
       ) {
         activityType = TransactionActivity.SELF_TRANSFER;
+      } else if (
+        tx.to.hash.toLowerCase() === address.toLowerCase() ||
+        // Also tag ETH received on smart contract wallet via internal transactions
+        // Conditions:: from: address, internal transaction type: delegatecall
+        (tx.from.hash.toLowerCase() === address.toLowerCase() &&
+          tx?.internal_tx_type === InternalTransactionType.DELEGATECALL)
+      ) {
+        activityType = TransactionActivity.RECEIVED;
       } else if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
         activityType = TransactionActivity.SENT;
-      } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
-        activityType = TransactionActivity.RECEIVED;
       }
 
       if (activityType === TransactionActivity.UNKNOWN) {
@@ -424,8 +497,8 @@ export const getActivitiesByAddress = async function (
 
 /**
  * Update the cache for the given address with transactions (one page with one invocation), if exists.
- * @param address - The address for which to update the token transactions cache.
- * @param chainID - Chain identifier for which the token transfers are being cached.
+ * @param address - The address for which to update the transactions cache.
+ * @param chainID - Chain identifier for which the transactions are being cached.
  * @returns void
  * @throws Error if the external API call fails.
  */
@@ -625,6 +698,88 @@ export const updateTokenTransactionsCache = async (
   } else {
     // Explicitly set flag when the last page has been reached
     activityCache.set(cacheKeyTokenTransferNextPageParams, LAST_PAGE_REACHED);
+  }
+};
+
+/**
+ * Update the cache for the given address with internal transactions (one page with one invocation), if exists.
+ * @param address - The address for which to update the internal transactions cache.
+ * @param chainID - Chain identifier for which the internal transactions are being cached.
+ * @returns void
+ * @throws Error if the external API call fails.
+ */
+export const updateInternalTransactionsCache = async (
+  address: string,
+  chainID: number
+): Promise<void> => {
+  // Activity cache
+  const activityCache = newLruMemCache(ACTIVITY_CACHE_ID);
+
+  const cacheKeyInternalTxs = getCacheKey(
+    address,
+    chainID,
+    'internal_transactions'
+  );
+  const cacheKeyInternalTxsNextPageParams = getCacheKey(
+    address,
+    chainID,
+    'internal_transactions_next_params'
+  );
+
+  let nextPageParams: CachedBlockscoutNextPageParams = (activityCache.get(
+    cacheKeyInternalTxsNextPageParams
+  ) || null) as CachedBlockscoutNextPageParams;
+
+  if ((nextPageParams as unknown as string) === LAST_PAGE_REACHED) {
+    return; // No more pages to fetch
+  }
+
+  let userInternalTxs: BlockscoutInternalTransaction[] = (activityCache.get(
+    cacheKeyInternalTxs
+  ) || []) as BlockscoutInternalTransaction[];
+
+  const baseRequestUrl = getBaseInternalTransactionsRequestUrl(
+    address,
+    chainID
+  );
+  const requestUrl = baseRequestUrl.concat(buildQueryString(nextPageParams));
+  const response = await httpUtils.request(requestUrl);
+
+  const errResponse = response as PannaHttpErr;
+  if ('code' in errResponse && 'message' in errResponse) {
+    throw new Error(
+      `Unable to fetch user internal-transactions: ${errResponse.message}`
+    );
+  }
+
+  const blockscoutRes =
+    response as unknown as BlockscoutInternalTransactionsResponse;
+  blockscoutRes.items.forEach((itx) => {
+    // Include only ETH received/sent via internal transactions for smart contract wallets
+    // Received conditions::  value: not "0", from: address, type: delegatecall
+    // Sent conditions::      value: not "0", from: address, type: call
+    if (
+      Number(itx.value) !== 0 &&
+      (itx.from.hash.toLowerCase() === address.toLowerCase() ||
+        itx.to.hash.toLowerCase() === address.toLowerCase()) &&
+      [
+        InternalTransactionType.CALL,
+        InternalTransactionType.DELEGATECALL
+      ].includes(itx.type.toLowerCase())
+    ) {
+      userInternalTxs.push(itx);
+    }
+  });
+  activityCache.set(cacheKeyInternalTxs, userInternalTxs);
+
+  if (blockscoutRes.next_page_params) {
+    activityCache.set(
+      cacheKeyInternalTxsNextPageParams,
+      blockscoutRes.next_page_params
+    );
+  } else {
+    // Explicitly set flag when the last page has been reached
+    activityCache.set(cacheKeyInternalTxsNextPageParams, LAST_PAGE_REACHED);
   }
 };
 
