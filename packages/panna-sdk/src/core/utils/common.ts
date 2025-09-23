@@ -2,10 +2,14 @@ import { lisk, liskSepolia } from '../chains';
 import { BASE_BLOCKSCOUT_URL, BASE_SEPOLIA_BLOCKSCOUT_URL } from './constants';
 
 export const CACHE_KEY_TYPE = {
-  transactions: '',
-  transactions_next_params: 'params',
+  activities: 'act',
+  activities_next_page_params: 'act_params',
+  transactions: 'tx',
+  transactions_next_params: 'tx_params',
   token_transfers: 'tt',
   token_transfers_next_params: 'tt_params',
+  internal_transactions: 'itx',
+  internal_transactions_next_params: 'itx_params',
   collectibles: 'coll',
   collectibles_next_params: 'coll_params'
 };
@@ -59,3 +63,49 @@ export const isValidAddress = function (address: string): boolean {
 export const getBaseApiUrl = (
   chainID: keyof typeof CHAIN_ID_API_URL_MAP
 ): string => CHAIN_ID_API_URL_MAP[chainID];
+
+/**
+ * Returns a query string constructed from the provided parameters.
+ * @param params
+ * @returns
+ */
+export const buildQueryString = (params: unknown): string => {
+  if (
+    params === null ||
+    params === undefined ||
+    Object.keys(params).length === 0
+  ) {
+    return '';
+  }
+
+  const query = Object.entries(params as unknown as Record<string, unknown>)
+    .map(([key, value]) => {
+      if (value === undefined || value === null) {
+        return '';
+      }
+
+      if (Array.isArray(value)) {
+        return value
+          .map(
+            (arrayValue) =>
+              `${encodeURIComponent(key)}=${encodeURIComponent(arrayValue)}`
+          )
+          .join('&');
+      }
+
+      if (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean'
+      ) {
+        return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+      }
+
+      // Ignore other types like objects, functions, etc.
+      return '';
+    })
+    .filter((part) => part.length > 0)
+    .join('&');
+
+  return query ? `?${query}` : '';
+};

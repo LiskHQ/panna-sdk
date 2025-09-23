@@ -198,8 +198,6 @@ describe('HttpStatusCode', () => {
 });
 
 describe('request', () => {
-  const validateStatus = () => true;
-
   it('should return PannaHttpErr response in case of internal Axios error', async () => {
     const axiosErr = new AxiosError(
       'ERR_NETWORK',
@@ -209,15 +207,15 @@ describe('request', () => {
       throw axiosErr;
     });
 
-    expect(
-      request(MOCK_REQUEST_URL, { validateStatus })
-    ).resolves.toStrictEqual(formatAxiosErr(axiosErr.code));
+    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(
+      formatAxiosErr(axiosErr.code)
+    );
     expect(http.requestWithRetries).toHaveBeenCalledTimes(1);
     expect(http.requestWithRetries).toHaveBeenCalledWith(
       MOCK_REQUEST_URL,
       {
         method: 'get',
-        validateStatus
+        validateStatus: expect.any(Function)
       },
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
@@ -230,15 +228,13 @@ describe('request', () => {
     );
     jest.spyOn(http, 'requestWithRetries').mockResolvedValue(mockResponse);
 
-    expect(
-      request(MOCK_REQUEST_URL, { validateStatus })
-    ).resolves.toStrictEqual(mockResponse.data);
+    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(mockResponse.data);
     expect(http.requestWithRetries).toHaveBeenCalledTimes(1);
     expect(http.requestWithRetries).toHaveBeenCalledWith(
       MOCK_REQUEST_URL,
       {
         method: 'get',
-        validateStatus
+        validateStatus: expect.any(Function)
       },
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
@@ -251,15 +247,15 @@ describe('request', () => {
     );
     jest.spyOn(http, 'requestWithRetries').mockResolvedValue(mockResponse);
 
-    expect(
-      request(MOCK_REQUEST_URL, { method: 'put', validateStatus })
-    ).resolves.toStrictEqual(mockResponse.data);
+    expect(request(MOCK_REQUEST_URL, { method: 'put' })).resolves.toStrictEqual(
+      mockResponse.data
+    );
     expect(http.requestWithRetries).toHaveBeenCalledTimes(1);
     expect(http.requestWithRetries).toHaveBeenCalledWith(
       MOCK_REQUEST_URL,
       {
         method: 'put',
-        validateStatus
+        validateStatus: expect.any(Function)
       },
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
@@ -270,15 +266,13 @@ describe('request', () => {
     const mockResponse = fixture_getSampleAxiosResponse(HttpStatusCode.Ok);
     jest.spyOn(http, 'requestWithRetries').mockResolvedValue(mockResponse);
 
-    expect(
-      request(MOCK_REQUEST_URL, { validateStatus })
-    ).resolves.toStrictEqual(mockResponse.data);
+    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(mockResponse.data);
     expect(http.requestWithRetries).toHaveBeenCalledTimes(1);
     expect(http.requestWithRetries).toHaveBeenCalledWith(
       MOCK_REQUEST_URL,
       {
         method: 'get',
-        validateStatus
+        validateStatus: expect.any(Function)
       },
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
@@ -290,17 +284,67 @@ describe('request', () => {
     jest.spyOn(http, 'requestWithRetries').mockResolvedValue(mockResponse);
 
     expect(
-      request(MOCK_REQUEST_URL, { method: 'post', validateStatus })
+      request(MOCK_REQUEST_URL, { method: 'post' })
     ).resolves.toStrictEqual(mockResponse.data);
     expect(http.requestWithRetries).toHaveBeenCalledTimes(1);
     expect(http.requestWithRetries).toHaveBeenCalledWith(
       MOCK_REQUEST_URL,
       {
         method: 'post',
-        validateStatus
+        validateStatus: expect.any(Function)
       },
       DEFAULT_RETRIES,
       DEFAULT_RETRY_DELAY_MS
     );
+  });
+
+  xit('should return from cache if exists', async () => {
+    const mockResponse = fixture_getSampleAxiosResponse(HttpStatusCode.Ok);
+    const requestSpy = jest
+      .spyOn(http, 'requestWithRetries')
+      .mockResolvedValue(mockResponse);
+
+    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(mockResponse.data);
+    expect(requestSpy).toHaveBeenCalledTimes(1);
+    expect(requestSpy).toHaveBeenCalledWith(
+      MOCK_REQUEST_URL,
+      {
+        method: 'get',
+        validateStatus: expect.any(Function)
+      },
+      DEFAULT_RETRIES,
+      DEFAULT_RETRY_DELAY_MS
+    );
+
+    // 2nd call - should return from cache
+    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(mockResponse.data);
+    expect(requestSpy).toHaveBeenCalledTimes(1); // No additional call made
+  });
+
+  it('should not cache non-GET API calls', async () => {
+    const mockResponse = fixture_getSampleAxiosResponse(HttpStatusCode.Ok);
+    const requestSpy = jest
+      .spyOn(http, 'requestWithRetries')
+      .mockResolvedValue(mockResponse);
+
+    expect(
+      request(MOCK_REQUEST_URL, { method: 'post' })
+    ).resolves.toStrictEqual(mockResponse.data);
+    expect(requestSpy).toHaveBeenCalledTimes(1);
+    expect(requestSpy).toHaveBeenCalledWith(
+      MOCK_REQUEST_URL,
+      {
+        method: 'post',
+        validateStatus: expect.any(Function)
+      },
+      DEFAULT_RETRIES,
+      DEFAULT_RETRY_DELAY_MS
+    );
+
+    // 2nd call - should NOT return from cache
+    expect(
+      request(MOCK_REQUEST_URL, { method: 'post' })
+    ).resolves.toStrictEqual(mockResponse.data);
+    expect(requestSpy).toHaveBeenCalledTimes(2); // Additional call made
   });
 });
