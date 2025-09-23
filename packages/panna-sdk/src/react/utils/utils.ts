@@ -14,15 +14,6 @@ export function getSupportedTokens(testingStatus?: boolean | undefined) {
 }
 
 /**
- * Get the chain settings for a given chain.
- * @param testingStatus - The testing status
- * @returns The chain settings for the given chain
- */
-export function getChain(testingStatus?: boolean | undefined) {
-  return testingStatus ? liskSepolia : lisk;
-}
-
-/**
  * Get the chain settings based on the current environment.
  * In production (CHAIN_ID=1135), uses lisk.
  * In development/staging (CHAIN_ID=4202), uses liskSepolia.
@@ -32,15 +23,6 @@ export function getChain(testingStatus?: boolean | undefined) {
 export function getEnvironmentChain(chainId?: string) {
   const isDevelopment = chainId === String(liskSepolia.id);
   return isDevelopment ? liskSepolia : lisk;
-}
-
-/**
- * Get the account abstraction settings for a given chain.
- * @param testingStatus - The testing status
- * @returns The account abstraction settings for the given chain
- */
-export function getAAChain(testingStatus?: boolean | undefined) {
-  return getChain(testingStatus);
 }
 
 /**

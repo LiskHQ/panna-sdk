@@ -3,8 +3,6 @@ import { TokenBalance } from '@/mocks/token-balances';
 import { getCountryByCode } from './countries';
 import {
   detectUserCountry,
-  getAAChain,
-  getChain,
   getEnvironmentChain,
   getSupportedTokens,
   renderCryptoAmount,
@@ -50,23 +48,6 @@ describe('Utils Functions', () => {
     });
   });
 
-  describe('getChain', () => {
-    it('should return lisk chain when testingStatus is false', () => {
-      const result = getChain(false);
-      expect(result).toEqual({ id: 1135, name: 'Lisk' });
-    });
-
-    it('should return lisk sepolia chain when testingStatus is true', () => {
-      const result = getChain(true);
-      expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
-    });
-
-    it('should return lisk chain when testingStatus is undefined', () => {
-      const result = getChain();
-      expect(result).toEqual({ id: 1135, name: 'Lisk' });
-    });
-  });
-
   describe('getEnvironmentChain', () => {
     const originalEnv = process.env.NODE_ENV;
 
@@ -96,23 +77,6 @@ describe('Utils Functions', () => {
       process.env.NODE_ENV = 'test';
       const result = getEnvironmentChain();
       expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
-    });
-  });
-
-  describe('getAAChain', () => {
-    it('should return same result as getChain for false', () => {
-      const result = getAAChain(false);
-      expect(result).toEqual({ id: 1135, name: 'Lisk' });
-    });
-
-    it('should return same result as getChain for true', () => {
-      const result = getAAChain(true);
-      expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
-    });
-
-    it('should return same result as getChain for undefined', () => {
-      const result = getAAChain();
-      expect(result).toEqual({ id: 1135, name: 'Lisk' });
     });
   });
 });
