@@ -1,12 +1,12 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { accountBalancesInFiat, isValidAddress } from 'src/core';
+import { accountBalancesInFiat, isValidAddress, liskSepolia } from 'src/core';
 import { TokenBalance } from '@/mocks/token-balances';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import {
-  DEFAULT_STALE_TIME,
+  createDefaultRetryFn,
   DEFAULT_REFETCH_INTERVAL,
   DEFAULT_RETRY_DELAY,
-  createDefaultRetryFn
+  DEFAULT_STALE_TIME
 } from './constants';
 import { usePanna } from './use-panna';
 
@@ -23,7 +23,7 @@ export function useTokenBalances(
   { address }: UseTokenBalancesParams,
   options?: Omit<UseQueryOptions<TokenBalance[]>, 'queryKey' | 'queryFn'>
 ) {
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
   const hasValidAddress = isValidAddress(address);
 
   return useQuery({
@@ -33,9 +33,9 @@ export function useTokenBalances(
         throw new Error('Invalid query state');
       }
 
-      const chain = getEnvironmentChain();
+      const chain = getEnvironmentChain(chainId);
       const supportedTokens = getSupportedTokens(
-        process.env.NODE_ENV === 'development'
+        chainId === String(liskSepolia.id)
       );
 
       try {

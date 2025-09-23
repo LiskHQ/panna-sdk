@@ -13,10 +13,10 @@ import {
  * @example
  * ```tsx
  * function MyComponent() {
- *   const { client, partnerId } = usePanna();
+ *   const { client, partnerId, chainId } = usePanna();
  *
  *   // client is guaranteed to be available here
- *   return <div>Connected with client ID: {client.clientId} and partner ID: {partnerId}</div>;
+ *   return <div>Connected with client ID: {client.clientId}, partner ID: {partnerId}, and chain ID: {chainId}</div>;
  * }
  * ```
  */

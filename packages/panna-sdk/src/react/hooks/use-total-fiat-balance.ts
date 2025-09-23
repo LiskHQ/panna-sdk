@@ -2,7 +2,8 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import {
   accountBalancesInFiat,
   DEFAULT_CURRENCY,
-  isValidAddress
+  isValidAddress,
+  liskSepolia
 } from 'src/core';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import type { FiatCurrency } from '../../core/utils/types';
@@ -20,7 +21,7 @@ export function useTotalFiatBalance(
   { address, currency = DEFAULT_CURRENCY }: UseTotalFiatBalanceParams,
   options?: Omit<UseQueryOptions<number>, 'queryKey' | 'queryFn'>
 ) {
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
   const hasValidAddress = isValidAddress(address);
 
   return useQuery({
@@ -32,7 +33,7 @@ export function useTotalFiatBalance(
 
       const chain = getEnvironmentChain();
       const supportedTokens = getSupportedTokens(
-        process.env.NODE_ENV === 'development'
+        chainId === String(liskSepolia.id)
       );
 
       const chainTokens = supportedTokens[chain.id] ?? [];

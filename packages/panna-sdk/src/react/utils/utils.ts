@@ -24,14 +24,14 @@ export function getChain(testingStatus?: boolean | undefined) {
 
 /**
  * Get the chain settings based on the current environment.
- * In production (NODE_ENV=production), uses lisk.
- * In development/staging (NODE_ENV=development), uses liskSepolia.
+ * In production (CHAIN_ID=1135), uses lisk.
+ * In development/staging (CHAIN_ID=4202), uses liskSepolia.
+ * @param chainId - The chain ID from environment variable
  * @returns The chain settings for the current environment
  */
-export function getEnvironmentChain() {
-  const isProduction =
-    typeof process !== 'undefined' && process.env?.NODE_ENV === 'production';
-  return isProduction ? lisk : liskSepolia;
+export function getEnvironmentChain(chainId?: string) {
+  const isDevelopment = chainId === String(liskSepolia.id);
+  return isDevelopment ? liskSepolia : lisk;
 }
 
 /**
