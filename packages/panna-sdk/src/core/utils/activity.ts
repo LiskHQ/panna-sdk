@@ -270,22 +270,23 @@ export const getActivitiesByAddress = async function (
 
       let activityType: ActivityType = TransactionActivity.UNKNOWN;
 
-      if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
-        activityType = TransactionActivity.SENT;
-      } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
-        activityType = TransactionActivity.RECEIVED;
-      } else if (
-        tx.to.is_contract &&
+      if (
+        tx.from.hash === '0x0000000000000000000000000000000000000000' &&
+        tx.to.hash.toLowerCase() === address.toLowerCase() &&
         tx.token_transfers.find((t) => t.type.toLowerCase() === 'token_minting')
       ) {
         activityType = TransactionActivity.MINTED;
+      } else if (tx.from.hash.toLowerCase() === address.toLowerCase()) {
+        activityType = TransactionActivity.SENT;
+      } else if (tx.to.hash.toLowerCase() === address.toLowerCase()) {
+        activityType = TransactionActivity.RECEIVED;
       }
 
       if (activityType === TransactionActivity.UNKNOWN) {
         console.warn(
           `Unable to determine transaction activity type for tx: ${transactionID}, skipping...`
         );
-        return null; // Skip unknown transactions gracefully
+        return null; // Skip unidentified transactions gracefully
       }
 
       let amount: TransactionAmount;
