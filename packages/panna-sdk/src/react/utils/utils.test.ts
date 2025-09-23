@@ -61,7 +61,6 @@ describe('Utils Functions', () => {
     });
 
     it('should return lisk sepolia chain when lisk Sepolia ID is passed', () => {
-      process.env.NODE_ENV = 'development';
       const result = getEnvironmentChain('4202');
       expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
     });
