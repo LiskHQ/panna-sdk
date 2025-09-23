@@ -17,13 +17,19 @@ jest.mock('./countries', () => ({
 // Mock the core imports
 jest.mock('../../core', () => ({
   lisk: { id: 1135, name: 'Lisk' },
-  liskSepolia: { id: 4202, name: 'Lisk Sepolia' }
+  liskSepolia: { id: 4202, name: 'Lisk Sepolia' },
+  chains: {
+    1135: { id: 1135, name: 'Lisk' },
+    4202: { id: 4202, name: 'Lisk Sepolia' }
+  }
 }));
 
 // Mock the consts imports
 jest.mock('../consts', () => ({
-  liskTokenConfig: [{ symbol: 'LSK', name: 'Lisk' }],
-  liskSepoliaTokenConfig: [{ symbol: 'LSK', name: 'Lisk Sepolia' }]
+  tokenConfig: {
+    1135: [{ symbol: 'LSK', name: 'Lisk' }],
+    4202: [{ symbol: 'LSK', name: 'Lisk Sepolia' }]
+  }
 }));
 
 const mockGetCountryByCode = getCountryByCode as jest.MockedFunction<
@@ -32,51 +38,37 @@ const mockGetCountryByCode = getCountryByCode as jest.MockedFunction<
 
 describe('Utils Functions', () => {
   describe('getSupportedTokens', () => {
-    it('should return lisk token config when testingStatus is false', () => {
-      const result = getSupportedTokens(false);
+    it('should return lisk token config when lisk ID is passed', () => {
+      const result = getSupportedTokens('1135');
       expect(result).toEqual([{ symbol: 'LSK', name: 'Lisk' }]);
     });
 
-    it('should return lisk sepolia token config when testingStatus is true', () => {
-      const result = getSupportedTokens(true);
+    it('should return lisk sepolia token config when lisk Sepolia ID is passed', () => {
+      const result = getSupportedTokens('4202');
       expect(result).toEqual([{ symbol: 'LSK', name: 'Lisk Sepolia' }]);
     });
 
-    it('should return lisk token config when testingStatus is undefined', () => {
+    it('should return lisk token config when no chain ID is provided', () => {
       const result = getSupportedTokens();
       expect(result).toEqual([{ symbol: 'LSK', name: 'Lisk' }]);
     });
   });
 
   describe('getEnvironmentChain', () => {
-    const originalEnv = process.env.NODE_ENV;
-
-    afterEach(() => {
-      process.env.NODE_ENV = originalEnv;
-    });
-
-    it('should return lisk chain in production environment', () => {
-      process.env.NODE_ENV = 'production';
-      const result = getEnvironmentChain();
+    it('should return lisk chain when lisk Chain ID is passed', () => {
+      const result = getEnvironmentChain('1135');
       expect(result).toEqual({ id: 1135, name: 'Lisk' });
     });
 
-    it('should return lisk sepolia chain in development environment', () => {
+    it('should return lisk sepolia chain when lisk Sepolia ID is passed', () => {
       process.env.NODE_ENV = 'development';
-      const result = getEnvironmentChain();
+      const result = getEnvironmentChain('4202');
       expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
     });
 
-    it('should return lisk sepolia chain when NODE_ENV is not set', () => {
-      delete process.env.NODE_ENV;
+    it('should return lisk chain when chain ID is not set', () => {
       const result = getEnvironmentChain();
-      expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
-    });
-
-    it('should return lisk sepolia chain in test environment', () => {
-      process.env.NODE_ENV = 'test';
-      const result = getEnvironmentChain();
-      expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
+      expect(result).toEqual({ id: 1135, name: 'Lisk' });
     });
   });
 });

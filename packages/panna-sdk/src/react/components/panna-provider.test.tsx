@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React, { useContext } from 'react';
 import { createPannaClient, type PannaClient } from '../../core';
-import { PannaProvider, PannaClientContext } from './panna-provider';
+import { PannaClientContext, PannaProvider } from './panna-provider';
 
 // Mock @tanstack/react-query
 jest.mock('@tanstack/react-query', () => ({
@@ -31,7 +31,8 @@ jest.mock('./account-event-provider', () => ({
 
 // Mock the createPannaClient function
 jest.mock('../../core', () => ({
-  createPannaClient: jest.fn()
+  createPannaClient: jest.fn(),
+  lisk: { id: 1135, name: 'Lisk' }
 }));
 
 const mockCreatePannaClient = createPannaClient as jest.MockedFunction<

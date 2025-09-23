@@ -21,22 +21,20 @@ jest.mock('src/core', () => {
 
 jest.mock('@/utils', () => ({
   getEnvironmentChain: jest.fn(() => ({ id: 123 })),
-  getSupportedTokens: jest.fn(() => ({
-    123: [
-      {
-        address: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-        symbol: 'AAA',
-        name: 'Alpha',
-        icon: 'icon-alpha'
-      },
-      {
-        address: '0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
-        symbol: 'BBB',
-        name: 'Beta'
-        // no icon to test fallback
-      }
-    ]
-  }))
+  getSupportedTokens: jest.fn(() => [
+    {
+      address: '0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+      symbol: 'AAA',
+      name: 'Alpha',
+      icon: 'icon-alpha'
+    },
+    {
+      address: '0xBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+      symbol: 'BBB',
+      name: 'Beta'
+      // no icon to test fallback
+    }
+  ])
 }));
 
 const mockedAccountBalancesInFiat =
