@@ -173,6 +173,99 @@ describe('PannaProvider', () => {
         'test-partner'
       );
     });
+
+    it('should provide default chainId when none is specified', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      render(
+        <PannaProvider clientId="test-client-id">
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      // The default chainId should be lisk.id (mocked as 1135)
+      const contextValue = JSON.parse(
+        screen.getByTestId('client-value').textContent || '{}'
+      );
+      expect(contextValue.chainId).toBe('1135');
+    });
+
+    it('should provide custom chainId when specified', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      render(
+        <PannaProvider clientId="test-client-id" chainId="9999">
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      const contextValue = JSON.parse(
+        screen.getByTestId('client-value').textContent || '{}'
+      );
+      expect(contextValue.chainId).toBe('9999');
+    });
+
+    it('should update chainId when prop changes', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      const { rerender } = render(
+        <PannaProvider clientId="test-client-id" chainId="1234">
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      let contextValue = JSON.parse(
+        screen.getByTestId('client-value').textContent || '{}'
+      );
+      expect(contextValue.chainId).toBe('1234');
+
+      rerender(
+        <PannaProvider clientId="test-client-id" chainId="5678">
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      contextValue = JSON.parse(
+        screen.getByTestId('client-value').textContent || '{}'
+      );
+      expect(contextValue.chainId).toBe('5678');
+    });
+
+    it('should fallback to default chainId if chainId is undefined', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      render(
+        <PannaProvider clientId="test-client-id" chainId={undefined}>
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      const contextValue = JSON.parse(
+        screen.getByTestId('client-value').textContent || '{}'
+      );
+      expect(contextValue.chainId).toBe('1135');
+    });
+
+    it('should fallback to default chainId if chainId is null', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      render(
+        // @ts-expect-error: testing null chainId
+        <PannaProvider clientId="test-client-id" chainId={null}>
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      const contextValue = JSON.parse(
+        screen.getByTestId('client-value').textContent || '{}'
+      );
+      expect(contextValue.chainId).toBe('1135');
+    });
   });
 
   describe('client memoization', () => {
