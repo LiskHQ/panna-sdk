@@ -48,7 +48,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       code: ''
     }
   });
-  const { client, partnerId } = usePanna();
+  const { client, partnerId, chainId } = usePanna();
   const [resendTimer, resetResendTimer] = useCountdown(45);
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
@@ -57,7 +57,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     client,
     setWalletAsActive: true,
     accountAbstraction: {
-      chain: getEnvironmentChain(),
+      chain: getEnvironmentChain(chainId),
       sponsorGas: true // enable sponsored transactions
     }
   });

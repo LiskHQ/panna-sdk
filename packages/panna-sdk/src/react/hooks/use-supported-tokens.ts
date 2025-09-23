@@ -1,6 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { liskSepolia } from 'src/core';
-import { getEnvironmentChain, getSupportedTokens } from '@/utils';
+import { getSupportedTokens } from '@/utils';
 import {
   createDefaultRetryFn,
   DEFAULT_REFETCH_INTERVAL,
@@ -33,14 +32,9 @@ export function useSupportedTokens(
       }
 
       try {
-        const chain = getEnvironmentChain();
-        const supportedTokens = getSupportedTokens(
-          chainId === String(liskSepolia.id)
-        );
+        const supportedTokens = getSupportedTokens(chainId);
 
-        const chainTokens = supportedTokens[chain.id] ?? [];
-
-        return chainTokens.map((token) => ({
+        return supportedTokens.map((token) => ({
           address: token.address,
           symbol: token.symbol || '',
           name: token.name || '',

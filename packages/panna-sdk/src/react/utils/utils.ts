@@ -1,16 +1,17 @@
 import { formatEther, formatUnits } from 'viem';
 import { TokenBalance } from '@/mocks/token-balances';
-import { lisk, liskSepolia } from '../../core';
-import { liskSepoliaTokenConfig, liskTokenConfig } from '../consts';
+import { chains, lisk } from '../../core';
+import { tokenConfig } from '../consts';
 import { getCountryByCode } from './countries';
 
 /**
  * Get the supported tokens for a given chain.
- * @param testingStatus - The testing status
+ * @param chainId - The chain ID from environment variable
  * @returns The supported tokens for the given chain
  */
-export function getSupportedTokens(testingStatus?: boolean | undefined) {
-  return testingStatus ? liskSepoliaTokenConfig : liskTokenConfig;
+export function getSupportedTokens(chainId?: string) {
+  const envChain = getEnvironmentChain(chainId);
+  return tokenConfig[envChain.id] ?? [];
 }
 
 /**
@@ -21,8 +22,7 @@ export function getSupportedTokens(testingStatus?: boolean | undefined) {
  * @returns The chain settings for the current environment
  */
 export function getEnvironmentChain(chainId?: string) {
-  const isDevelopment = chainId === String(liskSepolia.id);
-  return isDevelopment ? liskSepolia : lisk;
+  return chainId ? chains[Number(chainId)] : lisk;
 }
 
 /**

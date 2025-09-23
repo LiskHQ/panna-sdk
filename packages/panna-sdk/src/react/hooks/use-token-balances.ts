@@ -1,5 +1,5 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { accountBalancesInFiat, isValidAddress, liskSepolia } from 'src/core';
+import { accountBalancesInFiat, isValidAddress } from 'src/core';
 import { TokenBalance } from '@/mocks/token-balances';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import {
@@ -34,14 +34,10 @@ export function useTokenBalances(
       }
 
       const chain = getEnvironmentChain(chainId);
-      const supportedTokens = getSupportedTokens(
-        chainId === String(liskSepolia.id)
-      );
+      const supportedTokens = getSupportedTokens(chainId);
 
       try {
-        const chainTokens = supportedTokens[chain.id] ?? [];
-
-        const tokenAddresses = chainTokens.map((t) => t.address);
+        const tokenAddresses = supportedTokens.map((t) => t.address);
 
         const { tokenBalances } = await accountBalancesInFiat({
           address,
@@ -50,8 +46,8 @@ export function useTokenBalances(
           tokens: tokenAddresses
         });
 
-        const fallbackIcon = chainTokens[0]?.icon ?? '';
-        const symbolToIcon = chainTokens.reduce<Record<string, string>>(
+        const fallbackIcon = supportedTokens[0]?.icon ?? '';
+        const symbolToIcon = supportedTokens.reduce<Record<string, string>>(
           (acc, t) => {
             if (t.symbol) acc[t.symbol] = t.icon ?? fallbackIcon;
             return acc;

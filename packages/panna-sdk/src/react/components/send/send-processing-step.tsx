@@ -34,7 +34,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
   // @Todo: Possibly create hook for this logic
   useEffect(() => {
     let transaction: PrepareTransactionResult | PrepareContractCallResult;
-    const chain = getEnvironmentChain();
+    const chain = getEnvironmentChain(chainId);
     const currentTokenConfig = tokenConfig[chain.id];
     if (tokenData.symbol === 'ETH') {
       transaction = prepareTransaction({

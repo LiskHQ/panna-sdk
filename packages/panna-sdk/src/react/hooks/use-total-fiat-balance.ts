@@ -2,8 +2,7 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import {
   accountBalancesInFiat,
   DEFAULT_CURRENCY,
-  isValidAddress,
-  liskSepolia
+  isValidAddress
 } from 'src/core';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import type { FiatCurrency } from '../../core/utils/types';
@@ -31,13 +30,10 @@ export function useTotalFiatBalance(
         throw new Error('Invalid query state');
       }
 
-      const chain = getEnvironmentChain();
-      const supportedTokens = getSupportedTokens(
-        chainId === String(liskSepolia.id)
-      );
+      const chain = getEnvironmentChain(chainId);
+      const supportedTokens = getSupportedTokens(chainId);
 
-      const chainTokens = supportedTokens[chain.id] ?? [];
-      const tokenAddresses = chainTokens.map((t) => t.address);
+      const tokenAddresses = supportedTokens.map((t) => t.address);
 
       const { totalValue } = await accountBalancesInFiat({
         address,

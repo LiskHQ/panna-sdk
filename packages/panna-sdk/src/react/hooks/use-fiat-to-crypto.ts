@@ -5,9 +5,9 @@ import { getTokenFiatPrices } from '../../core/onramp';
 import type { FiatCurrency } from '../../core/utils/types';
 import { getEnvironmentChain } from '../utils';
 import {
-  DEFAULT_STALE_TIME,
   DEFAULT_REFETCH_INTERVAL,
   DEFAULT_RETRY_DELAY,
+  DEFAULT_STALE_TIME,
   createDefaultRetryFn
 } from './constants';
 import { usePanna } from './use-panna';
@@ -40,7 +40,7 @@ export function useFiatToCrypto(
   }: UseFiatToCryptoParams,
   options?: Omit<UseQueryOptions<FiatToCryptoResult>, 'queryKey' | 'queryFn'>
 ) {
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
   const hasValidAmount = fiatAmount > 0;
 
   return useQuery({
@@ -64,7 +64,7 @@ export function useFiatToCrypto(
           client
         });
 
-        const currentChain = getEnvironmentChain();
+        const currentChain = getEnvironmentChain(chainId);
         const isLiskSepolia = currentChain.id === liskSepolia.id;
 
         const tokenPrice = tokenPrices.find((token) => {
