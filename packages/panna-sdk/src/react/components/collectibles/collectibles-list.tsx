@@ -118,7 +118,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           return null;
         }
 
-        // Use token.xyz and fallback to token instance
+        // @TODO: Use token.xyz and fallback to token instance
         const firstInstance = item.instances[0];
 
         return (
