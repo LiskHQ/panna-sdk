@@ -22,7 +22,8 @@ export function getSupportedTokens(chainId?: string) {
  * @returns The chain settings for the current environment
  */
 export function getEnvironmentChain(chainId?: string) {
-  return chainId ? chains[Number(chainId)] : lisk;
+  const chain = chainId ? chains[Number(chainId)] : undefined;
+  return chain ?? lisk;
 }
 
 /**
