@@ -25,7 +25,7 @@ import { LAST_AUTH_PROVIDER } from '@/consts';
 import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
 import { generateSiwePayload, siweLogin } from '../../../core/auth';
-import { getEnvironmentChain } from '../../utils';
+import { formatSiweMessage, getEnvironmentChain } from '../../utils';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 
@@ -125,8 +125,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
     }
   }
 
-  // Helper function to perform SIWE authentication after wallet connection
-  const performSiweAuth = async (wallet: {
+  const handleSiweAuth = async (wallet: {
     getAccount: () => Account | undefined;
   }) => {
     try {
@@ -139,19 +138,21 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
         return false;
       }
 
-      // Generate SIWE challenge directly using the account address
       const payload = await generateSiwePayload({
         address: account.address
       });
 
-      // Sign the payload with the connected wallet
-      const { signLoginPayload } = await import('thirdweb/auth');
-      const signedPayload = await signLoginPayload({
-        account,
-        payload
+      const siweMessage = formatSiweMessage(payload);
+
+      const signature = await account.signMessage({
+        message: siweMessage
       });
 
-      // Verify with Panna API and get JWT token directly
+      const signedPayload = {
+        payload,
+        signature
+      };
+
       const success = await siweLogin({
         payload: signedPayload.payload,
         signature: signedPayload.signature,
@@ -207,7 +208,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
           }
 
           // Automatically perform SIWE authentication in the background
-          await performSiweAuth(wallet);
+          await handleSiweAuth(wallet);
 
           onClose?.();
         }

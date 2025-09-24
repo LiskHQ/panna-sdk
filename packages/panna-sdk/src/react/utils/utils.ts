@@ -1,6 +1,7 @@
 import { formatEther, formatUnits } from 'viem';
 import { TokenBalance } from '@/mocks/token-balances';
 import { chains, lisk } from '../../core';
+import type { LoginPayload } from '../../core/utils/types';
 import { tokenConfig } from '../consts';
 import { getCountryByCode } from './countries';
 
@@ -147,3 +148,61 @@ export const renderCryptoAmount = (tokenInfo: TokenBalance, amount: string) => {
     return '0.000000';
   }
 };
+
+/**
+ * Format a SIWE login payload into a standard EIP-4361 message string
+ *
+ * @param payload - The SIWE login payload
+ * @returns The formatted SIWE message string
+ *
+ * @example
+ * ```ts
+ * const message = formatSiweMessage(payload);
+ * const signature = await account.signMessage({ message });
+ * ```
+ */
+export function formatSiweMessage(payload: LoginPayload): string {
+  const {
+    domain,
+    address,
+    statement,
+    uri,
+    version,
+    chain_id,
+    nonce,
+    issued_at,
+    expiration_time,
+    invalid_before,
+    resources
+  } = payload;
+
+  let message = `${domain} wants you to sign in with your Ethereum account:\n`;
+  message += `${address}\n\n`;
+
+  if (statement) {
+    message += `${statement}\n\n`;
+  }
+
+  message += `URI: ${uri}\n`;
+  message += `Version: ${version}\n`;
+  message += `Chain ID: ${chain_id}\n`;
+  message += `Nonce: ${nonce}\n`;
+  message += `Issued At: ${issued_at}\n`;
+
+  if (expiration_time) {
+    message += `Expiration Time: ${expiration_time}\n`;
+  }
+
+  if (invalid_before) {
+    message += `Not Before: ${invalid_before}\n`;
+  }
+
+  if (resources && resources.length > 0) {
+    message += `Resources:\n`;
+    resources.forEach((resource: string) => {
+      message += `- ${resource}\n`;
+    });
+  }
+
+  return message;
+}
