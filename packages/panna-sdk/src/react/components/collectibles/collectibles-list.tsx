@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import { ImageType, TokenInstance } from 'src/core';
+import { ImageType, StringValues, Token, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
 import { DefaultNFTIcon } from '../icons/default-nft-icon';
@@ -21,9 +21,17 @@ import { CustomMediaRenderer } from '../ui/custom-media-renderer';
 import { Skeleton } from '../ui/skeleton';
 import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
+import { SendCollectibleForm } from './send-collectible-form';
 
 const DEFAULT_LIMIT = 5;
 const DEFAULT_OFFSET = 0;
+
+enum CollectibleViewEnum {
+  Main = 'main',
+  Details = 'details'
+}
+
+type CollectibleView = `${StringValues<typeof CollectibleViewEnum>}`;
 
 type CollectiblesListProps = {
   className?: string;
@@ -32,6 +40,12 @@ type CollectiblesListProps = {
 export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
   const { chainId } = usePanna();
+  const [activeView, setActiveView] = useState<CollectibleView>(
+    CollectibleViewEnum.Main
+  );
+  const [selectedCollectible, setSelectedCollectible] =
+    useState<TokenInstance | null>(null);
+  const [selectedToken, setSelectedToken] = useState<Token | null>(null);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: DEFAULT_OFFSET,
     pageSize: DEFAULT_LIMIT
@@ -110,53 +124,76 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
-  return (
-    <section>
-      {table.getRowModel().rows.map((row, index) => {
-        const item = row.original;
-        if (!item.instances || item.instances.length === 0) {
-          return null;
-        }
-
-        // @TODO: Use token.xyz and fallback to token instance
-        const firstInstance = item.instances[0];
-
+  const renderContent = (activeView: CollectibleView) => {
+    switch (activeView) {
+      case CollectibleViewEnum.Main:
         return (
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full"
-            defaultValue={`item-${firstInstance.id}-${index}`}
-            key={`item-${item.token.symbol}-${index}`}
-          >
-            <AccordionItem value={`item-${firstInstance.id}-${index}`}>
-              <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <CollectibleLogo instance={firstInstance} />
-                  <div className="flex items-center gap-1">
-                    <Typography variant="small">{item.token.name}</Typography>
-                    <Typography variant="muted">
-                      ({item.numInstancesOwned})
-                    </Typography>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="grid grid-cols-2 gap-4">
-                {item.instances.map((instance, instanceIndex) => (
-                  <Card key={instanceIndex} className="p-0">
-                    <CardContent className="p-0">
-                      <CollectibleImageRenderer instance={instance} />
-                    </CardContent>
-                  </Card>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+          <>
+            {table.getRowModel().rows.map((row, index) => {
+              const item = row.original;
+              if (!item.instances || item.instances.length === 0) {
+                return null;
+              }
+
+              // @TODO: Use token.xyz and fallback to token instance
+              const firstInstance = item.instances[0];
+
+              return (
+                <Accordion
+                  type="single"
+                  collapsible
+                  className="w-full"
+                  defaultValue={`item-${firstInstance.id}-${index}`}
+                  key={`item-${item.token.symbol}-${index}`}
+                >
+                  <AccordionItem value={`item-${firstInstance.id}-${index}`}>
+                    <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <CollectibleLogo instance={firstInstance} />
+                        <div className="flex items-center gap-1">
+                          <Typography variant="small">
+                            {item.token.name}
+                          </Typography>
+                          <Typography variant="muted">
+                            ({item.numInstancesOwned})
+                          </Typography>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="grid grid-cols-2 gap-4">
+                      {item.instances.map((instance, instanceIndex) => (
+                        <Card key={instanceIndex} className="p-0">
+                          <CardContent className="p-0">
+                            <CollectibleImageRenderer
+                              instance={instance}
+                              token={item.token}
+                              setActiveView={setActiveView}
+                              setSelectedCollectible={setSelectedCollectible}
+                              setSelectedToken={setSelectedToken}
+                            />
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              );
+            })}
+            <TablePagination table={table} isFetching={isFetching} />
+          </>
         );
-      })}
-      <TablePagination table={table} isFetching={isFetching} />
-    </section>
-  );
+      case CollectibleViewEnum.Details:
+        return (
+          <SendCollectibleForm
+            collectible={selectedCollectible!}
+            token={selectedToken!}
+            onClose={() => setActiveView(CollectibleViewEnum.Main)}
+          />
+        );
+    }
+  };
+
+  return <section>{renderContent(activeView)}</section>;
 }
 
 function CollectiblesListLoading() {
@@ -210,7 +247,35 @@ function CollectibleLogo({ instance }: { instance: TokenInstance }) {
   );
 }
 
-function CollectibleImageRenderer({ instance }: { instance: TokenInstance }) {
+type CollectibleImageRendererProps = {
+  instance: TokenInstance;
+  token: Token;
+  setActiveView: (view: CollectibleView) => void;
+  setSelectedCollectible: (collectible: TokenInstance) => void;
+  setSelectedToken: (token: Token) => void;
+};
+
+function CollectibleImageRenderer({
+  instance,
+  token,
+  setActiveView,
+  setSelectedCollectible,
+  setSelectedToken
+}: CollectibleImageRendererProps) {
+  const handleClick = () => {
+    setSelectedCollectible(instance);
+    setSelectedToken(token);
+    setActiveView(CollectibleViewEnum.Details);
+  };
+
+  return (
+    <div onClick={handleClick}>
+      <ImageRenderer instance={instance} />
+    </div>
+  );
+}
+
+export function ImageRenderer({ instance }: { instance: TokenInstance }) {
   return (
     <>
       {instance.imageType === ImageType.URL && (
