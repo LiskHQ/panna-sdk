@@ -1,4 +1,10 @@
-import { type AccountEventPayload } from './types';
+import {
+  type AccountEventPayload,
+  type AuthChallengeRequest,
+  type AuthChallengeReply,
+  type AuthVerifyRequest,
+  type AuthVerifyReply
+} from './types';
 
 export type PannaApiConfig = {
   baseUrl?: string;
@@ -77,6 +83,140 @@ export class PannaApiService {
       return response;
     } catch (error) {
       console.error('Failed to send account event to Panna API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get authentication challenge for SIWE
+   * @param request - The auth challenge request containing wallet address
+   * @returns Promise resolving to the auth challenge response
+   */
+  public async getAuthChallenge(
+    request: AuthChallengeRequest
+  ): Promise<AuthChallengeReply> {
+    const { baseUrl, isMockMode } = this.config;
+    const url = `${baseUrl}/auth/challenge/${request.address}`;
+
+    if (isMockMode) {
+      const mockResponse: AuthChallengeReply = {
+        address: request.address,
+        chainId: 1135,
+        domain: 'panna-app.lisk.com',
+        issuedAt: new Date().toISOString(),
+        nonce: '0xb7b1a40ac418c5bf',
+        uri: 'https://panna-app.lisk.com',
+        version: '1'
+      };
+      return mockResponse;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Panna API challenge request failed: ${response.status} ${response.statusText}`
+        );
+      }
+
+      return (await response.json()) as AuthChallengeReply;
+    } catch (error) {
+      console.error('Failed to get auth challenge from Panna API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create authentication challenge for SIWE
+   * @param request - The auth challenge request containing wallet address
+   * @returns Promise resolving to the auth challenge response
+   */
+  public async createAuthChallenge(
+    request: AuthChallengeRequest
+  ): Promise<AuthChallengeReply> {
+    const { baseUrl, isMockMode } = this.config;
+    const url = `${baseUrl}/auth/challenge`;
+
+    if (isMockMode) {
+      const mockResponse: AuthChallengeReply = {
+        address: request.address,
+        chainId: 1135,
+        domain: 'panna-app.lisk.com',
+        issuedAt: new Date().toISOString(),
+        nonce: '0xb7b1a40ac418c5bf',
+        uri: 'https://panna-app.lisk.com',
+        version: '1'
+      };
+      return mockResponse;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Panna API challenge creation failed: ${response.status} ${response.statusText}`
+        );
+      }
+
+      return (await response.json()) as AuthChallengeReply;
+    } catch (error) {
+      console.error('Failed to create auth challenge with Panna API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Verify authentication signature for SIWE
+   * @param request - The auth verify request containing signed message
+   * @returns Promise resolving to the auth token response
+   */
+  public async verifyAuth(
+    request: AuthVerifyRequest
+  ): Promise<AuthVerifyReply> {
+    const { baseUrl, isMockMode } = this.config;
+    const url = `${baseUrl}/auth/verify`;
+
+    if (isMockMode) {
+      const mockResponse: AuthVerifyReply = {
+        address: request.address,
+        token:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTU2NDUzMjUsInN1YiI6IjB4N2UwYmNjNzhlMzE3ZmEyOGY3M2E0NDU2N2Q4NTRiMDgxMDA0NjIyZCJ9.6_tOR5eayoQWTR2-4rsQmlX30I4acFtXaIdPCnd3pTc',
+        expiresIn: 1755645325
+      };
+      return mockResponse;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Panna API auth verification failed: ${response.status} ${response.statusText}`
+        );
+      }
+
+      return (await response.json()) as AuthVerifyReply;
+    } catch (error) {
+      console.error('Failed to verify auth with Panna API:', error);
       throw error;
     }
   }
