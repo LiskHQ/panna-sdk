@@ -5,7 +5,8 @@ import {
   type BlockscoutTransaction,
   type BlockscoutTokenTransfer,
   type BlockscoutTransactionType,
-  type BlockscoutNextPageParams
+  type BlockscoutNextPageParams,
+  type BlockscoutInternalTransactionNextPageParams
 } from './blockscout.types';
 
 // Parameters for fetching account activities
@@ -30,10 +31,11 @@ export interface Activity {
 }
 
 export const TransactionActivity = {
-  UNKNOWN: 'unknown',
+  UNKNOWN: 'Unknown',
   SENT: 'Sent',
   RECEIVED: 'Received',
-  MINTED: 'Minted'
+  MINTED: 'Minted',
+  SELF_TRANSFER: 'Self transfer'
 };
 
 type TransactionActivityType = typeof TransactionActivity;
@@ -122,9 +124,20 @@ export type PreProcessedActivity = Partial<BlockscoutTransaction> & {
   transaction_types: BlockscoutTransactionType[];
   result: string;
   status: string;
+  internal_tx_type?: InternalTransactionTypeType;
 };
 
 export type CachedBlockscoutNextPageParams =
   | BlockscoutNextPageParams
+  | BlockscoutInternalTransactionNextPageParams
   | typeof LAST_PAGE_REACHED
   | null;
+
+export const InternalTransactionType = {
+  CALL: 'call',
+  DELEGATECALL: 'delegatecall'
+};
+
+type InternalTransactionIntermediaryType = typeof InternalTransactionType;
+type InternalTransactionTypeType =
+  InternalTransactionIntermediaryType[keyof InternalTransactionIntermediaryType];
