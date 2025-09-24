@@ -1,13 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, createContext, useMemo } from 'react';
 import { AutoConnect, ThirdwebProvider } from 'thirdweb/react';
-import { createAccount, createPannaClient, type PannaClient } from '../../core';
+import {
+  createAccount,
+  createPannaClient,
+  lisk,
+  type PannaClient
+} from '../../core';
 import { AccountEventProvider } from './account-event-provider';
 
 export type PannaProviderProps = {
   children?: ReactNode;
   clientId?: string;
   partnerId?: string;
+  chainId?: string;
   queryClient?: QueryClient;
   /**
    * Optional timeout (ms) for Thirdweb AutoConnect
@@ -22,11 +28,13 @@ export type PannaProviderProps = {
 export type PannaContextValue = {
   client: PannaClient;
   partnerId: string;
+  chainId?: string;
 };
 
 type InternalPannaContextValue = {
   client: PannaClient | null;
   partnerId: string;
+  chainId?: string;
 };
 
 export const PannaClientContext =
@@ -66,6 +74,7 @@ export function PannaProvider(props: PannaProviderProps) {
   const {
     clientId,
     partnerId,
+    chainId,
     children,
     queryClient,
     authToken,
@@ -76,9 +85,10 @@ export function PannaProvider(props: PannaProviderProps) {
     const client = clientId ? createPannaClient({ clientId }) : null;
     return {
       client,
-      partnerId: partnerId ?? ''
+      partnerId: partnerId ?? '',
+      chainId: chainId ?? String(lisk.id)
     };
-  }, [clientId, partnerId]);
+  }, [clientId, partnerId, chainId]);
 
   // Create a default QueryClient if none provided
   const defaultQueryClient = useMemo(

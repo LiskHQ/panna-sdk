@@ -1,10 +1,10 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { getEnvironmentChain, getSupportedTokens } from '@/utils';
+import { getSupportedTokens } from '@/utils';
 import {
-  DEFAULT_STALE_TIME,
+  createDefaultRetryFn,
   DEFAULT_REFETCH_INTERVAL,
   DEFAULT_RETRY_DELAY,
-  createDefaultRetryFn
+  DEFAULT_STALE_TIME
 } from './constants';
 import { usePanna } from './use-panna';
 
@@ -22,7 +22,7 @@ type Token = {
 export function useSupportedTokens(
   options?: Omit<UseQueryOptions<Token[]>, 'queryKey' | 'queryFn'>
 ) {
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
 
   return useQuery({
     queryKey: ['supported-tokens'],
@@ -32,14 +32,9 @@ export function useSupportedTokens(
       }
 
       try {
-        const chain = getEnvironmentChain();
-        const supportedTokens = getSupportedTokens(
-          process.env.NODE_ENV === 'development'
-        );
+        const supportedTokens = getSupportedTokens(chainId);
 
-        const chainTokens = supportedTokens[chain.id] ?? [];
-
-        return chainTokens.map((token) => ({
+        return supportedTokens.map((token) => ({
           address: token.address,
           symbol: token.symbol || '',
           name: token.name || '',

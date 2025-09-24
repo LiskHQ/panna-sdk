@@ -6,7 +6,10 @@ import { CollectiblesList } from './collectibles-list';
 
 jest.mock('@/hooks', () => ({
   useActiveAccount: jest.fn(),
-  useCollectibles: jest.fn()
+  useCollectibles: jest.fn(),
+  usePanna: jest.fn(() => ({
+    chainId: 1135
+  }))
 }));
 jest.mock('../ui/accordion', () => ({
   Accordion: ({ children }: { children: React.ReactNode }) => (

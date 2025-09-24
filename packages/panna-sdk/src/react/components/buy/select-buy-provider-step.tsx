@@ -4,7 +4,11 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
 import { liskSepolia } from '../../../core';
 import { extractNumericPrice } from '../../../core/utils/utils';
-import { useBuyWithFiatQuotes, useSupportedTokens } from '../../hooks';
+import {
+  useBuyWithFiatQuotes,
+  usePanna,
+  useSupportedTokens
+} from '../../hooks';
 import type { BuyWithFiatQuote } from '../../types/buy-with-fiat-quote.types';
 import { getEnvironmentChain } from '../../utils';
 import { Badge } from '../ui/badge';
@@ -21,6 +25,7 @@ type SelectBuyProviderStepProps = {
 
 export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { next } = useDialogStepper();
+  const { chainId } = usePanna();
 
   const activeAccount = useActiveAccount();
   const { token, country, cryptoAmount } = form.watch();
@@ -33,7 +38,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
       return undefined;
     }
 
-    const currentChain = getEnvironmentChain();
+    const currentChain = getEnvironmentChain(chainId);
     const isLiskSepolia = currentChain.id === liskSepolia.id;
 
     const supportedToken = supportedTokens.find((supportedToken) => {

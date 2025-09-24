@@ -73,7 +73,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
       phoneNumber: ''
     }
   });
-  const { client, partnerId } = usePanna();
+  const { client, partnerId, chainId } = usePanna();
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
 
@@ -81,7 +81,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
     client,
     setWalletAsActive: true,
     accountAbstraction: {
-      chain: getEnvironmentChain(),
+      chain: getEnvironmentChain(chainId),
       sponsorGas: true
     }
   });

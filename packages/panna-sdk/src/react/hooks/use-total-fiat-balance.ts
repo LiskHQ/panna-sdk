@@ -20,7 +20,7 @@ export function useTotalFiatBalance(
   { address, currency = DEFAULT_CURRENCY }: UseTotalFiatBalanceParams,
   options?: Omit<UseQueryOptions<number>, 'queryKey' | 'queryFn'>
 ) {
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
   const hasValidAddress = isValidAddress(address);
 
   return useQuery({
@@ -30,13 +30,10 @@ export function useTotalFiatBalance(
         throw new Error('Invalid query state');
       }
 
-      const chain = getEnvironmentChain();
-      const supportedTokens = getSupportedTokens(
-        process.env.NODE_ENV === 'development'
-      );
+      const chain = getEnvironmentChain(chainId);
+      const supportedTokens = getSupportedTokens(chainId);
 
-      const chainTokens = supportedTokens[chain.id] ?? [];
-      const tokenAddresses = chainTokens.map((t) => t.address);
+      const tokenAddresses = supportedTokens.map((t) => t.address);
 
       const { totalValue } = await accountBalancesInFiat({
         address,

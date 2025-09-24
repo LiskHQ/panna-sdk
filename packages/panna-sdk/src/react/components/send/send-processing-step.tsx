@@ -2,7 +2,6 @@ import { Loader2Icon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import {
-  lisk,
   liskSepolia,
   prepareContractCall,
   PrepareContractCallResult,
@@ -13,6 +12,7 @@ import {
 } from 'src/core';
 import { tokenConfig } from '@/consts';
 import { useActiveAccount, usePanna } from '@/hooks';
+import { getEnvironmentChain } from '@/utils';
 import { Address, PreparedTransaction } from '../../../core/types/external';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -24,7 +24,7 @@ type SendProcessingStepProps = {
 };
 
 export function SendProcessingStep({ form }: SendProcessingStepProps) {
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
   const { next } = useDialogStepper();
   const account = useActiveAccount();
   const initializeTokenSend = useRef(true);
@@ -34,7 +34,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
   // @Todo: Possibly create hook for this logic
   useEffect(() => {
     let transaction: PrepareTransactionResult | PrepareContractCallResult;
-    const chain = process.env.NODE_ENV === 'development' ? liskSepolia : lisk;
+    const chain = getEnvironmentChain(chainId);
     const currentTokenConfig = tokenConfig[chain.id];
     if (tokenData.symbol === 'ETH') {
       transaction = prepareTransaction({
@@ -66,7 +66,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
           transaction: transaction as PreparedTransaction<any>
         });
 
-        if (process.env.NODE_ENV === 'development') {
+        if (chainId === String(liskSepolia.id)) {
           console.log('Success! Transaction hash:', result.transactionHash);
         }
         next();

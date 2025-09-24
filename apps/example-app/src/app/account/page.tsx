@@ -2,7 +2,7 @@
 
 import { LogOut, User } from 'lucide-react';
 import {
-  lisk,
+  getEnvironmentChain,
   useAccountBalance,
   useActiveAccount,
   useConnectedAccounts,
@@ -22,13 +22,13 @@ export default function AccountPage() {
   const { disconnect: logout } = useLogout();
   const connectedAccounts = useConnectedAccounts();
   const activeAccount = useActiveAccount();
-  const { client } = usePanna();
+  const { client, chainId } = usePanna();
 
   const { data: accountBalance, isLoading: isLoadingBalance } =
     useAccountBalance({
       address: activeAccount?.address || '',
       client: client!,
-      chain: lisk
+      chain: getEnvironmentChain(chainId)
     });
 
   // Get user profiles (email, phone, etc.)
@@ -103,7 +103,7 @@ export default function AccountPage() {
       <WalletDetailsCard
         address={activeAccount.address}
         networkName={
-          activeConnectedAccount?.getChain?.()?.name || 'Lisk Network'
+          getEnvironmentChain(chainId)?.name || 'Unidentified Network'
         }
         accountBalance={accountBalance}
         isLoadingBalance={isLoadingBalance}

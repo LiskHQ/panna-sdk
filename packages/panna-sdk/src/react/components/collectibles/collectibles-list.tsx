@@ -7,7 +7,7 @@ import {
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
 import { ImageType, TokenInstance } from 'src/core';
-import { useActiveAccount, useCollectibles } from '@/hooks';
+import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
 import { DefaultNFTIcon } from '../icons/default-nft-icon';
 import {
@@ -31,6 +31,7 @@ type CollectiblesListProps = {
 
 export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
+  const { chainId } = usePanna();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: DEFAULT_OFFSET,
     pageSize: DEFAULT_LIMIT
@@ -40,7 +41,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
       address: account?.address as string,
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize,
-      chain: getEnvironmentChain()
+      chain: getEnvironmentChain(chainId)
     },
     {
       enabled: !!account?.address
@@ -117,6 +118,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           return null;
         }
 
+        // @TODO: Use token.xyz and fallback to token instance
         const firstInstance = item.instances[0];
 
         return (
