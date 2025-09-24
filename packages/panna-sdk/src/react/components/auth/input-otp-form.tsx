@@ -3,6 +3,7 @@ import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
+import type { Account } from 'thirdweb/wallets';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import z from 'zod';
 import {
@@ -21,6 +22,7 @@ import {
 import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
+import { generateSiwePayload, siweLogin } from '../../../core/auth';
 import { getEnvironmentChain } from '../../utils';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
@@ -61,6 +63,62 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       sponsorGas: true // enable sponsored transactions
     }
   });
+
+  // Helper function to perform SIWE authentication after wallet connection
+  const performSiweAuth = async (wallet: {
+    getAccount: () => Account | undefined;
+  }) => {
+    try {
+      const account = wallet.getAccount();
+      if (!account) {
+        console.warn('No account found for SIWE authentication');
+        return false;
+      }
+
+      // Add a small delay to ensure wallet is fully authenticated with thirdweb
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Generate SIWE challenge directly using the account address
+      const payload = await generateSiwePayload({
+        address: account.address
+      });
+
+      // Sign the payload with the connected wallet
+      const { signLoginPayload } = await import('thirdweb/auth');
+      const signedPayload = await signLoginPayload({
+        account,
+        payload
+      });
+
+      // Verify with Panna API and get JWT token directly
+      const success = await siweLogin({
+        payload: signedPayload.payload,
+        signature: signedPayload.signature,
+        account
+      });
+
+      if (success) {
+        console.log('SIWE authentication successful');
+      } else {
+        console.warn('SIWE authentication failed');
+      }
+
+      return success;
+    } catch (error) {
+      console.error('SIWE authentication error:', error);
+
+      // Check if it's a 401 unauthorized error from thirdweb
+      if (error instanceof Error && error.message.includes('401')) {
+        console.warn(
+          'Wallet not yet authenticated with thirdweb service - SIWE authentication skipped'
+        );
+        // Don't treat this as a fatal error, just log it
+        return false;
+      }
+
+      return false;
+    }
+  };
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     try {
@@ -108,6 +166,10 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
               localStorage.setItem(USER_CONTACT, contact);
             }
           }
+
+          // Automatically perform SIWE authentication in the background
+          await performSiweAuth(wallet);
+
           reset();
           onClose();
         }

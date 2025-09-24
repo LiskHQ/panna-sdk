@@ -9,6 +9,7 @@ import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
+import type { Account } from 'thirdweb/wallets';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { LAST_AUTH_PROVIDER } from '@/consts';
 import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
+import { generateSiwePayload, siweLogin } from '../../../core/auth';
 import { getEnvironmentChain } from '../../utils';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
@@ -123,6 +125,62 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
     }
   }
 
+  // Helper function to perform SIWE authentication after wallet connection
+  const performSiweAuth = async (wallet: {
+    getAccount: () => Account | undefined;
+  }) => {
+    try {
+      const account = wallet.getAccount();
+
+      console.log({ account, wallet });
+
+      if (!account) {
+        console.warn('No account found for SIWE authentication');
+        return false;
+      }
+
+      // Generate SIWE challenge directly using the account address
+      const payload = await generateSiwePayload({
+        address: account.address
+      });
+
+      // Sign the payload with the connected wallet
+      const { signLoginPayload } = await import('thirdweb/auth');
+      const signedPayload = await signLoginPayload({
+        account,
+        payload
+      });
+
+      // Verify with Panna API and get JWT token directly
+      const success = await siweLogin({
+        payload: signedPayload.payload,
+        signature: signedPayload.signature,
+        account
+      });
+
+      if (success) {
+        console.log('SIWE authentication successful');
+      } else {
+        console.warn('SIWE authentication failed');
+      }
+
+      return success;
+    } catch (error) {
+      console.error('SIWE authentication error:', error);
+
+      // Check if it's a 401 unauthorized error from thirdweb
+      if (error instanceof Error && error.message.includes('401')) {
+        console.warn(
+          'Wallet not yet authenticated with thirdweb service - SIWE authentication skipped'
+        );
+        // Don't treat this as a fatal error, just log it
+        return false;
+      }
+
+      return false;
+    }
+  };
+
   const handleGoogleLogin = async () => {
     try {
       const wallet = await connect(async () => {
@@ -147,6 +205,10 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
             localStorage.setItem(LAST_AUTH_PROVIDER, 'Google');
             // Note: USER_ADDRESS is automatically managed by thirdweb
           }
+
+          // Automatically perform SIWE authentication in the background
+          await performSiweAuth(wallet);
+
           onClose?.();
         }
       }
