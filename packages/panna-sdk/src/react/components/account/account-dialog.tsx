@@ -8,7 +8,6 @@ import {
 import { useRef, useState } from 'react';
 import { DEFAULT_CURRENCY } from 'src/core';
 import { truncateAddress } from '@/utils/address';
-import { type StringValues } from '../../../core/utils/types';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
@@ -29,24 +28,18 @@ import type { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { AccountSettingsView } from './account-settings-view';
-
-enum AccountViewEnum {
-  Main = 'main',
-  Settings = 'settings',
-  Buy = 'buy',
-  Send = 'send'
-}
-
-type AccountView = `${StringValues<typeof AccountViewEnum>}`;
+import {
+  AccountView,
+  AccountViewEnum,
+  useAccountView
+} from './account-view-provider';
 
 type AccountDialogProps = {
   address: string;
 };
 
 export function AccountDialog({ address }: AccountDialogProps) {
-  const [activeView, setActiveView] = useState<AccountView>(
-    AccountViewEnum.Main
-  );
+  const { activeView, setActiveView } = useAccountView();
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
     useState<DialogStepperContextValue | null>(null);

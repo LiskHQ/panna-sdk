@@ -1,5 +1,6 @@
 import { useActiveAccount } from '@/hooks';
 import { AccountDialog } from '../account/account-dialog';
+import { AccountViewProvider } from '../account/account-view-provider';
 import { LoginButton } from './login-button';
 
 /**
@@ -23,7 +24,9 @@ export function ConnectButton() {
   return (
     <>
       {account?.address ? (
-        <AccountDialog address={account.address} />
+        <AccountViewProvider>
+          <AccountDialog address={account.address} />
+        </AccountViewProvider>
       ) : (
         <LoginButton />
       )}
