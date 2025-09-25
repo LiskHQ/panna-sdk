@@ -2,10 +2,10 @@ import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { Token, TokenInstance } from 'src/core';
 
 type CollectiblesContextType = {
-  activeCollectible: TokenInstance | null;
-  setActiveCollectible: (collectible: TokenInstance | null) => void;
-  activeToken: Token | null;
-  setActiveToken: (token: Token | null) => void;
+  activeCollectible: TokenInstance | undefined;
+  setActiveCollectible: (collectible: TokenInstance | undefined) => void;
+  activeToken: Token | undefined;
+  setActiveToken: (token: Token | undefined) => void;
 };
 
 const CollectiblesContext = createContext<CollectiblesContextType | undefined>(
@@ -29,9 +29,10 @@ type CollectiblesProviderProps = {
 export const CollectiblesProvider: React.FC<CollectiblesProviderProps> = ({
   children
 }) => {
-  const [activeCollectible, setActiveCollectible] =
-    useState<TokenInstance | null>(null);
-  const [activeToken, setActiveToken] = useState<Token | null>(null);
+  const [activeCollectible, setActiveCollectible] = useState<
+    TokenInstance | undefined
+  >();
+  const [activeToken, setActiveToken] = useState<Token | undefined>();
 
   return (
     <CollectiblesContext.Provider
