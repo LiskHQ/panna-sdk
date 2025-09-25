@@ -8,6 +8,7 @@ import {
 } from 'react';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
+import { getSiweAuthToken } from '../../core/auth';
 import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
@@ -103,6 +104,10 @@ export function AccountEventProvider({
         throw new Error('Chain ID not found');
       }
 
+      // Try to get auth token from SIWE auth service first, then fall back to prop
+      const siweToken = await getSiweAuthToken();
+      const effectiveAuthToken = siweToken || authToken;
+
       const basePayload = {
         eventType,
         timestamp: new Date().toISOString(),
@@ -159,9 +164,23 @@ export function AccountEventProvider({
         throw new Error(`Unsupported event type: ${eventType}`);
       }
 
-      await pannaApiService.sendAccountEvent(address, payload, authToken);
+      await pannaApiService.sendAccountEvent(
+        address,
+        payload,
+        effectiveAuthToken
+      );
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
+
+      // If it's a 401 error and we don't have a token, suggest authentication
+      if (error instanceof Error && error.message.includes('401')) {
+        const siweToken = await getSiweAuthToken();
+        if (!siweToken && !authToken) {
+          console.warn(
+            'Account event failed due to missing authentication. Please ensure SIWE authentication is completed before wallet connection events.'
+          );
+        }
+      }
     }
   };
 
@@ -201,13 +220,36 @@ export function AccountEventProvider({
 
   /**
    * Handle wallet onConnect event
+   * Adds a delay to allow SIWE authentication to complete before sending the event
    */
   const handleOnConnect = async (address: string) => {
     try {
       const socialInfo = getSocialInfo();
-      await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
-        social: socialInfo || undefined
-      });
+
+      // First attempt - send immediately
+      try {
+        await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
+          social: socialInfo || undefined
+        });
+        return; // Success, no need to retry
+      } catch (error) {
+        // If it fails with 401, wait a bit for SIWE auth to complete and retry
+        if (error instanceof Error && error.message.includes('401')) {
+          console.log(
+            'Account event failed, waiting for authentication to complete...'
+          );
+
+          // Wait 2 seconds for SIWE auth to potentially complete
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // Retry once more
+          await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
+            social: socialInfo || undefined
+          });
+        } else {
+          throw error;
+        }
+      }
     } catch (error) {
       console.error('Error handling onConnect event:', error);
     }

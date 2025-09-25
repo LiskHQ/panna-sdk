@@ -189,7 +189,11 @@ export class PannaApiService {
     const { baseUrl, isMockMode } = this.config;
     const url = `${baseUrl}/auth/verify`;
 
+    console.log('API Service - Configuration:', { baseUrl, isMockMode });
+    console.log('API Service - Verify request URL:', url);
+
     if (isMockMode) {
+      console.log('API Service - Using mock mode for auth verification');
       const mockResponse: AuthVerifyReply = {
         address: request.address,
         token:
@@ -200,6 +204,12 @@ export class PannaApiService {
     }
 
     try {
+      console.log('API Service - Sending verify request to:', url);
+      console.log(
+        'API Service - Request body:',
+        JSON.stringify(request, null, 2)
+      );
+
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -208,13 +218,23 @@ export class PannaApiService {
         body: JSON.stringify(request)
       });
 
+      console.log('API Service - Response status:', response.status);
+      console.log(
+        'API Service - Response headers:',
+        Object.fromEntries(response.headers.entries())
+      );
+
       if (!response.ok) {
+        const errorText = await response.text();
+        console.log('API Service - Error response body:', errorText);
         throw new Error(
-          `Panna API auth verification failed: ${response.status} ${response.statusText}`
+          `Panna API auth verification failed: ${response.status} ${response.statusText} - ${errorText}`
         );
       }
 
-      return (await response.json()) as AuthVerifyReply;
+      const result = (await response.json()) as AuthVerifyReply;
+      console.log('API Service - Successful response:', result);
+      return result;
     } catch (error) {
       console.error('Failed to verify auth with Panna API:', error);
       throw error;

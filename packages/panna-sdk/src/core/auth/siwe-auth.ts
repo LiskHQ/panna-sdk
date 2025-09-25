@@ -42,6 +42,20 @@ export class SiweAuth {
   private authToken: string | null = null;
   private userAddress: string | null = null;
 
+  constructor() {
+    // Load existing auth data from localStorage on initialization
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('panna_auth_token');
+      const storedAddress = localStorage.getItem('panna_user_address');
+
+      if (storedToken && storedAddress) {
+        this.authToken = storedToken;
+        this.userAddress = storedAddress;
+        console.log('SIWE Auth - Loaded existing token from localStorage');
+      }
+    }
+  }
+
   /**
    * Generate a SIWE compliant login payload
    * This function should be called by the frontend to get a challenge message
@@ -54,13 +68,26 @@ export class SiweAuth {
     };
 
     try {
+      console.log(
+        'SIWE Auth - Requesting challenge for address:',
+        params.address
+      );
+
       // Get challenge from Panna API
       const challenge: AuthChallengeReply =
         await pannaApiService.getAuthChallenge(challengeRequest);
 
-      // Transform API response to thirdweb LoginPayload format
-      const payload: LoginPayload = {
+      console.log('SIWE Auth - Received challenge:', {
         address: challenge.address,
+        domain: challenge.domain,
+        chainId: challenge.chainId,
+        nonce: challenge.nonce
+      });
+
+      // Transform API response to thirdweb LoginPayload format
+      // Ensure address consistency (use the address from challenge which should be normalized)
+      const payload: LoginPayload = {
+        address: challenge.address.toLowerCase(), // Normalize to lowercase for consistency
         chain_id: challenge.chainId.toString(),
         domain: challenge.domain,
         expiration_time: new Date(
@@ -74,6 +101,13 @@ export class SiweAuth {
         version: challenge.version,
         resources: ['https://panna-app.lisk.com']
       };
+
+      console.log('SIWE Auth - Generated payload:', {
+        address: payload.address,
+        domain: payload.domain,
+        chain_id: payload.chain_id,
+        nonce: payload.nonce
+      });
 
       return payload;
     } catch (error) {
@@ -108,9 +142,10 @@ export class SiweAuth {
   public async login(params: LoginParams): Promise<boolean> {
     try {
       // Convert LoginPayload to AuthVerifyRequest format
+      // Normalize address to lowercase to match API expectations
       const verifyRequest: AuthVerifyRequest = {
         domain: params.payload.domain,
-        address: params.payload.address,
+        address: params.payload.address.toLowerCase(),
         uri: params.payload.uri || '',
         version: params.payload.version,
         chainId: parseInt(params.payload.chain_id || '1'),
@@ -119,6 +154,27 @@ export class SiweAuth {
         signature: params.signature,
         isSafeWallet: false // TODO: Detect if it's a Safe wallet
       };
+
+      // Debug logging to help diagnose issues
+      console.log('SIWE Auth - Sending verify request:', {
+        ...verifyRequest,
+        signature: verifyRequest.signature.substring(0, 10) + '...' // Truncate signature for logging
+      });
+
+      // Also log the full signature for debugging
+      console.log('SIWE Auth - Full signature:', verifyRequest.signature);
+      console.log(
+        'SIWE Auth - Signature length:',
+        verifyRequest.signature.length
+      );
+      console.log(
+        'SIWE Auth - Is valid ECDSA signature format:',
+        /^0x[0-9a-fA-F]{130}$/.test(verifyRequest.signature)
+      );
+      console.log(
+        'SIWE Auth - Original payload that was signed:',
+        params.payload
+      );
 
       // Verify with Panna API
       const authResult = await pannaApiService.verifyAuth(verifyRequest);
@@ -134,12 +190,20 @@ export class SiweAuth {
           localStorage.setItem('panna_user_address', authResult.address);
         }
 
+        console.log('SIWE Auth - Successfully authenticated and stored token');
         return true;
       }
 
+      console.warn('SIWE Auth - No token received from verify response');
       return false;
     } catch (error) {
       console.error('Failed to verify login:', error);
+      console.error('SIWE Auth - Request details:', {
+        address: params.payload.address,
+        domain: params.payload.domain,
+        chainId: params.payload.chain_id,
+        hasSignature: !!params.signature
+      });
       return false;
     }
   }
@@ -235,6 +299,14 @@ export async function isSiweLoggedIn(): Promise<boolean> {
  */
 export async function getSiweUser(): Promise<string | null> {
   return siweAuth.getUser();
+}
+
+/**
+ * Helper function to get current SIWE auth token
+ * Compatible with thirdweb's auth flow
+ */
+export async function getSiweAuthToken(): Promise<string | null> {
+  return siweAuth.getAuthToken();
 }
 
 /**

@@ -81,9 +81,32 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
 
       const siweMessage = formatSiweMessage(payload);
 
-      const signature = await account.signMessage({
-        message: siweMessage
-      });
+      console.log('SIWE Auth - Message being signed (OTP form):', siweMessage);
+
+      // Try to get standard ECDSA signature for SIWE
+      let signature;
+      try {
+        // First try with raw bytes to force personal sign
+        signature = await account.signMessage({
+          message: {
+            raw: new TextEncoder().encode(siweMessage)
+          }
+        });
+        console.log('SIWE Auth - Raw signature method used (OTP form)');
+      } catch (error) {
+        console.log(
+          'SIWE Auth - Raw signature failed, trying standard method (OTP form):',
+          error
+        );
+        // Fallback to standard string message
+        signature = await account.signMessage({
+          message: siweMessage
+        });
+        console.log('SIWE Auth - Standard signature method used (OTP form)');
+      }
+
+      console.log('SIWE Auth - Generated signature (OTP form):', signature);
+      console.log('SIWE Auth - Signature length (OTP form):', signature.length);
 
       const signedPayload = {
         payload,
