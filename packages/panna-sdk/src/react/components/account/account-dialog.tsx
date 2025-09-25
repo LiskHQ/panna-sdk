@@ -254,6 +254,9 @@ export function AccountDialog({ address }: AccountDialogProps) {
         <Button variant="outline">{truncateAddress(address)}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
+        <DialogDescription className="sr-only">
+          Select account views and manage your account settings.
+        </DialogDescription>
         <AccountScreensProvider>
           {renderHeader(activeView)}
           {renderContent(activeView)}
