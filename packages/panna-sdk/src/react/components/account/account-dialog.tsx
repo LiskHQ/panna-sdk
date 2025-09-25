@@ -13,6 +13,7 @@ import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
+import { SendCollectibleForm } from '../collectibles/send-collectible-form';
 import { SendForm } from '../send/send-form';
 import { Button } from '../ui/button';
 import {
@@ -27,6 +28,7 @@ import {
 import type { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { AccountScreensProvider } from './account-screens-provider';
 import { AccountSettingsView } from './account-settings-view';
 import {
   AccountView,
@@ -165,6 +167,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
             {/* No dialog title for Send flow; each step renders its own title */}
           </DialogHeader>
         );
+      case AccountViewEnum.CollectibleDetails:
+        return (
+          <SendCollectibleForm
+            onClose={() => setActiveView(AccountViewEnum.Main)}
+          />
+        );
     }
   };
 
@@ -246,8 +254,10 @@ export function AccountDialog({ address }: AccountDialogProps) {
         <Button variant="outline">{truncateAddress(address)}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
-        {renderHeader(activeView)}
-        {renderContent(activeView)}
+        <AccountScreensProvider>
+          {renderHeader(activeView)}
+          {renderContent(activeView)}
+        </AccountScreensProvider>
       </DialogContent>
     </Dialog>
   );

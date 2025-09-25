@@ -1,5 +1,4 @@
 import { ArrowLeftIcon, XIcon } from 'lucide-react';
-import { Token, TokenInstance } from 'src/core';
 import {
   Dialog,
   DialogClose,
@@ -9,27 +8,28 @@ import {
   DialogTitle
 } from '../ui/dialog';
 import { DialogStepper } from '../ui/dialog-stepper';
+import { useCollectiblesInfo } from './collectibles-provider';
 import { SelectCollectibleStep } from './select-collectible-step';
 
 type SendCollectibleFormProps = {
-  collectible: TokenInstance;
-  token: Token;
   onClose: () => void;
 };
 
-export function SendCollectibleForm({
-  collectible,
-  token,
-  onClose
-}: SendCollectibleFormProps) {
+export function SendCollectibleForm({ onClose }: SendCollectibleFormProps) {
+  const { activeCollectible, activeToken } = useCollectiblesInfo();
+
+  if (!activeCollectible || !activeToken) {
+    return null;
+  }
+
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent showCloseButton={false} className="flex flex-col gap-6">
         <DialogDescription className="sr-only">
-          Send {token.name}
+          Send {activeToken.name}
         </DialogDescription>
         <DialogHeader className="items-center gap-0">
-          <DialogTitle className="sr-only">Send {token.name}</DialogTitle>
+          <DialogTitle className="sr-only">Send {activeToken.name}</DialogTitle>
           <div className="flex w-full items-center justify-between gap-2">
             <button type="button">
               <ArrowLeftIcon
@@ -47,7 +47,10 @@ export function SendCollectibleForm({
         </DialogHeader>
         <form>
           <DialogStepper>
-            <SelectCollectibleStep collectible={collectible} token={token} />
+            <SelectCollectibleStep
+              collectible={activeCollectible}
+              token={activeToken}
+            />
             <div />
           </DialogStepper>
         </form>

@@ -5,7 +5,8 @@ export enum AccountViewEnum {
   Main = 'main',
   Settings = 'settings',
   Buy = 'buy',
-  Send = 'send'
+  Send = 'send',
+  CollectibleDetails = 'collectible-details'
 }
 export type AccountView = `${StringValues<typeof AccountViewEnum>}`;
 
