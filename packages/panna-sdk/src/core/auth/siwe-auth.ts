@@ -24,6 +24,7 @@ export type LoginParams = {
   payload: LoginPayload;
   signature: string;
   account: Account;
+  isSafeWallet?: boolean;
 };
 
 /**
@@ -41,6 +42,7 @@ export type SignLoginPayloadParams = {
 export class SiweAuth {
   private authToken: string | null = null;
   private userAddress: string | null = null;
+  private lastChallenge: AuthChallengeReply | null = null;
 
   constructor() {
     // Load existing auth data from localStorage on initialization
@@ -77,37 +79,30 @@ export class SiweAuth {
       const challenge: AuthChallengeReply =
         await pannaApiService.getAuthChallenge(challengeRequest);
 
-      console.log('SIWE Auth - Received challenge:', {
-        address: challenge.address,
-        domain: challenge.domain,
-        chainId: challenge.chainId,
-        nonce: challenge.nonce
-      });
+      console.log('SIWE Auth - Received challenge:', challenge);
 
-      // Transform API response to thirdweb LoginPayload format
-      // Ensure address consistency (use the address from challenge which should be normalized)
+      // Store the challenge for later use in verification (matches working script approach)
+      this.lastChallenge = challenge;
+
+      // Create minimal LoginPayload for message signing (matches working script format)
       const payload: LoginPayload = {
-        address: challenge.address.toLowerCase(), // Normalize to lowercase for consistency
+        address: challenge.address.toLowerCase(),
         chain_id: challenge.chainId.toString(),
         domain: challenge.domain,
-        expiration_time: new Date(
-          Date.now() + 24 * 60 * 60 * 1000
-        ).toISOString(), // 24 hours from now
-        invalid_before: challenge.issuedAt,
-        issued_at: challenge.issuedAt,
-        nonce: challenge.nonce,
-        statement: 'Sign in to Panna with Ethereum',
         uri: challenge.uri,
         version: challenge.version,
-        resources: ['https://panna-app.lisk.com']
+        nonce: challenge.nonce,
+        issued_at: challenge.issuedAt,
+        // Minimal required fields only - no expiration, resources, etc.
+        expiration_time: new Date(
+          Date.now() + 24 * 60 * 60 * 1000
+        ).toISOString(),
+        invalid_before: challenge.issuedAt,
+        statement: '',
+        resources: []
       };
 
-      console.log('SIWE Auth - Generated payload:', {
-        address: payload.address,
-        domain: payload.domain,
-        chain_id: payload.chain_id,
-        nonce: payload.nonce
-      });
+      console.log('SIWE Auth - Generated payload:', payload);
 
       return payload;
     } catch (error) {
@@ -141,24 +136,27 @@ export class SiweAuth {
    */
   public async login(params: LoginParams): Promise<boolean> {
     try {
-      // Convert LoginPayload to AuthVerifyRequest format
-      // Normalize address to lowercase to match API expectations
+      // Use the challenge response directly with signature added (matches working test script)
+      // We need to store the original challenge response to use here
+      if (!this.lastChallenge) {
+        throw new Error(
+          'No challenge available for verification. Please generate a payload first.'
+        );
+      }
+
       const verifyRequest: AuthVerifyRequest = {
-        domain: params.payload.domain,
-        address: params.payload.address.toLowerCase(),
-        uri: params.payload.uri || '',
-        version: params.payload.version,
-        chainId: parseInt(params.payload.chain_id || '1'),
-        nonce: params.payload.nonce,
-        issuedAt: params.payload.issued_at,
+        ...this.lastChallenge,
+        // Fix timestamp format - convert to UTC with Z suffix (like the working script)
+        issuedAt: this.lastChallenge.issuedAt.replace(/\+\d{2}:\d{2}$/, 'Z'),
         signature: params.signature,
-        isSafeWallet: false // TODO: Detect if it's a Safe wallet
+        isSafeWallet: params.isSafeWallet || false
       };
 
       // Debug logging to help diagnose issues
       console.log('SIWE Auth - Sending verify request:', {
         ...verifyRequest,
-        signature: verifyRequest.signature.substring(0, 10) + '...' // Truncate signature for logging
+        signature: verifyRequest.signature.substring(0, 10) + '...', // Truncate signature for logging
+        isSafeWallet: verifyRequest.isSafeWallet
       });
 
       // Also log the full signature for debugging

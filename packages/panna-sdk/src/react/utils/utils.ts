@@ -150,59 +150,28 @@ export const renderCryptoAmount = (tokenInfo: TokenBalance, amount: string) => {
 };
 
 /**
- * Format a SIWE login payload into a standard EIP-4361 message string
+ * Format a SIWE login payload into the format expected by Panna API
+ * This follows the simplified format used by the Panna API, not the full EIP-4361 spec
  *
  * @param payload - The SIWE login payload
  * @returns The formatted SIWE message string
  *
  * @example
  * ```ts
- * const message = formatSiweMessage(payload);
+ * const message = buildSiweMessage(payload);
  * const signature = await account.signMessage({ message });
  * ```
  */
-export function formatSiweMessage(payload: LoginPayload): string {
-  const {
-    domain,
-    address,
-    statement,
-    uri,
-    version,
-    chain_id,
-    nonce,
-    issued_at,
-    expiration_time,
-    invalid_before,
-    resources
-  } = payload;
+export function buildSiweMessage(payload: LoginPayload): string {
+  const { domain, address, uri, version, chain_id, nonce, issued_at } = payload;
 
-  let message = `${domain} wants you to sign in with your Ethereum account:\n`;
-  message += `${address}\n\n`;
+  // Use the simplified format expected by Panna API (matches the working test script)
+  return `${domain} wants you to sign in with your Ethereum account:
+${address}
 
-  if (statement) {
-    message += `${statement}\n\n`;
-  }
-
-  message += `URI: ${uri}\n`;
-  message += `Version: ${version}\n`;
-  message += `Chain ID: ${chain_id}\n`;
-  message += `Nonce: ${nonce}\n`;
-  message += `Issued At: ${issued_at}\n`;
-
-  if (expiration_time) {
-    message += `Expiration Time: ${expiration_time}\n`;
-  }
-
-  if (invalid_before) {
-    message += `Not Before: ${invalid_before}\n`;
-  }
-
-  if (resources && resources.length > 0) {
-    message += `Resources:\n`;
-    resources.forEach((resource: string) => {
-      message += `- ${resource}\n`;
-    });
-  }
-
-  return message;
+URI: ${uri}
+Version: ${version}
+Chain ID: ${chain_id}
+Nonce: ${nonce}
+Issued At: ${issued_at}`;
 }

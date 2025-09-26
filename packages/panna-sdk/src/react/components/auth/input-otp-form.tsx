@@ -3,7 +3,7 @@ import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import type { Account } from 'thirdweb/wallets';
+import type { SmartWalletOptions, Wallet } from 'thirdweb/wallets';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import z from 'zod';
 import {
@@ -23,7 +23,7 @@ import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { generateSiwePayload, siweLogin } from '../../../core/auth';
-import { formatSiweMessage, getEnvironmentChain } from '../../utils';
+import { buildSiweMessage, getEnvironmentChain } from '../../utils';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -65,11 +65,20 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   });
 
   // Helper function to perform SIWE authentication after wallet connection
-  const handleSiweAuth = async (wallet: {
-    getAccount: () => Account | undefined;
-  }) => {
+  const handleSiweAuth = async (wallet: Wallet) => {
     try {
       const account = wallet.getAccount();
+      const isSmartAccount = !!(
+        wallet.getConfig() as unknown as { smartAccount: SmartWalletOptions }
+      ).smartAccount;
+
+      console.log({
+        account,
+        wallet,
+        walletConfig: wallet.getConfig(),
+        isSmartAccount
+      });
+
       if (!account) {
         console.warn('No account found for SIWE authentication');
         return false;
@@ -79,30 +88,34 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
         address: account.address
       });
 
-      const siweMessage = formatSiweMessage(payload);
+      const siweMessage = buildSiweMessage(payload);
 
       console.log('SIWE Auth - Message being signed (OTP form):', siweMessage);
 
-      // Try to get standard ECDSA signature for SIWE
+      // Try to get standard ECDSA signature for SIWE (matching working test script approach)
       let signature;
       try {
-        // First try with raw bytes to force personal sign
-        signature = await account.signMessage({
-          message: {
-            raw: new TextEncoder().encode(siweMessage)
-          }
-        });
-        console.log('SIWE Auth - Raw signature method used (OTP form)');
-      } catch (error) {
-        console.log(
-          'SIWE Auth - Raw signature failed, trying standard method (OTP form):',
-          error
-        );
-        // Fallback to standard string message
+        // First try standard string message (like the working script)
         signature = await account.signMessage({
           message: siweMessage
         });
         console.log('SIWE Auth - Standard signature method used (OTP form)');
+
+        // If signature is too long (contract signature), try raw bytes method
+        if (signature.length > 132) {
+          console.log(
+            'SIWE Auth - Long signature detected, trying raw bytes method (OTP form)'
+          );
+          signature = await account.signMessage({
+            message: {
+              raw: new TextEncoder().encode(siweMessage)
+            }
+          });
+          console.log('SIWE Auth - Raw signature method used (OTP form)');
+        }
+      } catch (error) {
+        console.log('SIWE Auth - Signature failed (OTP form):', error);
+        throw error;
       }
 
       console.log('SIWE Auth - Generated signature (OTP form):', signature);
@@ -116,7 +129,8 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       const success = await siweLogin({
         payload: signedPayload.payload,
         signature: signedPayload.signature,
-        account
+        account,
+        isSafeWallet: isSmartAccount
       });
 
       if (success) {
