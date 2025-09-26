@@ -211,7 +211,8 @@ export const getCollectiblesByAddress = async function (
             e.metadata?.image_url ||
             e.metadata?.image_data ||
             null,
-          name: e.metadata?.name
+          name: e.metadata?.name,
+          value: e.value || null
         };
         return instance;
       });

@@ -192,6 +192,7 @@ interface BlockscoutNFTInstance {
   media_type?: string | null;
   media_url?: string | null;
   thumbnails?: string | null;
+  value?: string | null;
 }
 
 interface BlockscoutNFTInstanceMetadata {

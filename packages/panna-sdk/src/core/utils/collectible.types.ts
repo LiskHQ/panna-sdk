@@ -33,6 +33,7 @@ export interface TokenInstance {
   imageType: (typeof ImageType)[keyof typeof ImageType];
   image: string | null;
   name?: string;
+  value?: string | null;
 }
 
 export interface CollectibleMetadata {
