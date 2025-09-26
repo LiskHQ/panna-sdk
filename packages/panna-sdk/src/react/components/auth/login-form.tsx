@@ -152,10 +152,9 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
 
       console.log('SIWE Auth - Message being signed:', siweMessage);
 
-      // Try to get standard ECDSA signature for SIWE (matching working test script approach)
+      // Try to get standard ECDSA signature for SIWE
       let signature;
       try {
-        // First try standard string message (like the working script)
         signature = await account.signMessage({
           message: siweMessage
         });
