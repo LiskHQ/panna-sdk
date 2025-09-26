@@ -60,7 +60,6 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
         address: token.address as Address
       });
     }
-    console.log('Prepared transaction:', transaction);
 
     async function sendCollectible() {
       try {
