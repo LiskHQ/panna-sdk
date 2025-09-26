@@ -198,7 +198,7 @@ export const getCollectiblesByAddress = async function (
         name: collection.token.name,
         symbol: collection.token.symbol,
         type: collection.token.type.toLowerCase(),
-        address: collection.token.address as string,
+        address: collection.token.address_hash as string,
         icon: collection.token.icon_url
       };
 
