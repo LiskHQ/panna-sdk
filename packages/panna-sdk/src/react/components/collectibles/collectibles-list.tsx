@@ -5,7 +5,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { ImageType, Token, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
@@ -150,18 +150,45 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="grid grid-cols-2 gap-4">
+                {/* Since ERC-1155 allows owning multiple tokens with the same ID,
+                check value to display multiple tokens */}
                 {item.instances.map((instance, instanceIndex) => (
-                  <Card key={instanceIndex} className="p-0">
-                    <CardContent className="p-0">
-                      <CollectibleImageRenderer
-                        instance={instance}
-                        token={item.token}
-                        setActiveView={setActiveView}
-                        setActiveCollectible={setActiveCollectible}
-                        setActiveToken={setActiveToken}
-                      />
-                    </CardContent>
-                  </Card>
+                  <Fragment key={`${instance.id}-${instanceIndex}`}>
+                    {instance?.value ? (
+                      <>
+                        {Array.from({ length: Number(instance.value) }).map(
+                          (_, valueIndex) => (
+                            <Card
+                              key={`${instance.id}-${valueIndex}`}
+                              className="p-0"
+                            >
+                              <CardContent className="p-0">
+                                <CollectibleImageRenderer
+                                  instance={instance}
+                                  token={item.token}
+                                  setActiveView={setActiveView}
+                                  setActiveCollectible={setActiveCollectible}
+                                  setActiveToken={setActiveToken}
+                                />
+                              </CardContent>
+                            </Card>
+                          )
+                        )}
+                      </>
+                    ) : (
+                      <Card key={instanceIndex} className="p-0">
+                        <CardContent className="p-0">
+                          <CollectibleImageRenderer
+                            instance={instance}
+                            token={item.token}
+                            setActiveView={setActiveView}
+                            setActiveCollectible={setActiveCollectible}
+                            setActiveToken={setActiveToken}
+                          />
+                        </CardContent>
+                      </Card>
+                    )}
+                  </Fragment>
                 ))}
               </AccordionContent>
             </AccordionItem>
