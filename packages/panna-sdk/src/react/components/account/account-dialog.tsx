@@ -169,9 +169,25 @@ export function AccountDialog({ address }: AccountDialogProps) {
         );
       case AccountViewEnum.CollectibleDetails:
         return (
-          <SendCollectibleForm
-            onClose={() => setActiveView(AccountViewEnum.Main)}
-          />
+          <DialogHeader className="items-center gap-0">
+            <div className="flex w-full items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveView(AccountViewEnum.Main)}
+              >
+                <ArrowLeftIcon
+                  size={20}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                />
+              </button>
+              <DialogClose>
+                <XIcon
+                  size={20}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                />
+              </DialogClose>
+            </div>
+          </DialogHeader>
         );
     }
   };
@@ -242,6 +258,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <SendForm
             onStepperChange={setSendStepperContext}
+            onClose={() => setActiveView(AccountViewEnum.Main)}
+          />
+        );
+      case AccountViewEnum.CollectibleDetails:
+        return (
+          <SendCollectibleForm
             onClose={() => setActiveView(AccountViewEnum.Main)}
           />
         );
