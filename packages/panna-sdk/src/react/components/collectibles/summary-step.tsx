@@ -36,7 +36,7 @@ export function SummaryStep({ form }: SummaryStepProps) {
           {recipientAddress}
         </Typography>
       </div>
-      <Button onClick={() => next()}>Send</Button>
+      <Button onClick={() => next({ hideBackButton: true })}>Send</Button>
     </div>
   );
 }

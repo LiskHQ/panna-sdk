@@ -173,21 +173,25 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (sendCollectibleStepperContext?.canGoBack) {
-                    sendCollectibleStepperContext.prev();
-                  } else {
-                    setActiveView(AccountViewEnum.Main);
-                  }
-                }}
-              >
-                <ArrowLeftIcon
-                  size={20}
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                />
-              </button>
+              {sendStepperContext?.stepData?.hideBackButton ? (
+                <div />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (sendCollectibleStepperContext?.canGoBack) {
+                      sendCollectibleStepperContext.prev();
+                    } else {
+                      setActiveView(AccountViewEnum.Main);
+                    }
+                  }}
+                >
+                  <ArrowLeftIcon
+                    size={20}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  />
+                </button>
+              )}
               <DialogClose>
                 <XIcon
                   size={20}
