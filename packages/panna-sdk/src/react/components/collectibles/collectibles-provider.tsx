@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, use, useState } from 'react';
 import { Token, TokenInstance } from 'src/core';
 
 type CollectiblesContextType = {
@@ -12,30 +12,28 @@ const CollectiblesContext = createContext<CollectiblesContextType | undefined>(
   undefined
 );
 
-export const useCollectiblesInfo = () => {
-  const context = useContext(CollectiblesContext);
+export function useCollectiblesInfo() {
+  const context = use(CollectiblesContext);
   if (!context) {
     throw new Error(
       'useCollectiblesInfo must be used within a CollectiblesProvider'
     );
   }
   return context;
-};
+}
 
 type CollectiblesProviderProps = {
   children: ReactNode;
 };
 
-export const CollectiblesProvider: React.FC<CollectiblesProviderProps> = ({
-  children
-}) => {
+export function CollectiblesProvider({ children }: CollectiblesProviderProps) {
   const [activeCollectible, setActiveCollectible] = useState<
     TokenInstance | undefined
   >();
   const [activeToken, setActiveToken] = useState<Token | undefined>();
 
   return (
-    <CollectiblesContext.Provider
+    <CollectiblesContext
       value={{
         activeCollectible,
         setActiveCollectible,
@@ -44,6 +42,6 @@ export const CollectiblesProvider: React.FC<CollectiblesProviderProps> = ({
       }}
     >
       {children}
-    </CollectiblesContext.Provider>
+    </CollectiblesContext>
   );
-};
+}

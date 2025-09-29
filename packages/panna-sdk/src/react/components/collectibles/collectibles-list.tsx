@@ -273,9 +273,13 @@ function CollectibleImageRenderer({
   };
 
   return (
-    <div onClick={handleClick}>
+    <button
+      type="button"
+      onClick={handleClick}
+      className="h-full w-full cursor-pointer border-none bg-transparent"
+    >
       <ImageRenderer instance={instance} />
-    </div>
+    </button>
   );
 }
 

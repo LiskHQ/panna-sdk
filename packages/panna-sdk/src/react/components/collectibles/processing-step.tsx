@@ -8,6 +8,7 @@ import {
   sendTransaction,
   TokenERC
 } from 'src/core';
+import { Abi } from 'viem';
 import { useActiveAccount, usePanna } from '@/hooks';
 import { getEnvironmentChain } from '@/utils';
 import { Address, PreparedTransaction } from '../../../core/types/external';
@@ -15,6 +16,9 @@ import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 import { SendCollectibleFormData } from './schema';
+
+const DEFAULT_ERC1155_VALUE = 1;
+const DEFAULT_ERC1155_DATA = '0x';
 
 type ProcessingStepProps = {
   form: UseFormReturn<SendCollectibleFormData>;
@@ -27,7 +31,7 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
   const initializeTokenSend = useRef(true);
   const { collectible, token, recipientAddress } = form.getValues();
 
-  // @Todo: Possibly create hook for this logic
+  // TODO: Possibly create hook for this logic
   useEffect(() => {
     let transaction: PrepareContractCallResult;
     const chain = getEnvironmentChain(chainId);
@@ -54,8 +58,8 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
           account?.address as Address,
           recipientAddress as Address,
           BigInt(collectible.id),
-          1,
-          '0x'
+          DEFAULT_ERC1155_VALUE,
+          DEFAULT_ERC1155_DATA
         ],
         address: token.address as Address
       });
@@ -65,8 +69,7 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
       try {
         const result = await sendTransaction({
           account: account!,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          transaction: transaction as PreparedTransaction<any>
+          transaction: transaction as PreparedTransaction<Abi>
         });
 
         if (chainId === String(liskSepolia.id)) {

@@ -17,8 +17,8 @@ type AccountScreensProviderProps = {
  *
  * @param children - The React nodes that will be rendered within the context providers.
  */
-export const AccountScreensProvider: React.FC<AccountScreensProviderProps> = ({
+export function AccountScreensProvider({
   children
-}) => {
+}: AccountScreensProviderProps) {
   return <CollectiblesProvider>{children}</CollectiblesProvider>;
-};
+}

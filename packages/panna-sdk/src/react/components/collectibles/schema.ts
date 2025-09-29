@@ -2,14 +2,14 @@ import { isValidAddress } from 'src/core';
 import { ImageType } from 'src/core/utils/collectible.types';
 import { z } from 'zod';
 
-const TokenInstanceSchema = z.object({
+const tokenInstanceSchema = z.object({
   id: z.string().min(1, 'Token instance ID is required'),
   imageType: z.nativeEnum(ImageType),
   image: z.string().nullable(),
   name: z.string().min(1, 'Token name is required').optional()
 });
 
-const TokenSchema = z.object({
+const tokenSchema = z.object({
   name: z.string().min(1, 'Token name is required'),
   symbol: z.string().min(1, 'Token symbol is required'),
   type: z.string().min(1, 'Token type is required'),
@@ -23,8 +23,8 @@ const TokenSchema = z.object({
 });
 
 export const sendCollectibleFormSchema = z.object({
-  collectible: TokenInstanceSchema,
-  token: TokenSchema,
+  collectible: tokenInstanceSchema,
+  token: tokenSchema,
   recipientAddress: z
     .string()
     .min(1, 'Recipient address is required')
