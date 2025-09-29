@@ -11,6 +11,23 @@ jest.mock('@/hooks', () => ({
     chainId: 1135
   }))
 }));
+jest.mock('../account/account-view-provider', () => ({
+  AccountViewProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  useAccountView: jest.fn(() => ({
+    setActiveView: jest.fn()
+  }))
+}));
+jest.mock('./collectibles-provider.tsx', () => ({
+  CollectiblesProvider: ({ children }: { children: React.ReactNode }) => (
+    <div>{children}</div>
+  ),
+  useCollectiblesInfo: jest.fn(() => ({
+    setActiveCollectible: jest.fn(),
+    setActiveToken: jest.fn()
+  }))
+}));
 jest.mock('../ui/accordion', () => ({
   Accordion: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
