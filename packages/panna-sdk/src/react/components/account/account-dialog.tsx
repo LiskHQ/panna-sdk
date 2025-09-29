@@ -45,6 +45,8 @@ export function AccountDialog({ address }: AccountDialogProps) {
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
     useState<DialogStepperContextValue | null>(null);
+  const [sendCollectibleStepperContext, setSendCollectibleStepperContext] =
+    useState<DialogStepperContextValue | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({
@@ -173,7 +175,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
             <div className="flex w-full items-center justify-between gap-2">
               <button
                 type="button"
-                onClick={() => setActiveView(AccountViewEnum.Main)}
+                onClick={() => {
+                  if (sendCollectibleStepperContext?.canGoBack) {
+                    sendCollectibleStepperContext.prev();
+                  } else {
+                    setActiveView(AccountViewEnum.Main);
+                  }
+                }}
               >
                 <ArrowLeftIcon
                   size={20}
@@ -264,6 +272,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
       case AccountViewEnum.CollectibleDetails:
         return (
           <SendCollectibleForm
+            onStepperChange={setSendCollectibleStepperContext}
             onClose={() => setActiveView(AccountViewEnum.Main)}
           />
         );
