@@ -27,10 +27,8 @@ type CollectiblesProviderProps = {
 };
 
 export function CollectiblesProvider({ children }: CollectiblesProviderProps) {
-  const [activeCollectible, setActiveCollectible] = useState<
-    TokenInstance | undefined
-  >();
-  const [activeToken, setActiveToken] = useState<Token | undefined>();
+  const [activeCollectible, setActiveCollectible] = useState<TokenInstance>();
+  const [activeToken, setActiveToken] = useState<Token>();
 
   return (
     <CollectiblesContext

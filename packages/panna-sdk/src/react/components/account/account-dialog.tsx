@@ -42,6 +42,7 @@ type AccountDialogProps = {
 
 export function AccountDialog({ address }: AccountDialogProps) {
   const { activeView, setActiveView } = useAccountView();
+  const [activeTab, setActiveTab] = useState<string>('balance');
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
     useState<DialogStepperContextValue | null>(null);
@@ -53,6 +54,15 @@ export function AccountDialog({ address }: AccountDialogProps) {
       address,
       currency: DEFAULT_CURRENCY
     });
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  const handleCollectibleClose = () => {
+    setActiveView(AccountViewEnum.Main);
+    setActiveTab('collectibles');
+  };
 
   const renderHeader = (view: AccountView) => {
     switch (view) {
@@ -192,12 +202,11 @@ export function AccountDialog({ address }: AccountDialogProps) {
                   />
                 </button>
               )}
-              <DialogClose>
-                <XIcon
-                  size={20}
-                  className="text-muted-foreground hover:text-primary transition-colors"
-                />
-              </DialogClose>
+              <XIcon
+                size={20}
+                onClick={handleCollectibleClose}
+                className="text-muted-foreground hover:text-primary transition-colors"
+              />
             </div>
           </DialogHeader>
         );
@@ -230,7 +239,11 @@ export function AccountDialog({ address }: AccountDialogProps) {
               </Button>
             </div>
             <Separator orientation="horizontal" />
-            <Tabs defaultValue="balance" className="w-full items-center gap-6">
+            <Tabs
+              defaultValue={activeTab}
+              onValueChange={handleTabClick}
+              className="w-full items-center gap-6"
+            >
               <TabsList>
                 <TabsTrigger value="balance">Balance</TabsTrigger>
                 <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
@@ -277,7 +290,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <SendCollectibleForm
             onStepperChange={setSendCollectibleStepperContext}
-            onClose={() => setActiveView(AccountViewEnum.Main)}
+            onClose={handleCollectibleClose}
           />
         );
     }
