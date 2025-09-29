@@ -38,7 +38,7 @@ export const AccountViewProvider: React.FC<AccountViewProviderProps> = ({
 }) => {
   const [activeView, setActiveView] = useState<AccountView>(initialView);
 
-  // TODO: In the future when we want to setup theming, we can add a ThemeProvider here
+  // In the future when we want to setup theming, we can add a ThemeProvider here
   // that uses the `theme` prop and wraps the children with it.
   return (
     <AccountViewContext value={{ activeView, setActiveView }}>
