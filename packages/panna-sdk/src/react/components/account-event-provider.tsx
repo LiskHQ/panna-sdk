@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
-import { getSiweAuthToken } from '../../core/auth';
+import { getSiweAuthToken, isSiweLoggedIn } from '../../core/auth';
 import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
@@ -38,16 +38,12 @@ const AccountEventContext = createContext<AccountEventContextType | null>(null);
 
 export type AccountEventProviderProps = {
   children: ReactNode;
-  authToken?: string;
 };
 
 /**
  * Provider component that handles wallet events and sends them to the Panna API
  */
-export function AccountEventProvider({
-  children,
-  authToken
-}: AccountEventProviderProps) {
+export function AccountEventProvider({ children }: AccountEventProviderProps) {
   const { client, partnerId } = usePanna();
   const previousAddressRef = useRef<string | null>(null);
   const account = useActiveAccount();
@@ -86,7 +82,42 @@ export function AccountEventProvider({
   };
 
   /**
+   * Wait for authentication to complete with timeout
+   * @param maxWaitTimeMs - Maximum time to wait for authentication (default: 10 seconds)
+   * @param checkIntervalMs - Interval between authentication checks (default: 500ms)
+   * @returns Promise<string | null> - Auth token if available, null if timeout or not authenticated
+   */
+  const waitForAuthentication = async (
+    maxWaitTimeMs: number = 10000,
+    checkIntervalMs: number = 500
+  ): Promise<string | null> => {
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < maxWaitTimeMs) {
+      try {
+        const isLoggedIn = await isSiweLoggedIn();
+        if (isLoggedIn) {
+          const token = await getSiweAuthToken();
+          if (token) {
+            console.log('Authentication completed, token available');
+            return token;
+          }
+        }
+      } catch (error) {
+        console.warn('Error checking authentication status:', error);
+      }
+
+      // Wait before next check
+      await new Promise((resolve) => setTimeout(resolve, checkIntervalMs));
+    }
+
+    console.warn(`Authentication timeout after ${maxWaitTimeMs}ms`);
+    return null;
+  };
+
+  /**
    * Send account event to Panna API
+   * Always waits for SIWE authentication and makes API calls mandatory when token exists
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
@@ -104,9 +135,27 @@ export function AccountEventProvider({
         throw new Error('Chain ID not found');
       }
 
-      // Try to get auth token from SIWE auth service first, then fall back to prop
-      const siweToken = await getSiweAuthToken();
-      const effectiveAuthToken = siweToken || authToken;
+      // Always try to get SIWE token first
+      let siweToken = await getSiweAuthToken();
+
+      // If no token, always wait for authentication to complete
+      if (!siweToken) {
+        console.log(
+          `No SIWE auth token found for ${eventType} event, waiting for authentication to complete...`
+        );
+        siweToken = await waitForAuthentication();
+      }
+
+      // If still no token after waiting, throw an error since API calls are now mandatory
+      if (!siweToken) {
+        throw new Error(
+          `${eventType} event failed: SIWE authentication is required but no token was available after waiting. Please ensure SIWE authentication is completed.`
+        );
+      }
+
+      console.log(
+        `Proceeding with ${eventType} event using SIWE authentication`
+      );
 
       const basePayload = {
         eventType,
@@ -164,23 +213,16 @@ export function AccountEventProvider({
         throw new Error(`Unsupported event type: ${eventType}`);
       }
 
-      await pannaApiService.sendAccountEvent(
-        address,
-        payload,
-        effectiveAuthToken
+      await pannaApiService.sendAccountEvent(address, payload, siweToken);
+
+      console.log(
+        `Successfully sent ${eventType} event for address ${address} with SIWE authentication`
       );
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
 
-      // If it's a 401 error and we don't have a token, suggest authentication
-      if (error instanceof Error && error.message.includes('401')) {
-        const siweToken = await getSiweAuthToken();
-        if (!siweToken && !authToken) {
-          console.warn(
-            'Account event failed due to missing authentication. Please ensure SIWE authentication is completed before wallet connection events.'
-          );
-        }
-      }
+      // Re-throw error for caller to handle
+      throw error;
     }
   };
 
@@ -220,36 +262,15 @@ export function AccountEventProvider({
 
   /**
    * Handle wallet onConnect event
-   * Adds a delay to allow SIWE authentication to complete before sending the event
+   * Always waits for SIWE authentication before sending the event
    */
   const handleOnConnect = async (address: string) => {
     try {
       const socialInfo = getSocialInfo();
 
-      // First attempt - send immediately
-      try {
-        await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
-          social: socialInfo || undefined
-        });
-        return; // Success, no need to retry
-      } catch (error) {
-        // If it fails with 401, wait a bit for SIWE auth to complete and retry
-        if (error instanceof Error && error.message.includes('401')) {
-          console.log(
-            'Account event failed, waiting for authentication to complete...'
-          );
-
-          // Wait 2 seconds for SIWE auth to potentially complete
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // Retry once more
-          await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
-            social: socialInfo || undefined
-          });
-        } else {
-          throw error;
-        }
-      }
+      await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
+        social: socialInfo || undefined
+      });
     } catch (error) {
       console.error('Error handling onConnect event:', error);
     }
@@ -257,6 +278,7 @@ export function AccountEventProvider({
 
   /**
    * Handle wallet disconnect event
+   * Always waits for SIWE authentication before sending the event
    */
   const handleDisconnect = async (address: string) => {
     try {
@@ -270,6 +292,7 @@ export function AccountEventProvider({
 
   /**
    * Handle account changed event
+   * Always waits for SIWE authentication before sending the event
    */
   const handleAccountChanged = async (address: string) => {
     try {

@@ -610,7 +610,7 @@ describe('AccountEventProvider', () => {
       };
 
       render(
-        <AccountEventProvider authToken="test-auth-token">
+        <AccountEventProvider>
           {React.createElement(mockConsumer)}
         </AccountEventProvider>
       );
