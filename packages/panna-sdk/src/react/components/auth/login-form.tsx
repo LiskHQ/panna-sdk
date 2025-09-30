@@ -152,23 +152,21 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
 
       console.log('SIWE Auth - Message being signed:', siweMessage);
 
-      // Try to get standard ECDSA signature for SIWE
+      // Try to get ERC-191 compliant ECDSA signature for SIWE
       let signature;
       try {
-        signature = await account.signMessage({
-          message: siweMessage
+        console.log('SIWE Auth - Signing message with payload:', {
+          message: siweMessage,
+          chainId: getEnvironmentChain().id as number
         });
-        console.log('SIWE Auth - Standard signature method used. Signature:', {
-          signature,
-          siweMessage
+        signature = await account.signMessage({
+          message: siweMessage,
+          chainId: getEnvironmentChain().id as number
         });
       } catch (error) {
         console.log('SIWE Auth - Signature failed:', error);
         throw error;
       }
-
-      console.log('SIWE Auth - Generated signature:', signature);
-      console.log('SIWE Auth - Signature length:', signature.length);
 
       const signedPayload = {
         payload,

@@ -92,27 +92,12 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
 
       console.log('SIWE Auth - Message being signed (OTP form):', siweMessage);
 
-      // Try to get standard ECDSA signature for SIWE (matching working test script approach)
+      // Try to get standard ECDSA signature for SIWE
       let signature;
       try {
-        // First try standard string message (like the working script)
         signature = await account.signMessage({
           message: siweMessage
         });
-        console.log('SIWE Auth - Standard signature method used (OTP form)');
-
-        // If signature is too long (contract signature), try raw bytes method
-        if (signature.length > 132) {
-          console.log(
-            'SIWE Auth - Long signature detected, trying raw bytes method (OTP form)'
-          );
-          signature = await account.signMessage({
-            message: {
-              raw: new TextEncoder().encode(siweMessage)
-            }
-          });
-          console.log('SIWE Auth - Raw signature method used (OTP form)');
-        }
       } catch (error) {
         console.log('SIWE Auth - Signature failed (OTP form):', error);
         throw error;
@@ -126,20 +111,20 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
         signature
       };
 
-      const success = await siweLogin({
+      const isSuccess = await siweLogin({
         payload: signedPayload.payload,
         signature: signedPayload.signature,
         account,
         isSafeWallet: isSmartAccount
       });
 
-      if (success) {
+      if (isSuccess) {
         console.log('SIWE authentication successful');
       } else {
         console.warn('SIWE authentication failed');
       }
 
-      return success;
+      return isSuccess;
     } catch (error) {
       console.error('SIWE authentication error:', error);
 
