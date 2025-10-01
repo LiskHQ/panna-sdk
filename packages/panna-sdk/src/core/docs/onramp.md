@@ -57,13 +57,14 @@ console.log('Purchase status:', status.status); // COMPLETED | FAILED | PENDING
 Select the optimal provider for your users' location:
 
 ```ts
-// Supported providers
+// Supported providers (empty string indicates no provider available)
 type OnrampProvider =
   | 'stripe'
   | 'coinbase'
   | 'transak'
   | 'moonpay'
-  | 'thirdweb';
+  | 'thirdweb'
+  | '';
 
 // Example provider availability by country (would typically come from API)
 const PROVIDER_AVAILABILITY: Record<string, OnrampProvider[]> = {
@@ -74,8 +75,14 @@ const PROVIDER_AVAILABILITY: Record<string, OnrampProvider[]> = {
 };
 
 // Auto-select best provider based on availability
+// Returns empty string if no providers available for the country
 function getBestProvider(countryCode: string): OnrampProvider {
-  const providers = PROVIDER_AVAILABILITY[countryCode] || ['stripe'];
+  const providers = PROVIDER_AVAILABILITY[countryCode];
+
+  // If country not found in availability list, return empty string
+  if (!providers || providers.length === 0) {
+    return '';
+  }
 
   // Priority: Stripe → Coinbase → Transak → Others
   const priority: OnrampProvider[] = [
@@ -92,7 +99,21 @@ function getBestProvider(countryCode: string): OnrampProvider {
     }
   }
 
-  return providers[0] || 'stripe';
+  // Return first available provider from the list
+  return providers[0];
+}
+
+// Example usage with proper error handling
+const countryCode = 'FR'; // France - not in our PROVIDER_AVAILABILITY list
+const provider = getBestProvider(countryCode);
+
+if (provider === '') {
+  // Handle case where no provider is available for this country
+  console.error(`No onramp providers available for country: ${countryCode}`);
+  // Show user a message: "Onramp service not available in your region"
+} else {
+  // Proceed with the selected provider
+  console.log(`Using provider: ${provider}`);
 }
 ```
 
