@@ -99,14 +99,14 @@ export const usePannaClient = () => useContext(PannaContext);
 
 ```ts
 // app/api/wallet/route.ts
-import { createPannaClient } from 'panna-sdk';
+import { createPannaClient, accountBalance, lisk } from 'panna-sdk';
 
 const client = createPannaClient({
-  secretKey: process.env.PANNA_SECRET_KEY!
+  clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
 });
 
 export async function POST(request: Request) {
-  // Use client for server operations
+  // Use client for operations
   const data = await request.json();
 
   const balance = await accountBalance({
@@ -138,15 +138,10 @@ const client = createPannaClient({
 ### Environment-Based Setup
 
 ```ts
-function createClient() {
-  const isServer = typeof window === 'undefined';
-
-  return createPannaClient(
-    isServer
-      ? { secretKey: process.env.PANNA_SECRET_KEY! }
-      : { clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID! }
-  );
-}
+// Use environment variables for configuration
+const client = createPannaClient({
+  clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
+});
 ```
 
 ## Ecosystem Configuration
