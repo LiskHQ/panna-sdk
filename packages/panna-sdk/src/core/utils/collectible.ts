@@ -17,7 +17,12 @@ import {
   Token,
   TokenInstance
 } from './collectible.types';
-import { getBaseApiUrl, getCacheKey, isValidAddress } from './common';
+import {
+  buildQueryString,
+  getBaseApiUrl,
+  getCacheKey,
+  isValidAddress
+} from './common';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET
@@ -156,11 +161,9 @@ export const getCollectiblesByAddress = async function (
       break;
     }
 
-    const requestUrl =
-      nextPageParams === null
-        ? baseCollectionsRequestUrl
-        : `${baseCollectionsRequestUrl}?token_contract_address_hash=${nextPageParams.token_contract_address_hash}&token_type=${nextPageParams.token_type}`;
-
+    const requestUrl = baseCollectionsRequestUrl.concat(
+      buildQueryString(nextPageParams)
+    );
     const response = await httpUtils.request(requestUrl);
 
     const errResponse = response as PannaHttpErr;
