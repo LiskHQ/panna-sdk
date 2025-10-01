@@ -8,6 +8,7 @@ import {
 } from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { sendFormSchema } from './schema';
+import { SendErrorStep } from './send-error-step';
 import { SendProcessingStep } from './send-processing-step';
 import { SendSelectTokenStep } from './send-select-token-step';
 import { SendSuccessStep } from './send-success-step';
@@ -77,6 +78,9 @@ export function SendForm({ onStepperChange, onClose }: SendFormProps) {
           </StepperContextProvider>
           <StepperContextProvider onStepperChange={onStepperChange}>
             <SendSuccessStep onClose={onClose} />
+          </StepperContextProvider>
+          <StepperContextProvider onStepperChange={onStepperChange}>
+            <SendErrorStep />
           </StepperContextProvider>
         </DialogStepper>
       </form>

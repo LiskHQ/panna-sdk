@@ -183,7 +183,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
-              {sendStepperContext?.stepData?.hideBackButton ? (
+              {sendCollectibleStepperContext?.stepData?.hideBackButton ? (
                 <div />
               ) : (
                 <button

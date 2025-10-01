@@ -26,7 +26,7 @@ type ProcessingStepProps = {
 
 export function ProcessingStep({ form }: ProcessingStepProps) {
   const { client, chainId } = usePanna();
-  const { next } = useDialogStepper();
+  const { next, goToStep, lastStep } = useDialogStepper();
   const account = useActiveAccount();
   const initializeTokenSend = useRef(true);
   const { collectible, token, recipientAddress } = form.getValues();
@@ -86,6 +86,8 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
         } else {
           console.error('Transaction failed:', errorMessage);
         }
+        // Error screen is always the last step
+        goToStep(lastStep, { hideBackButton: true });
       }
     }
 

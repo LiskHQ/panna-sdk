@@ -25,7 +25,7 @@ type SendProcessingStepProps = {
 
 export function SendProcessingStep({ form }: SendProcessingStepProps) {
   const { client, chainId } = usePanna();
-  const { next } = useDialogStepper();
+  const { next, goToStep, lastStep } = useDialogStepper();
   const account = useActiveAccount();
   const initializeTokenSend = useRef(true);
   const tokenData = form.getValues('tokenInfo.token');
@@ -41,7 +41,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
         client,
         chain,
         to: form.getValues('recipientAddress') as Address,
-        value: BigInt(toWei(cryptoAmount))
+        value: BigInt(toWei(cryptoAmount) * 100000000000000000n) // Convert ETH to wei
       });
     } else {
       transaction = prepareContractCall({
@@ -80,6 +80,8 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
         } else {
           console.error('Transaction failed:', errorMessage);
         }
+        // Error screen is always the last step
+        goToStep(lastStep, { hideBackButton: true });
       }
     }
 
