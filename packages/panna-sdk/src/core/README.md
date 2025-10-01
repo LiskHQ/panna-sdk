@@ -120,10 +120,7 @@ const transaction = prepareTransaction({
 });
 
 // User sends payment
-const result = await sendTransaction({
-  account: userAccount,
-  transaction
-});
+const result = await sendTransaction({ account, transaction });
 ```
 
 ### Token Transfers
