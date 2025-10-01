@@ -36,6 +36,7 @@ Get authentication working in 2 minutes:
 
 ```ts
 import {
+  EcosystemId,
   createPannaClient,
   createAccount,
   prepareLogin,
@@ -44,7 +45,7 @@ import {
 
 // 1. Initialize SDK
 const client = createPannaClient({ clientId: 'your-client-id' });
-const ecosystem = { id: 'ecosystem.lisk', partnerId: 'your-partner-id' };
+const ecosystem = { id: EcosystemId.LISK, partnerId: 'your-partner-id' };
 
 // 2. Send verification code
 await prepareLogin({
@@ -139,9 +140,9 @@ One-click authentication using popular social providers.
 ### Basic Social Login
 
 ```ts
-import { socialLogin } from 'panna-sdk';
+import { EcosystemId, socialLogin } from 'panna-sdk';
 
-const ecosystem = { id: 'ecosystem.lisk', partnerId: 'your-partner-id' };
+const ecosystem = { id: EcosystemId.LISK, partnerId: 'your-partner-id' };
 
 // Supported providers: 'google', 'apple', 'facebook', 'discord', 'github',
 // 'x', 'coinbase', 'farcaster', 'telegram'
@@ -272,6 +273,7 @@ if (googleAccount) {
 
 ## Next Steps
 
+- [Client Module](./client.md) - SDK initialization and configuration
 - [Transaction Module](./transaction.md) - Send transactions
 - [Chain Configuration](./chains.md) - Multi-chain support
 - [Fiat Onramp](./onramp.md) - Crypto purchases

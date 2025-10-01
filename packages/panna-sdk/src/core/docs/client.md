@@ -129,7 +129,7 @@ const client = createPannaClient({
   config: {
     rpc: {
       1135: 'https://rpc.lisk.network', // Lisk Mainnet
-      11155111: 'https://rpc.sepolia.lisk.network' // Lisk Sepolia
+      4202: 'https://rpc.sepolia.lisk.network' // Lisk Sepolia
     }
   }
 });

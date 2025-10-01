@@ -1,6 +1,6 @@
 # Onramp Module
 
-The Onramp module enables fiat-to-crypto conversions through multiple payment providers. The module supports country-specific provider selection and comprehensive purchase flow management.
+The Onramp module enables fiat-to-crypto conversions through multiple payment providers. The module supports country-specific provider selection and offers comprehensive purchase flow management.
 
 ## What You'll Learn
 
@@ -117,7 +117,7 @@ class PurchaseManager {
       // 2. Prepare purchase
       const session = await onRampPrepare({
         client: this.client,
-        chainId: 1135,
+        chainId: lisk.id,
         tokenAddress,
         receiver: userAddress,
         amount,
@@ -140,9 +140,11 @@ class PurchaseManager {
 
   async checkStatus(sessionId?: string) {
     const id = sessionId || localStorage.getItem('onramp_session');
-    if (!id) throw new Error('No session ID found');
+    if (!id) {
+      throw new Error('No session ID found');
+    }
 
-    return await onRampStatus({ id, client: this.client });
+    return onRampStatus({ id, client: this.client });
   }
 }
 ```
@@ -201,6 +203,7 @@ const provider = getBestProvider(countryCode);
 
 ## Next Steps
 
+- Explore [Client Module](./client.md) for SDK initialization and configuration
 - Explore [Wallet Module](./wallet.md) for user authentication and account setup
 - Review [Transaction Module](./transaction.md) for handling purchased tokens
 - Check [Utils Module](./utils.md) for balance tracking and fiat conversions

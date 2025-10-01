@@ -57,7 +57,7 @@ const customChain = describeChain({
 
 ### Lisk Mainnet
 
-Production network for Lisk applications.
+Production network for applications deployed on Lisk.
 
 ```ts
 import { lisk, prepareTransaction, toWei } from 'panna-sdk';
@@ -94,8 +94,8 @@ const transaction = prepareTransaction({
   value: toWei('10')
 });
 
-// Get test tokens from faucet - Sepolia is a testnet
-console.log('Get test LSK from: https://faucet.lisk.com');
+// Get test tokens from faucet - Lisk Sepolia is a testnet
+console.log('Get test LSK from: https://sepolia-faucet.lisk.com');
 ```
 
 ## Custom Chains
@@ -239,4 +239,5 @@ const currentChain = selectChain('mainnet');
 - Learn about [Transaction Module](./transaction.md) for sending transactions on configured chains
 - Explore [Client Module](./client.md) for SDK initialization with custom RPC endpoints
 - Review [Wallet Module](./wallet.md) for user authentication across multiple networks
+- Check [Onramp Module](./onramp.md) for fiat-to-crypto purchases
 - Check [Utils Module](./utils.md) for chain-related utility functions

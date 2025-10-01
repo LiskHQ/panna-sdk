@@ -44,7 +44,7 @@ import {
 const client = createPannaClient({ clientId: 'your-client-id' });
 const account = createAccount({ partnerId: 'your-partner-id' });
 
-// Send 1 LSK
+// Send 1 ETH
 const transaction = prepareTransaction({
   client,
   chain: lisk,
@@ -69,7 +69,7 @@ The most basic transaction type: sending LSK between addresses.
 ```ts
 import { prepareTransaction, sendTransaction, toWei } from 'panna-sdk';
 
-// Send 10 LSK to another address
+// Send 10 ETH to another address
 const transaction = prepareTransaction({
   client,
   chain: lisk,
@@ -96,7 +96,7 @@ const transaction = prepareContractCall({
   chain: lisk,
   address: '0x...', // Token contract address
   method: 'function transfer(address to, uint256 amount)',
-  params: [recipientAddress, toWei('100')]
+  params: [recipientAddress, toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 
 await sendTransaction({ account, transaction });
@@ -124,7 +124,7 @@ const transaction = prepareContractCall({
   address: tokenContractAddress,
   abi: erc20Abi,
   method: 'transfer', // Full autocomplete available
-  params: [recipientAddress, toWei('100')]
+  params: [recipientAddress, toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 ```
 
@@ -149,7 +149,7 @@ const mintTx = prepareContractCall({
   address: nftContract,
   method: 'function mint(address to, uint256 tokenId)',
   params: [userAddress, BigInt(1)],
-  value: toWei('0.1') // Send 0.1 LSK with the call
+  value: toWei('0.1') // Send 0.1 ETH with the call
 });
 ```
 
@@ -169,16 +169,16 @@ const contract = getContract({
 const tx1 = prepareContractCall({
   client,
   chain: lisk,
-  address: contractAddress,
-  abi: contractAbi,
+  address: contract.address,
+  abi: contract.abi,
   method: 'setValue',
   params: [42]
 });
 const tx2 = prepareContractCall({
   client,
   chain: lisk,
-  address: contractAddress,
-  abi: contractAbi,
+  address: contract.address,
+  abi: contract.abi,
   method: 'setName',
   params: ['Alice']
 });
@@ -217,6 +217,7 @@ const transaction = prepareTransaction({
 
 ## Next Steps
 
+- Explore [Client Module](./client.md) for SDK initialization and configuration
 - Explore [Chains Module](./chains.md) for configuring networks and RPC endpoints
 - Review [Utils Module](./utils.md) for balance queries and token conversions
 - Learn about [Wallet Module](./wallet.md) for user account management and authentication

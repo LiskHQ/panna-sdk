@@ -5,7 +5,7 @@ The Panna SDK Core module provides powerful Web3 primitives for building blockch
 ## Quick Start
 
 ```typescript
-import { createPannaClient, createAccount, login, lisk } from 'panna-sdk';
+import { createPannaClient, createAccount, login } from 'panna-sdk';
 
 // Initialize the SDK client
 const client = createPannaClient({
@@ -116,7 +116,7 @@ const transaction = prepareTransaction({
   client,
   chain: lisk,
   to: merchantAddress,
-  value: toWei('10') // 10 LSK
+  value: toWei('10') // 10 ETH
 });
 
 // User sends payment
@@ -135,10 +135,10 @@ const transaction = prepareContractCall({
   chain: lisk,
   address: tokenAddress,
   method: 'function transfer(address to, uint256 amount)',
-  params: [recipientAddress, toWei('100')]
+  params: [recipientAddress, toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 
-await sendTransaction({ account, transaction });
+const result = await sendTransaction({ account, transaction });
 ```
 
 ### Multi-Chain Support

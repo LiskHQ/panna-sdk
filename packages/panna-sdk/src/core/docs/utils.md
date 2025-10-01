@@ -207,10 +207,10 @@ const activities = await getActivitiesByAddress({
 
 // Process and filter activities
 const sentTransactions = activities.filter(
-  (activity) => activity.type === 'send'
+  (activity) => activity.activityType.toLowerCase() === 'sent'
 );
 const failedTransactions = activities.filter(
-  (activity) => activity.status === 'failed'
+  (activity) => activity.status.toLowerCase() === 'error'
 );
 
 // Format for display
@@ -219,9 +219,10 @@ function formatTransactionHistory(activities: Activity[]) {
     date: new Date(activity.timestamp * 1000).toLocaleDateString(),
     type: activity.type,
     amount: (Number(BigInt(activity.value)) / 1e18).toString(),
-    counterparty: activity.type === 'receive' ? activity.from : activity.to,
+    counterparty:
+      activity.activityType === 'sent' ? activity.to : activity.from,
     status: activity.status,
-    explorerUrl: `https://blockscout.lisk.com/tx/${activity.hash}`
+    explorerUrl: `https://blockscout.lisk.com/tx/${activity.transactionID}`
   }));
 }
 ```
@@ -278,8 +279,8 @@ function validateTransactionInput(
 
   // Amount validation
   const numAmount = parseFloat(amount);
-  if (!amount || numAmount <= 0) {
-    errors.push('Amount must be greater than 0');
+  if (!amount || numAmount < 0) {
+    errors.push('Amount must be greater than or equal to 0');
   }
 
   // Balance check
@@ -339,4 +340,5 @@ socialButtons.forEach((button) => {
 - Explore the [Wallet Module](./wallet.md) for user authentication and account management
 - Check the [Transaction Module](./transaction.md) for sending tokens and smart contract interactions
 - Review the [Client Module](./client.md) for SDK initialization and configuration
+- Learn about [Onramp Module](./onramp.md) for fiat-to-crypto purchases
 - Learn about [Chains Module](./chains.md) for network configuration
