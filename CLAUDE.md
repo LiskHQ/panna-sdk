@@ -1,4 +1,6 @@
-# Panna SDK Development Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Build & Test Commands
 
@@ -22,3 +24,82 @@ pnpm --filter example-app dev      # Run example app in dev mode
 - **React**: Functional components only, hooks for state management, no React.FC
 - **Error Handling**: Throw errors with descriptive messages, handle async errors properly
 - **Comments**: JSDoc for public APIs only, avoid inline comments unless critical
+
+## Architecture Overview
+
+This is a TypeScript monorepo for the Panna SDK, a blockchain wallet SDK built on top of Thirdweb.
+
+### Monorepo Structure
+
+- **`packages/panna-sdk`**: Core SDK package containing both headless logic and React UI components
+- **`apps/example-app`**: Next.js 14 example app demonstrating SDK usage
+- **Build System**: PNPM workspaces with project references
+- **Testing**: Jest with separate configurations for core (node) and React (jsdom) tests
+
+### SDK Architecture (`packages/panna-sdk`)
+
+The SDK is split into two main parts:
+
+#### Core (`src/core/`)
+
+Headless, framework-agnostic logic:
+
+- **Client** (`client/`): `createPannaClient()` wraps Thirdweb client creation
+- **Wallet** (`wallet/`): Authentication methods (email, phone, social), account management, linking/unlinking accounts
+- **Chains** (`chains/`): Chain definitions (Lisk, Lisk Sepolia) and chain metadata
+- **Transaction** (`transaction/`): Transaction preparation, contract calls, sending transactions
+- **Onramp** (`onramp/`): Fiat-to-crypto onramp integration, provider management, quote fetching
+- **Utils** (`utils/`): Balance calculations, activity fetching, collectibles, fiat price conversion, address validation
+
+#### React (`src/react/`)
+
+React-specific UI components and hooks:
+
+- **Components** (`components/`):
+  - `PannaProvider`: Root provider wrapping Thirdweb's `ThirdwebProvider` and React Query
+  - `AccountEventProvider`: Manages wallet connection/disconnection events
+  - Auth flows, buy/send forms, activity lists, collectibles, account dialogs
+  - UI primitives from Radix UI (buttons, dialogs, forms, tables, etc.)
+- **Hooks** (`hooks/`): React hooks for token balances, activities, collectibles, fiat quotes, account management
+- **Utils** (`utils/`): React-specific utilities (address formatting, country helpers, query utilities)
+
+### Key Dependencies
+
+- **Thirdweb**: Core blockchain functionality (wallet, client, transactions)
+- **Viem**: Ethereum utilities
+- **React Query**: Async state management for React hooks
+- **Radix UI**: Accessible UI primitives
+- **Tailwind CSS**: Styling (with `clsx` and `tailwind-merge`)
+- **React Hook Form + Zod**: Form handling and validation
+
+### Build & Bundle
+
+- **Builder**: `tsup` generates both ESM (`.mjs`) and CJS (`.cjs`) outputs
+- **CSS**: Tailwind styles built separately via PostCSS
+- **Exports**: Package exports both main entry (`./`) and styles (`./styles.css`)
+- **Environment Variables**: Injected at build time via tsup config (`PANNA_API_URL`, `MOCK_PANNA_API`)
+
+### Testing Setup
+
+- **Jest Projects**: Separate configs for core (node) and React (jsdom) tests
+- **File Patterns**:
+  - Core tests: `src/core/**/*.test.ts`
+  - React tests: `src/react/**/*.test.{ts,tsx}`
+  - Fixture tests excluded: `*.fixture.test.ts`
+- **Module Aliases**: `@/` maps to `src/react/` for React tests, `src/` for core tests
+- **Running Single Test**: `pnpm --filter panna-sdk test -- path/to/test.ts`
+
+### Example App (`apps/example-app`)
+
+- **Framework**: Next.js 15 with App Router (React 19)
+- **Development**: `pnpm --filter example-app dev` (uses Turbopack)
+- **Workspace Dependency**: Consumes `panna-sdk` via `workspace:^` protocol
+
+## Environment Variables
+
+SDK requires configuration via environment variables:
+
+- `PANNA_API_URL`: API endpoint (default: https://api.panna.dev)
+- `MOCK_PANNA_API`: Enable API mocking for tests (default: false)
+
+Create `.env` file in `packages/panna-sdk/` for local development.
