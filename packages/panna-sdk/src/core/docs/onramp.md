@@ -28,13 +28,13 @@ In this guide, you will:
 Get onramp functionality working quickly:
 
 ```ts
-import { onRampPrepare, onRampStatus } from 'panna-sdk';
+import { onRampPrepare, onRampStatus, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
 
 // 1. Prepare purchase session
 const session = await onRampPrepare({
   client,
   chainId: 1135, // Lisk mainnet
-  tokenAddress: '0x0000000000000000000000000000000000000000', // Native ETH
+  tokenAddress: NATIVE_TOKEN_ADDRESS, // Native ETH
   receiver: userWalletAddress,
   amount: '100',
   onRampProvider: 'stripe',

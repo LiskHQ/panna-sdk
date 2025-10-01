@@ -100,12 +100,14 @@ export async function onRampStatus(
  *
  * @example
  * ```ts
+ * import { onRampPrepare, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+ *
  * // Prepare an onramp session for a fiat-to-crypto transaction
  * const onramp = await onRampPrepare({
  *   client: pannaClient,
  *   chainId: 1,
- *   tokenAddress: '0x0000000000000000000000000000000000000000',
- *   receiver: '0x0000000000000000000000000000000000000000',
+ *   tokenAddress: NATIVE_TOKEN_ADDRESS,
+ *   receiver: userWalletAddress,
  *   amount: '100',
  *   purchaseData: { sessionId: '123' },
  *   onramp: 'stripe'
@@ -204,10 +206,12 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
  *
  * @example
  * ```ts
- * // Get fiat prices for a specific token
+ * import { getTokenFiatPrices, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+ *
+ * // Get fiat prices for a specific token (native ETH)
  * const prices = await getTokenFiatPrices({
  *   chainId: 1,
- *   tokenAddress: '0x0000000000000000000000000000000000000000',
+ *   tokenAddress: NATIVE_TOKEN_ADDRESS,
  *   client: pannaClient
  * });
  * // Get fiat prices for all tokens on a chain
@@ -220,7 +224,7 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
  * [
  *   {
  *     chainId: 1,
- *     address: '0x0000000000000000000000000000000000000000',
+ *     address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', // NATIVE_TOKEN_ADDRESS
  *     symbol: 'ETH',
  *     name: 'Ethereum',
  *     decimals: 18,
@@ -232,7 +236,7 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
  *   },
  *   {
  *     chainId: 1,
- *     address: '0x0000000000000000000000000000000000000001',
+ *     address: '0xdac17f958d2ee523a2206206994597c13d831ec7', // USDT contract address
  *     symbol: 'USDT',
  *     name: 'Tether',
  *     decimals: 6,
