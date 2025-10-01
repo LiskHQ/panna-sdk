@@ -153,8 +153,8 @@ const customChain = describeChain({
   id: 1234,
   rpc: 'https://my-rpc.com',
   nativeCurrency: {
-    name: 'Custom Token',
-    symbol: 'CTK',
+    name: 'Ether',
+    symbol: 'ETH',
     decimals: 18
   }
 });
