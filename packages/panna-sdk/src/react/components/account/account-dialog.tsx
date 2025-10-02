@@ -264,19 +264,19 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 </TabsTrigger>
               </TabsList>
               <TabsContent
-                value="balance"
+                value={AccountDialogTab.Balance}
                 className="max-h-80 w-full overflow-y-auto"
               >
                 <TokensList />
               </TabsContent>
               <TabsContent
-                value="collectibles"
+                value={AccountDialogTab.Collectibles}
                 className="max-h-[400px] w-full overflow-y-auto"
               >
                 <CollectiblesList />
               </TabsContent>
               <TabsContent
-                value="activity"
+                value={AccountDialogTab.Activity}
                 className="max-h-80 w-full overflow-y-auto"
               >
                 <ActivityList />

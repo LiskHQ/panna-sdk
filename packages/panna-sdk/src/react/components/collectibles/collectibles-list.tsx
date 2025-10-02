@@ -121,34 +121,10 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
   function renderCollectibleImage(
     instance: TokenInstance,
     item: Collectible,
-    instanceIndex: number
+    instanceKey: string
   ) {
-    // Since ERC-1155 allows owning multiple tokens with the same ID,
-    // check instance value to display multiple tokens with the same ID
-    if (instance?.value) {
-      return (
-        <>
-          {Array.from({ length: Number(instance.value) }).map(
-            (_, valueIndex) => (
-              <Card key={`${instance.id}-${valueIndex}`} className="p-0">
-                <CardContent className="p-0">
-                  <CollectibleImageRenderer
-                    instance={instance}
-                    token={item.token}
-                    setActiveView={setActiveView}
-                    setActiveCollectible={setActiveCollectible}
-                    setActiveToken={setActiveToken}
-                  />
-                </CardContent>
-              </Card>
-            )
-          )}
-        </>
-      );
-    }
-
     return (
-      <Card key={instanceIndex} className="p-0">
+      <Card key={instanceKey} className="p-0">
         <CardContent className="p-0">
           <CollectibleImageRenderer
             instance={instance}
@@ -202,9 +178,28 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="grid grid-cols-2 gap-4">
+                {/* Since ERC-1155 allows owning multiple tokens with the same ID,
+                check instance value to display multiple tokens with the same ID */}
                 {item.instances.map((instance, instanceIndex) => (
                   <Fragment key={`${instance.id}-${instanceIndex}`}>
-                    {renderCollectibleImage(instance, item, instanceIndex)}
+                    {instance?.value ? (
+                      <>
+                        {Array.from({ length: Number(instance.value) }).map(
+                          (_, valueIndex) =>
+                            renderCollectibleImage(
+                              instance,
+                              item,
+                              `${instance.id}-${valueIndex}`
+                            )
+                        )}
+                      </>
+                    ) : (
+                      renderCollectibleImage(
+                        instance,
+                        item,
+                        String(instanceIndex)
+                      )
+                    )}
                   </Fragment>
                 ))}
               </AccordionContent>
