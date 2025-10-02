@@ -45,10 +45,10 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
   });
   const { isLoading, isFetching, data, isError } = useCollectibles(
     {
-      address: '0x970cedC2708dDc369dD6D6186769c30fF7168288',
+      address: account?.address as string,
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize,
-      chain: getEnvironmentChain('1135')
+      chain: getEnvironmentChain(chainId)
     },
     {
       enabled: !!account?.address
