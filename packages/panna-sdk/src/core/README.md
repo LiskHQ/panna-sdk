@@ -34,36 +34,36 @@ await login({
 
 ### Essential Modules (Start Here)
 
-1. **[Client](./docs/client.md)** - SDK initialization and configuration
+1. **[Client](./client/README.md)** - SDK initialization and configuration
    - Create and configure SDK clients
    - Manage API keys and authentication
    - Set up for client-side or server-side usage
 
-2. **[Wallet](./docs/wallet.md)** - User authentication and account management
+2. **[Wallet](./wallet/README.md)** - User authentication and account management
    - Email/phone authentication
    - Social login providers
    - Account linking and profile management
 
-3. **[Transaction](./docs/transaction.md)** - Blockchain transaction handling
+3. **[Transaction](./transaction/README.md)** - Blockchain transaction handling
    - Send native tokens and ERC-20 tokens
    - Interact with smart contracts
    - Prepare and execute transactions
 
 ### Network & Infrastructure
 
-4. **[Chains](./docs/chains.md)** - Blockchain network configuration
+4. **[Chains](./chains/README.md)** - Blockchain network configuration
    - Pre-configured Lisk networks
    - Custom chain configuration
    - Network metadata and RPC management
 
-5. **[Onramp](./docs/onramp.md)** - Fiat-to-crypto gateway
+5. **[Onramp](./onramp/README.md)** - Fiat-to-crypto gateway
    - Buy crypto with credit cards
    - Multiple payment provider support
    - Country-specific provider availability
 
 ### Utilities & Helpers
 
-6. **[Utils](./docs/utils.md)** - Common utility functions
+6. **[Utils](./utils/README.md)** - Common utility functions
    - Balance queries and conversions
    - Address validation
    - Token metadata fetching
@@ -164,9 +164,9 @@ const customChain = describeChain({
 
 For detailed information about each module, see the individual documentation:
 
-- [Client Module](./docs/client.md) - SDK initialization
-- [Wallet Module](./docs/wallet.md) - Authentication & accounts
-- [Transaction Module](./docs/transaction.md) - Sending transactions
-- [Chains Module](./docs/chains.md) - Network configuration
-- [Onramp Module](./docs/onramp.md) - Fiat gateways
-- [Utils Module](./docs/utils.md) - Helper functions
+- [Client Module](./client/README.md) - SDK initialization
+- [Wallet Module](./wallet/README.md) - Authentication & accounts
+- [Transaction Module](./transaction/README.md) - Sending transactions
+- [Chains Module](./chains/README.md) - Network configuration
+- [Onramp Module](./onramp/README.md) - Fiat gateways
+- [Utils Module](./utils/README.md) - Helper functions

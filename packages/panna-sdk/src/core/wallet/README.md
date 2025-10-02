@@ -273,8 +273,8 @@ if (googleAccount) {
 
 ## Next Steps
 
-- [Client Module](./client.md) - SDK initialization and configuration
-- [Transaction Module](./transaction.md) - Send transactions
-- [Chain Configuration](./chains.md) - Multi-chain support
-- [Fiat Onramp](./onramp.md) - Crypto purchases
-- [Utils Module](./utils.md) - Helpful utilities
+- [Client Module](../client/README.md) - SDK initialization and configuration
+- [Transaction Module](../transaction/README.md) - Send transactions
+- [Chain Configuration](../chains/README.md) - Multi-chain support
+- [Fiat Onramp](../onramp/README.md) - Crypto purchases
+- [Utils Module](../utils/README.md) - Helpful utilities
