@@ -233,25 +233,26 @@ function formatTransactionHistory(activities: Activity[]) {
 import { getCollectiblesByAddress } from 'panna-sdk';
 
 // Get user's NFT collection
-const nfts = await getCollectiblesByAddress({
+const result = await getCollectiblesByAddress({
   client,
   address: userAddress
 });
 
-// Group NFTs by collection
-const groupedNFTs = nfts.reduce(
+// Group NFTs by collection (using token address as unique identifier)
+const groupedNFTs = result.collectibles.reduce(
   (groups, nft) => {
-    const collection = nft.collection;
-    if (!groups[collection]) groups[collection] = [];
-    groups[collection].push(nft);
+    const collectionKey = nft.token.address;
+    if (!groups[collectionKey]) groups[collectionKey] = [];
+    groups[collectionKey].push(nft);
     return groups;
   },
-  {} as Record<string, typeof nfts>
+  {} as Record<string, typeof result.collectibles>
 );
 
 // Display collection summary
-Object.entries(groupedNFTs).forEach(([collection, nfts]) => {
-  console.log(`${collection}: ${nfts.length} NFTs`);
+Object.entries(groupedNFTs).forEach(([collectionAddress, nfts]) => {
+  const collectionName = nfts[0]?.token.name || 'Unknown';
+  console.log(`${collectionName}: ${nfts.length} NFTs`);
 });
 ```
 
