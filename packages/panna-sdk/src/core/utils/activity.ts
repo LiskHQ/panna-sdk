@@ -235,7 +235,9 @@ export const getActivitiesByAddress = async function (
       }
     }
 
-    preProcessedActivities.push(...userTransactions);
+    const preProcessedActivitiesDup = [] as PreProcessedActivity[];
+
+    preProcessedActivitiesDup.push(...userTransactions);
     userInternalTxs.forEach((itx) => {
       const mockedTx = {
         block_number: itx.block_number,
@@ -255,7 +257,7 @@ export const getActivitiesByAddress = async function (
         internal_tx_type: itx.type
       } as PreProcessedActivity;
 
-      preProcessedActivities.push(mockedTx);
+      preProcessedActivitiesDup.push(mockedTx);
     });
     userTokenTransfers.forEach((tt) => {
       const mockedTx = {
@@ -270,9 +272,17 @@ export const getActivitiesByAddress = async function (
         status: 'ok'
       } as PreProcessedActivity;
 
-      preProcessedActivities.push(mockedTx);
+      preProcessedActivitiesDup.push(mockedTx);
     });
-    preProcessedActivities.sort((a, b) => b.block_number - a.block_number);
+    preProcessedActivities.push(
+      ...preProcessedActivitiesDup
+        .sort((a, b) => b.block_number - a.block_number)
+        .filter(
+          (currentEntry, currentIndex, originalSortedArray) =>
+            currentIndex ===
+            originalSortedArray.findIndex((t) => t.hash === currentEntry.hash)
+        )
+    ); // Sort by block number in descending order and remove duplicates
 
     activityCache.set(ckActivities, preProcessedActivities);
   }

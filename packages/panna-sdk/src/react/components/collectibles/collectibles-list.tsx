@@ -5,10 +5,21 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
-import { useState } from 'react';
-import { ImageType, TokenInstance } from 'src/core';
+import { Fragment, useState } from 'react';
+import {
+  Collectible,
+  ImageType,
+  Token,
+  TokenERC,
+  TokenInstance
+} from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
+import {
+  AccountView,
+  AccountViewEnum,
+  useAccountView
+} from '../account/account-view-provider';
 import { DefaultNFTIcon } from '../icons/default-nft-icon';
 import {
   Accordion,
@@ -21,6 +32,7 @@ import { CustomMediaRenderer } from '../ui/custom-media-renderer';
 import { Skeleton } from '../ui/skeleton';
 import { TablePagination } from '../ui/table-pagination';
 import { Typography } from '../ui/typography';
+import { useCollectiblesInfo } from './collectibles-provider';
 
 const DEFAULT_LIMIT = 5;
 const DEFAULT_OFFSET = 0;
@@ -32,6 +44,7 @@ type CollectiblesListProps = {
 export function CollectiblesList({ className }: CollectiblesListProps) {
   const account = useActiveAccount();
   const { chainId } = usePanna();
+  const { setActiveView } = useAccountView();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: DEFAULT_OFFSET,
     pageSize: DEFAULT_LIMIT
@@ -50,6 +63,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
 
   const collectiblesData = data?.collectibles || [];
   const totalCount = data?.metadata.count || 0;
+  const { setActiveCollectible, setActiveToken } = useCollectiblesInfo();
 
   const table = useReactTable({
     columns: [],
@@ -110,6 +124,26 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
+  function renderCollectibleImage(
+    instance: TokenInstance,
+    item: Collectible,
+    instanceKey: string
+  ) {
+    return (
+      <Card key={instanceKey} className="p-0">
+        <CardContent className="p-0">
+          <CollectibleImageRenderer
+            instance={instance}
+            token={item.token}
+            setActiveView={setActiveView}
+            setActiveCollectible={setActiveCollectible}
+            setActiveToken={setActiveToken}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <section>
       {table.getRowModel().rows.map((row, index) => {
@@ -118,8 +152,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           return null;
         }
 
-        // @TODO: Use token.xyz and fallback to token instance
         const firstInstance = item.instances[0];
+        const tokenIcon = item.token.icon;
 
         return (
           <Accordion
@@ -132,7 +166,15 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <CollectibleLogo instance={firstInstance} />
+                  {tokenIcon ? (
+                    <img
+                      src={tokenIcon}
+                      alt={item.token.name}
+                      className="h-10 w-10 rounded-full"
+                    />
+                  ) : (
+                    <CollectibleLogo instance={firstInstance} />
+                  )}
                   <div className="flex items-center gap-1">
                     <Typography variant="small">{item.token.name}</Typography>
                     <Typography variant="muted">
@@ -142,12 +184,29 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="grid grid-cols-2 gap-4">
+                {/* Since ERC-1155 allows owning multiple tokens with the same ID,
+                check instance value to display multiple tokens with the same ID */}
                 {item.instances.map((instance, instanceIndex) => (
-                  <Card key={instanceIndex} className="p-0">
-                    <CardContent className="p-0">
-                      <CollectibleImageRenderer instance={instance} />
-                    </CardContent>
-                  </Card>
+                  <Fragment key={`${instance.id}-${instanceIndex}`}>
+                    {item.token.type === TokenERC.ERC1155 ? (
+                      <>
+                        {Array.from({ length: Number(instance.value) }).map(
+                          (_, valueIndex) =>
+                            renderCollectibleImage(
+                              instance,
+                              item,
+                              `${instance.id}-${valueIndex}`
+                            )
+                        )}
+                      </>
+                    ) : (
+                      renderCollectibleImage(
+                        instance,
+                        item,
+                        String(instanceIndex)
+                      )
+                    )}
+                  </Fragment>
                 ))}
               </AccordionContent>
             </AccordionItem>
@@ -210,7 +269,39 @@ function CollectibleLogo({ instance }: { instance: TokenInstance }) {
   );
 }
 
-function CollectibleImageRenderer({ instance }: { instance: TokenInstance }) {
+type CollectibleImageRendererProps = {
+  instance: TokenInstance;
+  token: Token;
+  setActiveView: (view: AccountView) => void;
+  setActiveCollectible: (collectible: TokenInstance) => void;
+  setActiveToken: (token: Token) => void;
+};
+
+function CollectibleImageRenderer({
+  instance,
+  token,
+  setActiveView,
+  setActiveCollectible,
+  setActiveToken
+}: CollectibleImageRendererProps) {
+  const handleClick = () => {
+    setActiveCollectible(instance);
+    setActiveToken(token);
+    setActiveView(AccountViewEnum.CollectibleDetails);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      className="h-full w-full cursor-pointer border-none bg-transparent"
+    >
+      <ImageRenderer instance={instance} />
+    </button>
+  );
+}
+
+export function ImageRenderer({ instance }: { instance: TokenInstance }) {
   return (
     <>
       {instance.imageType === ImageType.URL && (

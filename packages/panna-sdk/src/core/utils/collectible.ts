@@ -17,7 +17,12 @@ import {
   Token,
   TokenInstance
 } from './collectible.types';
-import { getBaseApiUrl, getCacheKey, isValidAddress } from './common';
+import {
+  buildQueryString,
+  getBaseApiUrl,
+  getCacheKey,
+  isValidAddress
+} from './common';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET
@@ -156,11 +161,9 @@ export const getCollectiblesByAddress = async function (
       break;
     }
 
-    const requestUrl =
-      nextPageParams === null
-        ? baseCollectionsRequestUrl
-        : `${baseCollectionsRequestUrl}?token_contract_address_hash=${nextPageParams.token_contract_address_hash}&token_type=${nextPageParams.token_type}`;
-
+    const requestUrl = baseCollectionsRequestUrl.concat(
+      buildQueryString(nextPageParams)
+    );
     const response = await httpUtils.request(requestUrl);
 
     const errResponse = response as PannaHttpErr;
@@ -198,7 +201,7 @@ export const getCollectiblesByAddress = async function (
         name: collection.token.name,
         symbol: collection.token.symbol,
         type: collection.token.type.toLowerCase(),
-        address: collection.token.address as string,
+        address: collection.token.address_hash as string,
         icon: collection.token.icon_url
       };
 
@@ -211,7 +214,8 @@ export const getCollectiblesByAddress = async function (
             e.metadata?.image_url ||
             e.metadata?.image_data ||
             null,
-          name: e.metadata?.name
+          name: e.metadata?.name,
+          value: e.value || null
         };
         return instance;
       });

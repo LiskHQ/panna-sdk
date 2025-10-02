@@ -8,12 +8,12 @@ import {
 import { useRef, useState } from 'react';
 import { DEFAULT_CURRENCY } from 'src/core';
 import { truncateAddress } from '@/utils/address';
-import { type StringValues } from '../../../core/utils/types';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
+import { SendCollectibleForm } from '../collectibles/send-collectible-form';
 import { SendForm } from '../send/send-form';
 import { Button } from '../ui/button';
 import {
@@ -28,27 +28,33 @@ import {
 import type { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { AccountScreensProvider } from './account-screens-provider';
 import { AccountSettingsView } from './account-settings-view';
-
-enum AccountViewEnum {
-  Main = 'main',
-  Settings = 'settings',
-  Buy = 'buy',
-  Send = 'send'
-}
-
-type AccountView = `${StringValues<typeof AccountViewEnum>}`;
+import {
+  AccountView,
+  AccountViewEnum,
+  useAccountView
+} from './account-view-provider';
 
 type AccountDialogProps = {
   address: string;
 };
 
+enum AccountDialogTab {
+  Balance = 'balance',
+  Collectibles = 'collectibles',
+  Activity = 'activity'
+}
+
 export function AccountDialog({ address }: AccountDialogProps) {
-  const [activeView, setActiveView] = useState<AccountView>(
-    AccountViewEnum.Main
+  const { activeView, setActiveView } = useAccountView();
+  const [activeTab, setActiveTab] = useState<AccountDialogTab>(
+    AccountDialogTab.Balance
   );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
+    useState<DialogStepperContextValue | null>(null);
+  const [sendCollectibleStepperContext, setSendCollectibleStepperContext] =
     useState<DialogStepperContextValue | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
@@ -56,6 +62,15 @@ export function AccountDialog({ address }: AccountDialogProps) {
       address,
       currency: DEFAULT_CURRENCY
     });
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab as AccountDialogTab);
+  };
+
+  const handleCollectibleClose = () => {
+    setActiveView(AccountViewEnum.Main);
+    setActiveTab(AccountDialogTab.Collectibles);
+  };
 
   const renderHeader = (view: AccountView) => {
     switch (view) {
@@ -172,6 +187,37 @@ export function AccountDialog({ address }: AccountDialogProps) {
             {/* No dialog title for Send flow; each step renders its own title */}
           </DialogHeader>
         );
+      case AccountViewEnum.CollectibleDetails:
+        return (
+          <DialogHeader className="items-center gap-0">
+            <div className="flex w-full items-center justify-between gap-2">
+              {sendCollectibleStepperContext?.stepData?.hideBackButton ? (
+                <div />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (sendCollectibleStepperContext?.canGoBack) {
+                      sendCollectibleStepperContext.prev();
+                    } else {
+                      setActiveView(AccountViewEnum.Main);
+                    }
+                  }}
+                >
+                  <ArrowLeftIcon
+                    size={20}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  />
+                </button>
+              )}
+              <XIcon
+                size={20}
+                onClick={handleCollectibleClose}
+                className="text-muted-foreground hover:text-primary transition-colors"
+              />
+            </div>
+          </DialogHeader>
+        );
     }
   };
 
@@ -201,26 +247,36 @@ export function AccountDialog({ address }: AccountDialogProps) {
               </Button>
             </div>
             <Separator orientation="horizontal" />
-            <Tabs defaultValue="balance" className="w-full items-center gap-6">
+            <Tabs
+              defaultValue={activeTab}
+              onValueChange={handleTabClick}
+              className="w-full items-center gap-6"
+            >
               <TabsList>
-                <TabsTrigger value="balance">Balance</TabsTrigger>
-                <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsTrigger value={AccountDialogTab.Balance}>
+                  Balance
+                </TabsTrigger>
+                <TabsTrigger value={AccountDialogTab.Collectibles}>
+                  Collectibles
+                </TabsTrigger>
+                <TabsTrigger value={AccountDialogTab.Activity}>
+                  Activity
+                </TabsTrigger>
               </TabsList>
               <TabsContent
-                value="balance"
+                value={AccountDialogTab.Balance}
                 className="max-h-80 w-full overflow-y-auto"
               >
                 <TokensList />
               </TabsContent>
               <TabsContent
-                value="collectibles"
+                value={AccountDialogTab.Collectibles}
                 className="max-h-[400px] w-full overflow-y-auto"
               >
                 <CollectiblesList />
               </TabsContent>
               <TabsContent
-                value="activity"
+                value={AccountDialogTab.Activity}
                 className="max-h-80 w-full overflow-y-auto"
               >
                 <ActivityList />
@@ -244,6 +300,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
             onClose={() => setActiveView(AccountViewEnum.Main)}
           />
         );
+      case AccountViewEnum.CollectibleDetails:
+        return (
+          <SendCollectibleForm
+            onStepperChange={setSendCollectibleStepperContext}
+            onClose={handleCollectibleClose}
+          />
+        );
     }
   };
 
@@ -253,8 +316,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
         <Button variant="outline">{truncateAddress(address)}</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
-        {renderHeader(activeView)}
-        {renderContent(activeView)}
+        <DialogDescription className="sr-only">
+          Select account views and manage your account settings.
+        </DialogDescription>
+        <AccountScreensProvider>
+          {renderHeader(activeView)}
+          {renderContent(activeView)}
+        </AccountScreensProvider>
       </DialogContent>
     </Dialog>
   );

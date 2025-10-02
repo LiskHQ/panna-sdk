@@ -5,65 +5,73 @@ import {
   liskSepolia,
   prepareContractCall,
   PrepareContractCallResult,
-  prepareTransaction,
-  PrepareTransactionResult,
   sendTransaction,
-  toWei
+  TokenERC
 } from 'src/core';
-import { tokenConfig } from '@/consts';
+import { Abi } from 'viem';
 import { useActiveAccount, usePanna } from '@/hooks';
 import { getEnvironmentChain } from '@/utils';
 import { Address, PreparedTransaction } from '../../../core/types/external';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
-import { SendFormData } from './schema';
+import { SendCollectibleFormData } from './schema';
 
-type SendProcessingStepProps = {
-  form: UseFormReturn<SendFormData>;
+const DEFAULT_ERC1155_VALUE = 1;
+const DEFAULT_ERC1155_DATA = '0x';
+
+type ProcessingStepProps = {
+  form: UseFormReturn<SendCollectibleFormData>;
 };
 
-export function SendProcessingStep({ form }: SendProcessingStepProps) {
+export function ProcessingStep({ form }: ProcessingStepProps) {
   const { client, chainId } = usePanna();
   const { next, goToStep, lastStep } = useDialogStepper();
   const account = useActiveAccount();
   const initializeTokenSend = useRef(true);
-  const tokenData = form.getValues('tokenInfo.token');
-  const cryptoAmount = form.getValues('cryptoAmount') || '0';
+  const { collectible, token, recipientAddress } = form.getValues();
 
-  // @Todo: Possibly create hook for this logic
+  // TODO: Possibly create hook for this logic
   useEffect(() => {
-    let transaction: PrepareTransactionResult | PrepareContractCallResult;
+    let transaction: PrepareContractCallResult;
     const chain = getEnvironmentChain(chainId);
-    const currentTokenConfig = tokenConfig[chain.id];
-    if (tokenData.symbol === 'ETH') {
-      transaction = prepareTransaction({
+    if (token.type === TokenERC.ERC721) {
+      transaction = prepareContractCall({
         client,
         chain,
-        to: form.getValues('recipientAddress') as Address,
-        value: BigInt(toWei(cryptoAmount)) // Convert ETH to wei
+        method:
+          'function safeTransferFrom(address from, address to, uint256 tokenId)',
+        params: [
+          account?.address as Address,
+          recipientAddress as Address,
+          BigInt(collectible.id)
+        ],
+        address: token.address as Address
+      });
+    } else if (token.type === TokenERC.ERC1155) {
+      transaction = prepareContractCall({
+        client,
+        chain,
+        method:
+          'function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes data)',
+        params: [
+          account?.address as Address,
+          recipientAddress as Address,
+          BigInt(collectible.id),
+          DEFAULT_ERC1155_VALUE,
+          DEFAULT_ERC1155_DATA
+        ],
+        address: token.address as Address
       });
     } else {
-      transaction = prepareContractCall({
-        method: 'function transfer(address to, uint256 value)',
-        params: [
-          form.getValues('recipientAddress') as Address,
-          BigInt(Number(cryptoAmount) * 10 ** tokenData.decimals)
-        ],
-        address: currentTokenConfig.find(
-          (token) => token.symbol === tokenData.symbol
-        )?.address as Address,
-        chain,
-        client
-      });
+      throw new Error('Unsupported token type');
     }
 
-    async function sendToken() {
+    async function sendCollectible() {
       try {
         const result = await sendTransaction({
           account: account!,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          transaction: transaction as PreparedTransaction<any>
+          transaction: transaction as PreparedTransaction<Abi>
         });
 
         if (chainId === String(liskSepolia.id)) {
@@ -86,7 +94,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
     }
 
     if (initializeTokenSend.current) {
-      sendToken();
+      sendCollectible();
       initializeTokenSend.current = false;
     }
   }, []);
