@@ -98,3 +98,13 @@ your-monorepo/
 └── .prettierrc             # Prettier formatting
 
 ```
+
+---
+
+## 💬 Support & Community
+
+Need help or want to connect with the community?
+
+**[Join our Discord](https://lisk.chat/)** - Get support, share feedback, and collaborate with other developers.
+
+For questions, issues, or contributions, feel free to reach out through our Discord community!
