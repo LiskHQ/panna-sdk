@@ -6,7 +6,13 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { Fragment, useState } from 'react';
-import { Collectible, ImageType, Token, TokenInstance } from 'src/core';
+import {
+  Collectible,
+  ImageType,
+  Token,
+  TokenERC,
+  TokenInstance
+} from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
 import {
@@ -182,7 +188,7 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 check instance value to display multiple tokens with the same ID */}
                 {item.instances.map((instance, instanceIndex) => (
                   <Fragment key={`${instance.id}-${instanceIndex}`}>
-                    {instance?.value ? (
+                    {item.token.type === TokenERC.ERC1155 ? (
                       <>
                         {Array.from({ length: Number(instance.value) }).map(
                           (_, valueIndex) =>
