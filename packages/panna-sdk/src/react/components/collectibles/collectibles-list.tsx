@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { Fragment, useState } from 'react';
-import { ImageType, Token, TokenInstance } from 'src/core';
+import { Collectible, ImageType, Token, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
 import {
@@ -45,10 +45,10 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
   });
   const { isLoading, isFetching, data, isError } = useCollectibles(
     {
-      address: account?.address as string,
+      address: '0x970cedC2708dDc369dD6D6186769c30fF7168288',
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize,
-      chain: getEnvironmentChain(chainId)
+      chain: getEnvironmentChain('1135')
     },
     {
       enabled: !!account?.address
@@ -118,6 +118,50 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
+  function renderCollectibleImage(
+    instance: TokenInstance,
+    item: Collectible,
+    instanceIndex: number
+  ) {
+    // Since ERC-1155 allows owning multiple tokens with the same ID,
+    // check instance value to display multiple tokens with the same ID
+    if (instance?.value) {
+      return (
+        <>
+          {Array.from({ length: Number(instance.value) }).map(
+            (_, valueIndex) => (
+              <Card key={`${instance.id}-${valueIndex}`} className="p-0">
+                <CardContent className="p-0">
+                  <CollectibleImageRenderer
+                    instance={instance}
+                    token={item.token}
+                    setActiveView={setActiveView}
+                    setActiveCollectible={setActiveCollectible}
+                    setActiveToken={setActiveToken}
+                  />
+                </CardContent>
+              </Card>
+            )
+          )}
+        </>
+      );
+    }
+
+    return (
+      <Card key={instanceIndex} className="p-0">
+        <CardContent className="p-0">
+          <CollectibleImageRenderer
+            instance={instance}
+            token={item.token}
+            setActiveView={setActiveView}
+            setActiveCollectible={setActiveCollectible}
+            setActiveToken={setActiveToken}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <section>
       {table.getRowModel().rows.map((row, index) => {
@@ -126,8 +170,8 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
           return null;
         }
 
-        // @TODO: Use token.xyz and fallback to token instance
         const firstInstance = item.instances[0];
+        const tokenIcon = item.token.icon;
 
         return (
           <Accordion
@@ -140,7 +184,15 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
             <AccordionItem value={`item-${firstInstance.id}-${index}`}>
               <AccordionTrigger className="flex items-center justify-between hover:cursor-pointer hover:no-underline">
                 <div className="flex items-center gap-3">
-                  <CollectibleLogo instance={firstInstance} />
+                  {tokenIcon ? (
+                    <img
+                      src={tokenIcon}
+                      alt={item.token.name}
+                      className="h-10 w-10 rounded-full"
+                    />
+                  ) : (
+                    <CollectibleLogo instance={firstInstance} />
+                  )}
                   <div className="flex items-center gap-1">
                     <Typography variant="small">{item.token.name}</Typography>
                     <Typography variant="muted">
@@ -150,44 +202,9 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="grid grid-cols-2 gap-4">
-                {/* Since ERC-1155 allows owning multiple tokens with the same ID,
-                check value to display multiple tokens */}
                 {item.instances.map((instance, instanceIndex) => (
                   <Fragment key={`${instance.id}-${instanceIndex}`}>
-                    {instance?.value ? (
-                      <>
-                        {Array.from({ length: Number(instance.value) }).map(
-                          (_, valueIndex) => (
-                            <Card
-                              key={`${instance.id}-${valueIndex}`}
-                              className="p-0"
-                            >
-                              <CardContent className="p-0">
-                                <CollectibleImageRenderer
-                                  instance={instance}
-                                  token={item.token}
-                                  setActiveView={setActiveView}
-                                  setActiveCollectible={setActiveCollectible}
-                                  setActiveToken={setActiveToken}
-                                />
-                              </CardContent>
-                            </Card>
-                          )
-                        )}
-                      </>
-                    ) : (
-                      <Card key={instanceIndex} className="p-0">
-                        <CardContent className="p-0">
-                          <CollectibleImageRenderer
-                            instance={instance}
-                            token={item.token}
-                            setActiveView={setActiveView}
-                            setActiveCollectible={setActiveCollectible}
-                            setActiveToken={setActiveToken}
-                          />
-                        </CardContent>
-                      </Card>
-                    )}
+                    {renderCollectibleImage(instance, item, instanceIndex)}
                   </Fragment>
                 ))}
               </AccordionContent>

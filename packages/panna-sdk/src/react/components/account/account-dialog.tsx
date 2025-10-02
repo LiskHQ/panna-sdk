@@ -40,9 +40,17 @@ type AccountDialogProps = {
   address: string;
 };
 
+enum AccountDialogTab {
+  Balance = 'balance',
+  Collectibles = 'collectibles',
+  Activity = 'activity'
+}
+
 export function AccountDialog({ address }: AccountDialogProps) {
   const { activeView, setActiveView } = useAccountView();
-  const [activeTab, setActiveTab] = useState<string>('balance');
+  const [activeTab, setActiveTab] = useState<AccountDialogTab>(
+    AccountDialogTab.Balance
+  );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
     useState<DialogStepperContextValue | null>(null);
@@ -56,12 +64,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
     });
 
   const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
+    setActiveTab(tab as AccountDialogTab);
   };
 
   const handleCollectibleClose = () => {
     setActiveView(AccountViewEnum.Main);
-    setActiveTab('collectibles');
+    setActiveTab(AccountDialogTab.Collectibles);
   };
 
   const renderHeader = (view: AccountView) => {
@@ -245,9 +253,15 @@ export function AccountDialog({ address }: AccountDialogProps) {
               className="w-full items-center gap-6"
             >
               <TabsList>
-                <TabsTrigger value="balance">Balance</TabsTrigger>
-                <TabsTrigger value="collectibles">Collectibles</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsTrigger value={AccountDialogTab.Balance}>
+                  Balance
+                </TabsTrigger>
+                <TabsTrigger value={AccountDialogTab.Collectibles}>
+                  Collectibles
+                </TabsTrigger>
+                <TabsTrigger value={AccountDialogTab.Activity}>
+                  Activity
+                </TabsTrigger>
               </TabsList>
               <TabsContent
                 value="balance"

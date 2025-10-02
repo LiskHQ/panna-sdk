@@ -48,7 +48,7 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
         ],
         address: token.address as Address
       });
-    } else {
+    } else if (token.type === TokenERC.ERC1155) {
       transaction = prepareContractCall({
         client,
         chain,
@@ -63,6 +63,8 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
         ],
         address: token.address as Address
       });
+    } else {
+      throw new Error('Unsupported token type');
     }
 
     async function sendCollectible() {

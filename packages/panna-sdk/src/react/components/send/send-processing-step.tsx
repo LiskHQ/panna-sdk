@@ -41,7 +41,7 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
         client,
         chain,
         to: form.getValues('recipientAddress') as Address,
-        value: BigInt(toWei(cryptoAmount) * 100000000000000000n) // Convert ETH to wei
+        value: BigInt(toWei(cryptoAmount)) // Convert ETH to wei
       });
     } else {
       transaction = prepareContractCall({
