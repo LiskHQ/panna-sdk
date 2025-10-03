@@ -197,8 +197,8 @@ const transaction = prepareTransaction({
   chain: lisk,
   to: recipientAddress,
   value: toWei('1'),
-  maxFeePerGas: BigInt(30000000000), // 30 gwei maximum
-  maxPriorityFeePerGas: BigInt(2000000000) // 2 gwei tip for miners
+  maxFeePerGas: BigInt(30_000_000_000), // 30 gwei maximum
+  maxPriorityFeePerGas: BigInt(2_000_000_000) // 2 gwei tip for miners
 });
 ```
 
@@ -211,7 +211,7 @@ const transaction = prepareTransaction({
   chain: lisk,
   to: recipientAddress,
   value: toWei('1'),
-  gasPrice: BigInt(20000000000) // 20 gwei
+  gasPrice: BigInt(20_000_000_000) // 20 gwei
 });
 ```
 
