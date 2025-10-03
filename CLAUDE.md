@@ -18,7 +18,7 @@ pnpm --filter example-app dev      # Run example app in dev mode
 
 - **TypeScript**: Strict mode enabled, avoid `any` types, use explicit return types for public APIs
 - **Imports**: Sorted by @trivago/prettier-plugin, use `@/` alias for internal imports
-- **Formatting**: Prettier with 80 char lines, single quotes, semicolons, no trailing commas
+- **Formatting**: Prettier with 80 char lines, single quotes, semicolons, trailing commas where valid
 - **Naming**: camelCase for variables/functions, PascalCase for types/interfaces/components, UPPER_SNAKE for constants
 - **Exports**: Named exports preferred, single `export` statement per file when possible
 - **React**: Functional components only, hooks for state management, no React.FC
@@ -32,7 +32,7 @@ This is a TypeScript monorepo for the Panna SDK, a blockchain wallet SDK built o
 ### Monorepo Structure
 
 - **`packages/panna-sdk`**: Core SDK package containing both headless logic and React UI components
-- **`apps/example-app`**: Next.js 14 example app demonstrating SDK usage
+- **`apps/example-app`**: Next.js 15 example app demonstrating SDK usage
 - **Build System**: PNPM workspaces with project references
 - **Testing**: Jest with separate configurations for core (node) and React (jsdom) tests
 
@@ -103,3 +103,11 @@ SDK requires configuration via environment variables:
 - `MOCK_PANNA_API`: Enable API mocking for tests (default: false)
 
 Create `.env` file in `packages/panna-sdk/` for local development.
+
+## Available Agents
+
+### git-branch-reviewer
+
+Use when you need to review code changes before creating a PR. The agent analyzes diffs, identifies issues, and provides categorized feedback.
+
+**Usage**: "Review my branch changes" or "Is my branch ready for PR?"
