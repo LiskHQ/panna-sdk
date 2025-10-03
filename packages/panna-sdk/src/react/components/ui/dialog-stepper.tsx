@@ -18,7 +18,9 @@ export type DialogStepperContextValue = {
   prev: (data?: Record<string, unknown>) => void;
   reset: () => void;
   stepData: Record<string, unknown>;
+  goToStep: (step: number, data?: Record<string, unknown>) => void;
   currentStep: number;
+  lastStep: number;
   canGoBack: boolean;
 };
 
@@ -39,6 +41,14 @@ export function DialogStepper({ children }: DialogStepperProps) {
     setStep((prev) => Math.max(0, prev - 1));
   }, []);
 
+  const goToStep = useCallback(
+    (step: number, data?: Record<string, unknown>) => {
+      setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
+      setStep(step);
+    },
+    []
+  );
+
   const reset = useCallback(() => {
     setStep(0);
     setStepData({});
@@ -51,10 +61,20 @@ export function DialogStepper({ children }: DialogStepperProps) {
   }, [children]);
 
   const canGoBack = step > 0;
+  const lastStep = Children.count(children) - 1;
 
   return (
     <DialogStepperContext.Provider
-      value={{ next, prev, reset, stepData, currentStep: step, canGoBack }}
+      value={{
+        next,
+        prev,
+        reset,
+        stepData,
+        currentStep: step,
+        goToStep,
+        lastStep,
+        canGoBack
+      }}
     >
       {memoizedChildren[step]}
     </DialogStepperContext.Provider>
