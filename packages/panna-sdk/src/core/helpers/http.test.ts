@@ -1,5 +1,6 @@
 import { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
+import { newLruMemCache } from './cache';
 import * as delay from './delay';
 import * as http from './http';
 import {
@@ -198,6 +199,13 @@ describe('HttpStatusCode', () => {
 });
 
 describe('request', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Clear the request cache before each test
+    const requestCache = newLruMemCache('http_request');
+    requestCache.clear();
+  });
+
   it('should return PannaHttpErr response in case of internal Axios error', async () => {
     const axiosErr = new AxiosError(
       'ERR_NETWORK',
@@ -298,13 +306,15 @@ describe('request', () => {
     );
   });
 
-  xit('should return from cache if exists', async () => {
+  it('should return from cache if exists', async () => {
     const mockResponse = fixture_getSampleAxiosResponse(HttpStatusCode.Ok);
     const requestSpy = jest
       .spyOn(http, 'requestWithRetries')
       .mockResolvedValue(mockResponse);
 
-    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(mockResponse.data);
+    await expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(
+      mockResponse.data
+    );
     expect(requestSpy).toHaveBeenCalledTimes(1);
     expect(requestSpy).toHaveBeenCalledWith(
       MOCK_REQUEST_URL,
@@ -317,7 +327,9 @@ describe('request', () => {
     );
 
     // 2nd call - should return from cache
-    expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(mockResponse.data);
+    await expect(request(MOCK_REQUEST_URL)).resolves.toStrictEqual(
+      mockResponse.data
+    );
     expect(requestSpy).toHaveBeenCalledTimes(1); // No additional call made
   });
 

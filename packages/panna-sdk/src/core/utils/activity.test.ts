@@ -1,7 +1,7 @@
+import { Bridge } from 'thirdweb';
 import { liskSepolia } from '../chain';
 import { type PannaClient } from '../client';
 import * as httpUtils from '../helpers/http';
-import * as activity from './activity';
 import {
   fillTokenTransactions,
   getActivitiesByAddress,
@@ -25,6 +25,38 @@ import {
 // Mock upstream modules
 jest.mock('../helpers/http');
 jest.mock('./activity', () => jest.requireActual('./activity'));
+jest.mock('thirdweb', () => ({
+  Bridge: {
+    tokens: jest.fn()
+  },
+  NATIVE_TOKEN_ADDRESS: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+}));
+
+// Mock the cache module with complete reset capability
+jest.mock('../helpers/cache', () => {
+  let caches = new Map<string, Map<string, unknown>>();
+
+  return {
+    newLruMemCache: (id: string) => {
+      if (!caches.has(id)) {
+        caches.set(id, new Map());
+      }
+      const cache = caches.get(id)!;
+
+      return {
+        get: (key: string) => cache.get(key),
+        set: (key: string, value: unknown) => cache.set(key, value),
+        has: (key: string) => cache.has(key),
+        delete: (key: string) => cache.delete(key),
+        clear: () => cache.clear()
+      };
+    },
+    // Completely reset the cache Map (not just clear contents)
+    __resetAllCaches: () => {
+      caches = new Map<string, Map<string, unknown>>();
+    }
+  };
+});
 
 const mockClient = {} as PannaClient;
 
@@ -240,16 +272,39 @@ describe('getAmountType', () => {
 });
 
 describe('getActivitiesByAddress', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Completely reset cache state between tests
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const cacheModule = require('../helpers/cache');
+    if (cacheModule.__resetAllCaches) {
+      cacheModule.__resetAllCaches();
+    }
+
+    // Mock Bridge.tokens to return empty array (no fiat prices)
+    (Bridge.tokens as jest.Mock).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   afterAll(() => {
     jest.clearAllMocks();
   });
 
-  xit('should return empty list of activities if none exist', async () => {
+  it('should return empty list of activities if none exist', async () => {
     const mockRequestResponse = {
       items: [],
       next_page_params: null
     };
-    (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
+
+    // Order: 1. internal, 2. transactions, 3. token transfers (Promise.allSettled)
+    (httpUtils.request as jest.Mock)
+      .mockResolvedValueOnce(mockRequestResponse) // internal transactions
+      .mockResolvedValueOnce(mockRequestResponse) // transactions
+      .mockResolvedValueOnce(mockRequestResponse); // token transfers
 
     const params = {
       address: '0xe1287E785D424cd3d0998957388C4770488ed841',
@@ -258,13 +313,17 @@ describe('getActivitiesByAddress', () => {
     };
     const result = await getActivitiesByAddress(params);
 
-    expect(httpUtils.request).toHaveBeenCalledTimes(2);
+    expect(httpUtils.request).toHaveBeenCalledTimes(3);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
-      getBaseTransactionsRequestUrl(params.address, liskSepolia.id)
+      getBaseInternalTransactionsRequestUrl(params.address, liskSepolia.id)
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       2,
+      getBaseTransactionsRequestUrl(params.address, liskSepolia.id)
+    );
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      3,
       getBaseTokenTransferRequestUrl(params.address, liskSepolia.id)
     );
     expect(result).toStrictEqual({
@@ -278,14 +337,23 @@ describe('getActivitiesByAddress', () => {
     });
   });
 
-  xit('should return list of activities (lower than default limit)', async () => {
+  it('should return list of activities (lower than default limit)', async () => {
     const mockRequestResponse = fixture.getActivitiesByAddress
       .should_return_list_of_activities_lower_than_default_limit
       .mockRequestResponse as unknown as BlockscoutTransactionsResponse;
-    (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
-    jest
-      .spyOn(activity, 'fillTokenTransactions')
-      .mockResolvedValue(mockRequestResponse.items);
+
+    const emptyResponse = {
+      items: [],
+      next_page_params: null
+    };
+
+    // Order: 1. internal, 2. transactions, 3. token transfers (Promise.allSettled),
+    // 4. token transfers (fillTokenTransactions - some transactions have token_transfer type)
+    (httpUtils.request as jest.Mock)
+      .mockResolvedValueOnce(emptyResponse) // internal transactions
+      .mockResolvedValueOnce(mockRequestResponse) // transactions
+      .mockResolvedValueOnce(emptyResponse) // token transfers (Promise.allSettled)
+      .mockResolvedValueOnce(emptyResponse); // token transfers (fillTokenTransactions)
 
     const params = {
       address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
@@ -294,17 +362,22 @@ describe('getActivitiesByAddress', () => {
     };
     const result = await getActivitiesByAddress(params);
 
-    expect(httpUtils.request).toHaveBeenCalledTimes(1);
+    expect(httpUtils.request).toHaveBeenCalledTimes(4);
     expect(httpUtils.request).toHaveBeenNthCalledWith(
       1,
+      getBaseInternalTransactionsRequestUrl(params.address, params.chain.id)
+    );
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      2,
       getBaseTransactionsRequestUrl(params.address, params.chain.id)
     );
-    expect(activity.fillTokenTransactions).toHaveBeenCalledTimes(1);
-    expect(activity.fillTokenTransactions).toHaveBeenNthCalledWith(
-      1,
-      params.address,
-      params.chain.id,
-      mockRequestResponse.items
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      3,
+      getBaseTokenTransferRequestUrl(params.address, params.chain.id)
+    );
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      4,
+      getBaseTokenTransferRequestUrl(params.address, params.chain.id)
     );
     expect(result).toStrictEqual(
       fixture.getActivitiesByAddress
@@ -312,7 +385,7 @@ describe('getActivitiesByAddress', () => {
     );
   });
 
-  xit('should return list of activities (multiple API requests)', async () => {
+  it('should return list of activities (multiple API requests)', async () => {
     const mockRequestResponse1 = fixture.getActivitiesByAddress
       .should_return_list_of_activities_multiple_API_requests
       .mockRequestResponse1 as unknown as BlockscoutTransactionsResponse;
@@ -323,16 +396,19 @@ describe('getActivitiesByAddress', () => {
       .should_return_list_of_activities_multiple_API_requests
       .mockRequestResponse3 as unknown as BlockscoutTransactionsResponse;
 
-    (httpUtils.request as jest.Mock)
-      .mockResolvedValueOnce(mockRequestResponse1)
-      .mockResolvedValueOnce(mockRequestResponse2)
-      .mockResolvedValueOnce(mockRequestResponse3);
+    const emptyResponse = {
+      items: [],
+      next_page_params: null
+    };
 
-    jest
-      .spyOn(activity, 'fillTokenTransactions')
-      .mockResolvedValueOnce(mockRequestResponse1.items)
-      .mockResolvedValueOnce(mockRequestResponse2.items)
-      .mockResolvedValueOnce(mockRequestResponse3.items);
+    // Order: 1. internal (initial), 2. transactions page 1 (initial), 3. token transfers (initial),
+    // 4. transactions page 2 (pagination), 5. transactions page 3 (pagination)
+    (httpUtils.request as jest.Mock)
+      .mockResolvedValueOnce(emptyResponse) // internal transactions (initial)
+      .mockResolvedValueOnce(mockRequestResponse1) // transactions page 1 (initial)
+      .mockResolvedValueOnce(emptyResponse) // token transfers (initial)
+      .mockResolvedValueOnce(mockRequestResponse2) // transactions page 2 (pagination)
+      .mockResolvedValueOnce(mockRequestResponse3); // transactions page 3 (pagination)
 
     const params = {
       address: '0x1AC80cE05cd7715BfBb7cEB2D42ed7874810EB3F',
@@ -342,19 +418,31 @@ describe('getActivitiesByAddress', () => {
       limit: 4
     };
     const result = await getActivitiesByAddress(params);
-    expect(httpUtils.request).toHaveBeenCalledTimes(3);
+    expect(httpUtils.request).toHaveBeenCalledTimes(5);
 
     const baseRequestUrl = getBaseTransactionsRequestUrl(
       params.address,
       params.chain.id
     );
-    expect(httpUtils.request).toHaveBeenNthCalledWith(1, baseRequestUrl);
+
+    // Initial calls via Promise.allSettled
     expect(httpUtils.request).toHaveBeenNthCalledWith(
-      2,
+      1,
+      getBaseInternalTransactionsRequestUrl(params.address, params.chain.id)
+    );
+    expect(httpUtils.request).toHaveBeenNthCalledWith(2, baseRequestUrl);
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      3,
+      getBaseTokenTransferRequestUrl(params.address, params.chain.id)
+    );
+
+    // Pagination calls
+    expect(httpUtils.request).toHaveBeenNthCalledWith(
+      4,
       `${baseRequestUrl}?block_number=${mockRequestResponse1.next_page_params?.block_number}&index=${mockRequestResponse1.next_page_params?.index}&items_count=${mockRequestResponse1.next_page_params?.items_count}`
     );
     expect(httpUtils.request).toHaveBeenNthCalledWith(
-      3,
+      5,
       `${baseRequestUrl}?block_number=${mockRequestResponse2.next_page_params?.block_number}&index=${mockRequestResponse2.next_page_params?.index}&items_count=${mockRequestResponse2.next_page_params?.items_count}`
     );
     expect(result).toStrictEqual(

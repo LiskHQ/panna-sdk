@@ -6445,7 +6445,7 @@ export const getActivitiesByAddress = {
             '0x3e50f83636069d59795f0604ed8f2983a1c8dd2ae0f563337486b2362258def8'
         },
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -6463,7 +6463,7 @@ export const getActivitiesByAddress = {
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -6510,7 +6510,7 @@ export const getActivitiesByAddress = {
               type: 'erc-20'
             },
             type: 'erc-20',
-            value: '0'
+            value: '2000000000000000000'
           },
           status: 'success',
           transactionID:
@@ -6528,7 +6528,7 @@ export const getActivitiesByAddress = {
               type: 'erc-20'
             },
             type: 'erc-20',
-            value: '0'
+            value: '2000000000000000000'
           },
           status: 'success',
           transactionID:
@@ -7382,7 +7382,7 @@ export const getActivitiesByAddress = {
     wantResult: {
       activities: [
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -7400,7 +7400,7 @@ export const getActivitiesByAddress = {
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
@@ -7447,7 +7447,7 @@ export const getActivitiesByAddress = {
               type: 'erc-20'
             },
             type: 'erc-20',
-            value: '0'
+            value: '2000000000000000000'
           },
           status: 'success',
           transactionID:

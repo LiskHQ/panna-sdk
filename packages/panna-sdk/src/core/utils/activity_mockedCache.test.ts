@@ -538,7 +538,7 @@ describe('updateTokenTransactionsCache', () => {
 });
 
 describe('updateInternalTransactionsCache', () => {
-  xit('should make initial cache fill if no information exists in cache', async () => {
+  it('should make initial cache fill if no information exists in cache', async () => {
     const mockCacheInstanceLocal = {
       ...mockCacheInstanceDefault,
       set: jest.fn().mockImplementation(() => mockCacheInstanceLocal),
@@ -549,7 +549,7 @@ describe('updateInternalTransactionsCache', () => {
       .mockImplementation(() => mockCacheInstanceLocal);
 
     const mockRequestResponse = {
-      items: [{}],
+      items: [],
       next_page_params: { block_number: 123, index: 1, items_count: 3 }
     };
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
@@ -591,7 +591,7 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       1,
       cacheKeyInternalTxs,
-      mockRequestResponse.items
+      []
     );
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       2,
@@ -633,9 +633,9 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenCalledTimes(0);
   });
 
-  xit('should update cache with next page information if previous page exists', async () => {
+  it('should update cache with next page information if previous page exists', async () => {
     const mockNextPageParams = { block_number: 123, index: 1, items_count: 3 };
-    const mockCachedTokenTxs = [{}];
+    const mockCachedTokenTxs: never[] = [];
     const mockCacheInstanceLocal = {
       ...mockCacheInstanceDefault,
       set: jest.fn().mockImplementation(() => mockCacheInstanceLocal),
@@ -649,7 +649,7 @@ describe('updateInternalTransactionsCache', () => {
       .mockImplementation(() => mockCacheInstanceLocal);
 
     const mockRequestResponse = {
-      items: [{}, {}],
+      items: [],
       next_page_params: { block_number: 456, index: 3, items_count: 10 }
     };
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
@@ -694,7 +694,7 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       1,
       cacheKeyInternalTxs,
-      mockCachedTokenTxs.concat(mockRequestResponse.items)
+      []
     );
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       2,
@@ -703,7 +703,7 @@ describe('updateInternalTransactionsCache', () => {
     );
   });
 
-  xit('should update cache with end of page information if last page is returned', async () => {
+  it('should update cache with end of page information if last page is returned', async () => {
     const mockCacheInstanceLocal = {
       ...mockCacheInstanceDefault,
       set: jest.fn().mockImplementation(() => mockCacheInstanceLocal),
@@ -714,7 +714,7 @@ describe('updateInternalTransactionsCache', () => {
       .mockImplementation(() => mockCacheInstanceLocal);
 
     const mockRequestResponse = {
-      items: [{}],
+      items: [],
       next_page_params: null
     };
     (httpUtils.request as jest.Mock).mockResolvedValue(mockRequestResponse);
@@ -756,7 +756,7 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       1,
       cacheKeyInternalTxs,
-      mockRequestResponse.items
+      []
     );
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       2,
