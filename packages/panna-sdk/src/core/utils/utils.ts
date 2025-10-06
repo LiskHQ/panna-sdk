@@ -3,7 +3,7 @@ import { convertCryptoToFiat } from 'thirdweb/pay';
 import { toWei as thirdwebToWei } from 'thirdweb/utils';
 import { getWalletBalance } from 'thirdweb/wallets';
 import { getSocialIcon as thirdwebGetSocialIcon } from 'thirdweb/wallets/in-app';
-import { lisk, liskSepolia } from '../chains';
+import { lisk, liskSepolia } from '../chain';
 import {
   DEFAULT_CHAIN,
   DEFAULT_CURRENCY,

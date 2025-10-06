@@ -26,6 +26,27 @@ This is a TypeScript monorepo for developing a Panna SDK.
 
 ---
 
+## 📚 Documentation
+
+### Core Module Documentation
+
+Comprehensive guides for all SDK modules are available in the core package:
+
+**[📖 View Core Module Docs](./packages/panna-sdk/src/core/README.md)**
+
+The documentation includes:
+
+- **[Client](./packages/panna-sdk/src/core/client/README.md)** - SDK initialization and configuration
+- **[Wallet](./packages/panna-sdk/src/core/wallet/README.md)** - User authentication and account management
+- **[Transaction](./packages/panna-sdk/src/core/transaction/README.md)** - Blockchain transaction handling
+- **[Chain](./packages/panna-sdk/src/core/chain/README.md)** - Network configuration
+- **[Onramp](./packages/panna-sdk/src/core/onramp/README.md)** - Fiat-to-crypto gateway
+- **[Utils](./packages/panna-sdk/src/core/utils/README.md)** - Helper functions and utilities
+
+Each module includes detailed usage examples, API references, and integration guides.
+
+---
+
 ## 🧰 Tooling
 
 - **Monorepo:** PNPM Workspaces
@@ -77,3 +98,13 @@ your-monorepo/
 └── .prettierrc             # Prettier formatting
 
 ```
+
+---
+
+## 💬 Support & Community
+
+Need help or want to connect with the community?
+
+**[Join our Discord](https://lisk.chat/)** - Get support, share feedback, and collaborate with other developers.
+
+For questions, issues, or contributions, feel free to reach out through our Discord community!

@@ -1,4 +1,4 @@
-import { Chain } from '../chains';
+import { Chain } from '../chain';
 import { type PannaClient } from '../client';
 
 // Utility type to extract string values from an object
