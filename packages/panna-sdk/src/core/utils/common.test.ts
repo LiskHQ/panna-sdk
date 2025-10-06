@@ -1,4 +1,4 @@
-import { lisk, liskSepolia } from '../chains';
+import { lisk, liskSepolia } from '../chain';
 import {
   CACHE_KEY_TYPE,
   CHAIN_ID_API_URL_MAP,

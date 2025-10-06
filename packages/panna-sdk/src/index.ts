@@ -13,6 +13,7 @@ export {
 
   // Wallet/Account functions
   login,
+  socialLogin,
   createAccount,
   getLinkedAccounts,
   getEmail,

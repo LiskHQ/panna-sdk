@@ -1,4 +1,4 @@
-import type { Chain } from '../chains/types';
+import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
 import type { Address } from '../types/external';
 import type {

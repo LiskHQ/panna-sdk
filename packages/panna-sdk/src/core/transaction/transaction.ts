@@ -4,7 +4,7 @@ import {
   getContract as thirdwebGetContract,
   sendTransaction as thirdwebSendTransaction
 } from 'thirdweb';
-import type { Chain } from '../chains/types';
+import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
 import type { Abi, Address, Hex } from '../types/external';
 import { removeUndefined } from '../utils/object';
@@ -59,7 +59,7 @@ import type {
  *   chain: lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   value: toWei("0.5"),
- *   gasPrice: BigInt(20000000000) // 20 gwei
+ *   gasPrice: BigInt(20_000_000_000) // 20 gwei
  * });
  *
  * // Prepare a contract deployment (no `to` address)
@@ -219,8 +219,8 @@ export const prepareTransaction = (
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", toWei("100")],
- *   maxFeePerGas: BigInt(30000000000), // 30 gwei
- *   maxPriorityFeePerGas: BigInt(2000000000), // 2 gwei
+ *   maxFeePerGas: BigInt(30_000_000_000), // 30 gwei
+ *   maxPriorityFeePerGas: BigInt(2_000_000_000), // 2 gwei
  *   gas: BigInt(21000) // Gas limit
  * });
  *

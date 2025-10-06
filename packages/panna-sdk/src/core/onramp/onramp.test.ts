@@ -1,5 +1,5 @@
 import { Bridge } from 'thirdweb';
-import { liskSepolia } from '../chains';
+import { liskSepolia } from '../chain';
 import type { PannaClient } from '../client';
 import { DEFAULT_CURRENCY } from '../defaults';
 import {
