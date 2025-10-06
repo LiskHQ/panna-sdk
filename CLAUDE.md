@@ -77,7 +77,7 @@ React-specific UI components and hooks:
 - **Builder**: `tsup` generates both ESM (`.mjs`) and CJS (`.cjs`) outputs
 - **CSS**: Tailwind styles built separately via PostCSS
 - **Exports**: Package exports both main entry (`./`) and styles (`./styles.css`)
-- **Environment Variables**: Injected at build time via tsup config (`PANNA_API_URL`, `MOCK_PANNA_API`)
+- **Environment Variables**: Injected at build time via tsup config (`PANNA_API_URL`, `MOCK_PANNA_API`). Define these in a `.env` file in `packages/panna-sdk/`.
 
 ### Testing Setup
 
