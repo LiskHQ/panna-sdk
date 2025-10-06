@@ -51,7 +51,7 @@ await login({
 
 ### Network & Infrastructure
 
-4. **[Chains](./chains/README.md)** - Blockchain network configuration
+4. **[Chain](./chain/README.md)** - Blockchain network configuration
    - Pre-configured Lisk networks
    - Custom chain configuration
    - Network metadata and RPC management
@@ -167,6 +167,6 @@ For detailed information about each module, see the individual documentation:
 - [Client Module](./client/README.md) - SDK initialization
 - [Wallet Module](./wallet/README.md) - Authentication & accounts
 - [Transaction Module](./transaction/README.md) - Sending transactions
-- [Chains Module](./chains/README.md) - Network configuration
+- [Chain Module](./chain/README.md) - Network configuration
 - [Onramp Module](./onramp/README.md) - Fiat gateways
 - [Utils Module](./utils/README.md) - Helper functions

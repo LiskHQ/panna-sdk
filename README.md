@@ -39,7 +39,7 @@ The documentation includes:
 - **[Client](./packages/panna-sdk/src/core/client/README.md)** - SDK initialization and configuration
 - **[Wallet](./packages/panna-sdk/src/core/wallet/README.md)** - User authentication and account management
 - **[Transaction](./packages/panna-sdk/src/core/transaction/README.md)** - Blockchain transaction handling
-- **[Chains](./packages/panna-sdk/src/core/chains/README.md)** - Network configuration
+- **[Chain](./packages/panna-sdk/src/core/chain/README.md)** - Network configuration
 - **[Onramp](./packages/panna-sdk/src/core/onramp/README.md)** - Fiat-to-crypto gateway
 - **[Utils](./packages/panna-sdk/src/core/utils/README.md)** - Helper functions and utilities
 

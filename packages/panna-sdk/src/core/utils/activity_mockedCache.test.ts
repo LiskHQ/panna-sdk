@@ -1,4 +1,4 @@
-import { liskSepolia } from '../chains';
+import { liskSepolia } from '../chain';
 import * as cache from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';

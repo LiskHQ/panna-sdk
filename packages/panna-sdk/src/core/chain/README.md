@@ -1,6 +1,6 @@
-# Chains Module
+# Chain Module
 
-The Chains module provides blockchain network configuration and management. The module includes pre-configured Lisk networks and utilities for custom chain configuration.
+The Chain module provides blockchain network configuration and management. The module includes pre-configured Lisk networks and utilities for custom chain configuration.
 
 ## What You'll Learn
 
@@ -12,7 +12,7 @@ In this guide, you will:
 
 ## Table of Contents
 
-- [Chains Module](#chains-module)
+- [Chain Module](#chain-module)
   - [What You'll Learn](#what-youll-learn)
   - [Table of Contents](#table-of-contents)
   - [Quick Start](#quick-start)

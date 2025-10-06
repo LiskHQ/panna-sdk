@@ -1,4 +1,4 @@
-import { lisk, liskSepolia } from '../chains';
+import { lisk, liskSepolia } from '../chain';
 import { BASE_BLOCKSCOUT_URL, BASE_SEPOLIA_BLOCKSCOUT_URL } from './constants';
 
 export const CACHE_KEY_TYPE = {

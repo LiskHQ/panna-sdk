@@ -1,5 +1,5 @@
 import { type Chain } from 'thirdweb';
-import { liskSepolia } from '../chains';
+import { liskSepolia } from '../chain';
 import { type PannaClient } from '../client';
 import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import {

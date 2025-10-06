@@ -1,5 +1,5 @@
 import { ethIcon } from '../../react/consts';
-import { lisk } from '../chains';
+import { lisk } from '../chain';
 import { NATIVE_TOKEN_ADDRESS } from '../defaults';
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';

@@ -275,6 +275,6 @@ if (googleAccount) {
 
 - [Client Module](../client/README.md) - SDK initialization and configuration
 - [Transaction Module](../transaction/README.md) - Send transactions
-- [Chain Configuration](../chains/README.md) - Multi-chain support
+- [Chain Configuration](../chain/README.md) - Multi-chain support
 - [Fiat Onramp](../onramp/README.md) - Crypto purchases
 - [Utils Module](../utils/README.md) - Helpful utilities

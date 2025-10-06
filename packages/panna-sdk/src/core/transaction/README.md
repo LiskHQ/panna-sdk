@@ -218,7 +218,7 @@ const transaction = prepareTransaction({
 ## Next Steps
 
 - Explore [Client Module](../client/README.md) for SDK initialization and configuration
-- Explore [Chains Module](../chains/README.md) for configuring networks and RPC endpoints
+- Explore [Chain Module](../chain/README.md) for configuring networks and RPC endpoints
 - Review [Utils Module](../utils/README.md) for balance queries and token conversions
 - Learn about [Wallet Module](../wallet/README.md) for user account management and authentication
 - Check [Onramp Module](../onramp/README.md) for integrating fiat-to-crypto purchases

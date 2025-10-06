@@ -342,4 +342,4 @@ socialButtons.forEach((button) => {
 - Check the [Transaction Module](../transaction/README.md) for sending tokens and smart contract interactions
 - Review the [Client Module](../client/README.md) for SDK initialization and configuration
 - Learn about [Onramp Module](../onramp/README.md) for fiat-to-crypto purchases
-- Learn about [Chains Module](../chains/README.md) for network configuration
+- Learn about [Chain Module](../chain/README.md) for network configuration

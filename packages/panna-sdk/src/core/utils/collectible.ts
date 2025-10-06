@@ -1,4 +1,4 @@
-import { lisk } from '../chains';
+import { lisk } from '../chain';
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
 import { PannaHttpErr } from '../helpers/http';

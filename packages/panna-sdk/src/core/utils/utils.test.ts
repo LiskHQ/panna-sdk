@@ -3,8 +3,8 @@ import * as thirdweb from 'thirdweb';
 import * as thirdwebPay from 'thirdweb/pay';
 import * as thirdwebWallets from 'thirdweb/wallets';
 import * as thirdwebInApp from 'thirdweb/wallets/in-app';
-import { liskSepolia } from '../chains';
-import { lisk } from '../chains/chain-definitions/lisk';
+import { liskSepolia } from '../chain';
+import { lisk } from '../chain/chain-definitions/lisk';
 import { type PannaClient } from '../client';
 import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import {

@@ -4,7 +4,7 @@ import {
   getContract as thirdwebGetContract,
   sendTransaction as thirdwebSendTransaction
 } from 'thirdweb';
-import type { Chain } from '../chains/types';
+import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
 import type { Abi, Address, Hex } from '../types/external';
 import { removeUndefined } from '../utils/object';

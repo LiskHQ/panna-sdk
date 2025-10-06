@@ -1,5 +1,5 @@
 import { NATIVE_TOKEN_ADDRESS as THIRDWEB_NATIVE_TOKEN_ADDRESS } from 'thirdweb';
-import { lisk } from './chains/chain-definitions/lisk';
+import { lisk } from './chain/chain-definitions/lisk';
 import type { FiatCurrency } from './utils/types';
 
 /**
