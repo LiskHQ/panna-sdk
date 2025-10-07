@@ -217,7 +217,7 @@ describe('AccountEventProvider', () => {
               sponsorGas: true
             }
           }),
-          undefined
+          'mock-jwt-token'
         );
       });
     });
@@ -491,7 +491,7 @@ describe('AccountEventProvider', () => {
             smartAccount: expect.any(Object),
             social: expect.any(Object)
           }),
-          undefined
+          'mock-jwt-token'
         );
       });
     });
@@ -535,7 +535,7 @@ describe('AccountEventProvider', () => {
             eventType: AccountEventType.DISCONNECT,
             reason: 'User initiated'
           }),
-          undefined
+          'mock-jwt-token'
         );
       });
     });
@@ -579,45 +579,7 @@ describe('AccountEventProvider', () => {
             eventType: AccountEventType.ACCOUNT_UPDATE,
             updateType: 'profile_change'
           }),
-          undefined
-        );
-      });
-    });
-
-    it('should include authToken when provided', async () => {
-      const mockConsumer = () => {
-        const context = useAccountEventContext();
-        return (
-          <button
-            data-testid="auth-button"
-            onClick={() =>
-              context.sendAccountEvent(
-                AccountEventType.ON_CONNECT,
-                mockAccount.address
-              )
-            }
-          >
-            Connect with Auth
-          </button>
-        );
-      };
-
-      render(
-        <AccountEventProvider>
-          {React.createElement(mockConsumer)}
-        </AccountEventProvider>
-      );
-
-      const button = screen.getByTestId('auth-button');
-      await act(async () => {
-        button.click();
-      });
-
-      await waitFor(() => {
-        expect(mockSendAccountEvent).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.any(Object),
-          'test-auth-token'
+          'mock-jwt-token'
         );
       });
     });
@@ -625,27 +587,22 @@ describe('AccountEventProvider', () => {
 
   describe('Error Handling', () => {
     it('should handle missing smart account config error', async () => {
-      mockWallet.getConfig.mockReturnValue(
-        {} as unknown as {
-          smartAccount: SmartAccountOptions;
-        }
-      );
+      // Create a wallet mock without smart account config
+      const mockWalletNoSA = {
+        ...mockWallet,
+        getConfig: jest.fn().mockReturnValue({})
+      };
+      mockUseActiveWallet.mockReturnValue(mockWalletNoSA as unknown as Wallet);
 
+      let sendEventFn: ((...args: unknown[]) => Promise<void>) | null = null;
       const mockConsumer = () => {
         const context = useAccountEventContext();
-        return (
-          <button
-            data-testid="error-button"
-            onClick={() =>
-              context.sendAccountEvent(
-                AccountEventType.ON_CONNECT,
-                mockAccount.address
-              )
-            }
-          >
-            Trigger Error
-          </button>
-        );
+        sendEventFn = () =>
+          context.sendAccountEvent(
+            AccountEventType.ON_CONNECT,
+            mockAccount.address
+          );
+        return <div data-testid="consumer">Ready</div>;
       };
 
       render(
@@ -654,37 +611,36 @@ describe('AccountEventProvider', () => {
         </AccountEventProvider>
       );
 
-      const button = screen.getByTestId('error-button');
-      await act(async () => {
-        button.click();
+      await waitFor(() => {
+        expect(screen.getByTestId('consumer')).toBeInTheDocument();
       });
 
-      await waitFor(() => {
-        expect(console.error).toHaveBeenCalledWith(
-          'Failed to send onConnect event:',
-          expect.any(Error)
-        );
-      });
+      // Call sendAccountEvent and expect it to reject
+      await expect(sendEventFn!()).rejects.toThrow();
+
+      // Verify error was logged
+      expect(console.error).toHaveBeenCalledWith(
+        'Failed to send onConnect event:',
+        expect.any(Error)
+      );
+
+      // Reset wallet mock for other tests
+      mockUseActiveWallet.mockReturnValue(mockWallet as unknown as Wallet);
     });
 
     it('should handle API service errors gracefully', async () => {
+      // Mock API to reject
       mockSendAccountEvent.mockRejectedValue(new Error('API Error'));
 
+      let sendEventFn: ((...args: unknown[]) => Promise<void>) | null = null;
       const mockConsumer = () => {
         const context = useAccountEventContext();
-        return (
-          <button
-            data-testid="api-error-button"
-            onClick={() =>
-              context.sendAccountEvent(
-                AccountEventType.ON_CONNECT,
-                mockAccount.address
-              )
-            }
-          >
-            Trigger API Error
-          </button>
-        );
+        sendEventFn = () =>
+          context.sendAccountEvent(
+            AccountEventType.ON_CONNECT,
+            mockAccount.address
+          );
+        return <div data-testid="api-consumer">Ready</div>;
       };
 
       render(
@@ -693,17 +649,27 @@ describe('AccountEventProvider', () => {
         </AccountEventProvider>
       );
 
-      const button = screen.getByTestId('api-error-button');
-      await act(async () => {
-        button.click();
+      await waitFor(() => {
+        expect(screen.getByTestId('api-consumer')).toBeInTheDocument();
       });
 
+      // Call sendAccountEvent - it should throw internally and log the error
+      try {
+        await sendEventFn!();
+      } catch {
+        // Expected to throw
+      }
+
+      // Verify error was logged
       await waitFor(() => {
         expect(console.error).toHaveBeenCalledWith(
           'Failed to send onConnect event:',
           expect.any(Error)
         );
       });
+
+      // Reset mock for other tests
+      mockSendAccountEvent.mockResolvedValue({} as Response);
     });
 
     it('should warn when using social fallback', async () => {
@@ -781,7 +747,7 @@ describe('AccountEventProvider', () => {
           expect.objectContaining({
             eventType: 'onConnect'
           }),
-          undefined
+          'mock-jwt-token'
         );
       });
     });
@@ -815,7 +781,7 @@ describe('AccountEventProvider', () => {
             eventType: AccountEventType.DISCONNECT,
             reason: 'User initiated'
           }),
-          undefined
+          'mock-jwt-token'
         );
       });
     });
@@ -853,7 +819,7 @@ describe('AccountEventProvider', () => {
             eventType: AccountEventType.ACCOUNT_UPDATE,
             updateType: 'account_change'
           }),
-          undefined
+          'mock-jwt-token'
         );
       });
     });
