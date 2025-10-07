@@ -82,31 +82,50 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (values.email) {
-      await prepareLogin({
-        client,
-        ecosystem: {
-          id: EcosystemId.LISK,
-          partnerId
-        },
-        strategy: LoginStrategy.EMAIL,
-        email: values.email
-      });
-      next({
-        email: values.email
-      });
+      try {
+        await prepareLogin({
+          client,
+          ecosystem: {
+            id: EcosystemId.LISK,
+            partnerId
+          },
+          strategy: LoginStrategy.EMAIL,
+          email: values.email
+        });
+        // Passing error as null to clear any previous error state
+        next({
+          email: values.email,
+          error: null
+        });
+      } catch (error) {
+        console.error('Email login preparation failed:', error);
+        next({
+          email: values.email,
+          error: (error as Error).message
+        });
+      }
     } else if (values.phoneNumber) {
-      await prepareLogin({
-        client,
-        ecosystem: {
-          id: EcosystemId.LISK,
-          partnerId
-        },
-        strategy: LoginStrategy.PHONE,
-        phoneNumber: values.phoneNumber
-      });
-      next({
-        phoneNumber: values.phoneNumber
-      });
+      try {
+        await prepareLogin({
+          client,
+          ecosystem: {
+            id: EcosystemId.LISK,
+            partnerId
+          },
+          strategy: LoginStrategy.PHONE,
+          phoneNumber: values.phoneNumber
+        });
+        next({
+          phoneNumber: values.phoneNumber,
+          error: null
+        });
+      } catch (error) {
+        console.error('Phone login preparation failed:', error);
+        next({
+          phoneNumber: values.phoneNumber,
+          error: (error as Error).message
+        });
+      }
     }
   }
 

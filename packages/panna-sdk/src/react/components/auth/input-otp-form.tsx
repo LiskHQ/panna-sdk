@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
+import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
 import { ecosystemWallet } from 'thirdweb/wallets';
@@ -49,10 +50,21 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       code: ''
     }
   });
+  const { error: codeFormError } = form.getFieldState('code');
   const { client, partnerId, chainId } = usePanna();
   const [resendTimer, resetResendTimer] = useCountdown(45);
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
+
+  useEffect(() => {
+    // Display any error passed from previous step
+    if (data?.error) {
+      form.setError('code', {
+        type: 'manual',
+        message: data.error as string
+      });
+    }
+  }, []);
 
   const { connect } = useLogin({
     client,
@@ -65,6 +77,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     try {
+      let connectionError: Error | null = null;
       form.clearErrors('code');
 
       // Connect using smart account with ecosystem wallet
@@ -75,23 +88,40 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
         });
 
         if (data.email) {
-          await ecoWallet.connect({
-            client,
-            strategy: 'email',
-            email: data.email as string,
-            verificationCode: values.code
-          });
+          try {
+            await ecoWallet.connect({
+              client,
+              strategy: 'email',
+              email: data.email as string,
+              verificationCode: values.code
+            });
+          } catch (error) {
+            connectionError =
+              error instanceof Error ? error : new Error(String(error));
+            throw error;
+          }
         } else {
-          await ecoWallet.connect({
-            client,
-            strategy: 'phone',
-            phoneNumber: data.phoneNumber as string,
-            verificationCode: values.code
-          });
+          try {
+            await ecoWallet.connect({
+              client,
+              strategy: 'phone',
+              phoneNumber: data.phoneNumber as string,
+              verificationCode: values.code
+            });
+          } catch (error) {
+            connectionError =
+              error instanceof Error ? error : new Error(String(error));
+            throw error;
+          }
         }
 
         return ecoWallet;
       });
+
+      // If ecoWallet.connect() failed, throw the original error
+      if (connectionError) {
+        throw connectionError;
+      }
 
       if (wallet) {
         const address = wallet.getAccount()?.address;
@@ -182,13 +212,21 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
                     data-type="text"
                     inputMode="text"
                   >
-                    <InputOTPGroup>
+                    <InputOTPGroup
+                      className={
+                        codeFormError ? '[&>div]:border-destructive border' : ''
+                      }
+                    >
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                     </InputOTPGroup>
                     <InputOTPSeparator />
-                    <InputOTPGroup>
+                    <InputOTPGroup
+                      className={
+                        codeFormError ? '[&>div]:border-destructive border' : ''
+                      }
+                    >
                       <InputOTPSlot index={3} />
                       <InputOTPSlot index={4} />
                       <InputOTPSlot index={5} />
