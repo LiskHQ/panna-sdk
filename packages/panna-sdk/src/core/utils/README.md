@@ -40,7 +40,8 @@ import {
   toWei,
   isValidAddress,
   getActivitiesByAddress,
-  getCollectiblesByAddress
+  getCollectiblesByAddress,
+  FiatCurrency
 } from 'panna-sdk';
 
 // Essential operations
@@ -56,14 +57,14 @@ const isValid = isValidAddress(recipientAddress); // Validate address
 const activities = await getActivitiesByAddress({
   client,
   address: userAddress,
-  currency: 'USD' // Optional: include fiat values
+  currency: FiatCurrency.USD // Optional: include fiat values
 });
 const nfts = await getCollectiblesByAddress({ client, address: userAddress });
 const fiatBalance = await accountBalanceInFiat({
   client,
   chain: lisk,
   address: userAddress,
-  currency: 'USD'
+  currency: FiatCurrency.USD
 });
 ```
 
@@ -125,7 +126,8 @@ const portfolio = await getPortfolioBalances(userAddress, tokens);
 import {
   accountBalanceInFiat,
   accountBalancesInFiat,
-  getFiatPrice
+  getFiatPrice,
+  FiatCurrency
 } from 'panna-sdk';
 
 // Single token balance with fiat value
@@ -133,7 +135,7 @@ const balanceWithFiat = await accountBalanceInFiat({
   client,
   chain: lisk,
   address: userAddress,
-  currency: 'USD'
+  currency: FiatCurrency.USD
 });
 
 console.log(
@@ -146,7 +148,7 @@ const portfolio = await accountBalancesInFiat({
   client,
   chain: lisk,
   address: userAddress,
-  currency: 'USD'
+  currency: FiatCurrency.USD
 });
 
 const totalValue = portfolio.reduce(
@@ -230,16 +232,16 @@ function formatTransactionHistory(activities: Activity[]) {
 
 ### Activity Fiat Values
 
-Activities can include fiat values for token amounts when prices are available. Use the `currency` parameter to specify USD, EUR, or GBP (defaults to USD). The `fiatValue` property is optional and only present when token prices exist for the given token.
+Activities can include fiat values for token amounts when prices are available. Use the `currency` parameter to specify FiatCurrency.USD, FiatCurrency.EUR, or FiatCurrency.GBP (defaults to FiatCurrency.USD). The `fiatValue` property is optional and only present when token prices exist for the given token.
 
 ```ts
-import { getActivitiesByAddress } from 'panna-sdk';
+import { getActivitiesByAddress, FiatCurrency } from 'panna-sdk';
 
 // Fetch activities with fiat values
 const activities = await getActivitiesByAddress({
   client,
   address: userAddress,
-  currency: 'USD' // Optional: 'USD' | 'EUR' | 'GBP' (default: 'USD')
+  currency: FiatCurrency.USD // Optional: FiatCurrency.USD | FiatCurrency.EUR | FiatCurrency.GBP (default: FiatCurrency.USD)
 });
 
 // Access fiat values (available for ETH, ERC-20, and ERC-1155 tokens)

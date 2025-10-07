@@ -1,11 +1,11 @@
 import { NATIVE_TOKEN_ADDRESS as THIRDWEB_NATIVE_TOKEN_ADDRESS } from 'thirdweb';
 import { lisk } from './chain/chain-definitions/lisk';
-import type { FiatCurrency } from './utils/types';
+import { FiatCurrency } from './utils/types';
 
 /**
  * Default currency used throughout the SDK when no currency is specified
  */
-export const DEFAULT_CURRENCY: FiatCurrency = 'USD';
+export const DEFAULT_CURRENCY: FiatCurrency = FiatCurrency.USD;
 
 /**
  * Default country used throughout the SDK when no country is specified

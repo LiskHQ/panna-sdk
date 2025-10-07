@@ -12,6 +12,7 @@ import {
   BlockscoutTokenTransfer,
   BlockscoutTransaction
 } from './blockscout.types';
+import { FiatCurrency } from './types';
 
 // Mock token prices for fiat value testing
 const fixture_tokenPrices = [
@@ -33,7 +34,7 @@ const calculateExpectedFiatValue = (
 // Helper function to get price for symbol and currency
 const getTokenPrice = (
   symbol: string,
-  currency: string = 'USD'
+  currency: string = FiatCurrency.USD
 ): number | undefined => {
   // Special case for USDC.e (maps to USDC)
   const lookupSymbol = symbol === 'USDC.e' ? 'USDC' : symbol;
@@ -99,9 +100,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000000000000000', // 1 ETH in wei
         18,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
-      expect(result).toEqual({ amount: 3000, currency: 'USD' });
+      expect(result).toEqual({ amount: 3000, currency: FiatCurrency.USD });
     });
 
     it('should calculate EUR fiat value correctly', () => {
@@ -110,9 +111,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '2000000000000000000', // 2 ETH in wei
         18,
         mockTokenPrices,
-        'EUR'
+        FiatCurrency.EUR
       );
-      expect(result).toEqual({ amount: 5400, currency: 'EUR' });
+      expect(result).toEqual({ amount: 5400, currency: FiatCurrency.EUR });
     });
 
     it('should calculate GBP fiat value correctly', () => {
@@ -121,9 +122,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000000000000000', // 1 ETH in wei
         18,
         mockTokenPrices,
-        'GBP'
+        FiatCurrency.GBP
       );
-      expect(result).toEqual({ amount: 2400, currency: 'GBP' });
+      expect(result).toEqual({ amount: 2400, currency: FiatCurrency.GBP });
     });
   });
 
@@ -134,9 +135,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000', // 1 USDC with 6 decimals
         6,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
-      expect(result).toEqual({ amount: 1.0, currency: 'USD' });
+      expect(result).toEqual({ amount: 1.0, currency: FiatCurrency.USD });
     });
 
     it('should handle different decimals correctly (18 decimals)', () => {
@@ -145,9 +146,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1500000000000000000', // 1.5 LSK with 18 decimals
         18,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
-      expect(result).toEqual({ amount: 2.25, currency: 'USD' });
+      expect(result).toEqual({ amount: 2.25, currency: FiatCurrency.USD });
     });
   });
 
@@ -158,7 +159,7 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000',
         6,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
       expect(result).toBeUndefined();
     });
@@ -169,14 +170,20 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000000000000000',
         18,
         mockTokenPrices,
-        'JPY' as 'USD' // Force type to test runtime behavior
+        FiatCurrency.JPY // Using JPY which is not in mock prices
       );
       expect(result).toBeUndefined();
     });
 
     it('should handle zero value correctly', () => {
-      const result = calculateFiatValue('ETH', '0', 18, mockTokenPrices, 'USD');
-      expect(result).toEqual({ amount: 0, currency: 'USD' });
+      const result = calculateFiatValue(
+        'ETH',
+        '0',
+        18,
+        mockTokenPrices,
+        FiatCurrency.USD
+      );
+      expect(result).toEqual({ amount: 0, currency: FiatCurrency.USD });
     });
 
     it('should handle empty token prices array', () => {
@@ -185,7 +192,7 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000000000000000',
         18,
         [],
-        'USD'
+        FiatCurrency.USD
       );
       expect(result).toBeUndefined();
     });
@@ -198,10 +205,10 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000', // 1 USDC.e with 6 decimals
         6,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
       // Should use USDC price
-      expect(result).toEqual({ amount: 1.0, currency: 'USD' });
+      expect(result).toEqual({ amount: 1.0, currency: FiatCurrency.USD });
     });
 
     it('should map USDC.e to USDC for EUR price lookup', () => {
@@ -210,10 +217,10 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1000000', // 1 USDC.e with 6 decimals
         6,
         mockTokenPrices,
-        'EUR'
+        FiatCurrency.EUR
       );
       // Should use USDC price in EUR
-      expect(result).toEqual({ amount: 0.9, currency: 'EUR' });
+      expect(result).toEqual({ amount: 0.9, currency: FiatCurrency.EUR });
     });
   });
 
@@ -224,9 +231,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '500000000000000000', // 0.5 ETH
         18,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
-      expect(result).toEqual({ amount: 1500, currency: 'USD' });
+      expect(result).toEqual({ amount: 1500, currency: FiatCurrency.USD });
     });
 
     it('should calculate very small amounts correctly', () => {
@@ -235,9 +242,9 @@ describe('calculateFiatValue - Unit Tests', () => {
         '1', // 0.000001 USDC (1 micro USDC)
         6,
         mockTokenPrices,
-        'USD'
+        FiatCurrency.USD
       );
-      expect(result).toEqual({ amount: 0.000001, currency: 'USD' });
+      expect(result).toEqual({ amount: 0.000001, currency: FiatCurrency.USD });
     });
   });
 });
@@ -862,7 +869,9 @@ describe('getActivitiesByAddress - Fiat Value Tests', () => {
 
       const resultActivity = result.activities[0];
       if ('fiatValue' in resultActivity.amount) {
-        expect(resultActivity.amount.fiatValue?.currency).toBe('USD');
+        expect(resultActivity.amount.fiatValue?.currency).toBe(
+          FiatCurrency.USD
+        );
       }
     });
 
@@ -886,18 +895,20 @@ describe('getActivitiesByAddress - Fiat Value Tests', () => {
         address: TEST_USER_ADDRESS,
         client: mockClient,
         chain: liskSepolia,
-        currency: 'EUR' as const
+        currency: FiatCurrency.EUR
       };
 
       const result = await getActivitiesByAddress(params);
 
       const resultActivity = result.activities[0];
       if ('fiatValue' in resultActivity.amount) {
-        expect(resultActivity.amount.fiatValue?.currency).toBe('EUR');
+        expect(resultActivity.amount.fiatValue?.currency).toBe(
+          FiatCurrency.EUR
+        );
         const expectedFiatValue = calculateExpectedFiatValue(
           ethValue,
           18,
-          getTokenPrice('ETH', 'EUR')!
+          getTokenPrice('ETH', FiatCurrency.EUR)!
         );
         expect(resultActivity.amount.fiatValue?.amount).toBe(expectedFiatValue);
       }
@@ -923,18 +934,20 @@ describe('getActivitiesByAddress - Fiat Value Tests', () => {
         address: TEST_USER_ADDRESS,
         client: mockClient,
         chain: liskSepolia,
-        currency: 'GBP' as const
+        currency: FiatCurrency.GBP
       };
 
       const result = await getActivitiesByAddress(params);
 
       const resultActivity = result.activities[0];
       if ('fiatValue' in resultActivity.amount) {
-        expect(resultActivity.amount.fiatValue?.currency).toBe('GBP');
+        expect(resultActivity.amount.fiatValue?.currency).toBe(
+          FiatCurrency.GBP
+        );
         const expectedFiatValue = calculateExpectedFiatValue(
           ethValue,
           18,
-          getTokenPrice('ETH', 'GBP')!
+          getTokenPrice('ETH', FiatCurrency.GBP)!
         );
         expect(resultActivity.amount.fiatValue?.amount).toBe(expectedFiatValue);
       }

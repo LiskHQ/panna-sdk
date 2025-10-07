@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import { DEFAULT_CURRENCY } from 'src/core';
-import { Activity, TransactionActivity, TokenERC } from 'src/core';
+import {
+  Activity,
+  TransactionActivity,
+  TokenERC,
+  FiatCurrency
+} from 'src/core';
 import { ActivityItem } from './activity-item';
 
 describe('ActivityItem', () => {
@@ -109,7 +114,7 @@ describe('ActivityItem', () => {
         },
         fiatValue: {
           amount: 2700.0,
-          currency: 'EUR'
+          currency: FiatCurrency.EUR
         }
       },
       status: 'success'
@@ -137,7 +142,7 @@ describe('ActivityItem', () => {
         },
         fiatValue: {
           amount: 2400.0,
-          currency: 'GBP'
+          currency: FiatCurrency.GBP
         }
       },
       status: 'success'

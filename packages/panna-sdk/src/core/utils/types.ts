@@ -74,14 +74,15 @@ export type AccountEventTypeValue =
   (typeof AccountEventType)[keyof typeof AccountEventType];
 
 // Supported fiat currencies
-export type FiatCurrency =
-  | 'USD'
-  | 'EUR'
-  | 'GBP'
-  | 'CAD'
-  | 'AUD'
-  | 'JPY'
-  | 'NZD';
+export enum FiatCurrency {
+  USD = 'USD',
+  EUR = 'EUR',
+  GBP = 'GBP',
+  CAD = 'CAD',
+  AUD = 'AUD',
+  JPY = 'JPY',
+  NZD = 'NZD'
+}
 
 // Parameters for getting fiat price
 export interface GetFiatPriceParams {

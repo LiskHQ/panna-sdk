@@ -89,6 +89,8 @@ export const getSocialIcon = function (provider: SocialProvider): string {
  * @throws Error if token address is invalid or client is not provided
  * @example
  * ```ts
+ * import { getFiatPrice, FiatCurrency } from 'panna-sdk';
+ *
  * // Get value of 1 ETH (defaults to USD)
  * const result = await getFiatPrice({
  *   client: pannaClient,
@@ -102,7 +104,7 @@ export const getSocialIcon = function (provider: SocialProvider): string {
  *   chain: customChain,
  *   tokenAddress: '0x...',
  *   amount: 100,
- *   currency: 'EUR'
+ *   currency: FiatCurrency.EUR
  * });
  * // result: { price: 105.00, currency: 'EUR' }
  * ```
@@ -144,6 +146,8 @@ export const getFiatPrice = async function (
  * @throws Error if address or token address are invalid
  * @example
  * ```ts
+ * import { accountBalanceInFiat, FiatCurrency } from 'panna-sdk';
+ *
  * // Get value for the specified user's native token balance in USD
  * const result = await accountBalanceInFiat({
  *   address: userAddress,
@@ -162,7 +166,7 @@ export const getFiatPrice = async function (
  *   client: pannaClient,
  *   chain: customChain,
  *   tokenAddress: '0x...',
- *   currency: 'EUR'
+ *   currency: FiatCurrency.EUR
  * });
  * // result: {
  * //   token: { symbol: 'USDC.e', name: 'USD Coin', decimals: 6 },
@@ -224,6 +228,8 @@ export const accountBalanceInFiat = async function (
  * @throws Error if address is invalid
  * @example
  * ```ts
+ * import { accountBalancesInFiat, FiatCurrency, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+ *
  * // Get portfolio value for multiple tokens
  * const result = await accountBalancesInFiat({
  *   client: pannaClient,
@@ -234,7 +240,7 @@ export const accountBalanceInFiat = async function (
  *     '0x...', // USDC
  *     '0x...'  // DAI
  *   ],
- *   currency: 'USD'
+ *   currency: FiatCurrency.USD
  * });
  * // result: {
  * //   totalValue: { amount: 5250.75, currency: 'USD' },
