@@ -55,7 +55,8 @@ const isValid = isValidAddress(recipientAddress); // Validate address
 // Get user data
 const activities = await getActivitiesByAddress({
   client,
-  address: userAddress
+  address: userAddress,
+  currency: 'USD' // Optional: include fiat values
 });
 const nfts = await getCollectiblesByAddress({ client, address: userAddress });
 const fiatBalance = await accountBalanceInFiat({
@@ -226,6 +227,33 @@ function formatTransactionHistory(activities: Activity[]) {
   }));
 }
 ```
+
+### Activity Fiat Values
+
+Activities can include fiat values for token amounts when prices are available. Use the `currency` parameter to specify USD, EUR, or GBP (defaults to USD). The `fiatValue` property is optional and only present when token prices exist for the given token.
+
+```ts
+import { getActivitiesByAddress } from 'panna-sdk';
+
+// Fetch activities with fiat values
+const activities = await getActivitiesByAddress({
+  client,
+  address: userAddress,
+  currency: 'USD' // Optional: 'USD' | 'EUR' | 'GBP' (default: 'USD')
+});
+
+// Access fiat values (available for ETH, ERC-20, and ERC-1155 tokens)
+activities.activities.forEach((activity) => {
+  if ('fiatValue' in activity.amount) {
+    const { amount, currency } = activity.amount.fiatValue;
+    console.log(
+      `Token value: ${activity.amount.value} = ${amount} ${currency}`
+    );
+  }
+});
+```
+
+**Note:** USDC.e tokens are automatically mapped to USDC prices for fiat value calculation.
 
 ## 4. NFT Collections
 
