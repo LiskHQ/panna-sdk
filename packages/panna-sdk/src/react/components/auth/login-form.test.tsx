@@ -29,6 +29,7 @@ jest.mock('thirdweb/wallets', () => ({
 }));
 jest.mock('../../utils', () => ({
   getEnvironmentChain: jest.fn(),
+  handleSiweAuth: jest.fn().mockResolvedValue(true),
   cn: jest.fn()
 }));
 

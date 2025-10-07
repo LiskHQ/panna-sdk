@@ -9,8 +9,7 @@ import { pannaApiService, AccountEventType } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
 import {
   AccountEventProvider,
-  useAccountEventContext,
-  type AccountEventProviderProps
+  useAccountEventContext
 } from './account-event-provider';
 import { PannaContextValue } from './panna-provider';
 
@@ -39,6 +38,12 @@ jest.mock('../../core/client', () => ({
   EcosystemId: {
     LISK: 'ecosystem.lisk'
   }
+}));
+
+// Mock SIWE auth functions
+jest.mock('../../core/auth', () => ({
+  getSiweAuthToken: jest.fn().mockResolvedValue('mock-jwt-token'),
+  isSiweLoggedIn: jest.fn().mockResolvedValue(true)
 }));
 
 // Type the mocked functions
@@ -185,18 +190,6 @@ describe('AccountEventProvider', () => {
       );
 
       consoleSpy.mockRestore();
-    });
-
-    it('should accept authToken prop', () => {
-      const props: AccountEventProviderProps = {
-        authToken: 'test-auth-token',
-        children: <TestConsumer />
-      };
-
-      render(<AccountEventProvider {...props} />);
-      expect(screen.getByTestId('context-available')).toHaveTextContent(
-        'context-available'
-      );
     });
   });
 
