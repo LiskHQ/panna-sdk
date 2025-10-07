@@ -591,7 +591,7 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       1,
       cacheKeyInternalTxs,
-      []
+      mockRequestResponse.items
     );
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       2,
@@ -694,7 +694,7 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       1,
       cacheKeyInternalTxs,
-      []
+      mockCachedTokenTxs.concat(mockRequestResponse.items)
     );
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       2,
@@ -756,7 +756,7 @@ describe('updateInternalTransactionsCache', () => {
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       1,
       cacheKeyInternalTxs,
-      []
+      mockRequestResponse.items
     );
     expect(mockCacheInstanceLocal.set).toHaveBeenNthCalledWith(
       2,
