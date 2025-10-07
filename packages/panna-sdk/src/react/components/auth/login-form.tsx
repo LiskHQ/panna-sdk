@@ -9,7 +9,6 @@ import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,17 +19,13 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { LAST_AUTH_PROVIDER } from '@/consts';
-import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
-import { getEnvironmentChain } from '../../utils';
-import { handleSiweAuth } from '../../utils/auth';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 
 type LoginFormProps = {
   next: DialogStepperContextValue['next'];
-  onClose?: () => void;
+  goToStep: DialogStepperContextValue['goToStep'];
 };
 
 const notBlank = (val?: string) => !!val && val.trim() !== '';
@@ -66,7 +61,7 @@ const formSchema = z
     }
   );
 
-export function LoginForm({ next, onClose }: LoginFormProps) {
+export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,18 +69,9 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
       phoneNumber: ''
     }
   });
-  const { client, partnerId, chainId } = usePanna();
+  const { client, partnerId } = usePanna();
   const [showEmailSubmit, setShowEmailSubmit] = useState(true);
   const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
-
-  const { connect } = useLogin({
-    client,
-    setWalletAsActive: true,
-    accountAbstraction: {
-      chain: getEnvironmentChain(chainId),
-      sponsorGas: true
-    }
-  });
 
   const handleFormSubmit = async (field: keyof z.infer<typeof formSchema>) => {
     const isFieldValid = await form.trigger(field);
@@ -124,51 +110,14 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    try {
-      const wallet = await connect(async () => {
-        // Create ecosystem wallet for Google auth
-        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
-          partnerId
-        });
-
-        await ecoWallet.connect({
-          client,
-          strategy: 'google'
-        });
-
-        return ecoWallet;
-      });
-
-      if (wallet) {
-        const address = wallet.getAccount()?.address;
-        if (address) {
-          const isBrowser = typeof window !== 'undefined';
-          if (isBrowser) {
-            localStorage.setItem(LAST_AUTH_PROVIDER, 'Google');
-            // Note: USER_ADDRESS is automatically managed by thirdweb
-          }
-
-          // Automatically perform SIWE authentication in the background
-          await handleSiweAuth(wallet, {
-            chainId: getEnvironmentChain().id as number
-          });
-
-          onClose?.();
-        }
-      }
-    } catch (error) {
-      console.error('Google login failed:', error);
-    }
-  };
-
   return (
     <Form {...form}>
       <form className="flex flex-col gap-4">
         <Button
           type="button"
           className="flex gap-3"
-          onClick={handleGoogleLogin}
+          onClick={() => goToStep(2)} // Pending social login step
+          data-testid="google-login-button"
         >
           <GoogleIcon />
           Continue with Google
