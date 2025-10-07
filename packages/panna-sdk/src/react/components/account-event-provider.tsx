@@ -101,7 +101,6 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
         if (isLoggedIn) {
           const token = await getSiweAuthToken();
           if (token) {
-            console.log('Authentication completed, token available');
             return token;
           }
         }
@@ -144,9 +143,6 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
       // If no token, poll to check if authentication (triggered elsewhere) completes
       if (!siweToken) {
-        console.log(
-          `No SIWE auth token found for ${eventType} event, polling for authentication that was triggered elsewhere...`
-        );
         siweToken = await waitForAuthentication();
       }
 
@@ -156,10 +152,6 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
           `${eventType} event failed: SIWE authentication is required but no token was available after waiting. Please ensure SIWE authentication is completed.`
         );
       }
-
-      console.log(
-        `Proceeding with ${eventType} event using SIWE authentication`
-      );
 
       const basePayload = {
         eventType,
@@ -218,10 +210,6 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       }
 
       await pannaApiService.sendAccountEvent(address, payload, siweToken);
-
-      console.log(
-        `Successfully sent ${eventType} event for address ${address} with SIWE authentication`
-      );
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
 

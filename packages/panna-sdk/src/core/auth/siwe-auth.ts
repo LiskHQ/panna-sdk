@@ -53,7 +53,6 @@ export class SiweAuth {
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
         this.userAddress = storedAddress;
-        console.log('SIWE Auth - Loaded existing token from localStorage');
       }
     }
   }
@@ -70,21 +69,14 @@ export class SiweAuth {
     };
 
     try {
-      console.log(
-        'SIWE Auth - Requesting challenge for address:',
-        params.address
-      );
-
       // Get challenge from Panna API
       const challenge: AuthChallengeReply =
         await pannaApiService.getAuthChallenge(challengeRequest);
 
-      console.log('SIWE Auth - Received challenge:', challenge);
-
-      // Store the challenge for later use in verification (matches working script approach)
+      // Store the challenge for later use in verification
       this.lastChallenge = challenge;
 
-      // Create minimal LoginPayload for message signing (matches working script format)
+      // Create minimal LoginPayload for message signing
       const payload: LoginPayload = {
         address: challenge.address.toLowerCase(),
         chain_id: challenge.chainId.toString(),
@@ -101,8 +93,6 @@ export class SiweAuth {
         statement: '',
         resources: []
       };
-
-      console.log('SIWE Auth - Generated payload:', payload);
 
       return payload;
     } catch (error) {
@@ -136,8 +126,7 @@ export class SiweAuth {
    */
   public async login(params: LoginParams): Promise<boolean> {
     try {
-      // Use the challenge response directly with signature added (matches working test script)
-      // We need to store the original challenge response to use here
+      // Use the challenge response directly with signature added
       if (!this.lastChallenge) {
         throw new Error(
           'No challenge available for verification. Please generate a payload first.'
@@ -146,33 +135,11 @@ export class SiweAuth {
 
       const verifyRequest: AuthVerifyRequest = {
         ...this.lastChallenge,
-        // Fix timestamp format - convert to UTC with Z suffix (like the working script)
+        // Fix timestamp format - convert to UTC with Z suffix
         issuedAt: this.lastChallenge.issuedAt.replace(/\+\d{2}:\d{2}$/, 'Z'),
         signature: params.signature,
         isSafeWallet: params.isSafeWallet || false
       };
-
-      // Debug logging to help diagnose issues
-      console.log('SIWE Auth - Sending verify request:', {
-        ...verifyRequest,
-        signature: verifyRequest.signature.substring(0, 10) + '...', // Truncate signature for logging
-        isSafeWallet: verifyRequest.isSafeWallet
-      });
-
-      // Also log the full signature for debugging
-      console.log('SIWE Auth - Full signature:', verifyRequest.signature);
-      console.log(
-        'SIWE Auth - Signature length:',
-        verifyRequest.signature.length
-      );
-      console.log(
-        'SIWE Auth - Is valid ECDSA signature format:',
-        /^0x[0-9a-fA-F]{130}$/.test(verifyRequest.signature)
-      );
-      console.log(
-        'SIWE Auth - Original payload that was signed:',
-        params.payload
-      );
 
       // Verify with Panna API
       const authResult = await pannaApiService.verifyAuth(verifyRequest);
@@ -188,7 +155,6 @@ export class SiweAuth {
           localStorage.setItem('panna_user_address', authResult.address);
         }
 
-        console.log('SIWE Auth - Successfully authenticated and stored token');
         return true;
       }
 
@@ -196,12 +162,6 @@ export class SiweAuth {
       return false;
     } catch (error) {
       console.error('Failed to verify login:', error);
-      console.error('SIWE Auth - Request details:', {
-        address: params.payload.address,
-        domain: params.payload.domain,
-        chainId: params.payload.chain_id,
-        hasSignature: !!params.signature
-      });
       return false;
     }
   }

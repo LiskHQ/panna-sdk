@@ -208,13 +208,6 @@ export async function handleSiweAuth(
       wallet.getConfig() as unknown as { smartAccount: SmartWalletOptions }
     ).smartAccount;
 
-    console.log({
-      account,
-      wallet,
-      walletConfig: wallet.getConfig(),
-      isSmartAccount
-    });
-
     if (!account) {
       console.warn('Kein Account für SIWE-Authentifizierung gefunden');
       return false;
@@ -226,28 +219,17 @@ export async function handleSiweAuth(
 
     const siweMessage = buildSiweMessage(payload);
 
-    console.log('SIWE Auth - Message being signed:', siweMessage);
-
     // Try to get ERC-191 compliant ECDSA signature for SIWE
     let signature;
-    try {
-      if (options?.chainId) {
-        console.log('SIWE Auth - Signing message with payload:', {
-          message: siweMessage,
-          chainId: options.chainId
-        });
-        signature = await account.signMessage({
-          message: siweMessage,
-          chainId: options.chainId
-        });
-      } else {
-        signature = await account.signMessage({
-          message: siweMessage
-        });
-      }
-    } catch (error) {
-      console.log('SIWE Auth - Signature fehlgeschlagen:', error);
-      throw error;
+    if (options?.chainId) {
+      signature = await account.signMessage({
+        message: siweMessage,
+        chainId: options.chainId
+      });
+    } else {
+      signature = await account.signMessage({
+        message: siweMessage
+      });
     }
 
     const signedPayload = {
@@ -262,9 +244,7 @@ export async function handleSiweAuth(
       isSafeWallet: isSmartAccount
     });
 
-    if (isSuccess) {
-      console.log('SIWE authentication successful');
-    } else {
+    if (!isSuccess) {
       console.warn('SIWE authentication failed');
     }
 

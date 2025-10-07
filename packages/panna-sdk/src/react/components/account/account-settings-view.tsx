@@ -21,7 +21,6 @@ export function AccountSettingsView() {
     try {
       // Clear SIWE authentication data
       await siweLogout();
-      console.log('SIWE auth data cleared');
 
       // Disconnect the wallet
       if (activeWallet) {
