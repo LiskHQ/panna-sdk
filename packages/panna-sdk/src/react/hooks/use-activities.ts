@@ -40,6 +40,7 @@ export function useActivities(
     queryFn: async (): Promise<GetActivitiesByAddressResult> => {
       return await getActivitiesByAddress({
         address,
+        client,
         chain,
         limit,
         offset
