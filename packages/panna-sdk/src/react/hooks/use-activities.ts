@@ -38,6 +38,10 @@ export function useActivities(
   return useQuery({
     queryKey: ['activities', JSON.stringify(variables)],
     queryFn: async (): Promise<GetActivitiesByAddressResult> => {
+      if (!client || !hasValidAddress) {
+        throw new Error('Invalid query state');
+      }
+
       return await getActivitiesByAddress({
         address,
         client,
