@@ -2,7 +2,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import {
   getActivitiesByAddress,
   DEFAULT_CURRENCY,
-  type PannaClient
+  type PannaClient,
+  TransactionActivity,
+  TokenERC
 } from 'src/core';
 import { mockActivities } from '@/mocks/activities';
 import { createQueryClientWrapper } from '../utils/test-utils';
@@ -35,17 +37,17 @@ describe('useActivities', () => {
     mockedGetActivitiesByAddress.mockResolvedValue({
       activities: [
         {
-          activityType: 'sent',
+          activityType: TransactionActivity.SENT,
           transactionID: '0x123',
           amount: {
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000000000000',
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
               name: 'Ether',
               symbol: 'ETH',
               decimals: 18,
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: null
             },
             fiatValue: {
@@ -77,8 +79,10 @@ describe('useActivities', () => {
 
     expect(result.current.data).toBeDefined();
     expect(result.current.data?.activities).toHaveLength(1);
-    expect(result.current.data?.activities[0].activityType).toBe('sent');
-    expect(result.current.data?.activities[0].amount.type).toBe('eth');
+    expect(result.current.data?.activities[0].activityType).toBe(
+      TransactionActivity.SENT
+    );
+    expect(result.current.data?.activities[0].amount.type).toBe(TokenERC.ETH);
 
     const activity = result.current.data?.activities[0];
     if (activity && 'fiatValue' in activity.amount) {

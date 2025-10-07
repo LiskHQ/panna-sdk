@@ -1,4 +1,5 @@
 import { ethIcon } from '../../react/consts';
+import { TokenERC } from './activity.types';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET
@@ -6380,10 +6381,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '70000000000000'
           },
           status: 'success',
@@ -6398,10 +6399,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '8000000000000'
           },
           status: 'success',
@@ -6416,10 +6417,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000310000000000'
           },
           status: 'success',
@@ -6434,10 +6435,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1'
           },
           status: 'success',
@@ -6452,10 +6453,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -6470,10 +6471,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -6488,10 +6489,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '0'
           },
           status: 'success',
@@ -6507,9 +6508,9 @@ export const getActivitiesByAddress = {
               icon: null,
               name: 'Lisk',
               symbol: 'LSK',
-              type: 'erc-20'
+              type: TokenERC.ERC20
             },
-            type: 'erc-20',
+            type: TokenERC.ERC20,
             value: '2000000000000000000'
           },
           status: 'success',
@@ -6525,9 +6526,9 @@ export const getActivitiesByAddress = {
               icon: null,
               name: 'Lisk',
               symbol: 'LSK',
-              type: 'erc-20'
+              type: TokenERC.ERC20
             },
-            type: 'erc-20',
+            type: TokenERC.ERC20,
             value: '2000000000000000000'
           },
           status: 'success',
@@ -7389,10 +7390,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -7407,10 +7408,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -7425,10 +7426,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '0'
           },
           status: 'success',
@@ -7444,9 +7445,9 @@ export const getActivitiesByAddress = {
               icon: null,
               name: 'Lisk',
               symbol: 'LSK',
-              type: 'erc-20'
+              type: TokenERC.ERC20
             },
-            type: 'erc-20',
+            type: TokenERC.ERC20,
             value: '2000000000000000000'
           },
           status: 'success',
