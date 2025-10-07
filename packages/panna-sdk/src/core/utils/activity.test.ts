@@ -1,4 +1,5 @@
 import { liskSepolia } from '../chain';
+import { type PannaClient } from '../client';
 import * as httpUtils from '../helpers/http';
 import * as activity from './activity';
 import {
@@ -24,6 +25,8 @@ import {
 // Mock upstream modules
 jest.mock('../helpers/http');
 jest.mock('./activity', () => jest.requireActual('./activity'));
+
+const mockClient = {} as PannaClient;
 
 describe('getBaseTransactionsRequestUrl', () => {
   it('should return the transactions API endpoint for the given address', () => {
@@ -250,6 +253,7 @@ describe('getActivitiesByAddress', () => {
 
     const params = {
       address: '0xe1287E785D424cd3d0998957388C4770488ed841',
+      client: mockClient,
       chain: liskSepolia
     };
     const result = await getActivitiesByAddress(params);
@@ -285,6 +289,7 @@ describe('getActivitiesByAddress', () => {
 
     const params = {
       address: '0x1AC80cE05cd1775BfBb7cEB2D42ed7874810EB3F',
+      client: mockClient,
       chain: liskSepolia
     };
     const result = await getActivitiesByAddress(params);
@@ -331,6 +336,7 @@ describe('getActivitiesByAddress', () => {
 
     const params = {
       address: '0x1AC80cE05cd7715BfBb7cEB2D42ed7874810EB3F',
+      client: mockClient,
       chain: liskSepolia,
       offset: 4,
       limit: 4
@@ -358,7 +364,7 @@ describe('getActivitiesByAddress', () => {
   });
 
   it('should throw error when address in params is invalid', async () => {
-    const params = { address: 'invalidAddress' };
+    const params = { address: 'invalidAddress', client: mockClient };
     expect(async () => getActivitiesByAddress(params)).rejects.toThrow(
       'Invalid address format'
     );

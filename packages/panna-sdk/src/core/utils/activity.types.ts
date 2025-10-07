@@ -1,4 +1,5 @@
 import { type Chain } from 'thirdweb';
+import { type PannaClient } from '../client';
 import { LAST_PAGE_REACHED } from './activity';
 import {
   type BlockscoutAddressParam,
@@ -8,13 +9,16 @@ import {
   type BlockscoutNextPageParams,
   type BlockscoutInternalTransactionNextPageParams
 } from './blockscout.types';
+import { type FiatCurrency } from './types';
 
 // Parameters for fetching account activities
 export interface GetActivitiesByAddressParams {
   address: string;
+  client: PannaClient;
   chain?: Chain;
   limit?: number;
   offset?: number;
+  currency?: FiatCurrency;
 }
 
 // Result for fetched account activities
@@ -59,9 +63,15 @@ export type TransactionAmount = { type: string } & (
   | ERC1155Amount
 );
 
+export interface FiatValue {
+  amount: number;
+  currency: FiatCurrency;
+}
+
 interface BaseAmount {
   value: string;
   tokenInfo: TokenInfo;
+  fiatValue?: FiatValue;
 }
 
 export interface EtherAmount extends BaseAmount {
@@ -83,6 +93,7 @@ export interface ERC721Amount extends BaseNFTAmount {
 export interface ERC1155Amount extends BaseNFTAmount {
   type: 'erc-1155';
   value: string;
+  fiatValue?: FiatValue;
 }
 
 export interface NFTInstance {

@@ -1,6 +1,7 @@
+import { Bridge } from 'thirdweb';
 import { ethIcon } from '../../react/consts';
-import { lisk } from '../chain';
-import { NATIVE_TOKEN_ADDRESS } from '../defaults';
+import { lisk, liskSepolia } from '../chain';
+import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
 import { PannaHttpErr } from '../helpers/http';
@@ -18,6 +19,7 @@ import {
   type ERC20Amount,
   type ERC721Amount,
   type EtherAmount,
+  type FiatValue,
   type GetActivitiesByAddressParams,
   type GetActivitiesByAddressResult,
   type PreProcessedActivity,
@@ -51,6 +53,43 @@ import {
 // Global constants
 const ACTIVITY_CACHE_ID = 'activity';
 export const LAST_PAGE_REACHED = 'last_page_reached';
+
+/**
+ * Calculate fiat value for a token amount
+ * @param symbol - Token symbol
+ * @param value - Token amount as string
+ * @param decimals - Token decimals
+ * @param tokenPrices - Array of token prices
+ * @param currency - Target fiat currency
+ * @returns Fiat value object or undefined if price not found
+ */
+const calculateFiatValue = (
+  symbol: string,
+  value: string,
+  decimals: number,
+  tokenPrices: Array<{ symbol: string; prices: Record<string, number> }>,
+  currency: FiatValue['currency']
+): FiatValue | undefined => {
+  // Special case for mapping Lisk Bridged USDC.e to USDC
+  const tokenPrice = tokenPrices.find((token) => {
+    if (symbol === 'USDC.e' && token.symbol === 'USDC') {
+      return true;
+    }
+    return token.symbol === symbol;
+  });
+
+  if (!tokenPrice || !tokenPrice.prices[currency]) {
+    return undefined;
+  }
+
+  const fiatAmount =
+    (Number(value) * tokenPrice.prices[currency]) / 10 ** decimals;
+
+  return {
+    amount: fiatAmount,
+    currency
+  };
+};
 
 /**
  * Get blockscout transactions endpoint.
@@ -92,36 +131,58 @@ export const getBaseInternalTransactionsRequestUrl = (
 };
 
 /*
- * Get recent activities for an account.
+ * Get recent activities for an account with fiat price information.
  * @param params - Parameters for fetching the account activities.
  * @param params.address - The address for which to retrieve the activities.
+ * @param params.client - The Panna client to use for the request.
  * @param params.chain - (Optional) Chain object type. (Default: lisk)
  * @param params.offset - (Optional) The number of items to be skipped from the matching result. (Default: 0)
  * @param params.limit - (Optional) The number of items to be returned from the matching result. (Default: 10)
- * @returns Account activity information.
+ * @param params.currency - (Optional) The currency in which the fiat values are determined. (Default: USD)
+ * @returns Account activity information with fiat prices.
  * @throws Error if address is invalid.
  * @example
  * ```ts
- * // Get list of recent activities for the specified user
- * const result = await getActivitiesByAddress({ address: userAddress, offset: 0, limit: 10 });
+ * import { getActivitiesByAddress } from 'panna-sdk';
+ *
+ * // Get list of recent activities with fiat prices in USD (default)
+ * const result = await getActivitiesByAddress({
+ *   address: userAddress,
+ *   client: pannaClient,
+ *   offset: 0,
+ *   limit: 10
+ * });
+ *
+ * // Get activities with fiat prices in EUR
+ * const resultEUR = await getActivitiesByAddress({
+ *   address: userAddress,
+ *   client: pannaClient,
+ *   currency: 'EUR'
+ * });
+ *
  * // result: {
  * //   activities: [{
- * //     activityType: 'sent',
+ * //     activityType: 'Sent',
  * //     transactionID: '0x...',
  * //     amount: {
  * //       type: 'eth',
- * //       value: '100000000000',
+ * //       value: '1000000000000000000',
  * //       tokenInfo: {
  * //         address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
  * //         name: 'Ether',
  * //         symbol: 'ETH',
  * //         decimals: 18,
- * //         type: 'eth'
+ * //         type: 'eth',
+ * //         icon: 'https://...'
+ * //       },
+ * //       fiatValue: {
+ * //         amount: 3000.50,
+ * //         currency: 'USD'
  * //       }
  * //     },
  * //     status: 'ok'
  * //   }, {
- * //     activityType: 'received',
+ * //     activityType: 'Received',
  * //     transactionID: '0x...',
  * //     amount: {
  * //       type: 'erc-20',
@@ -131,49 +192,59 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         name: 'Lisk',
  * //         symbol: 'LSK',
  * //         decimals: 18,
- * //         type: 'erc-20'
+ * //         type: 'erc-20',
  * //         icon: null
+ * //       },
+ * //       fiatValue: {
+ * //         amount: 100.00,
+ * //         currency: 'USD'
  * //       }
  * //     },
  * //     status: 'ok'
  * //   }, {
- * //     activityType: 'received',
+ * //     activityType: 'Received',
  * //     transactionID: '0x...',
  * //     amount: {
  * //       type: 'erc-721',
  * //       tokenId: '9500',
  * //       instance: {
  * //         id: '9500',
- * //         isUnique: null,
- * //         owner: null,
+ * //         isUnique: true,
+ * //         owner: { address: '0x...', isContract: false },
  * //         tokenInfo: {
  * //           address: '0x...',
  * //           name: 'Lisk of Life',
  * //           symbol: 'LOL',
- * //           decimals: null,
+ * //           decimals: 0,
  * //           type: 'erc-721',
  * //           icon: null
  * //         }
- * //       },
+ * //       }
+ * //     },
  * //     status: 'ok'
  * //   }, {
- * //     activityType: 'minted',
+ * //     activityType: 'Minted',
  * //     transactionID: '0x...',
  * //     amount: {
  * //       type: 'erc-1155',
  * //       tokenId: '29900446396079726096...',
- * //       value: '100000000000',
- * //       tokenInfo: {
- * //         address: '0x...',
- * //         name: 'Rarible',
- * //         symbol: RARI,
- * //         decimals: null,
- * //         type: 'erc-1155',
- * //         icon: null
+ * //       value: '5',
+ * //       instance: {
+ * //         id: '29900446396079726096...',
+ * //         isUnique: false,
+ * //         owner: { address: '0x...', isContract: false },
+ * //         tokenInfo: {
+ * //           address: '0x...',
+ * //           name: 'Rarible',
+ * //           symbol: 'RARI',
+ * //           decimals: 0,
+ * //           type: 'erc-1155',
+ * //           icon: null
+ * //         }
  * //       }
  * //     },
- * //     status: 'error'
- * //   }, ...],
+ * //     status: 'ok'
+ * //   }],
  * //   metadata: { count: 10, offset: 0, limit: 10, hasNextPage: true }
  * // }
  * ```
@@ -191,9 +262,11 @@ export const getActivitiesByAddress = async function (
   // Set default request params
   const {
     address,
+    client,
     chain = lisk,
     offset = DEFAULT_PAGINATION_OFFSET,
-    limit = DEFAULT_PAGINATION_LIMIT
+    limit = DEFAULT_PAGINATION_LIMIT,
+    currency = DEFAULT_CURRENCY
   } = params;
 
   const ckActivities = getCacheKey(address, chain.id, 'activities');
@@ -287,6 +360,18 @@ export const getActivitiesByAddress = async function (
     activityCache.set(ckActivities, preProcessedActivities);
   }
 
+  // Fetch token prices for fiat value calculations
+  let tokenPrices: Array<{ symbol: string; prices: Record<string, number> }> =
+    [];
+  try {
+    tokenPrices = await Bridge.tokens({
+      chainId: chain.id === liskSepolia.id ? lisk.id : chain.id,
+      client
+    });
+  } catch (error) {
+    console.warn('Failed to fetch token prices:', error);
+  }
+
   const activities: Activity[] = preProcessedActivities
     .map((tx) => {
       const transactionID = tx.hash;
@@ -329,9 +414,9 @@ export const getActivitiesByAddress = async function (
         const amountType = getAmountType(address, tx);
         switch (amountType) {
           case TokenERC.ETH: {
-            amount = {
+            const ethAmount: EtherAmount = {
               type: TokenERC.ETH,
-              value: tx.value,
+              value: tx.value || '0',
               tokenInfo: {
                 address: NATIVE_TOKEN_ADDRESS,
                 name: 'Ether',
@@ -340,7 +425,22 @@ export const getActivitiesByAddress = async function (
                 type: TokenERC.ETH,
                 icon: ethIcon
               }
-            } as EtherAmount;
+            };
+
+            if (tokenPrices.length > 0 && tx.value) {
+              const fiatValue = calculateFiatValue(
+                'ETH',
+                tx.value,
+                18,
+                tokenPrices,
+                currency
+              );
+              if (fiatValue !== undefined) {
+                ethAmount.fiatValue = fiatValue;
+              }
+            }
+
+            amount = ethAmount;
             break;
           }
 
@@ -349,21 +449,38 @@ export const getActivitiesByAddress = async function (
               (e) => e.token.type.toLowerCase() === TokenERC.ERC20
             );
             const erc20TxTotal = erc20Tx?.total as BlockscoutTotalERC20;
+            const decimals = erc20Tx?.token.decimals
+              ? Number(erc20Tx?.token.decimals)
+              : 0;
 
-            amount = {
+            const erc20Amount: ERC20Amount = {
               type: TokenERC.ERC20,
               value: erc20TxTotal.value,
               tokenInfo: {
-                address: erc20Tx?.token.address_hash || erc20Tx?.token.address,
-                name: erc20Tx?.token.name,
-                symbol: erc20Tx?.token.symbol,
-                decimals: erc20Tx?.token.decimals
-                  ? Number(erc20Tx?.token.decimals)
-                  : 0,
+                address:
+                  (erc20Tx?.token.address_hash || erc20Tx?.token.address) ?? '',
+                name: erc20Tx?.token.name ?? '',
+                symbol: erc20Tx?.token.symbol ?? '',
+                decimals,
                 type: TokenERC.ERC20,
-                icon: erc20Tx?.token.icon_url
+                icon: erc20Tx?.token.icon_url ?? null
               }
-            } as ERC20Amount;
+            };
+
+            if (tokenPrices.length > 0 && erc20Tx?.token.symbol) {
+              const fiatValue = calculateFiatValue(
+                erc20Tx.token.symbol,
+                erc20TxTotal.value,
+                decimals,
+                tokenPrices,
+                currency
+              );
+              if (fiatValue !== undefined) {
+                erc20Amount.fiatValue = fiatValue;
+              }
+            }
+
+            amount = erc20Amount;
             break;
           }
 
@@ -399,8 +516,13 @@ export const getActivitiesByAddress = async function (
               (e) => e.token.type.toLowerCase() === TokenERC.ERC1155
             );
             const erc1155TxTotal = erc1155Tx?.total as BlockscoutTotalERC1155;
+            const decimals = erc1155Tx?.token.decimals
+              ? typeof erc1155Tx.token.decimals === 'string'
+                ? Number(erc1155Tx.token.decimals)
+                : erc1155Tx.token.decimals
+              : 0;
 
-            amount = {
+            const erc1155Amount: ERC1155Amount = {
               type: TokenERC.ERC1155,
               tokenId: erc1155TxTotal.token_id,
               value: erc1155TxTotal.value,
@@ -413,12 +535,27 @@ export const getActivitiesByAddress = async function (
                     erc1155Tx?.token.address_hash || erc1155Tx?.token.address,
                   name: erc1155Tx?.token.name,
                   symbol: erc1155Tx?.token.symbol,
-                  decimals: erc1155Tx?.token.decimals,
+                  decimals,
                   type: TokenERC.ERC1155,
                   icon: erc1155Tx?.token.icon_url
                 }
               }
             } as unknown as ERC1155Amount;
+
+            if (tokenPrices.length > 0 && erc1155Tx?.token.symbol) {
+              const fiatValue = calculateFiatValue(
+                erc1155Tx.token.symbol,
+                erc1155TxTotal.value,
+                decimals,
+                tokenPrices,
+                currency
+              );
+              if (fiatValue !== undefined) {
+                erc1155Amount.fiatValue = fiatValue;
+              }
+            }
+
+            amount = erc1155Amount;
             break;
           }
         }

@@ -200,6 +200,20 @@ function renderActivityNameOrSymbol(activity: Activity) {
   }
 }
 
+function renderActivityFiatValue(activity: Activity) {
+  const amount = activity.amount as EtherAmount | ERC20Amount | ERC1155Amount;
+
+  if (!amount.fiatValue) {
+    return <Typography variant="muted">-</Typography>;
+  }
+
+  return (
+    <Typography variant="muted">
+      ${amount.fiatValue.amount.toFixed(2)}
+    </Typography>
+  );
+}
+
 export function ActivityItem({ activity }: ActivityItemProps) {
   return (
     <section className="flex w-full justify-between">
@@ -211,11 +225,10 @@ export function ActivityItem({ activity }: ActivityItemProps) {
         </div>
       </header>
       <div className="flex flex-col justify-center text-right">
-        {/* @TODO: Implement pricing when API is updated */}
         <Typography variant="small">
           {renderActivityNameOrSymbol(activity)}
         </Typography>
-        <Typography variant="muted">$0</Typography>
+        {renderActivityFiatValue(activity)}
       </div>
     </section>
   );
