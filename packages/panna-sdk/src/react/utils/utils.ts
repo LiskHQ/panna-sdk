@@ -1,6 +1,9 @@
+import type { Wallet } from 'thirdweb/wallets';
+import type { SmartWalletOptions } from 'thirdweb/wallets';
 import { formatEther, formatUnits } from 'viem';
 import { TokenBalance } from '@/mocks/token-balances';
 import { chains, lisk } from '../../core';
+import { generateSiwePayload, siweLogin } from '../../core/auth';
 import type { LoginPayload } from '../../core/utils/types';
 import { tokenConfig } from '../consts';
 import { getCountryByCode } from './countries';
@@ -174,4 +177,110 @@ Version: ${version}
 Chain ID: ${chain_id}
 Nonce: ${nonce}
 Issued At: ${issued_at}`;
+}
+
+/**
+ * Perform SIWE authentication after wallet connection
+ * This function generates a SIWE payload, signs it with the wallet account,
+ * and sends it to the Panna API for verification
+ *
+ * @param wallet - The connected wallet instance
+ * @param options - Optional configuration
+ * @param options.chainId - The chain ID to use for signing (optional)
+ * @returns Promise<boolean> - Returns true if authentication was successful, false otherwise
+ *
+ * @example
+ * ```ts
+ * // With chain ID (for login form)
+ * const success = await handleSiweAuth(wallet, { chainId: 4202 });
+ *
+ * // Without chain ID (for OTP form)
+ * const success = await handleSiweAuth(wallet);
+ * ```
+ */
+export async function handleSiweAuth(
+  wallet: Wallet,
+  options?: { chainId?: number }
+): Promise<boolean> {
+  try {
+    const account = wallet.getAccount();
+    const isSmartAccount = !!(
+      wallet.getConfig() as unknown as { smartAccount: SmartWalletOptions }
+    ).smartAccount;
+
+    console.log({
+      account,
+      wallet,
+      walletConfig: wallet.getConfig(),
+      isSmartAccount
+    });
+
+    if (!account) {
+      console.warn('Kein Account für SIWE-Authentifizierung gefunden');
+      return false;
+    }
+
+    const payload = await generateSiwePayload({
+      address: account.address
+    });
+
+    const siweMessage = buildSiweMessage(payload);
+
+    console.log('SIWE Auth - Message being signed:', siweMessage);
+
+    // Try to get ERC-191 compliant ECDSA signature for SIWE
+    let signature;
+    try {
+      if (options?.chainId) {
+        console.log('SIWE Auth - Signing message with payload:', {
+          message: siweMessage,
+          chainId: options.chainId
+        });
+        signature = await account.signMessage({
+          message: siweMessage,
+          chainId: options.chainId
+        });
+      } else {
+        signature = await account.signMessage({
+          message: siweMessage
+        });
+      }
+    } catch (error) {
+      console.log('SIWE Auth - Signature fehlgeschlagen:', error);
+      throw error;
+    }
+
+    const signedPayload = {
+      payload,
+      signature
+    };
+
+    const isSuccess = await siweLogin({
+      payload: signedPayload.payload,
+      signature: signedPayload.signature,
+      account,
+      isSafeWallet: isSmartAccount
+    });
+
+    if (isSuccess) {
+      console.log('SIWE authentication successful');
+    } else {
+      console.warn('SIWE authentication failed');
+    }
+
+    return isSuccess;
+  } catch (error) {
+    console.error('SIWE Authentifizierungsfehler:', error);
+
+    // Check if it's a 401 unauthorized error from thirdweb
+    if (error instanceof Error && error.message.includes('401')) {
+      console.warn(
+        'Wallet noch nicht bei thirdweb Service authentifiziert - SIWE-Authentifizierung übersprungen'
+      );
+      // Don't treat this as a fatal error, just log it
+      return false;
+    }
+
+    return false;
+  }
 }

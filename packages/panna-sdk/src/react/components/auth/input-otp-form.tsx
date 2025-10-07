@@ -3,7 +3,6 @@ import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import type { SmartWalletOptions, Wallet } from 'thirdweb/wallets';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import z from 'zod';
 import {
@@ -22,8 +21,7 @@ import {
 import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
-import { generateSiwePayload, siweLogin } from '../../../core/auth';
-import { buildSiweMessage, getEnvironmentChain } from '../../utils';
+import { getEnvironmentChain, handleSiweAuth } from '../../utils';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -63,83 +61,6 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       sponsorGas: true // enable sponsored transactions
     }
   });
-
-  // Helper function to perform SIWE authentication after wallet connection
-  const handleSiweAuth = async (wallet: Wallet) => {
-    try {
-      const account = wallet.getAccount();
-      const isSmartAccount = !!(
-        wallet.getConfig() as unknown as { smartAccount: SmartWalletOptions }
-      ).smartAccount;
-
-      console.log({
-        account,
-        wallet,
-        walletConfig: wallet.getConfig(),
-        isSmartAccount
-      });
-
-      if (!account) {
-        console.warn('No account found for SIWE authentication');
-        return false;
-      }
-
-      const payload = await generateSiwePayload({
-        address: account.address
-      });
-
-      const siweMessage = buildSiweMessage(payload);
-
-      console.log('SIWE Auth - Message being signed (OTP form):', siweMessage);
-
-      // Try to get standard ECDSA signature for SIWE
-      let signature;
-      try {
-        signature = await account.signMessage({
-          message: siweMessage
-        });
-      } catch (error) {
-        console.log('SIWE Auth - Signature failed (OTP form):', error);
-        throw error;
-      }
-
-      console.log('SIWE Auth - Generated signature (OTP form):', signature);
-      console.log('SIWE Auth - Signature length (OTP form):', signature.length);
-
-      const signedPayload = {
-        payload,
-        signature
-      };
-
-      const isSuccess = await siweLogin({
-        payload: signedPayload.payload,
-        signature: signedPayload.signature,
-        account,
-        isSafeWallet: isSmartAccount
-      });
-
-      if (isSuccess) {
-        console.log('SIWE authentication successful');
-      } else {
-        console.warn('SIWE authentication failed');
-      }
-
-      return isSuccess;
-    } catch (error) {
-      console.error('SIWE authentication error:', error);
-
-      // Check if it's a 401 unauthorized error from thirdweb
-      if (error instanceof Error && error.message.includes('401')) {
-        console.warn(
-          'Wallet not yet authenticated with thirdweb service - SIWE authentication skipped'
-        );
-        // Don't treat this as a fatal error, just log it
-        return false;
-      }
-
-      return false;
-    }
-  };
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
     try {

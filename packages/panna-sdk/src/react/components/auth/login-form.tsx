@@ -9,7 +9,6 @@ import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import type { SmartWalletOptions, Wallet } from 'thirdweb/wallets';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -24,8 +23,7 @@ import { Input } from '@/components/ui/input';
 import { LAST_AUTH_PROVIDER } from '@/consts';
 import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
-import { generateSiwePayload, siweLogin } from '../../../core/auth';
-import { buildSiweMessage, getEnvironmentChain } from '../../utils';
+import { getEnvironmentChain, handleSiweAuth } from '../../utils';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 
@@ -125,84 +123,6 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
     }
   }
 
-  const handleSiweAuth = async (wallet: Wallet) => {
-    try {
-      const account = wallet.getAccount();
-      const isSmartAccount = !!(
-        wallet.getConfig() as unknown as { smartAccount: SmartWalletOptions }
-      ).smartAccount;
-
-      console.log({
-        account,
-        wallet,
-        walletConfig: wallet.getConfig(),
-        isSmartAccount
-      });
-
-      if (!account) {
-        console.warn('No account found for SIWE authentication');
-        return false;
-      }
-
-      const payload = await generateSiwePayload({
-        address: account.address
-      });
-
-      const siweMessage = buildSiweMessage(payload);
-
-      console.log('SIWE Auth - Message being signed:', siweMessage);
-
-      // Try to get ERC-191 compliant ECDSA signature for SIWE
-      let signature;
-      try {
-        console.log('SIWE Auth - Signing message with payload:', {
-          message: siweMessage,
-          chainId: getEnvironmentChain().id as number
-        });
-        signature = await account.signMessage({
-          message: siweMessage,
-          chainId: getEnvironmentChain().id as number
-        });
-      } catch (error) {
-        console.log('SIWE Auth - Signature failed:', error);
-        throw error;
-      }
-
-      const signedPayload = {
-        payload,
-        signature
-      };
-
-      const isSuccess = await siweLogin({
-        payload: signedPayload.payload,
-        signature: signedPayload.signature,
-        account,
-        isSafeWallet: isSmartAccount
-      });
-
-      if (isSuccess) {
-        console.log('SIWE authentication successful');
-      } else {
-        console.warn('SIWE authentication failed');
-      }
-
-      return isSuccess;
-    } catch (error) {
-      console.error('SIWE authentication error:', error);
-
-      // Check if it's a 401 unauthorized error from thirdweb
-      if (error instanceof Error && error.message.includes('401')) {
-        console.warn(
-          'Wallet not yet authenticated with thirdweb service - SIWE authentication skipped'
-        );
-        // Don't treat this as a fatal error, just log it
-        return false;
-      }
-
-      return false;
-    }
-  };
-
   const handleGoogleLogin = async () => {
     try {
       const wallet = await connect(async () => {
@@ -229,7 +149,9 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
           }
 
           // Automatically perform SIWE authentication in the background
-          await handleSiweAuth(wallet);
+          await handleSiweAuth(wallet, {
+            chainId: getEnvironmentChain().id as number
+          });
 
           onClose?.();
         }

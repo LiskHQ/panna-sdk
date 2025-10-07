@@ -82,7 +82,9 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   };
 
   /**
-   * Wait for authentication to complete with timeout
+   * Polls to check if SIWE authentication has completed with timeout
+   * NOTE: This function does NOT actively trigger authentication - it only waits for
+   * authentication that was triggered elsewhere (e.g., in login forms) to complete.
    * @param maxWaitTimeMs - Maximum time to wait for authentication (default: 10 seconds)
    * @param checkIntervalMs - Interval between authentication checks (default: 500ms)
    * @returns Promise<string | null> - Auth token if available, null if timeout or not authenticated
@@ -117,7 +119,9 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   /**
    * Send account event to Panna API
-   * Always waits for SIWE authentication and makes API calls mandatory when token exists
+   * Polls to check if SIWE authentication (triggered elsewhere) has completed.
+   * Makes API calls mandatory when token exists.
+   * NOTE: This function does NOT actively trigger authentication.
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
@@ -138,10 +142,10 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       // Always try to get SIWE token first
       let siweToken = await getSiweAuthToken();
 
-      // If no token, always wait for authentication to complete
+      // If no token, poll to check if authentication (triggered elsewhere) completes
       if (!siweToken) {
         console.log(
-          `No SIWE auth token found for ${eventType} event, waiting for authentication to complete...`
+          `No SIWE auth token found for ${eventType} event, polling for authentication that was triggered elsewhere...`
         );
         siweToken = await waitForAuthentication();
       }
@@ -262,7 +266,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   /**
    * Handle wallet onConnect event
-   * Always waits for SIWE authentication before sending the event
+   * Polls for SIWE authentication before sending the event
    */
   const handleOnConnect = async (address: string) => {
     try {
@@ -278,7 +282,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   /**
    * Handle wallet disconnect event
-   * Always waits for SIWE authentication before sending the event
+   * Polls for SIWE authentication before sending the event
    */
   const handleDisconnect = async (address: string) => {
     try {
@@ -292,7 +296,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   /**
    * Handle account changed event
-   * Always waits for SIWE authentication before sending the event
+   * Polls for SIWE authentication before sending the event
    */
   const handleAccountChanged = async (address: string) => {
     try {
