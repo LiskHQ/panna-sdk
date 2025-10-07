@@ -63,7 +63,7 @@ export const LAST_PAGE_REACHED = 'last_page_reached';
  * @param currency - Target fiat currency
  * @returns Fiat value object or undefined if price not found
  */
-const calculateFiatValue = (
+export const calculateFiatValue = (
   symbol: string,
   value: string,
   decimals: number,

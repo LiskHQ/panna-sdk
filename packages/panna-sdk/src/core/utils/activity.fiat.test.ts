@@ -4,7 +4,7 @@ import { lisk } from '../chain/chain-definitions/lisk';
 import { type PannaClient } from '../client';
 import { DEFAULT_CURRENCY } from '../defaults';
 import * as httpUtils from '../helpers/http';
-import { getActivitiesByAddress } from './activity';
+import { calculateFiatValue, getActivitiesByAddress } from './activity';
 import { TokenERC } from './activity.types';
 import {
   BlockscoutAddressParam,
@@ -84,6 +84,163 @@ const TEST_TX_HASH =
   '0x1000000000000000000000000000000000000000000000000000000000000000';
 const TEST_BLOCK_HASH =
   '0x2000000000000000000000000000000000000000000000000000000000000000';
+
+describe('calculateFiatValue - Unit Tests', () => {
+  const mockTokenPrices = [
+    { symbol: 'ETH', prices: { USD: 3000, EUR: 2700, GBP: 2400 } },
+    { symbol: 'USDC', prices: { USD: 1.0, EUR: 0.9, GBP: 0.8 } },
+    { symbol: 'LSK', prices: { USD: 1.5, EUR: 1.35, GBP: 1.2 } }
+  ];
+
+  describe('Currency Calculations', () => {
+    it('should calculate USD fiat value correctly', () => {
+      const result = calculateFiatValue(
+        'ETH',
+        '1000000000000000000', // 1 ETH in wei
+        18,
+        mockTokenPrices,
+        'USD'
+      );
+      expect(result).toEqual({ amount: 3000, currency: 'USD' });
+    });
+
+    it('should calculate EUR fiat value correctly', () => {
+      const result = calculateFiatValue(
+        'ETH',
+        '2000000000000000000', // 2 ETH in wei
+        18,
+        mockTokenPrices,
+        'EUR'
+      );
+      expect(result).toEqual({ amount: 5400, currency: 'EUR' });
+    });
+
+    it('should calculate GBP fiat value correctly', () => {
+      const result = calculateFiatValue(
+        'ETH',
+        '1000000000000000000', // 1 ETH in wei
+        18,
+        mockTokenPrices,
+        'GBP'
+      );
+      expect(result).toEqual({ amount: 2400, currency: 'GBP' });
+    });
+  });
+
+  describe('Decimal Handling', () => {
+    it('should handle different decimals correctly (6 decimals)', () => {
+      const result = calculateFiatValue(
+        'USDC',
+        '1000000', // 1 USDC with 6 decimals
+        6,
+        mockTokenPrices,
+        'USD'
+      );
+      expect(result).toEqual({ amount: 1.0, currency: 'USD' });
+    });
+
+    it('should handle different decimals correctly (18 decimals)', () => {
+      const result = calculateFiatValue(
+        'LSK',
+        '1500000000000000000', // 1.5 LSK with 18 decimals
+        18,
+        mockTokenPrices,
+        'USD'
+      );
+      expect(result).toEqual({ amount: 2.25, currency: 'USD' });
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should return undefined when price not found', () => {
+      const result = calculateFiatValue(
+        'UNKNOWN',
+        '1000000',
+        6,
+        mockTokenPrices,
+        'USD'
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when currency not available', () => {
+      const result = calculateFiatValue(
+        'ETH',
+        '1000000000000000000',
+        18,
+        mockTokenPrices,
+        'JPY' as 'USD' // Force type to test runtime behavior
+      );
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle zero value correctly', () => {
+      const result = calculateFiatValue('ETH', '0', 18, mockTokenPrices, 'USD');
+      expect(result).toEqual({ amount: 0, currency: 'USD' });
+    });
+
+    it('should handle empty token prices array', () => {
+      const result = calculateFiatValue(
+        'ETH',
+        '1000000000000000000',
+        18,
+        [],
+        'USD'
+      );
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('Special Token Mappings', () => {
+    it('should map USDC.e to USDC for price lookup', () => {
+      const result = calculateFiatValue(
+        'USDC.e',
+        '1000000', // 1 USDC.e with 6 decimals
+        6,
+        mockTokenPrices,
+        'USD'
+      );
+      // Should use USDC price
+      expect(result).toEqual({ amount: 1.0, currency: 'USD' });
+    });
+
+    it('should map USDC.e to USDC for EUR price lookup', () => {
+      const result = calculateFiatValue(
+        'USDC.e',
+        '1000000', // 1 USDC.e with 6 decimals
+        6,
+        mockTokenPrices,
+        'EUR'
+      );
+      // Should use USDC price in EUR
+      expect(result).toEqual({ amount: 0.9, currency: 'EUR' });
+    });
+  });
+
+  describe('Fractional Amounts', () => {
+    it('should calculate fractional token amounts correctly', () => {
+      const result = calculateFiatValue(
+        'ETH',
+        '500000000000000000', // 0.5 ETH
+        18,
+        mockTokenPrices,
+        'USD'
+      );
+      expect(result).toEqual({ amount: 1500, currency: 'USD' });
+    });
+
+    it('should calculate very small amounts correctly', () => {
+      const result = calculateFiatValue(
+        'USDC',
+        '1', // 0.000001 USDC (1 micro USDC)
+        6,
+        mockTokenPrices,
+        'USD'
+      );
+      expect(result).toEqual({ amount: 0.000001, currency: 'USD' });
+    });
+  });
+});
 
 describe('getActivitiesByAddress - Fiat Value Tests', () => {
   // Helper function to create complete mock transactions
