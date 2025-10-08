@@ -10,6 +10,15 @@ import type {
 } from '../utils/types';
 
 /**
+ * LocalStorage keys for SIWE authentication
+ */
+const STORAGE_KEYS = {
+  AUTH_TOKEN: 'panna_auth_token',
+  USER_ADDRESS: 'panna_user_address',
+  TOKEN_EXPIRY: 'panna_auth_token_expiry'
+} as const;
+
+/**
  * Parameters for generating a login payload
  */
 export type GeneratePayloadParams = {
@@ -48,9 +57,9 @@ export class SiweAuth {
   constructor() {
     // Load existing auth data from localStorage on initialization
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('panna_auth_token');
-      const storedAddress = localStorage.getItem('panna_user_address');
-      const storedExpiry = localStorage.getItem('panna_auth_token_expiry');
+      const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const storedAddress = localStorage.getItem(STORAGE_KEYS.USER_ADDRESS);
+      const storedExpiry = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
 
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
@@ -155,11 +164,11 @@ export class SiweAuth {
 
         // Store in localStorage for persistence (if available)
         if (typeof window !== 'undefined') {
-          localStorage.setItem('panna_auth_token', authResult.token);
-          localStorage.setItem('panna_user_address', authResult.address);
+          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResult.token);
+          localStorage.setItem(STORAGE_KEYS.USER_ADDRESS, authResult.address);
           if (authResult.expiresIn) {
             localStorage.setItem(
-              'panna_auth_token_expiry',
+              STORAGE_KEYS.TOKEN_EXPIRY,
               authResult.expiresIn.toString()
             );
           }
@@ -187,9 +196,9 @@ export class SiweAuth {
 
     // Check localStorage (if available)
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('panna_auth_token');
-      const storedAddress = localStorage.getItem('panna_user_address');
-      const storedExpiry = localStorage.getItem('panna_auth_token_expiry');
+      const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+      const storedAddress = localStorage.getItem(STORAGE_KEYS.USER_ADDRESS);
+      const storedExpiry = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
 
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
@@ -268,9 +277,9 @@ export class SiweAuth {
 
     // Clear localStorage (if available)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('panna_auth_token');
-      localStorage.removeItem('panna_user_address');
-      localStorage.removeItem('panna_auth_token_expiry');
+      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER_ADDRESS);
+      localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
     }
   }
 }

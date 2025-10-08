@@ -110,7 +110,10 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
           }
 
           // Automatically perform SIWE authentication in the background
-          await handleSiweAuth(wallet);
+          // Pass chainId for consistency with login form
+          await handleSiweAuth(wallet, {
+            chainId: getEnvironmentChain().id as number
+          });
 
           reset();
           onClose();

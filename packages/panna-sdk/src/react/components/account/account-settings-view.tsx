@@ -19,19 +19,15 @@ export function AccountSettingsView() {
 
   const handleLogout = async () => {
     try {
-      // Clear SIWE authentication data
-      await siweLogout();
-
-      // Disconnect the wallet
+      // Disconnect the wallet first (may trigger account activity events that need auth)
       if (activeWallet) {
         disconnect(activeWallet);
       }
     } catch (error) {
       console.error('Error during logout:', error);
-      // Still disconnect wallet even if SIWE logout fails
-      if (activeWallet) {
-        disconnect(activeWallet);
-      }
+    } finally {
+      // Always clear SIWE authentication data, even if disconnect fails
+      await siweLogout();
     }
   };
 

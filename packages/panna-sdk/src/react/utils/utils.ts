@@ -214,7 +214,7 @@ export async function handleSiweAuth(
     ).smartAccount;
 
     if (!account) {
-      console.warn('Kein Account für SIWE-Authentifizierung gefunden');
+      console.warn('No account found for SIWE authentication');
       return false;
     }
 
@@ -255,12 +255,12 @@ export async function handleSiweAuth(
 
     return isSuccess;
   } catch (error) {
-    console.error('SIWE Authentifizierungsfehler:', error);
+    console.error('SIWE authentication error:', error);
 
     // Check if it's a 401 unauthorized error from thirdweb
     if (error instanceof Error && error.message.includes('401')) {
       console.warn(
-        'Wallet noch nicht bei thirdweb Service authentifiziert - SIWE-Authentifizierung übersprungen'
+        'Wallet not yet authenticated with thirdweb service - SIWE authentication skipped'
       );
       // Don't treat this as a fatal error, just log it
       return false;
