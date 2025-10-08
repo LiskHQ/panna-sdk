@@ -79,7 +79,7 @@ export {
   type GetCollectiblesByAddressResult,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
-  type FiatCurrency,
+  FiatCurrency,
   type TokenFiatPrice,
 
   // Utility types
