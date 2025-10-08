@@ -17,6 +17,12 @@ const DEFAULT_CONFIG: PannaApiConfig = {
 };
 
 /**
+ * Mock JWT token for testing purposes
+ */
+const MOCK_JWT_TOKEN =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTU2NDUzMjUsInN1YiI6IjB4N2UwYmNjNzhlMzE3ZmEyOGY3M2E0NDU2N2Q4NTRiMDgxMDA0NjIyZCJ9.6_tOR5eayoQWTR2-4rsQmlX30I4acFtXaIdPCnd3pTc';
+
+/**
  * API service for sending account events to the Panna app.
  */
 export class PannaApiService {
@@ -192,8 +198,7 @@ export class PannaApiService {
     if (isMockMode) {
       const mockResponse: AuthVerifyReply = {
         address: request.address,
-        token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTU2NDUzMjUsInN1YiI6IjB4N2UwYmNjNzhlMzE3ZmEyOGY3M2E0NDU2N2Q4NTRiMDgxMDA0NjIyZCJ9.6_tOR5eayoQWTR2-4rsQmlX30I4acFtXaIdPCnd3pTc',
+        token: MOCK_JWT_TOKEN,
         expiresIn: 1755645325
       };
       return mockResponse;

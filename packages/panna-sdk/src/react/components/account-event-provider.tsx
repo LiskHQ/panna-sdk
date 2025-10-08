@@ -8,7 +8,6 @@ import {
 } from 'react';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
-import { getSiweAuthToken, isSiweLoggedIn } from '../../core/auth';
 import { EcosystemId } from '../../core/client';
 import {
   type AccountEventPayload,
@@ -91,41 +90,6 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   };
 
   /**
-   * Polls to check if SIWE authentication has completed with timeout
-   * NOTE: This function does NOT actively trigger authentication - it only waits for
-   * authentication that was triggered elsewhere (e.g., in login forms) to complete.
-   * @param maxWaitTimeMs - Maximum time to wait for authentication (default: 10 seconds)
-   * @param checkIntervalMs - Interval between authentication checks (default: 500ms)
-   * @returns Promise<string | null> - Auth token if available, null if timeout or not authenticated
-   */
-  const waitForAuthentication = async (
-    maxWaitTimeMs: number = 10000,
-    checkIntervalMs: number = 500
-  ): Promise<string | null> => {
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < maxWaitTimeMs) {
-      try {
-        const isLoggedIn = await isSiweLoggedIn();
-        if (isLoggedIn) {
-          const token = await getSiweAuthToken();
-          if (token) {
-            return token;
-          }
-        }
-      } catch (error) {
-        console.warn('Error checking authentication status:', error);
-      }
-
-      // Wait before next check
-      await new Promise((resolve) => setTimeout(resolve, checkIntervalMs));
-    }
-
-    console.warn(`Authentication timeout after ${maxWaitTimeMs}ms`);
-    return null;
-  };
-
-  /**
    * Send account event to Panna API
    * Automatically handles SIWE token validation and re-authentication if expired.
    * Makes API calls mandatory when token exists.
@@ -147,19 +111,14 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       }
 
       // Try to get valid token with automatic re-authentication if expired
-      let siweToken = await getOrRefreshSiweToken(activeWallet ?? undefined, {
+      const siweToken = await getOrRefreshSiweToken(activeWallet ?? undefined, {
         chainId
       });
 
-      // If no token after re-auth attempt, poll to check if authentication (triggered elsewhere) completes
-      if (!siweToken) {
-        siweToken = await waitForAuthentication();
-      }
-
-      // If still no token after waiting, throw an error since API calls are now mandatory
+      // If no token after re-auth attempt, throw an error since API calls are now mandatory
       if (!siweToken) {
         throw new Error(
-          `${eventType} event failed: SIWE authentication is required but no token was available after waiting. Please ensure SIWE authentication is completed.`
+          `${eventType} event failed: SIWE authentication is required but no token was available. Please ensure SIWE authentication is completed.`
         );
       }
 

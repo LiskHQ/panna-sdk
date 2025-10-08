@@ -1,12 +1,10 @@
-import { signLoginPayload } from 'thirdweb/auth';
 import type { Account } from 'thirdweb/wallets';
 import { pannaApiService } from '../utils/api-service';
 import type {
   AuthChallengeRequest,
   AuthChallengeReply,
   AuthVerifyRequest,
-  LoginPayload,
-  SignedLoginPayload
+  LoginPayload
 } from '../utils/types';
 
 /**
@@ -17,6 +15,12 @@ const STORAGE_KEYS = {
   USER_ADDRESS: 'panna_user_address',
   TOKEN_EXPIRY: 'panna_auth_token_expiry'
 } as const;
+
+/**
+ * Default expiration time for SIWE login payload (in milliseconds)
+ * TODO: Make this configurable via constructor options
+ */
+const DEFAULT_PAYLOAD_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 /**
  * Parameters for generating a login payload
@@ -34,14 +38,6 @@ export type LoginParams = {
   signature: string;
   account: Account;
   isSafeWallet?: boolean;
-};
-
-/**
- * Parameters for signing a login payload
- */
-export type SignLoginPayloadParams = {
-  payload: LoginPayload;
-  account: Account;
 };
 
 /**
@@ -99,7 +95,7 @@ export class SiweAuth {
         issued_at: challenge.issuedAt,
         // Minimal required fields only - no expiration, resources, etc.
         expiration_time: new Date(
-          Date.now() + 24 * 60 * 60 * 1000
+          Date.now() + DEFAULT_PAYLOAD_EXPIRATION_MS
         ).toISOString(),
         invalid_before: challenge.issuedAt,
         statement: '',
@@ -109,25 +105,6 @@ export class SiweAuth {
       return payload;
     } catch (error) {
       console.error('Failed to generate login payload:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Sign a login payload using thirdweb's signLoginPayload function
-   */
-  public async signPayload(
-    params: SignLoginPayloadParams
-  ): Promise<SignedLoginPayload> {
-    try {
-      const result = await signLoginPayload({
-        account: params.account,
-        payload: params.payload
-      });
-
-      return result;
-    } catch (error) {
-      console.error('Failed to sign login payload:', error);
       throw error;
     }
   }
@@ -147,8 +124,8 @@ export class SiweAuth {
 
       const verifyRequest: AuthVerifyRequest = {
         ...this.lastChallenge,
-        // Fix timestamp format - convert to UTC with Z suffix
-        issuedAt: this.lastChallenge.issuedAt.replace(/\+\d{2}:\d{2}$/, 'Z'),
+        // Ensure timestamp is in ISO 8601 format with Z suffix
+        issuedAt: new Date(this.lastChallenge.issuedAt).toISOString(),
         signature: params.signature,
         isSafeWallet: params.isSafeWallet || false
       };
@@ -160,19 +137,26 @@ export class SiweAuth {
         // Store auth token and user address
         this.authToken = authResult.token;
         this.userAddress = authResult.address;
-        this.tokenExpiresAt = authResult.expiresIn || null;
+
+        // Handle both expiresAt (timestamp) and expiresIn (duration in seconds) for backward compatibility
+        // Priority: expiresAt > expiresIn > null
+        this.tokenExpiresAt =
+          authResult.expiresAt || authResult.expiresIn || null;
 
         // Store in localStorage for persistence (if available)
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResult.token);
           localStorage.setItem(STORAGE_KEYS.USER_ADDRESS, authResult.address);
-          if (authResult.expiresIn) {
+          if (this.tokenExpiresAt) {
             localStorage.setItem(
               STORAGE_KEYS.TOKEN_EXPIRY,
-              authResult.expiresIn.toString()
+              this.tokenExpiresAt.toString()
             );
           }
         }
+
+        // Clear challenge after successful login to prevent reuse
+        this.lastChallenge = null;
 
         return true;
       }
@@ -186,12 +170,13 @@ export class SiweAuth {
   }
 
   /**
-   * Check if the user is currently logged in
+   * Check if the user is currently logged in with a valid (non-expired) token
    */
-  public async isLoggedIn(): Promise<boolean> {
+  public isLoggedIn(): boolean {
     // Check memory first
     if (this.authToken && this.userAddress) {
-      return true;
+      // Also check if token is not expired
+      return !this.isTokenExpired();
     }
 
     // Check localStorage (if available)
@@ -204,7 +189,8 @@ export class SiweAuth {
         this.authToken = storedToken;
         this.userAddress = storedAddress;
         this.tokenExpiresAt = storedExpiry ? parseInt(storedExpiry, 10) : null;
-        return true;
+        // Also check if token is not expired
+        return !this.isTokenExpired();
       }
     }
 
@@ -274,11 +260,12 @@ export class SiweAuth {
   /**
    * Logout the user
    */
-  public async logout(): Promise<void> {
+  public logout(): void {
     // Clear memory
     this.authToken = null;
     this.userAddress = null;
     this.tokenExpiresAt = null;
+    this.lastChallenge = null;
 
     // Clear localStorage (if available)
     if (typeof window !== 'undefined') {
@@ -316,7 +303,7 @@ export async function siweLogin(params: LoginParams): Promise<boolean> {
  * Helper function to check if user is logged in with SIWE
  * Compatible with thirdweb's auth flow
  */
-export async function isSiweLoggedIn(): Promise<boolean> {
+export function isSiweLoggedIn(): boolean {
   return siweAuth.isLoggedIn();
 }
 
@@ -324,7 +311,7 @@ export async function isSiweLoggedIn(): Promise<boolean> {
  * Helper function to get current SIWE user
  * Compatible with thirdweb's auth flow
  */
-export async function getSiweUser(): Promise<string | null> {
+export function getSiweUser(): string | null {
   return siweAuth.getUser();
 }
 
@@ -356,6 +343,6 @@ export function isSiweTokenExpired(): boolean {
  * Helper function to logout SIWE user
  * Compatible with thirdweb's auth flow
  */
-export async function siweLogout(): Promise<void> {
+export function siweLogout(): void {
   return siweAuth.logout();
 }

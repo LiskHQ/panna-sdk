@@ -102,7 +102,7 @@ describe('PannaApiService', () => {
     describe('mock mode', () => {
       it('should return mock response for onConnect event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: true
         });
 
@@ -126,7 +126,7 @@ describe('PannaApiService', () => {
 
       it('should return mock response for disconnect event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: true
         });
 
@@ -142,7 +142,7 @@ describe('PannaApiService', () => {
 
       it('should return mock response for accountUpdate event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: true
         });
 
@@ -158,7 +158,7 @@ describe('PannaApiService', () => {
 
       it('should ignore authToken in mock mode', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: true
         });
 
@@ -184,14 +184,14 @@ describe('PannaApiService', () => {
 
       it('should make correct fetch request for onConnect event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
         await service.sendAccountEvent(testAddress, mockOnConnectPayload);
 
         expect(fetch).toHaveBeenCalledWith(
-          `https://panna-app.lisk.com/v1/account/${testAddress}/activity`,
+          `https://stg-panna-app.lisk.com/v1/account/${testAddress}/activity`,
           {
             method: 'POST',
             headers: {
@@ -204,7 +204,7 @@ describe('PannaApiService', () => {
 
       it('should include Authorization header when authToken provided', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
         const authToken = 'Bearer test-token-123';
@@ -216,7 +216,7 @@ describe('PannaApiService', () => {
         );
 
         expect(fetch).toHaveBeenCalledWith(
-          `https://panna-app.lisk.com/v1/account/${testAddress}/activity`,
+          `https://stg-panna-app.lisk.com/v1/account/${testAddress}/activity`,
           {
             method: 'POST',
             headers: {
@@ -238,7 +238,7 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
@@ -267,7 +267,7 @@ describe('PannaApiService', () => {
 
       it('should handle different event types correctly', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
@@ -305,7 +305,7 @@ describe('PannaApiService', () => {
         (fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
@@ -322,7 +322,7 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
@@ -339,7 +339,7 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
@@ -356,7 +356,7 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 
@@ -374,7 +374,7 @@ describe('PannaApiService', () => {
         (fetch as jest.Mock).mockRejectedValue(new Error('Test error'));
 
         const service = new PannaApiService({
-          baseUrl: 'https://panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
 

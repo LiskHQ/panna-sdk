@@ -238,6 +238,7 @@ export type AuthVerifyReply = {
   address: string;
   token: string;
   expiresIn?: number;
+  expiresAt?: number;
 };
 
 // SIWE Login Payload (compatible with thirdweb)
