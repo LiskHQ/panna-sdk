@@ -47,11 +47,19 @@ export type AccountEventProviderProps = {
 export function AccountEventProvider({ children }: AccountEventProviderProps) {
   const { client, partnerId } = usePanna();
   const previousAddressRef = useRef<string | null>(null);
+  const lastKnownChainIdRef = useRef<number | null>(null);
   const account = useActiveAccount();
   const activeWallet = useActiveWallet();
   const userAddress = account?.address || null;
   const currentChain = activeWallet?.getChain?.();
   const { data: userProfiles } = useProfiles({ client: client! });
+
+  // Store the chainId whenever it's available so we can use it during disconnect
+  useEffect(() => {
+    if (currentChain?.id) {
+      lastKnownChainIdRef.current = currentChain.id;
+    }
+  }, [currentChain?.id]);
 
   const smartAccountConfig = useMemo(() => {
     const config = activeWallet?.getConfig();
@@ -132,7 +140,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
     } = {}
   ) => {
     try {
-      const chainId = currentChain?.id;
+      const chainId = currentChain?.id ?? lastKnownChainIdRef.current;
 
       if (!chainId) {
         throw new Error('Chain ID not found');
