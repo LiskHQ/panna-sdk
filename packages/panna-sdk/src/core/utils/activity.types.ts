@@ -69,6 +69,7 @@ export interface FiatValue {
 }
 
 export interface TokenPrice {
+  address: string;
   symbol: string;
   prices: Record<string, number>;
 }

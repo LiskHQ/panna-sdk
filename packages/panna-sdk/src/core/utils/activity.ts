@@ -56,28 +56,76 @@ const ACTIVITY_CACHE_ID = 'activity';
 export const LAST_PAGE_REACHED = 'last_page_reached';
 
 /**
- * Calculate fiat value for a token amount
- * @param symbol - Token symbol
+ * Mapping of Lisk Sepolia testnet token addresses to their Lisk mainnet equivalents.
+ * This is used to resolve testnet addresses to mainnet addresses for price lookups,
+ * since price data is only available on mainnet.
+ *
+ * Native ETH uses the same address (NATIVE_TOKEN_ADDRESS) across all chains.
+ *
+ * Source: packages/panna-sdk/src/react/consts/token-config.ts
+ */
+const TESTNET_TO_MAINNET_ADDRESS_MAP: Record<string, string> = {
+  // LSK token
+  '0x8a21cf9ba08ae709d64cb25afaa951183ec9ff6d':
+    '0xac485391eb2d7d88253a7f1ef18c37f4242d1a24',
+
+  // USDT token
+  '0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909':
+    '0x05d032ac25d322df992303dca074ee7392c117b9',
+
+  // USDC.e token (Bridged USDC)
+  '0x0e82fddad51cc3ac12b69761c45bbcb9a2bf3c83':
+    '0xf242275d3a6527d877f2c927a82d9b057609cc71'
+};
+
+/**
+ * Resolves a contract address to its mainnet equivalent for price lookups.
+ * When on testnet (Lisk Sepolia), maps testnet addresses to mainnet addresses.
+ * Native token addresses (0xeeee...) are already chain-agnostic and don't need mapping.
+ *
+ * @param address - The contract address to resolve
+ * @param chainId - The chain ID where the address exists
+ * @returns The resolved address (mainnet equivalent if testnet, original otherwise)
+ */
+const resolveContractAddress = (address: string, chainId: number): string => {
+  // Return normalized address (lowercase)
+  const normalizedAddress = address.toLowerCase();
+
+  // If on testnet, try to resolve to mainnet address
+  if (chainId === liskSepolia.id) {
+    const mainnetAddress = TESTNET_TO_MAINNET_ADDRESS_MAP[normalizedAddress];
+    return mainnetAddress || normalizedAddress;
+  }
+
+  return normalizedAddress;
+};
+
+/**
+ * Calculate fiat value for a token amount using contract address.
+ * @param contractAddress - Token contract address
  * @param value - Token amount as string
  * @param decimals - Token decimals
  * @param tokenPrices - Array of token prices
  * @param currency - Target fiat currency
+ * @param chainId - Chain ID for resolving testnet addresses
  * @returns Fiat value object or undefined if price not found
  */
 export const calculateFiatValue = (
-  symbol: string,
+  contractAddress: string,
   value: string,
   decimals: number,
   tokenPrices: TokenPriceList,
-  currency: FiatValue['currency']
+  currency: FiatValue['currency'],
+  chainId: number
 ): FiatValue | undefined => {
-  // Special case for mapping Lisk Bridged USDC.e to USDC
-  const tokenPrice = tokenPrices.find((token) => {
-    if (symbol === 'USDC.e' && token.symbol === 'USDC') {
-      return true;
-    }
-    return token.symbol === symbol;
-  });
+  // Resolve testnet address to mainnet equivalent if applicable
+  const resolvedAddress = resolveContractAddress(contractAddress, chainId);
+  const normalizedAddress = resolvedAddress.toLowerCase();
+
+  // Lookup by contract address
+  const tokenPrice = tokenPrices.find(
+    (token) => token.address.toLowerCase() === normalizedAddress
+  );
 
   if (!tokenPrice || !tokenPrice.prices[currency]) {
     return undefined;
@@ -435,11 +483,12 @@ export const getActivitiesByAddress = async function (
 
             if (tokenPrices.length > 0 && tx.value) {
               const fiatValue = calculateFiatValue(
-                'ETH',
+                NATIVE_TOKEN_ADDRESS,
                 tx.value,
                 18,
                 tokenPrices,
-                currency
+                currency,
+                chain.id
               );
               if (fiatValue !== undefined) {
                 ethAmount.fiatValue = fiatValue;
@@ -482,17 +531,16 @@ export const getActivitiesByAddress = async function (
               }
             };
 
-            if (
-              tokenPrices.length > 0 &&
-              decimals !== undefined &&
-              erc20TxToken.symbol
-            ) {
+            if (tokenPrices.length > 0 && decimals !== undefined) {
+              const tokenAddress =
+                erc20TxToken.address_hash || erc20TxToken.address || '';
               const fiatValue = calculateFiatValue(
-                erc20TxToken.symbol,
+                tokenAddress,
                 erc20TxTotal.value,
                 decimals,
                 tokenPrices,
-                currency
+                currency,
+                chain.id
               );
               if (fiatValue !== undefined) {
                 erc20Amount.fiatValue = fiatValue;
@@ -561,17 +609,16 @@ export const getActivitiesByAddress = async function (
               }
             } as unknown as ERC1155Amount;
 
-            if (
-              tokenPrices.length > 0 &&
-              decimals !== undefined &&
-              erc1155Tx?.token.symbol
-            ) {
+            if (tokenPrices.length > 0 && decimals !== undefined && erc1155Tx) {
+              const tokenAddress =
+                erc1155Tx.token.address_hash || erc1155Tx.token.address || '';
               const fiatValue = calculateFiatValue(
-                erc1155Tx.token.symbol,
+                tokenAddress,
                 erc1155TxTotal.value,
                 decimals,
                 tokenPrices,
-                currency
+                currency,
+                chain.id
               );
               if (fiatValue !== undefined) {
                 erc1155Amount.fiatValue = fiatValue;
