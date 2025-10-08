@@ -46,8 +46,8 @@ jest.mock('../../core/auth', () => ({
   isSiweLoggedIn: jest.fn().mockResolvedValue(true)
 }));
 
-// Mock utils
-jest.mock('../utils', () => ({
+// Mock auth utils
+jest.mock('../utils/auth', () => ({
   getOrRefreshSiweToken: jest.fn().mockResolvedValue('mock-jwt-token')
 }));
 

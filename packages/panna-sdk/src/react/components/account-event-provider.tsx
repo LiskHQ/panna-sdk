@@ -21,7 +21,7 @@ import {
   pannaApiService
 } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
-import { getOrRefreshSiweToken } from '../utils';
+import { getOrRefreshSiweToken } from '../utils/auth';
 
 export type AccountEventContextType = {
   sendAccountEvent: (

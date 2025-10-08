@@ -23,7 +23,8 @@ import { Input } from '@/components/ui/input';
 import { LAST_AUTH_PROVIDER } from '@/consts';
 import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
-import { getEnvironmentChain, handleSiweAuth } from '../../utils';
+import { getEnvironmentChain } from '../../utils';
+import { handleSiweAuth } from '../../utils/auth';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 

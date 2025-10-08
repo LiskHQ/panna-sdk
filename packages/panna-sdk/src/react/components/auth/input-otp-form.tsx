@@ -21,7 +21,8 @@ import {
 import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
-import { getEnvironmentChain, handleSiweAuth } from '../../utils';
+import { getEnvironmentChain } from '../../utils';
+import { handleSiweAuth } from '../../utils/auth';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
