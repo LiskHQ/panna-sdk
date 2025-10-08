@@ -60,7 +60,10 @@ describe('LoginForm', () => {
     });
     fireEvent.click(screen.getByTestId('email-submit-button'));
     await waitFor(() => {
-      expect(nextMock).toHaveBeenCalledWith({ email: 'test@example.com' });
+      expect(nextMock).toHaveBeenCalledWith({
+        email: 'test@example.com',
+        error: null
+      });
       expect(nextMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -85,7 +88,10 @@ describe('LoginForm', () => {
     });
     fireEvent.click(screen.getByTestId('phone-submit-button'));
     await waitFor(() => {
-      expect(nextMock).toHaveBeenCalledWith({ phoneNumber: '+12345678901' });
+      expect(nextMock).toHaveBeenCalledWith({
+        phoneNumber: '+12345678901',
+        error: null
+      });
       expect(nextMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -103,7 +109,7 @@ describe('LoginForm', () => {
     });
   });
 
-  it('calls onClose after successful Google login', async () => {
+  it('calls goToStep to begin Google login', async () => {
     render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.click(screen.getByText(/Continue with Google/i));
     await waitFor(() => {
