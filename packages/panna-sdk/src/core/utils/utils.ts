@@ -465,3 +465,60 @@ export function extractNumericPrice(priceString: string): number {
 
   return isNaN(parsed) ? Infinity : parsed;
 }
+
+/**
+ * Mapping of testnet token addresses to their mainnet equivalents, organized by chain ID.
+ * This is used to resolve testnet addresses to mainnet addresses for price lookups,
+ * since price data is only available on mainnet.
+ *
+ * The structure is: Record<testnetChainId, Record<testnetAddress, mainnetAddress>>
+ * The same contract address can exist on multiple chains, so we nest by chainID first.
+ *
+ * Native ETH uses the same address (NATIVE_TOKEN_ADDRESS) across all chains and doesn't need mapping.
+ *
+ * Source: packages/panna-sdk/src/react/consts/token-config.ts
+ */
+export const TESTNET_TO_MAINNET_ADDRESS_MAP: Record<
+  number,
+  Record<string, string>
+> = {
+  [liskSepolia.id]: {
+    // LSK token
+    '0x8a21cf9ba08ae709d64cb25afaa951183ec9ff6d':
+      '0xac485391eb2d7d88253a7f1ef18c37f4242d1a24',
+
+    // USDT token
+    '0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909':
+      '0x05d032ac25d322df992303dca074ee7392c117b9',
+
+    // USDC.e token (Bridged USDC)
+    '0x0e82fddad51cc3ac12b69761c45bbcb9a2bf3c83':
+      '0xf242275d3a6527d877f2c927a82d9b057609cc71'
+  }
+};
+
+/**
+ * Resolves a contract address to its mainnet equivalent for price lookups.
+ * When on testnet (e.g., Lisk Sepolia), maps testnet addresses to mainnet addresses.
+ * Native token addresses (0xeeee...) are already chain-agnostic and don't need mapping.
+ *
+ * @param address - The contract address to resolve
+ * @param chainId - The chain ID where the address exists
+ * @returns The resolved address (mainnet equivalent if testnet, original otherwise)
+ */
+export const resolveContractAddress = (
+  address: string,
+  chainId: number
+): string => {
+  // Return normalized address (lowercase)
+  const normalizedAddress = address.toLowerCase();
+
+  // Check if we have a mapping for this chain
+  const chainMapping = TESTNET_TO_MAINNET_ADDRESS_MAP[chainId];
+  if (chainMapping) {
+    const mainnetAddress = chainMapping[normalizedAddress];
+    return mainnetAddress || normalizedAddress;
+  }
+
+  return normalizedAddress;
+};

@@ -50,55 +50,11 @@ import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET
 } from './constants';
+import { resolveContractAddress } from './utils';
 
 // Global constants
 const ACTIVITY_CACHE_ID = 'activity';
 export const LAST_PAGE_REACHED = 'last_page_reached';
-
-/**
- * Mapping of Lisk Sepolia testnet token addresses to their Lisk mainnet equivalents.
- * This is used to resolve testnet addresses to mainnet addresses for price lookups,
- * since price data is only available on mainnet.
- *
- * Native ETH uses the same address (NATIVE_TOKEN_ADDRESS) across all chains.
- *
- * Source: packages/panna-sdk/src/react/consts/token-config.ts
- */
-const TESTNET_TO_MAINNET_ADDRESS_MAP: Record<string, string> = {
-  // LSK token
-  '0x8a21cf9ba08ae709d64cb25afaa951183ec9ff6d':
-    '0xac485391eb2d7d88253a7f1ef18c37f4242d1a24',
-
-  // USDT token
-  '0xd26be7331edd458c7afa6d8b7fcb7a9e1bb68909':
-    '0x05d032ac25d322df992303dca074ee7392c117b9',
-
-  // USDC.e token (Bridged USDC)
-  '0x0e82fddad51cc3ac12b69761c45bbcb9a2bf3c83':
-    '0xf242275d3a6527d877f2c927a82d9b057609cc71'
-};
-
-/**
- * Resolves a contract address to its mainnet equivalent for price lookups.
- * When on testnet (Lisk Sepolia), maps testnet addresses to mainnet addresses.
- * Native token addresses (0xeeee...) are already chain-agnostic and don't need mapping.
- *
- * @param address - The contract address to resolve
- * @param chainId - The chain ID where the address exists
- * @returns The resolved address (mainnet equivalent if testnet, original otherwise)
- */
-const resolveContractAddress = (address: string, chainId: number): string => {
-  // Return normalized address (lowercase)
-  const normalizedAddress = address.toLowerCase();
-
-  // If on testnet, try to resolve to mainnet address
-  if (chainId === liskSepolia.id) {
-    const mainnetAddress = TESTNET_TO_MAINNET_ADDRESS_MAP[normalizedAddress];
-    return mainnetAddress || normalizedAddress;
-  }
-
-  return normalizedAddress;
-};
 
 /**
  * Calculate fiat value for a token amount using contract address.
