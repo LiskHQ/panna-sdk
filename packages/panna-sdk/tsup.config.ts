@@ -15,6 +15,18 @@ export default defineConfig({
   splitting: true,
   outDir: 'dist',
   external: ['react', 'react-dom'],
+  noExternal: ['i18n-iso-countries', 'iso-3166-1-alpha-2'],
+  outExtension({ format }) {
+    return {
+      js: format === 'cjs' ? '.cjs' : '.mjs'
+    };
+  },
+  esbuildOptions(options) {
+    options.loader = {
+      ...options.loader,
+      '.json': 'json'
+    };
+  },
   define: {
     'process.env.PANNA_API_URL': JSON.stringify(
       process.env.PANNA_API_URL || 'https://api.panna.dev'
