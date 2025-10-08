@@ -1,4 +1,5 @@
 import { ethIcon } from '../../react/consts';
+import { TokenERC } from './activity.types';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET
@@ -6380,10 +6381,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '70000000000000'
           },
           status: 'success',
@@ -6398,10 +6399,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '8000000000000'
           },
           status: 'success',
@@ -6416,10 +6417,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000310000000000'
           },
           status: 'success',
@@ -6434,10 +6435,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1'
           },
           status: 'success',
@@ -6445,17 +6446,17 @@ export const getActivitiesByAddress = {
             '0x3e50f83636069d59795f0604ed8f2983a1c8dd2ae0f563337486b2362258def8'
         },
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -6463,17 +6464,17 @@ export const getActivitiesByAddress = {
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -6488,10 +6489,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '0'
           },
           status: 'success',
@@ -6507,10 +6508,10 @@ export const getActivitiesByAddress = {
               icon: null,
               name: 'Lisk',
               symbol: 'LSK',
-              type: 'erc-20'
+              type: TokenERC.ERC20
             },
-            type: 'erc-20',
-            value: '0'
+            type: TokenERC.ERC20,
+            value: '2000000000000000000'
           },
           status: 'success',
           transactionID:
@@ -6525,10 +6526,10 @@ export const getActivitiesByAddress = {
               icon: null,
               name: 'Lisk',
               symbol: 'LSK',
-              type: 'erc-20'
+              type: TokenERC.ERC20
             },
-            type: 'erc-20',
-            value: '0'
+            type: TokenERC.ERC20,
+            value: '2000000000000000000'
           },
           status: 'success',
           transactionID:
@@ -7382,17 +7383,17 @@ export const getActivitiesByAddress = {
     wantResult: {
       activities: [
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -7400,17 +7401,17 @@ export const getActivitiesByAddress = {
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
         {
-          activityType: 'Sent',
+          activityType: 'Self transfer',
           amount: {
             tokenInfo: {
               address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '1000000000'
           },
           status: 'success',
@@ -7425,10 +7426,10 @@ export const getActivitiesByAddress = {
               decimals: 18,
               name: 'Ether',
               symbol: 'ETH',
-              type: 'eth',
+              type: TokenERC.ETH,
               icon: ethIcon
             },
-            type: 'eth',
+            type: TokenERC.ETH,
             value: '0'
           },
           status: 'success',
@@ -7444,10 +7445,10 @@ export const getActivitiesByAddress = {
               icon: null,
               name: 'Lisk',
               symbol: 'LSK',
-              type: 'erc-20'
+              type: TokenERC.ERC20
             },
-            type: 'erc-20',
-            value: '0'
+            type: TokenERC.ERC20,
+            value: '2000000000000000000'
           },
           status: 'success',
           transactionID:

@@ -9,7 +9,7 @@ import {
   type AccountBalanceInFiatResult,
   type AccountBalancesInFiatParams,
   type AccountBalancesInFiatResult,
-  type FiatCurrency,
+  FiatCurrency,
   type GetFiatPriceParams,
   type GetFiatPriceResult,
   type SocialProvider,
@@ -105,12 +105,12 @@ describe('Utils Types', () => {
     it('should accept all valid fiat currencies', () => {
       const validCurrencies: FiatCurrency[] = [
         DEFAULT_CURRENCY,
-        'EUR',
-        'GBP',
-        'CAD',
-        'AUD',
-        'JPY',
-        'NZD'
+        FiatCurrency.EUR,
+        FiatCurrency.GBP,
+        FiatCurrency.CAD,
+        FiatCurrency.AUD,
+        FiatCurrency.JPY,
+        FiatCurrency.NZD
       ];
 
       validCurrencies.forEach((currency) => {
@@ -185,12 +185,12 @@ describe('Utils Types', () => {
     it('should accept different currencies', () => {
       const currencies: FiatCurrency[] = [
         DEFAULT_CURRENCY,
-        'EUR',
-        'GBP',
-        'CAD',
-        'AUD',
-        'JPY',
-        'NZD'
+        FiatCurrency.EUR,
+        FiatCurrency.GBP,
+        FiatCurrency.CAD,
+        FiatCurrency.AUD,
+        FiatCurrency.JPY,
+        FiatCurrency.NZD
       ];
 
       currencies.forEach((currency) => {
@@ -282,12 +282,12 @@ describe('Utils Types', () => {
     it('should accept different currencies', () => {
       const currencies: FiatCurrency[] = [
         DEFAULT_CURRENCY,
-        'EUR',
-        'GBP',
-        'CAD',
-        'AUD',
-        'JPY',
-        'NZD'
+        FiatCurrency.EUR,
+        FiatCurrency.GBP,
+        FiatCurrency.CAD,
+        FiatCurrency.AUD,
+        FiatCurrency.JPY,
+        FiatCurrency.NZD
       ];
 
       currencies.forEach((currency) => {
@@ -326,7 +326,7 @@ describe('Utils Types', () => {
           '0x0987654321098765432109876543210987654321',
           '0x1111111111111111111111111111111111111111'
         ],
-        currency: 'EUR'
+        currency: FiatCurrency.EUR
       };
 
       expect(params.address).toBe('0x1234567890123456789012345678901234567890');
@@ -340,7 +340,7 @@ describe('Utils Types', () => {
       expect(params.tokens[2]).toBe(
         '0x1111111111111111111111111111111111111111'
       );
-      expect(params.currency).toBe('EUR');
+      expect(params.currency).toBe(FiatCurrency.EUR);
     });
 
     it('should accept parameters with only required fields', () => {
@@ -487,12 +487,12 @@ describe('Utils Types', () => {
     it('should accept different currencies', () => {
       const currencies: FiatCurrency[] = [
         DEFAULT_CURRENCY,
-        'EUR',
-        'GBP',
-        'CAD',
-        'AUD',
-        'JPY',
-        'NZD'
+        FiatCurrency.EUR,
+        FiatCurrency.GBP,
+        FiatCurrency.CAD,
+        FiatCurrency.AUD,
+        FiatCurrency.JPY,
+        FiatCurrency.NZD
       ];
 
       currencies.forEach((currency) => {

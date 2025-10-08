@@ -1,4 +1,5 @@
 import { type Chain } from 'thirdweb';
+import { type PannaClient } from '../client';
 import { LAST_PAGE_REACHED } from './activity';
 import {
   type BlockscoutAddressParam,
@@ -8,13 +9,16 @@ import {
   type BlockscoutNextPageParams,
   type BlockscoutInternalTransactionNextPageParams
 } from './blockscout.types';
+import { type FiatCurrency } from './types';
 
 // Parameters for fetching account activities
 export interface GetActivitiesByAddressParams {
   address: string;
+  client: PannaClient;
   chain?: Chain;
   limit?: number;
   offset?: number;
+  currency?: FiatCurrency;
 }
 
 // Result for fetched account activities
@@ -30,24 +34,24 @@ export interface Activity {
   status: string;
 }
 
-export const TransactionActivity = {
-  UNKNOWN: 'Unknown',
-  SENT: 'Sent',
-  RECEIVED: 'Received',
-  MINTED: 'Minted',
-  SELF_TRANSFER: 'Self transfer'
-};
+export enum TransactionActivity {
+  UNKNOWN = 'Unknown',
+  SENT = 'Sent',
+  RECEIVED = 'Received',
+  MINTED = 'Minted',
+  SELF_TRANSFER = 'Self transfer'
+}
 
 type TransactionActivityType = typeof TransactionActivity;
 export type ActivityType =
   TransactionActivityType[keyof TransactionActivityType];
 
-export const TokenERC = {
-  ETH: 'eth',
-  ERC20: 'erc-20',
-  ERC721: 'erc-721',
-  ERC1155: 'erc-1155'
-} as const;
+export enum TokenERC {
+  ETH = 'eth',
+  ERC20 = 'erc-20',
+  ERC721 = 'erc-721',
+  ERC1155 = 'erc-1155'
+}
 
 type TokenERCType = typeof TokenERC;
 export type TokenType = TokenERCType[keyof TokenERCType];
@@ -59,17 +63,31 @@ export type TransactionAmount = { type: string } & (
   | ERC1155Amount
 );
 
+export interface FiatValue {
+  amount: number;
+  currency: FiatCurrency;
+}
+
+export interface TokenPrice {
+  address: string;
+  symbol: string;
+  prices: Record<string, number>;
+}
+
+export type TokenPriceList = TokenPrice[];
+
 interface BaseAmount {
   value: string;
   tokenInfo: TokenInfo;
+  fiatValue?: FiatValue;
 }
 
 export interface EtherAmount extends BaseAmount {
-  type: 'eth';
+  type: TokenERC.ETH;
 }
 
 export interface ERC20Amount extends BaseAmount {
-  type: 'erc-20';
+  type: TokenERC.ERC20;
 }
 
 interface BaseNFTAmount {
@@ -77,12 +95,13 @@ interface BaseNFTAmount {
   instance?: NFTInstance;
 }
 export interface ERC721Amount extends BaseNFTAmount {
-  type: 'erc-721';
+  type: TokenERC.ERC721;
 }
 
 export interface ERC1155Amount extends BaseNFTAmount {
-  type: 'erc-1155';
+  type: TokenERC.ERC1155;
   value: string;
+  fiatValue?: FiatValue;
 }
 
 export interface NFTInstance {

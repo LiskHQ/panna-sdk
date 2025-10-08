@@ -1,3 +1,4 @@
+import { FiatCurrency } from '../../core/utils/types';
 import {
   getCountryByCode,
   getCurrencyForCountry,
@@ -205,10 +206,10 @@ describe('Countries Utility Functions', () => {
     describe('2-letter country codes', () => {
       it('should return correct currency for valid 2-letter codes', () => {
         const testCases = [
-          { code: 'US', expected: 'USD' },
-          { code: 'GB', expected: 'GBP' },
-          { code: 'DE', expected: 'EUR' },
-          { code: 'CA', expected: 'CAD' }
+          { code: 'US', expected: FiatCurrency.USD },
+          { code: 'GB', expected: FiatCurrency.GBP },
+          { code: 'DE', expected: FiatCurrency.EUR },
+          { code: 'CA', expected: FiatCurrency.CAD }
         ];
 
         testCases.forEach(({ code, expected }) => {
@@ -219,17 +220,17 @@ describe('Countries Utility Functions', () => {
 
       it('should handle case insensitive input', () => {
         const result = getCurrencyForCountry('us');
-        expect(result).toBe('USD');
+        expect(result).toBe(FiatCurrency.USD);
       });
     });
 
     describe('3-letter country codes', () => {
       it('should return correct currency for valid 3-letter codes', () => {
         const testCases = [
-          { code: 'USA', expected: 'USD' },
-          { code: 'GBR', expected: 'GBP' },
-          { code: 'DEU', expected: 'EUR' },
-          { code: 'CAN', expected: 'CAD' }
+          { code: 'USA', expected: FiatCurrency.USD },
+          { code: 'GBR', expected: FiatCurrency.GBP },
+          { code: 'DEU', expected: FiatCurrency.EUR },
+          { code: 'CAN', expected: FiatCurrency.CAD }
         ];
 
         testCases.forEach(({ code, expected }) => {
@@ -240,7 +241,7 @@ describe('Countries Utility Functions', () => {
 
       it('should handle case insensitive 3-letter input', () => {
         const result = getCurrencyForCountry('usa');
-        expect(result).toBe('USD');
+        expect(result).toBe(FiatCurrency.USD);
       });
     });
 
@@ -250,15 +251,17 @@ describe('Countries Utility Functions', () => {
 
         invalidCodes.forEach((code) => {
           const result = getCurrencyForCountry(code);
-          expect(result).toBe('USD'); // DEFAULT_CURRENCY
+          expect(result).toBe(FiatCurrency.USD); // DEFAULT_CURRENCY
         });
       });
 
       it('should return default currency for empty/null input', () => {
-        expect(getCurrencyForCountry('')).toBe('USD');
-        expect(getCurrencyForCountry(null as unknown as string)).toBe('USD');
+        expect(getCurrencyForCountry('')).toBe(FiatCurrency.USD);
+        expect(getCurrencyForCountry(null as unknown as string)).toBe(
+          FiatCurrency.USD
+        );
         expect(getCurrencyForCountry(undefined as unknown as string)).toBe(
-          'USD'
+          FiatCurrency.USD
         );
       });
 
@@ -270,7 +273,7 @@ describe('Countries Utility Functions', () => {
         mockAlpha3ToAlpha2.mockReturnValueOnce(undefined);
 
         const result = getCurrencyForCountry('XXX');
-        expect(result).toBe('USD');
+        expect(result).toBe(FiatCurrency.USD);
       });
 
       it('should return default currency for invalid length codes', () => {
@@ -278,7 +281,7 @@ describe('Countries Utility Functions', () => {
 
         invalidLengths.forEach((code) => {
           const result = getCurrencyForCountry(code);
-          expect(result).toBe('USD');
+          expect(result).toBe(FiatCurrency.USD);
         });
       });
     });
@@ -287,10 +290,10 @@ describe('Countries Utility Functions', () => {
   describe('getCurrencySymbol', () => {
     it('should return correct symbols for valid currencies', () => {
       const testCases = [
-        { currency: 'USD', expected: '$' },
-        { currency: 'GBP', expected: '£' },
-        { currency: 'EUR', expected: '€' },
-        { currency: 'JPY', expected: '¥' }
+        { currency: FiatCurrency.USD, expected: '$' },
+        { currency: FiatCurrency.GBP, expected: '£' },
+        { currency: FiatCurrency.EUR, expected: '€' },
+        { currency: FiatCurrency.JPY, expected: '¥' }
       ];
 
       testCases.forEach(({ currency, expected }) => {
@@ -383,7 +386,7 @@ describe('Countries Utility Functions', () => {
         name: 'United States',
         flag: '🇺🇸'
       });
-      expect(currency).toBe('USD');
+      expect(currency).toBe(FiatCurrency.USD);
       expect(symbol).toBe('$');
     });
 
@@ -397,7 +400,7 @@ describe('Countries Utility Functions', () => {
         name: 'United States',
         flag: '🇺🇸'
       });
-      expect(currency).toBe('USD');
+      expect(currency).toBe(FiatCurrency.USD);
       expect(symbol).toBe('$');
     });
 
