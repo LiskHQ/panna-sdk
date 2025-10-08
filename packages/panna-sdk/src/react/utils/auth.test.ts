@@ -23,8 +23,9 @@ const mockGenerateSiwePayload = generateSiwePayload as jest.MockedFunction<
   typeof generateSiwePayload
 >;
 const mockSiweLogin = siweLogin as jest.MockedFunction<typeof siweLogin>;
-const mockGetValidSiweAuthToken =
-  getValidSiweAuthToken as jest.MockedFunction<typeof getValidSiweAuthToken>;
+const mockGetValidSiweAuthToken = getValidSiweAuthToken as jest.MockedFunction<
+  typeof getValidSiweAuthToken
+>;
 const mockIsSiweTokenExpired = isSiweTokenExpired as jest.MockedFunction<
   typeof isSiweTokenExpired
 >;
@@ -230,9 +231,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should handle 401 errors without treating as fatal', async () => {
-      mockGenerateSiwePayload.mockRejectedValue(
-        new Error('401 Unauthorized')
-      );
+      mockGenerateSiwePayload.mockRejectedValue(new Error('401 Unauthorized'));
 
       const result = await handleSiweAuth(mockWallet);
 
@@ -447,4 +446,3 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
   });
 });
-
