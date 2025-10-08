@@ -63,19 +63,22 @@ To get started with the Panna SDK, follow these steps:
 
    ```ts
    const client = createPannaClient({
-     partnerId: process.env.PARTNER_ID || ''
+     clientId: process.env.CLIENT_ID || ''
    });
    ```
 
 4. **Integrate UI components**:
 
    ```tsx
-   import { PannaProvider, LoginButton } from 'panna-sdk';
+   import { PannaProvider, ConnectButton } from 'panna-sdk';
 
    function App() {
      return (
-       <PannaProvider clientId={process.env.CLIENT_ID}>
-         <LoginButton label="Sign in with Panna" />
+       <PannaProvider
+         clientId={process.env.CLIENT_ID}
+         partnerId={process.env.PARTNER_ID}
+       >
+         <ConnectButton />
        </PannaProvider>
      );
    }
@@ -148,10 +151,10 @@ UI components are organized for reusability and maintainability:
 To use a UI component, import it from the SDK and include it in your React application. For example:
 
 ```tsx
-import { LoginButton } from 'panna-sdk';
+import { ConnectButton } from 'panna-sdk';
 
 function App() {
-  return <LoginButton />;
+  return <ConnectButton />;
 }
 ```
 
@@ -161,12 +164,12 @@ function App() {
 
 ### Using a UI Component
 
-The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
+The connect button handles authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
 
 ```tsx
-import { LoginButton } from 'panna-sdk';
+import { ConnectButton } from 'panna-sdk';
 
-<LoginButton label="Sign in with Panna" />;
+<ConnectButton />;
 ```
 
 For creating a custom UI, you can use the provided core functions to manage Panna state and interactions.
