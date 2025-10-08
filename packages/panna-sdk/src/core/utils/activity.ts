@@ -455,8 +455,17 @@ export const getActivitiesByAddress = async function (
               (e) => e.token.type.toLowerCase() === TokenERC.ERC20
             );
             const erc20TxTotal = erc20Tx?.total as BlockscoutTotalERC20;
-            const decimals = erc20Tx?.token.decimals
-              ? Number(erc20Tx?.token.decimals)
+
+            // Extract and validate token info
+            const erc20TxToken = erc20Tx?.token;
+            if (!erc20TxToken) {
+              throw new Error(
+                `Missing token info for ERC20 transaction: ${tx.hash}`
+              );
+            }
+
+            const decimals = erc20TxToken.decimals
+              ? Number(erc20TxToken.decimals)
               : undefined;
 
             const erc20Amount: ERC20Amount = {
@@ -464,22 +473,22 @@ export const getActivitiesByAddress = async function (
               value: erc20TxTotal.value,
               tokenInfo: {
                 address:
-                  (erc20Tx?.token.address_hash || erc20Tx?.token.address) ?? '',
-                name: erc20Tx?.token.name ?? '',
-                symbol: erc20Tx?.token.symbol ?? '',
+                  erc20TxToken.address_hash || erc20TxToken.address || '',
+                name: erc20TxToken.name,
+                symbol: erc20TxToken.symbol,
                 decimals: decimals ?? 0,
                 type: TokenERC.ERC20,
-                icon: erc20Tx?.token.icon_url ?? null
+                icon: erc20TxToken.icon_url || null
               }
             };
 
             if (
               tokenPrices.length > 0 &&
               decimals !== undefined &&
-              erc20Tx?.token.symbol
+              erc20TxToken.symbol
             ) {
               const fiatValue = calculateFiatValue(
-                erc20Tx.token.symbol,
+                erc20TxToken.symbol,
                 erc20TxTotal.value,
                 decimals,
                 tokenPrices,
