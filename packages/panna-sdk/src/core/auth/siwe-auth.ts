@@ -213,12 +213,17 @@ export class SiweAuth {
 
   /**
    * Check if the current auth token is expired
-   * @returns true if token is expired or expiry is unknown, false if still valid
+   * @returns true if token is expired, false if still valid or no token exists
    */
   public isTokenExpired(): boolean {
-    if (!this.tokenExpiresAt) {
-      // If we don't have expiry info, assume it might be expired
+    // If no token exists at all, return false (not expired, just doesn't exist)
+    if (!this.authToken) {
       return false;
+    }
+
+    // If we have a token but no expiry info, treat as expired for safety
+    if (!this.tokenExpiresAt) {
+      return true;
     }
 
     // expiresIn is a Unix timestamp in seconds

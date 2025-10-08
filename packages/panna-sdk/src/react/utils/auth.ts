@@ -149,9 +149,13 @@ export async function getOrRefreshSiweToken(
     return validToken;
   }
 
-  // If token is expired and we have a wallet, try to re-authenticate
-  if (wallet && isSiweTokenExpired()) {
-    console.log('SIWE token expired, attempting re-authentication...');
+  // If no valid token and we have a wallet, try to (re-)authenticate
+  if (wallet) {
+    const isExpired = isSiweTokenExpired();
+
+    if (isExpired) {
+      console.log('SIWE token expired, attempting re-authentication...');
+    }
 
     const reAuthSuccess = await handleSiweAuth(wallet, options);
 
@@ -164,6 +168,6 @@ export async function getOrRefreshSiweToken(
     }
   }
 
-  // No valid token and can't re-authenticate
+  // No valid token and can't re-authenticate (no wallet)
   return null;
 }
