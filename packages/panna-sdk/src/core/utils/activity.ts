@@ -1,10 +1,10 @@
-import { Bridge } from 'thirdweb';
 import { ethIcon } from '../../react/consts';
 import { lisk, liskSepolia } from '../chain';
 import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import { newLruMemCache } from '../helpers/cache';
 import * as httpUtils from '../helpers/http';
 import { PannaHttpErr } from '../helpers/http';
+import { getTokenFiatPrices } from '../onramp/onramp';
 import {
   // const
   TokenERC,
@@ -364,7 +364,7 @@ export const getActivitiesByAddress = async function (
   // Fetch token prices for fiat value calculations
   let tokenPrices: TokenPriceList = [];
   try {
-    tokenPrices = await Bridge.tokens({
+    tokenPrices = await getTokenFiatPrices({
       chainId: chain.id === liskSepolia.id ? lisk.id : chain.id,
       client
     });
