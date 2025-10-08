@@ -23,6 +23,7 @@ import {
   type GetActivitiesByAddressParams,
   type GetActivitiesByAddressResult,
   type PreProcessedActivity,
+  type TokenPriceList,
   type TokenType,
   type TransactionAmount
 } from './activity.types';
@@ -67,7 +68,7 @@ export const calculateFiatValue = (
   symbol: string,
   value: string,
   decimals: number,
-  tokenPrices: Array<{ symbol: string; prices: Record<string, number> }>,
+  tokenPrices: TokenPriceList,
   currency: FiatValue['currency']
 ): FiatValue | undefined => {
   // Special case for mapping Lisk Bridged USDC.e to USDC
@@ -361,8 +362,7 @@ export const getActivitiesByAddress = async function (
   }
 
   // Fetch token prices for fiat value calculations
-  let tokenPrices: Array<{ symbol: string; prices: Record<string, number> }> =
-    [];
+  let tokenPrices: TokenPriceList = [];
   try {
     tokenPrices = await Bridge.tokens({
       chainId: chain.id === liskSepolia.id ? lisk.id : chain.id,

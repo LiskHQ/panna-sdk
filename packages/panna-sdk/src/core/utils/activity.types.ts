@@ -68,6 +68,13 @@ export interface FiatValue {
   currency: FiatCurrency;
 }
 
+export interface TokenPrice {
+  symbol: string;
+  prices: Record<string, number>;
+}
+
+export type TokenPriceList = TokenPrice[];
+
 interface BaseAmount {
   value: string;
   tokenInfo: TokenInfo;
