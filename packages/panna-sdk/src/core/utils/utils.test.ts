@@ -8,7 +8,7 @@ import { lisk } from '../chain/chain-definitions/lisk';
 import { type PannaClient } from '../client';
 import { DEFAULT_CURRENCY, NATIVE_TOKEN_ADDRESS } from '../defaults';
 import {
-  type FiatCurrency,
+  FiatCurrency,
   type SocialProvider,
   type AccountBalanceResult,
   type GetFiatPriceResult,
@@ -301,7 +301,7 @@ describe('Utils - Unit Tests', () => {
         chain: mockChain,
         tokenAddress,
         amount: 100,
-        currency: 'EUR' as FiatCurrency
+        currency: FiatCurrency.EUR
       };
 
       const result = await getFiatPrice(params);
@@ -312,12 +312,12 @@ describe('Utils - Unit Tests', () => {
         fromTokenAddress: tokenAddress,
         fromAmount: 100,
         chain: mockChain,
-        to: 'EUR'
+        to: FiatCurrency.EUR
       });
 
       expect(result).toEqual({
         price: 1.05,
-        currency: 'EUR'
+        currency: FiatCurrency.EUR
       });
     });
 
@@ -389,12 +389,12 @@ describe('Utils - Unit Tests', () => {
     it('should handle all supported fiat currencies', async () => {
       const currencies: FiatCurrency[] = [
         DEFAULT_CURRENCY,
-        'EUR',
-        'GBP',
-        'CAD',
-        'AUD',
-        'JPY',
-        'NZD'
+        FiatCurrency.EUR,
+        FiatCurrency.GBP,
+        FiatCurrency.CAD,
+        FiatCurrency.AUD,
+        FiatCurrency.JPY,
+        FiatCurrency.NZD
       ];
 
       for (const currency of currencies) {
@@ -888,12 +888,12 @@ describe('Utils - Unit Tests', () => {
         client: mockClient,
         chain: mockChain,
         tokens: [NATIVE_TOKEN_ADDRESS],
-        currency: 'EUR'
+        currency: FiatCurrency.EUR
       };
 
       const result = await accountBalancesInFiat(params);
 
-      expect(result.totalValue.currency).toBe('EUR');
+      expect(result.totalValue.currency).toBe(FiatCurrency.EUR);
     });
 
     it('should throw error for invalid wallet address', async () => {

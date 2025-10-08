@@ -15,7 +15,7 @@ type SendSummaryStepProps = {
 export function SendSummaryStep({ form }: SendSummaryStepProps) {
   const { next } = useDialogStepper();
   const currency = (form.getValues('tokenInfo.fiatBalance.currency') ||
-    'USD') as FiatCurrency;
+    FiatCurrency.USD) as FiatCurrency;
 
   const renderCryptoAmount = () => {
     const cryptoAmount = form.getValues('cryptoAmount');
