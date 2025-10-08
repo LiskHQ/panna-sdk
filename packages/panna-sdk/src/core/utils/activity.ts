@@ -457,7 +457,7 @@ export const getActivitiesByAddress = async function (
             const erc20TxTotal = erc20Tx?.total as BlockscoutTotalERC20;
             const decimals = erc20Tx?.token.decimals
               ? Number(erc20Tx?.token.decimals)
-              : 0;
+              : undefined;
 
             const erc20Amount: ERC20Amount = {
               type: TokenERC.ERC20,
@@ -467,13 +467,17 @@ export const getActivitiesByAddress = async function (
                   (erc20Tx?.token.address_hash || erc20Tx?.token.address) ?? '',
                 name: erc20Tx?.token.name ?? '',
                 symbol: erc20Tx?.token.symbol ?? '',
-                decimals,
+                decimals: decimals ?? 0,
                 type: TokenERC.ERC20,
                 icon: erc20Tx?.token.icon_url ?? null
               }
             };
 
-            if (tokenPrices.length > 0 && erc20Tx?.token.symbol) {
+            if (
+              tokenPrices.length > 0 &&
+              decimals !== undefined &&
+              erc20Tx?.token.symbol
+            ) {
               const fiatValue = calculateFiatValue(
                 erc20Tx.token.symbol,
                 erc20TxTotal.value,
@@ -526,7 +530,7 @@ export const getActivitiesByAddress = async function (
               ? typeof erc1155Tx.token.decimals === 'string'
                 ? Number(erc1155Tx.token.decimals)
                 : erc1155Tx.token.decimals
-              : 0;
+              : undefined;
 
             const erc1155Amount: ERC1155Amount = {
               type: TokenERC.ERC1155,
@@ -541,14 +545,18 @@ export const getActivitiesByAddress = async function (
                     erc1155Tx?.token.address_hash || erc1155Tx?.token.address,
                   name: erc1155Tx?.token.name,
                   symbol: erc1155Tx?.token.symbol,
-                  decimals,
+                  decimals: decimals ?? 0,
                   type: TokenERC.ERC1155,
                   icon: erc1155Tx?.token.icon_url
                 }
               }
             } as unknown as ERC1155Amount;
 
-            if (tokenPrices.length > 0 && erc1155Tx?.token.symbol) {
+            if (
+              tokenPrices.length > 0 &&
+              decimals !== undefined &&
+              erc1155Tx?.token.symbol
+            ) {
               const fiatValue = calculateFiatValue(
                 erc1155Tx.token.symbol,
                 erc1155TxTotal.value,
