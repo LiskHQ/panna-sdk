@@ -3,7 +3,12 @@ import type { SmartWalletOptions } from 'thirdweb/wallets';
 import { formatEther, formatUnits } from 'viem';
 import { TokenBalance } from '@/mocks/token-balances';
 import { chains, lisk } from '../../core';
-import { generateSiwePayload, siweLogin } from '../../core/auth';
+import {
+  generateSiwePayload,
+  siweLogin,
+  getValidSiweAuthToken,
+  isSiweTokenExpired
+} from '../../core/auth';
 import type { LoginPayload } from '../../core/utils/types';
 import { tokenConfig } from '../consts';
 import { getCountryByCode } from './countries';
@@ -263,4 +268,49 @@ export async function handleSiweAuth(
 
     return false;
   }
+}
+
+/**
+ * Get a valid SIWE auth token with automatic re-authentication
+ * If the token is expired and a wallet is provided, automatically re-authenticates
+ *
+ * @param wallet - Optional wallet instance for re-authentication if token is expired
+ * @param options - Optional configuration for re-authentication
+ * @returns Promise<string | null> - Valid auth token or null if unavailable/failed
+ *
+ * @example
+ * ```ts
+ * // Without wallet (just checks if token is valid)
+ * const token = await getOrRefreshSiweToken();
+ *
+ * // With wallet (will re-authenticate if expired)
+ * const token = await getOrRefreshSiweToken(wallet, { chainId: 4202 });
+ * ```
+ */
+export async function getOrRefreshSiweToken(
+  wallet?: Wallet,
+  options?: { chainId?: number }
+): Promise<string | null> {
+  // First check if we have a valid (non-expired) token
+  const validToken = await getValidSiweAuthToken();
+
+  if (validToken) {
+    return validToken;
+  }
+
+  // If token is expired and we have a wallet, try to re-authenticate
+  if (wallet && isSiweTokenExpired()) {
+    const reAuthSuccess = await handleSiweAuth(wallet, options);
+
+    if (reAuthSuccess) {
+      // Return the newly generated token
+      return await getValidSiweAuthToken();
+    } else {
+      console.warn('SIWE re-authentication failed');
+      return null;
+    }
+  }
+
+  // No valid token and can't re-authenticate
+  return null;
 }

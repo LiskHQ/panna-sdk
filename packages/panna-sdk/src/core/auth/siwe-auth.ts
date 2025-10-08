@@ -42,6 +42,7 @@ export type SignLoginPayloadParams = {
 export class SiweAuth {
   private authToken: string | null = null;
   private userAddress: string | null = null;
+  private tokenExpiresAt: number | null = null;
   private lastChallenge: AuthChallengeReply | null = null;
 
   constructor() {
@@ -49,10 +50,12 @@ export class SiweAuth {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('panna_auth_token');
       const storedAddress = localStorage.getItem('panna_user_address');
+      const storedExpiry = localStorage.getItem('panna_auth_token_expiry');
 
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
         this.userAddress = storedAddress;
+        this.tokenExpiresAt = storedExpiry ? parseInt(storedExpiry, 10) : null;
       }
     }
   }
@@ -148,11 +151,18 @@ export class SiweAuth {
         // Store auth token and user address
         this.authToken = authResult.token;
         this.userAddress = authResult.address;
+        this.tokenExpiresAt = authResult.expiresIn || null;
 
         // Store in localStorage for persistence (if available)
         if (typeof window !== 'undefined') {
           localStorage.setItem('panna_auth_token', authResult.token);
           localStorage.setItem('panna_user_address', authResult.address);
+          if (authResult.expiresIn) {
+            localStorage.setItem(
+              'panna_auth_token_expiry',
+              authResult.expiresIn.toString()
+            );
+          }
         }
 
         return true;
@@ -179,15 +189,34 @@ export class SiweAuth {
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem('panna_auth_token');
       const storedAddress = localStorage.getItem('panna_user_address');
+      const storedExpiry = localStorage.getItem('panna_auth_token_expiry');
 
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
         this.userAddress = storedAddress;
+        this.tokenExpiresAt = storedExpiry ? parseInt(storedExpiry, 10) : null;
         return true;
       }
     }
 
     return false;
+  }
+
+  /**
+   * Check if the current auth token is expired
+   * @returns true if token is expired or expiry is unknown, false if still valid
+   */
+  public isTokenExpired(): boolean {
+    if (!this.tokenExpiresAt) {
+      // If we don't have expiry info, assume it might be expired
+      return false;
+    }
+
+    // expiresIn is a Unix timestamp in seconds
+    const now = Math.floor(Date.now() / 1000);
+    const bufferTime = 60; // Add 60 second buffer to refresh before actual expiry
+
+    return now >= this.tokenExpiresAt - bufferTime;
   }
 
   /**
@@ -199,9 +228,33 @@ export class SiweAuth {
 
   /**
    * Get the current auth token
+   * Note: This does not check expiry. Use getValidAuthToken() if you need expiry checking.
    */
   public getAuthToken(): string | null {
     return this.authToken;
+  }
+
+  /**
+   * Get the current auth token only if it's still valid (not expired)
+   * @returns The auth token if valid, null if expired or not available
+   */
+  public getValidAuthToken(): string | null {
+    if (!this.authToken) {
+      return null;
+    }
+
+    if (this.isTokenExpired()) {
+      return null;
+    }
+
+    return this.authToken;
+  }
+
+  /**
+   * Get the token expiry timestamp
+   */
+  public getTokenExpiry(): number | null {
+    return this.tokenExpiresAt;
   }
 
   /**
@@ -211,11 +264,13 @@ export class SiweAuth {
     // Clear memory
     this.authToken = null;
     this.userAddress = null;
+    this.tokenExpiresAt = null;
 
     // Clear localStorage (if available)
     if (typeof window !== 'undefined') {
       localStorage.removeItem('panna_auth_token');
       localStorage.removeItem('panna_user_address');
+      localStorage.removeItem('panna_auth_token_expiry');
     }
   }
 }
@@ -262,9 +317,25 @@ export async function getSiweUser(): Promise<string | null> {
 /**
  * Helper function to get current SIWE auth token
  * Compatible with thirdweb's auth flow
+ * Note: This does not check expiry
  */
 export async function getSiweAuthToken(): Promise<string | null> {
   return siweAuth.getAuthToken();
+}
+
+/**
+ * Helper function to get a valid (non-expired) SIWE auth token
+ * Returns null if token is expired or not available
+ */
+export async function getValidSiweAuthToken(): Promise<string | null> {
+  return siweAuth.getValidAuthToken();
+}
+
+/**
+ * Helper function to check if the current SIWE auth token is expired
+ */
+export function isSiweTokenExpired(): boolean {
+  return siweAuth.isTokenExpired();
 }
 
 /**

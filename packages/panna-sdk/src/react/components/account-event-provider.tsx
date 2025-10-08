@@ -21,6 +21,7 @@ import {
   pannaApiService
 } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
+import { getOrRefreshSiweToken } from '../utils';
 
 export type AccountEventContextType = {
   sendAccountEvent: (
@@ -118,9 +119,8 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   /**
    * Send account event to Panna API
-   * Polls to check if SIWE authentication (triggered elsewhere) has completed.
+   * Automatically handles SIWE token validation and re-authentication if expired.
    * Makes API calls mandatory when token exists.
-   * NOTE: This function does NOT actively trigger authentication.
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
@@ -138,10 +138,12 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
         throw new Error('Chain ID not found');
       }
 
-      // Always try to get SIWE token first
-      let siweToken = await getSiweAuthToken();
+      // Try to get valid token with automatic re-authentication if expired
+      let siweToken = await getOrRefreshSiweToken(activeWallet ?? undefined, {
+        chainId
+      });
 
-      // If no token, poll to check if authentication (triggered elsewhere) completes
+      // If no token after re-auth attempt, poll to check if authentication (triggered elsewhere) completes
       if (!siweToken) {
         siweToken = await waitForAuthentication();
       }
