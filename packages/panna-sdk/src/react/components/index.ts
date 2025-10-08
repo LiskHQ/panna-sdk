@@ -7,3 +7,8 @@ export {
   type AccountEventProviderProps,
   useAccountEventContext
 } from './account-event-provider';
+export {
+  ErrorBoundary,
+  type ErrorBoundaryProps,
+  type ErrorBoundaryState
+} from './error-boundary';
