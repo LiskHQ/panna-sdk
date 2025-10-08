@@ -414,9 +414,15 @@ export const getActivitiesByAddress = async function (
         const amountType = getAmountType(address, tx);
         switch (amountType) {
           case TokenERC.ETH: {
+            if (!tx.value) {
+              throw new Error(
+                `Missing transaction value for ETH transaction: ${tx.hash}`
+              );
+            }
+
             const ethAmount: EtherAmount = {
               type: TokenERC.ETH,
-              value: tx.value || '0',
+              value: tx.value,
               tokenInfo: {
                 address: NATIVE_TOKEN_ADDRESS,
                 name: 'Ether',
