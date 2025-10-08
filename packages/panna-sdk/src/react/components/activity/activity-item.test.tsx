@@ -127,7 +127,7 @@ describe('ActivityItem', () => {
 
   it('renders GBP currency symbol correctly', () => {
     const activity: Activity = {
-      activityType: TransactionActivity.MINTED,
+      activityType: TransactionActivity.RECEIVED,
       transactionID: '0xdef',
       amount: {
         type: TokenERC.ETH,
