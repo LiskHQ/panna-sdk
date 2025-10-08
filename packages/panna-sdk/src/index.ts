@@ -140,8 +140,7 @@ export {
   siweLogout,
   siweAuth,
   type GeneratePayloadParams,
-  type LoginParams as SiweLoginParams,
-  type SignLoginPayloadParams
+  type LoginParams as SiweLoginParams
 } from './core/auth';
 
 // SIWE types
