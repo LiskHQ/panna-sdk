@@ -35,7 +35,7 @@ jest.mock('../../utils', () => ({
 
 describe('LoginForm', () => {
   const nextMock = jest.fn();
-  const onCloseMock = jest.fn();
+  const goToStepMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,18 +43,18 @@ describe('LoginForm', () => {
   });
 
   it('renders Google login button', () => {
-    render(<LoginForm next={nextMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     expect(screen.getByText(/Continue with Google/i)).toBeInTheDocument();
   });
 
   it('renders email and phone input fields', () => {
-    render(<LoginForm next={nextMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     expect(screen.getByPlaceholderText(/Email address/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Phone number/i)).toBeInTheDocument();
   });
 
   it('submits with valid email only', async () => {
-    render(<LoginForm next={nextMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.change(screen.getByPlaceholderText(/Email address/i), {
       target: { value: 'test@example.com' }
     });
@@ -66,7 +66,7 @@ describe('LoginForm', () => {
   });
 
   it('shows error for invalid email', async () => {
-    render(<LoginForm next={nextMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.change(screen.getByPlaceholderText(/Email address/i), {
       target: { value: 'invalid' }
     });
@@ -79,7 +79,7 @@ describe('LoginForm', () => {
   });
 
   it('submits with valid phone only', async () => {
-    render(<LoginForm next={nextMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.change(screen.getByPlaceholderText(/Phone number/i), {
       target: { value: '+12345678901' }
     });
@@ -91,7 +91,7 @@ describe('LoginForm', () => {
   });
 
   it('shows error for invalid phone', async () => {
-    render(<LoginForm next={nextMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.change(screen.getByPlaceholderText(/Phone number/i), {
       target: { value: '123' }
     });
@@ -104,10 +104,10 @@ describe('LoginForm', () => {
   });
 
   it('calls onClose after successful Google login', async () => {
-    render(<LoginForm next={nextMock} onClose={onCloseMock} />);
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.click(screen.getByText(/Continue with Google/i));
     await waitFor(() => {
-      expect(onCloseMock).toHaveBeenCalled();
+      expect(goToStepMock).toHaveBeenCalled();
     });
   });
 });
