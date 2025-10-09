@@ -28,10 +28,10 @@ In this guide, you will:
 Get onramp functionality working quickly:
 
 ```ts
-import { onRampPrepare, onRampStatus, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+import { onramp, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
 
 // 1. Prepare purchase session
-const session = await onRampPrepare({
+const session = await onramp.onRampPrepare({
   client,
   chainId: 1135, // Lisk mainnet
   tokenAddress: NATIVE_TOKEN_ADDRESS, // Native ETH
@@ -45,7 +45,7 @@ const session = await onRampPrepare({
 window.location.href = session.link;
 
 // 3. After payment, check status
-const status = await onRampStatus({
+const status = await onramp.onRampStatus({
   id: session.id,
   client
 });
@@ -122,8 +122,11 @@ if (provider === '') {
 Create a production-ready purchase flow with status tracking:
 
 ```ts
+import { onramp, chains } from 'panna-sdk';
+import type { client } from 'panna-sdk';
+
 class PurchaseManager {
-  constructor(private client: PannaClient) {}
+  constructor(private client: client.PannaClient) {}
 
   async buyTokens(
     amount: string,
@@ -136,9 +139,9 @@ class PurchaseManager {
       const provider = getBestProvider(countryCode);
 
       // 2. Prepare purchase
-      const session = await onRampPrepare({
+      const session = await onramp.onRampPrepare({
         client: this.client,
-        chainId: lisk.id,
+        chainId: chains.lisk.id,
         tokenAddress,
         receiver: userAddress,
         amount,
@@ -165,7 +168,7 @@ class PurchaseManager {
       throw new Error('No session ID found');
     }
 
-    return onRampStatus({ id, client: this.client });
+    return onramp.onRampStatus({ id, client: this.client });
   }
 }
 ```
@@ -177,9 +180,11 @@ class PurchaseManager {
 Automatically monitor purchase completion:
 
 ```ts
+import { onramp } from 'panna-sdk';
+
 async function pollPurchaseStatus(sessionId: string): Promise<void> {
   const checkStatus = async () => {
-    const status = await onRampStatus({ id: sessionId, client });
+    const status = await onramp.onRampStatus({ id: sessionId, client });
 
     console.log('Purchase status:', status.status);
 

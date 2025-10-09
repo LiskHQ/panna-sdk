@@ -35,29 +35,23 @@ In this guide, you will:
 Get authentication working in 2 minutes:
 
 ```ts
-import {
-  EcosystemId,
-  createPannaClient,
-  createAccount,
-  prepareLogin,
-  login
-} from 'panna-sdk';
+import { client, wallet } from 'panna-sdk';
 
 // 1. Initialize SDK
-const client = createPannaClient({ clientId: 'your-client-id' });
-const ecosystem = { id: EcosystemId.LISK, partnerId: 'your-partner-id' };
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+const ecosystem = { id: wallet.EcosystemId.LISK, partnerId: 'your-partner-id' };
 
 // 2. Send verification code
-await prepareLogin({
-  client,
+await wallet.prepareLogin({
+  client: pannaClient,
   ecosystem,
   strategy: 'email',
   email: 'user@example.com'
 });
 
 // 3. User enters code, then authenticate
-const authResult = await login({
-  client,
+const authResult = await wallet.login({
+  client: pannaClient,
   ecosystem,
   strategy: 'email',
   email: 'user@example.com',
@@ -65,7 +59,7 @@ const authResult = await login({
 });
 
 // 4. Create account instance
-const account = createAccount({ partnerId: 'your-partner-id' });
+const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 console.log('Authenticated:', account.address);
 ```
 
@@ -74,20 +68,20 @@ console.log('Authenticated:', account.address);
 Configure the SDK for your application:
 
 ```ts
-import { createPannaClient, createAccount } from 'panna-sdk';
+import { client, wallet } from 'panna-sdk';
 
 // Browser environment
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: 'your-client-id' // Get from Panna dashboard
 });
 
 // Default ecosystem (Lisk)
-const account = createAccount({
+const account = wallet.createAccount({
   partnerId: 'your-partner-id'
 });
 
 // Custom ecosystem
-const customAccount = createAccount({
+const customAccount = wallet.createAccount({
   partnerId: 'your-partner-id',
   ecosystemId: 'ecosystem.custom'
 });
@@ -100,14 +94,14 @@ Email authentication uses a two-step verification process: send code, then verif
 ### Basic Flow
 
 ```ts
-import { prepareLogin, login, getEmail } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
 const ecosystem = { id: 'ecosystem.lisk', partnerId: 'your-partner-id' };
 
 async function authenticateWithEmail(email: string, code?: string) {
   if (!code) {
     // Step 1: Send verification code
-    await prepareLogin({
+    await wallet.prepareLogin({
       client,
       ecosystem,
       strategy: 'email',
@@ -117,7 +111,7 @@ async function authenticateWithEmail(email: string, code?: string) {
   }
 
   // Step 2: Verify code and authenticate
-  const result = await login({
+  const result = await wallet.login({
     client,
     ecosystem,
     strategy: 'email',
@@ -140,15 +134,15 @@ One-click authentication using popular social providers.
 ### Basic Social Login
 
 ```ts
-import { EcosystemId, socialLogin } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
-const ecosystem = { id: EcosystemId.LISK, partnerId: 'your-partner-id' };
+const ecosystem = { id: wallet.EcosystemId.LISK, partnerId: 'your-partner-id' };
 
 // Supported providers: 'google', 'apple', 'facebook', 'discord', 'github',
 // 'x', 'coinbase', 'farcaster', 'telegram'
 
 async function loginWithProvider(provider: string) {
-  await socialLogin({
+  await wallet.socialLogin({
     client,
     ecosystem,
     strategy: provider,
@@ -168,9 +162,11 @@ await loginWithProvider('github');
 ### Handle Auth Callback
 
 ```ts
+import { wallet } from 'panna-sdk';
+
 // In your callback route/component
 function handleAuthCallback() {
-  const account = createAccount({ partnerId: 'your-partner-id' });
+  const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 
   if (account.address) {
     console.log('User authenticated:', account.address);
@@ -184,8 +180,10 @@ function handleAuthCallback() {
 Phone authentication follows the same pattern as email authentication but uses SMS verification:
 
 ```ts
+import { wallet } from 'panna-sdk';
+
 // Send SMS code
-await prepareLogin({
+await wallet.prepareLogin({
   client,
   ecosystem,
   strategy: 'phone',
@@ -193,7 +191,7 @@ await prepareLogin({
 });
 
 // Verify code
-const result = await login({
+const result = await wallet.login({
   client,
   ecosystem,
   strategy: 'phone',
@@ -209,20 +207,20 @@ Work with authenticated user accounts and their information.
 ### Account Operations
 
 ```ts
-import { createAccount, getEmail, getPhoneNumber } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
 const ecosystem = { id: 'ecosystem.lisk', partnerId: 'your-partner-id' };
 
 // Create account instance
-const account = createAccount({ partnerId: 'your-partner-id' });
+const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 
 // Get account properties
 console.log('Address:', account.address);
 console.log('Chain:', account.getChain()?.id);
 
 // Get user information
-const email = await getEmail({ client, ecosystem });
-const phone = await getPhoneNumber({ client, ecosystem });
+const email = await wallet.getEmail({ client, ecosystem });
+const phone = await wallet.getPhoneNumber({ client, ecosystem });
 
 console.log('User info:', { email, phone, address: account.address });
 ```
@@ -234,12 +232,12 @@ console.log('User info:', { email, phone, address: account.address });
 Link multiple authentication methods to one wallet for flexible login options:
 
 ```ts
-import { linkAccount, getLinkedAccounts, unlinkAccount } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
 const ecosystem = { id: 'ecosystem.lisk', partnerId: 'your-partner-id' };
 
 // Link additional authentication methods
-await linkAccount({
+await wallet.linkAccount({
   client,
   ecosystem,
   strategy: 'google',
@@ -248,7 +246,7 @@ await linkAccount({
 });
 
 // Link phone to existing account
-await linkAccount({
+await wallet.linkAccount({
   client,
   ecosystem,
   strategy: 'phone',
@@ -257,7 +255,7 @@ await linkAccount({
 });
 
 // View all linked accounts
-const linkedAccounts = await getLinkedAccounts({ client, ecosystem });
+const linkedAccounts = await wallet.getLinkedAccounts({ client, ecosystem });
 linkedAccounts.forEach((account) => {
   console.log(
     `${account.type}: ${account.details?.email || account.details?.phone}`
@@ -267,7 +265,11 @@ linkedAccounts.forEach((account) => {
 // Unlink an account
 const googleAccount = linkedAccounts.find((a) => a.type === 'google');
 if (googleAccount) {
-  await unlinkAccount({ client, ecosystem, profileToUnlink: googleAccount });
+  await wallet.unlinkAccount({
+    client,
+    ecosystem,
+    profileToUnlink: googleAccount
+  });
 }
 ```
 

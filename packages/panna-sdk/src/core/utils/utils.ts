@@ -30,10 +30,10 @@ import {
  * @returns The converted value in Wei.
  * @example
  * ```ts
- * import { toWei } from 'panna-sdk';
+ * import { utils } from 'panna-sdk';
  *
- * const value = toWei('1.5'); // 1500000000000000000n (1.5 ETH in wei)
- * const usdcValue = toWei('100'); // Note: Only use for 18-decimal tokens!
+ * const value = utils.toWei('1.5'); // 1500000000000000000n (1.5 ETH in wei)
+ * const usdcValue = utils.toWei('100'); // Note: Only use for 18-decimal tokens!
  * ```
  */
 export const toWei = function (tokens: string): bigint {
@@ -89,22 +89,22 @@ export const getSocialIcon = function (provider: SocialProvider): string {
  * @throws Error if token address is invalid or client is not provided
  * @example
  * ```ts
- * import { getFiatPrice, FiatCurrency } from 'panna-sdk';
+ * import { utils } from 'panna-sdk';
  *
  * // Get value of 1 ETH (defaults to USD)
- * const result = await getFiatPrice({
+ * const result = await utils.getFiatPrice({
  *   client: pannaClient,
  *   amount: 1
  * });
  * // result: { price: 3000.50, currency: 'USD' }
  *
  * // Get value of 100 ERC20 tokens in EUR
- * const result = await getFiatPrice({
+ * const result = await utils.getFiatPrice({
  *   client: pannaClient,
  *   chain: customChain,
  *   tokenAddress: '0x...',
  *   amount: 100,
- *   currency: FiatCurrency.EUR
+ *   currency: utils.FiatCurrency.EUR
  * });
  * // result: { price: 105.00, currency: 'EUR' }
  * ```
@@ -146,10 +146,10 @@ export const getFiatPrice = async function (
  * @throws Error if address or token address are invalid
  * @example
  * ```ts
- * import { accountBalanceInFiat, FiatCurrency } from 'panna-sdk';
+ * import { utils } from 'panna-sdk';
  *
  * // Get value for the specified user's native token balance in USD
- * const result = await accountBalanceInFiat({
+ * const result = await utils.accountBalanceInFiat({
  *   address: userAddress,
  *   client: pannaClient,
  *   chain: customChain,
@@ -161,12 +161,12 @@ export const getFiatPrice = async function (
  * // }
  *
  * // Get value for the specified user's ERC20 token balance in EUR
- * const result = await accountBalanceInFiat({
+ * const result = await utils.accountBalanceInFiat({
  *   address: userAddress,
  *   client: pannaClient,
  *   chain: customChain,
  *   tokenAddress: '0x...',
- *   currency: FiatCurrency.EUR
+ *   currency: utils.FiatCurrency.EUR
  * });
  * // result: {
  * //   token: { symbol: 'USDC.e', name: 'USD Coin', decimals: 6 },
@@ -228,10 +228,10 @@ export const accountBalanceInFiat = async function (
  * @throws Error if address is invalid
  * @example
  * ```ts
- * import { accountBalancesInFiat, FiatCurrency, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+ * import { utils, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
  *
  * // Get portfolio value for multiple tokens
- * const result = await accountBalancesInFiat({
+ * const result = await utils.accountBalancesInFiat({
  *   client: pannaClient,
  *   address: '0x...',
  *   chain: lisk,
@@ -240,7 +240,7 @@ export const accountBalanceInFiat = async function (
  *     '0x...', // USDC
  *     '0x...'  // DAI
  *   ],
- *   currency: FiatCurrency.USD
+ *   currency: utils.FiatCurrency.USD
  * });
  * // result: {
  * //   totalValue: { amount: 5250.75, currency: 'USD' },

@@ -5,21 +5,21 @@ The Panna SDK Core module provides powerful Web3 primitives for building blockch
 ## Quick Start
 
 ```typescript
-import { createPannaClient, createAccount, login } from 'panna-sdk';
+import { client, wallet } from 'panna-sdk';
 
 // Initialize the SDK client
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: 'your-client-id'
 });
 
 // Create a user account
-const account = createAccount({
+const account = wallet.createAccount({
   partnerId: 'your-partner-id'
 });
 
 // Authenticate the user
-await login({
-  client,
+await wallet.login({
+  client: pannaClient,
   ecosystem: {
     id: 'ecosystem.lisk',
     partnerId: 'your-partner-id'
@@ -88,20 +88,22 @@ The SDK follows a consistent pattern across all modules:
 3. **Perform operations** - Execute transactions, query data, etc.
 
 ```typescript
+import { client, wallet, utils, chains } from 'panna-sdk';
+
 // 1. Initialize
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: 'your-client-id'
 });
 
 // 2. Setup account
-const account = createAccount({
+const account = wallet.createAccount({
   partnerId: 'your-partner-id'
 });
 
 // 3. Perform operations
-const balance = await accountBalance({
-  client,
-  chain: lisk,
+const balance = await utils.accountBalance({
+  client: pannaClient,
+  chain: chains.lisk,
   address: account.address
 });
 ```
@@ -111,45 +113,49 @@ const balance = await accountBalance({
 ### Accepting Payments
 
 ```typescript
+import { transaction, utils, chains } from 'panna-sdk';
+
 // Prepare payment receipt
-const transaction = prepareTransaction({
-  client,
-  chain: lisk,
+const tx = transaction.prepareTransaction({
+  client: pannaClient,
+  chain: chains.lisk,
   to: merchantAddress,
-  value: toWei('10') // 10 ETH
+  value: utils.toWei('10') // 10 ETH
 });
 
 // User sends payment
-const result = await sendTransaction({ account, transaction });
+const result = await transaction.sendTransaction({ account, transaction: tx });
 ```
 
 ### Token Transfers
 
 ```typescript
+import { transaction, utils, chains } from 'panna-sdk';
+
 // ERC-20 token transfer
-const transaction = prepareContractCall({
-  client,
-  chain: lisk,
+const tx = transaction.prepareContractCall({
+  client: pannaClient,
+  chain: chains.lisk,
   address: tokenAddress,
   method: 'function transfer(address to, uint256 amount)',
-  params: [recipientAddress, toWei('100')] // 100 ERC-20 tokens with 18 decimals
+  params: [recipientAddress, utils.toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 
-const result = await sendTransaction({ account, transaction });
+const result = await transaction.sendTransaction({ account, transaction: tx });
 ```
 
 ### Multi-Chain Support
 
 ```typescript
 // Use different chains
-import { lisk, liskSepolia, describeChain } from 'panna-sdk';
+import { chains } from 'panna-sdk';
 
 // Pre-configured chains
-const mainnet = lisk;
-const testnet = liskSepolia;
+const mainnet = chains.lisk;
+const testnet = chains.liskSepolia;
 
 // Custom chain
-const customChain = describeChain({
+const customChain = chains.describeChain({
   id: 1234,
   rpc: 'https://my-rpc.com',
   nativeCurrency: {

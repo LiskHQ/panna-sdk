@@ -31,30 +31,23 @@ In this guide, you will:
 ## Quick Start
 
 ```ts
-import {
-  createPannaClient,
-  createAccount,
-  prepareTransaction,
-  sendTransaction,
-  toWei,
-  lisk
-} from 'panna-sdk';
+import { client, wallet, transaction, utils, chains } from 'panna-sdk';
 
 // Setup
-const client = createPannaClient({ clientId: 'your-client-id' });
-const account = createAccount({ partnerId: 'your-partner-id' });
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 
 // Send 1 ETH
-const transaction = prepareTransaction({
-  client,
-  chain: lisk,
+const tx = transaction.prepareTransaction({
+  client: pannaClient,
+  chain: chains.lisk,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
-  value: toWei('1')
+  value: utils.toWei('1')
 });
 
-const result = await sendTransaction({
+const result = await transaction.sendTransaction({
   account,
-  transaction
+  transaction: tx
 });
 
 console.log('Transaction hash:', result.transactionHash);
@@ -67,44 +60,46 @@ console.log('Transaction hash:', result.transactionHash);
 The most basic transaction type: sending LSK between addresses.
 
 ```ts
-import { prepareTransaction, sendTransaction, toWei } from 'panna-sdk';
+import { transaction, utils, chains } from 'panna-sdk';
 
 // Send 10 ETH to another address
-const transaction = prepareTransaction({
+const tx = transaction.prepareTransaction({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
-  value: toWei('10') // Converts to wei automatically
+  value: utils.toWei('10') // Converts to wei automatically
 });
 
-const result = await sendTransaction({ account, transaction });
+const result = await transaction.sendTransaction({ account, transaction: tx });
 console.log('Transaction sent:', result.transactionHash);
 ```
 
-**Key Concept**: Use `toWei()` to convert human-readable amounts to blockchain units.
+**Key Concept**: Use `utils.toWei()` to convert human-readable amounts to blockchain units.
 
 ### 2. ERC-20 Token Transfers
 
 Transfer tokens by calling the smart contract `transfer` method.
 
 ```ts
-import { prepareContractCall } from 'panna-sdk';
+import { transaction, utils, chains } from 'panna-sdk';
 
 // Transfer 100 tokens
-const transaction = prepareContractCall({
+const tx = transaction.prepareContractCall({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: '0x...', // Token contract address
   method: 'function transfer(address to, uint256 amount)',
-  params: [recipientAddress, toWei('100')] // 100 ERC-20 tokens with 18 decimals
+  params: [recipientAddress, utils.toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 
-await sendTransaction({ account, transaction });
+await transaction.sendTransaction({ account, transaction: tx });
 ```
 
 **With Type Safety Using ABI:**
 
 ```ts
+import { transaction, utils, chains } from 'panna-sdk';
+
 const erc20Abi = [
   {
     name: 'transfer',
@@ -118,13 +113,13 @@ const erc20Abi = [
   }
 ] as const;
 
-const transaction = prepareContractCall({
+const tx = transaction.prepareContractCall({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: tokenContractAddress,
   abi: erc20Abi,
   method: 'transfer', // Full autocomplete available
-  params: [recipientAddress, toWei('100')] // 100 ERC-20 tokens with 18 decimals
+  params: [recipientAddress, utils.toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 ```
 
@@ -133,50 +128,52 @@ const transaction = prepareContractCall({
 Execute any smart contract method with parameters.
 
 ```ts
+import { transaction, utils, chains } from 'panna-sdk';
+
 // Set a value in a contract
-const transaction = prepareContractCall({
+const tx = transaction.prepareContractCall({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: contractAddress,
   method: 'function setValue(uint256 newValue)',
   params: [BigInt(42)]
 });
 
 // NFT minting with payment
-const mintTx = prepareContractCall({
+const mintTx = transaction.prepareContractCall({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: nftContract,
   method: 'function mint(address to, uint256 tokenId)',
   params: [userAddress, BigInt(1)],
-  value: toWei('0.1') // Send 0.1 ETH with the call
+  value: utils.toWei('0.1') // Send 0.1 ETH with the call
 });
 ```
 
-**Pro Tip**: Use `getContract()` for multiple calls to the same contract:
+**Pro Tip**: Use `transaction.getContract()` for multiple calls to the same contract:
 
 ```ts
-import { getContract } from 'panna-sdk';
+import { transaction, chains } from 'panna-sdk';
 
-const contract = getContract({
+const contract = transaction.getContract({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: contractAddress,
   abi: contractAbi
 });
 
 // Now use contract instance for multiple calls
-const tx1 = prepareContractCall({
+const tx1 = transaction.prepareContractCall({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: contract.address,
   abi: contract.abi,
   method: 'setValue',
   params: [42]
 });
-const tx2 = prepareContractCall({
+const tx2 = transaction.prepareContractCall({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   address: contract.address,
   abi: contract.abi,
   method: 'setName',
@@ -191,12 +188,14 @@ Gas fees determine transaction speed and cost. The SDK supports both modern (EIP
 ### Modern Gas Pricing (EIP-1559) - Recommended
 
 ```ts
+import { transaction, utils, chains } from 'panna-sdk';
+
 // Set maximum fees you're willing to pay
-const transaction = prepareTransaction({
+const tx = transaction.prepareTransaction({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   to: recipientAddress,
-  value: toWei('1'),
+  value: utils.toWei('1'),
   maxFeePerGas: BigInt(30_000_000_000), // 30 gwei maximum
   maxPriorityFeePerGas: BigInt(2_000_000_000) // 2 gwei tip for miners
 });
@@ -205,12 +204,14 @@ const transaction = prepareTransaction({
 ### Legacy Gas Pricing
 
 ```ts
+import { transaction, utils, chains } from 'panna-sdk';
+
 // Simple gas price (older method)
-const transaction = prepareTransaction({
+const tx = transaction.prepareTransaction({
   client,
-  chain: lisk,
+  chain: chains.lisk,
   to: recipientAddress,
-  value: toWei('1'),
+  value: utils.toWei('1'),
   gasPrice: BigInt(20_000_000_000) // 20 gwei
 });
 ```

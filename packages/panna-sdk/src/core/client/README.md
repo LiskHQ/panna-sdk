@@ -35,17 +35,17 @@ Choose your environment and follow the appropriate setup:
 ### Client-Side (Browser/Mobile)
 
 ```ts
-import { createPannaClient, accountBalance, lisk } from 'panna-sdk';
+import { client, utils, chains } from 'panna-sdk';
 
 // Initialize with public client ID
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: 'your-client-id'
 });
 
 // Use client in SDK operations
-const balance = await accountBalance({
-  client,
-  chain: lisk,
+const balance = await utils.accountBalance({
+  client: pannaClient,
+  chain: chains.lisk,
   address: '0x...'
 });
 ```
@@ -63,9 +63,9 @@ NEXT_PUBLIC_PANNA_CLIENT_ID=pk_live_abc123...
 ### Step 2: Basic Initialization
 
 ```ts
-import { createPannaClient } from 'panna-sdk';
+import { client } from 'panna-sdk';
 
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID
 });
 
@@ -76,17 +76,17 @@ const client = createPannaClient({
 ```ts
 // contexts/PannaContext.tsx
 import { createContext, useContext } from 'react';
-import { createPannaClient, type PannaClient } from 'panna-sdk';
+import { client, type client as ClientTypes } from 'panna-sdk';
 
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
 });
 
-const PannaContext = createContext<PannaClient>(client);
+const PannaContext = createContext<ClientTypes.PannaClient>(pannaClient);
 
 export function PannaProvider({ children }) {
   return (
-    <PannaContext.Provider value={client}>
+    <PannaContext.Provider value={pannaClient}>
       {children}
     </PannaContext.Provider>
   );
@@ -99,9 +99,9 @@ export const usePannaClient = () => useContext(PannaContext);
 
 ```ts
 // app/api/wallet/route.ts
-import { createPannaClient, accountBalance, lisk } from 'panna-sdk';
+import { client, utils, chains } from 'panna-sdk';
 
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
 });
 
@@ -109,9 +109,9 @@ export async function POST(request: Request) {
   // Use client for operations
   const data = await request.json();
 
-  const balance = await accountBalance({
-    client,
-    chain: lisk,
+  const balance = await utils.accountBalance({
+    client: pannaClient,
+    chain: chains.lisk,
     address: data.address
   });
 
@@ -124,7 +124,9 @@ export async function POST(request: Request) {
 ### Custom RPC Endpoints
 
 ```ts
-const client = createPannaClient({
+import { client } from 'panna-sdk';
+
+const pannaClient = client.createPannaClient({
   clientId: 'your-client-id',
   config: {
     rpc: {
@@ -138,8 +140,10 @@ const client = createPannaClient({
 ### Environment-Based Setup
 
 ```ts
+import { client } from 'panna-sdk';
+
 // Use environment variables for configuration
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
 });
 ```
@@ -149,16 +153,16 @@ const client = createPannaClient({
 When using authentication features, configure the ecosystem:
 
 ```ts
-import { EcosystemId, type EcosystemConfig } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
-const ecosystem: EcosystemConfig = {
-  id: EcosystemId.LISK,
+const ecosystem: wallet.EcosystemConfig = {
+  id: wallet.EcosystemId.LISK,
   partnerId: 'your-partner-id'
 };
 
 // Use in authentication
-await login({
-  client,
+await wallet.login({
+  client: pannaClient,
   ecosystem,
   strategy: 'email',
   email: 'user@example.com',
@@ -171,16 +175,16 @@ await login({
 ### Basic Wallet Operations
 
 ```ts
-import { createPannaClient, accountBalance, lisk } from 'panna-sdk';
+import { client, utils, chains } from 'panna-sdk';
 
-const client = createPannaClient({
+const pannaClient = client.createPannaClient({
   clientId: 'your-client-id'
 });
 
 // Get balance
-const balance = await accountBalance({
-  client,
-  chain: lisk,
+const balance = await utils.accountBalance({
+  client: pannaClient,
+  chain: chains.lisk,
   address: '0x...'
 });
 ```
@@ -189,19 +193,21 @@ const balance = await accountBalance({
 
 ```ts
 // services/panna.ts
-let client: PannaClient | null = null;
+import { client, type client as ClientTypes } from 'panna-sdk';
 
-export function getClient(): PannaClient {
-  if (!client) {
-    client = createPannaClient({
+let pannaClient: ClientTypes.PannaClient | null = null;
+
+export function getClient(): ClientTypes.PannaClient {
+  if (!pannaClient) {
+    pannaClient = client.createPannaClient({
       clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
     });
   }
-  return client;
+  return pannaClient;
 }
 
 // Use throughout your app
-const client = getClient();
+const myClient = getClient();
 ```
 
 ## Next Steps

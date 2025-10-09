@@ -148,10 +148,10 @@ export const getBaseInternalTransactionsRequestUrl = (
  * @throws Error if address is invalid.
  * @example
  * ```ts
- * import { getActivitiesByAddress, FiatCurrency } from 'panna-sdk';
+ * import { utils } from 'panna-sdk';
  *
  * // Get list of recent activities with fiat prices in USD (default)
- * const result = await getActivitiesByAddress({
+ * const result = await utils.getActivitiesByAddress({
  *   address: userAddress,
  *   client: pannaClient,
  *   offset: 0,
@@ -159,10 +159,10 @@ export const getBaseInternalTransactionsRequestUrl = (
  * });
  *
  * // Get activities with fiat prices in EUR
- * const resultEUR = await getActivitiesByAddress({
+ * const resultEUR = await utils.getActivitiesByAddress({
  *   address: userAddress,
  *   client: pannaClient,
- *   currency: FiatCurrency.EUR
+ *   currency: utils.FiatCurrency.EUR
  * });
  *
  * // result: {
