@@ -1,6 +1,6 @@
-# Utils Module
+# Util Module
 
-The Utils module provides essential blockchain utilities for balances, conversions, activity tracking, and data validation. The module includes helper functions for common operations and data processing.
+The Util module provides essential blockchain utilities for balances, conversions, activity tracking, and data validation. The module includes helper functions for common operations and data processing.
 
 ## What You'll Learn
 
@@ -14,7 +14,7 @@ In this guide, you will:
 
 ## Table of Contents
 
-- [Utils Module](#utils-module)
+- [Util Module](#util-module)
   - [What You'll Learn](#what-youll-learn)
   - [Table of Contents](#table-of-contents)
   - [Quick Start](#quick-start)
@@ -26,6 +26,7 @@ In this guide, you will:
     - [Wei Conversions](#wei-conversions)
     - [Custom Decimal Support](#custom-decimal-support)
   - [3. Activity Tracking](#3-activity-tracking)
+    - [Activity Fiat Values](#activity-fiat-values)
   - [4. NFT Collections](#4-nft-collections)
   - [5. Validation \& Input Handling](#5-validation--input-handling)
   - [6. Social Authentication](#6-social-authentication)
@@ -34,32 +35,32 @@ In this guide, you will:
 ## Quick Start
 
 ```ts
-import { utils, chains } from 'panna-sdk';
+import { util, chains } from 'panna-sdk';
 
 // Essential operations
-const balance = await utils.accountBalance({
+const balance = await util.accountBalance({
   client,
   chain: chains.lisk,
   address: userAddress
 });
-const amount = utils.toWei('10.5'); // Convert to wei: 10500000000000000000n
-const isValid = utils.isValidAddress(recipientAddress); // Validate address
+const amount = util.toWei('10.5'); // Convert to wei: 10500000000000000000n
+const isValid = util.isValidAddress(recipientAddress); // Validate address
 
 // Get user data
-const activities = await utils.getActivitiesByAddress({
+const activities = await util.getActivitiesByAddress({
   client,
   address: userAddress,
-  currency: utils.FiatCurrency.USD // Optional: include fiat values
+  currency: util.FiatCurrency.USD // Optional: include fiat values
 });
-const nfts = await utils.getCollectiblesByAddress({
+const nfts = await util.getCollectiblesByAddress({
   client,
   address: userAddress
 });
-const fiatBalance = await utils.accountBalanceInFiat({
+const fiatBalance = await util.accountBalanceInFiat({
   client,
   chain: chains.lisk,
   address: userAddress,
-  currency: utils.FiatCurrency.USD
+  currency: util.FiatCurrency.USD
 });
 ```
 
@@ -68,10 +69,10 @@ const fiatBalance = await utils.accountBalanceInFiat({
 ### Basic Balance Queries
 
 ```ts
-import { utils, chains } from 'panna-sdk';
+import { util, chains } from 'panna-sdk';
 
 // Native token balance (LSK)
-const balance = await utils.accountBalance({
+const balance = await util.accountBalance({
   client,
   chain: chains.lisk,
   address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e'
@@ -85,7 +86,7 @@ console.log({
 });
 
 // ERC-20 token balance
-const usdtBalance = await utils.accountBalance({
+const usdtBalance = await util.accountBalance({
   client,
   chain: chains.lisk,
   address: userAddress,
@@ -96,13 +97,13 @@ const usdtBalance = await utils.accountBalance({
 ### Multiple Token Balances
 
 ```ts
-import { utils, chains } from 'panna-sdk';
+import { util, chains } from 'panna-sdk';
 
 // Query multiple tokens efficiently
 async function getPortfolioBalances(address: string, tokens: string[]) {
   const balances = await Promise.all(
     tokens.map((tokenAddress) =>
-      utils.accountBalance({
+      util.accountBalance({
         client,
         chain: chains.lisk,
         address,
@@ -125,14 +126,14 @@ const portfolio = await getPortfolioBalances(userAddress, tokens);
 ### Fiat Conversions
 
 ```ts
-import { utils, chains } from 'panna-sdk';
+import { util, chains } from 'panna-sdk';
 
 // Single token balance with fiat value
-const balanceWithFiat = await utils.accountBalanceInFiat({
+const balanceWithFiat = await util.accountBalanceInFiat({
   client,
   chain: chains.lisk,
   address: userAddress,
-  currency: utils.FiatCurrency.USD
+  currency: util.FiatCurrency.USD
 });
 
 console.log(
@@ -141,11 +142,11 @@ console.log(
 // "10.5 LSK = $13.12"
 
 // Complete portfolio with fiat values
-const portfolio = await utils.accountBalancesInFiat({
+const portfolio = await util.accountBalancesInFiat({
   client,
   chain: chains.lisk,
   address: userAddress,
-  currency: utils.FiatCurrency.USD
+  currency: util.FiatCurrency.USD
 });
 
 const totalValue = portfolio.reduce(
@@ -160,13 +161,13 @@ console.log(`Total portfolio: $${totalValue.toFixed(2)}`);
 ### Wei Conversions
 
 ```ts
-import { utils, transaction, chains } from 'panna-sdk';
+import { util, transaction, chains } from 'panna-sdk';
 
 // Convert token amounts to wei (18 decimals)
 const examples = {
-  whole: utils.toWei('10'), // 10000000000000000000n
-  decimal: utils.toWei('10.5'), // 10500000000000000000n
-  small: utils.toWei('0.001') // 1000000000000000n
+  whole: util.toWei('10'), // 10000000000000000000n
+  decimal: util.toWei('10.5'), // 10500000000000000000n
+  small: util.toWei('0.001') // 1000000000000000n
 };
 
 // Use in transactions
@@ -174,7 +175,7 @@ const tx = transaction.prepareTransaction({
   client,
   chain: chains.lisk,
   to: recipientAddress,
-  value: utils.toWei('1.5') // Send 1.5 tokens
+  value: util.toWei('1.5') // Send 1.5 tokens
 });
 ```
 
@@ -195,10 +196,10 @@ const usdcAmount = toTokenUnits('100.50', 6); // 100500000n (6 decimals)
 ## 3. Activity Tracking
 
 ```ts
-import { utils } from 'panna-sdk';
+import { util } from 'panna-sdk';
 
 // Get user's transaction history
-const activities = await utils.getActivitiesByAddress({
+const activities = await util.getActivitiesByAddress({
   client,
   address: userAddress,
   limit: 20,
@@ -232,13 +233,13 @@ function formatTransactionHistory(activities: Activity[]) {
 Activities can include fiat values for token amounts when prices are available. Use the `currency` parameter to specify FiatCurrency.USD, FiatCurrency.EUR, or FiatCurrency.GBP (defaults to FiatCurrency.USD). The `fiatValue` property is optional and only present when token prices exist for the given token.
 
 ```ts
-import { utils } from 'panna-sdk';
+import { util } from 'panna-sdk';
 
 // Fetch activities with fiat values
-const activities = await utils.getActivitiesByAddress({
+const activities = await util.getActivitiesByAddress({
   client,
   address: userAddress,
-  currency: utils.FiatCurrency.USD // Optional: FiatCurrency.USD | FiatCurrency.EUR | FiatCurrency.GBP (default: FiatCurrency.USD)
+  currency: util.FiatCurrency.USD // Optional: FiatCurrency.USD | FiatCurrency.EUR | FiatCurrency.GBP (default: FiatCurrency.USD)
 });
 
 // Access fiat values (available for ETH, ERC-20, and ERC-1155 tokens)
@@ -257,10 +258,10 @@ activities.activities.forEach((activity) => {
 ## 4. NFT Collections
 
 ```ts
-import { utils } from 'panna-sdk';
+import { util } from 'panna-sdk';
 
 // Get user's NFT collection
-const result = await utils.getCollectiblesByAddress({
+const result = await util.getCollectiblesByAddress({
   client,
   address: userAddress
 });
@@ -286,11 +287,11 @@ Object.entries(groupedNFTs).forEach(([collectionAddress, nfts]) => {
 ## 5. Validation & Input Handling
 
 ```ts
-import { utils } from 'panna-sdk';
+import { util } from 'panna-sdk';
 
 // Address validation
 const address = '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e';
-const isValid = utils.isValidAddress(address);
+const isValid = util.isValidAddress(address);
 
 // Form validation helper
 function validateTransactionInput(
@@ -301,7 +302,7 @@ function validateTransactionInput(
   const errors: string[] = [];
 
   // Address validation
-  if (!recipient || !utils.isValidAddress(recipient.trim())) {
+  if (!recipient || !util.isValidAddress(recipient.trim())) {
     errors.push('Invalid recipient address');
   }
 
@@ -312,7 +313,7 @@ function validateTransactionInput(
   }
 
   // Balance check
-  if (balance && numAmount && utils.toWei(amount) > balance) {
+  if (balance && numAmount && util.toWei(amount) > balance) {
     errors.push('Insufficient balance');
   }
 
@@ -333,13 +334,13 @@ if (!valid) {
 ## 6. Social Authentication
 
 ```ts
-import { utils } from 'panna-sdk';
+import { util } from 'panna-sdk';
 
 // Create social login UI data
 function createSocialLoginButtons(providers: SocialProvider[]) {
   return providers.map((provider) => ({
     provider,
-    iconUrl: utils.getSocialIcon(provider),
+    iconUrl: util.getSocialIcon(provider),
     label: `Continue with ${provider}`,
     onClick: () => {
       // Implementation would depend on your specific login logic

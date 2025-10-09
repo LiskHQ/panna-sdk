@@ -68,10 +68,10 @@ export const getBaseNFTCollectionsRequestUrl = (
  * @throws Error if address is invalid.
  * @example
  * ```ts
- * import { utils } from 'panna-sdk';
+ * import { util } from 'panna-sdk';
  *
  * // Get list of collectibles owned by a given account
- * const result = await utils.getCollectiblesByAddress({ address: userAddress, offset: 0, limit: 10 });
+ * const result = await util.getCollectiblesByAddress({ address: userAddress, offset: 0, limit: 10 });
  * // result: {
  * // collectibles: [{
  * //   numInstancesOwned: 3,

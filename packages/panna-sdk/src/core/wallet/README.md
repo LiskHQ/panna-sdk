@@ -279,4 +279,4 @@ if (googleAccount) {
 - [Transaction Module](../transaction/README.md) - Send transactions
 - [Chain Configuration](../chain/README.md) - Multi-chain support
 - [Fiat Onramp](../onramp/README.md) - Crypto purchases
-- [Utils Module](../utils/README.md) - Helpful utilities
+- [Util Module](../util/README.md) - Helpful utilities

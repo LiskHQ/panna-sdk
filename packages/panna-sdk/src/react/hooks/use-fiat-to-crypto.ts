@@ -2,7 +2,7 @@ import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { DEFAULT_CURRENCY, lisk, liskSepolia } from 'src/core';
 import type { Chain } from 'thirdweb';
 import { getTokenFiatPrices } from '../../core/onramp';
-import type { FiatCurrency } from '../../core/utils/types';
+import type { FiatCurrency } from '../../core/util/types';
 import { getEnvironmentChain } from '../utils';
 import {
   DEFAULT_REFETCH_INTERVAL,

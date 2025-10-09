@@ -35,7 +35,7 @@ Choose your environment and follow the appropriate setup:
 ### Client-Side (Browser/Mobile)
 
 ```ts
-import { client, utils, chains } from 'panna-sdk';
+import { client, util, chains } from 'panna-sdk';
 
 // Initialize with public client ID
 const pannaClient = client.createPannaClient({
@@ -43,7 +43,7 @@ const pannaClient = client.createPannaClient({
 });
 
 // Use client in SDK operations
-const balance = await utils.accountBalance({
+const balance = await util.accountBalance({
   client: pannaClient,
   chain: chains.lisk,
   address: '0x...'
@@ -99,7 +99,7 @@ export const usePannaClient = () => useContext(PannaContext);
 
 ```ts
 // app/api/wallet/route.ts
-import { client, utils, chains } from 'panna-sdk';
+import { client, util, chains } from 'panna-sdk';
 
 const pannaClient = client.createPannaClient({
   clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
   // Use client for operations
   const data = await request.json();
 
-  const balance = await utils.accountBalance({
+  const balance = await util.accountBalance({
     client: pannaClient,
     chain: chains.lisk,
     address: data.address
@@ -175,14 +175,14 @@ await wallet.login({
 ### Basic Wallet Operations
 
 ```ts
-import { client, utils, chains } from 'panna-sdk';
+import { client, util, chains } from 'panna-sdk';
 
 const pannaClient = client.createPannaClient({
   clientId: 'your-client-id'
 });
 
 // Get balance
-const balance = await utils.accountBalance({
+const balance = await util.accountBalance({
   client: pannaClient,
   chain: chains.lisk,
   address: '0x...'
@@ -218,4 +218,4 @@ Now that you have a configured client, explore these SDK modules:
 - **[Transactions](../transaction/README.md)** - Send and prepare blockchain transactions
 - **[Chain](../chain/README.md)** - Configure supported blockchain networks
 - **[Onramp](../onramp/README.md)** - Integrate fiat-to-crypto payments
-- **[Utils](../utils/README.md)** - Helper functions for common operations
+- **[Util](../util/README.md)** - Helper functions for common operations

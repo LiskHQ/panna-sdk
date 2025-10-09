@@ -49,7 +49,7 @@ Headless, framework-agnostic logic:
 - **Chains** (`chains/`): Chain definitions (Lisk, Lisk Sepolia) and chain metadata
 - **Transaction** (`transaction/`): Transaction preparation, contract calls, sending transactions
 - **Onramp** (`onramp/`): Fiat-to-crypto onramp integration, provider management, quote fetching
-- **Utils** (`utils/`): Balance calculations, activity fetching, collectibles, fiat price conversion, address validation
+- **Util** (`util/`): Balance calculations, activity fetching, collectibles, fiat price conversion, address validation
 
 #### React (`src/react/`)
 

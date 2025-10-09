@@ -7,7 +7,7 @@ import {
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
 import type { Abi, Address, Hex } from '../types/external';
-import { removeUndefined } from '../utils/object';
+import { removeUndefined } from '../util/object';
 import type {
   PrepareTransactionParams,
   PrepareTransactionResult,
@@ -43,14 +43,14 @@ import type {
  *
  * @example
  * ```typescript
- * import { transaction, utils, chains } from 'panna-sdk';
+ * import { transaction, util, chains } from 'panna-sdk';
  *
  * // Prepare a simple ETH transfer
  * const tx = transaction.prepareTransaction({
  *   client: pannaClient,
  *   chain: chains.lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   value: utils.toWei("1") // 1 ETH
+ *   value: util.toWei("1") // 1 ETH
  * });
  *
  * // Prepare a transaction with gas settings
@@ -58,7 +58,7 @@ import type {
  *   client: pannaClient,
  *   chain: chains.lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   value: utils.toWei("0.5"),
+ *   value: util.toWei("0.5"),
  *   gasPrice: BigInt(20_000_000_000) // 20 gwei
  * });
  *
@@ -145,7 +145,7 @@ export const prepareTransaction = (
  *
  * @example
  * ```typescript
- * import { transaction, utils, chains } from 'panna-sdk';
+ * import { transaction, util, chains } from 'panna-sdk';
  *
  * // 1. Basic usage with method signature (type-safe based on signature)
  * const tx = transaction.prepareContractCall({
@@ -153,7 +153,7 @@ export const prepareTransaction = (
  *   chain: chains.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
- *   params: ["0x123...", utils.toWei("100")]
+ *   params: ["0x123...", util.toWei("100")]
  * });
  *
  * // 2. With full contract ABI (provides autocompletion and full type safety)
@@ -181,7 +181,7 @@ export const prepareTransaction = (
  *     }
  *   ],
  *   method: "transfer", // Auto-completion and type inference from ABI
- *   params: ["0x123...", utils.toWei("100")]
+ *   params: ["0x123...", util.toWei("100")]
  * });
  *
  * // 3. Using ABI snippet (efficient for single method calls)
@@ -199,7 +199,7 @@ export const prepareTransaction = (
  *     outputs: [{ type: "uint256" }],
  *     stateMutability: "nonpayable"
  *   },
- *   params: ["0x123...", utils.toWei("100")]
+ *   params: ["0x123...", util.toWei("100")]
  * });
  *
  * // 4. Payable function with value
@@ -209,7 +209,7 @@ export const prepareTransaction = (
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function mint(address to)",
  *   params: ["0x123..."],
- *   value: utils.toWei("0.1") // 0.1 ETH
+ *   value: util.toWei("0.1") // 0.1 ETH
  * });
  *
  * // 5. Advanced gas configuration (EIP-1559)
@@ -218,7 +218,7 @@ export const prepareTransaction = (
  *   chain: chains.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
- *   params: ["0x123...", utils.toWei("100")],
+ *   params: ["0x123...", util.toWei("100")],
  *   maxFeePerGas: BigInt(30_000_000_000), // 30 gwei
  *   maxPriorityFeePerGas: BigInt(2_000_000_000), // 2 gwei
  *   gas: BigInt(21000) // Gas limit
@@ -374,7 +374,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  *
  * @example
  * ```typescript
- * import { transaction, wallet, chains, utils } from 'panna-sdk';
+ * import { transaction, wallet, chains, util } from 'panna-sdk';
  *
  * // 1. Create and connect an account
  * const account = wallet.createAccount({ partnerId: 'your-partner-id' });
@@ -385,7 +385,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  *   client: pannaClient,
  *   chain: chains.lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   value: utils.toWei("1") // 1 ETH
+ *   value: util.toWei("1") // 1 ETH
  * });
  *
  * // 3. Send the transaction
@@ -401,7 +401,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  * @example
  * ```typescript
  * // Send a contract call transaction
- * import { transaction, chains, utils } from 'panna-sdk';
+ * import { transaction, chains, util } from 'panna-sdk';
  *
  * const contract = transaction.getContract({
  *   client: pannaClient,
@@ -412,7 +412,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  * const tx = transaction.prepareContractCall({
  *   contract,
  *   method: "function transfer(address to, uint256 amount)",
- *   params: ["0x123...", utils.toWei("100")]
+ *   params: ["0x123...", util.toWei("100")]
  * });
  *
  * const result = await transaction.sendTransaction({

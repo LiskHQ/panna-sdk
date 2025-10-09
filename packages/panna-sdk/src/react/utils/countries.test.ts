@@ -1,4 +1,4 @@
-import { FiatCurrency } from '../../core/utils/types';
+import { FiatCurrency } from '../../core/util/types';
 import {
   getCountryByCode,
   getCurrencyForCountry,

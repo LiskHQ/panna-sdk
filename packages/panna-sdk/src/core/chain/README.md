@@ -60,7 +60,7 @@ const customChain = chains.describeChain({
 Production network for applications deployed on Lisk.
 
 ```ts
-import { chains, transaction, utils } from 'panna-sdk';
+import { chains, transaction, util } from 'panna-sdk';
 
 // Chain properties
 console.log({
@@ -75,7 +75,7 @@ const tx = transaction.prepareTransaction({
   client,
   chain: chains.lisk,
   to: recipientAddress,
-  value: utils.toWei('1')
+  value: util.toWei('1')
 });
 ```
 
@@ -84,14 +84,14 @@ const tx = transaction.prepareTransaction({
 Development and testing network with free test tokens.
 
 ```ts
-import { chains, transaction, utils } from 'panna-sdk';
+import { chains, transaction, util } from 'panna-sdk';
 
 // Use testnet for development (requires client setup)
 const tx = transaction.prepareTransaction({
   client,
   chain: chains.liskSepolia,
   to: testAddress,
-  value: utils.toWei('10')
+  value: util.toWei('10')
 });
 
 // Get test tokens from faucet - Lisk Sepolia is a testnet
@@ -248,4 +248,4 @@ const currentChain = selectChain('mainnet');
 - Explore [Client Module](../client/README.md) for SDK initialization with custom RPC endpoints
 - Review [Wallet Module](../wallet/README.md) for user authentication across multiple networks
 - Check [Onramp Module](../onramp/README.md) for fiat-to-crypto purchases
-- Check [Utils Module](../utils/README.md) for chain-related utility functions
+- Check [Util Module](../util/README.md) for chain-related utility functions

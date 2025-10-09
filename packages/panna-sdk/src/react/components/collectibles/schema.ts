@@ -1,5 +1,5 @@
 import { isValidAddress } from 'src/core';
-import { ImageType } from 'src/core/utils/collectible.types';
+import { ImageType } from 'src/core/util/collectible.types';
 import { z } from 'zod';
 
 const tokenInstanceSchema = z.object({

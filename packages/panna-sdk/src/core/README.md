@@ -63,7 +63,7 @@ await wallet.login({
 
 ### Utilities & Helpers
 
-6. **[Utils](./utils/README.md)** - Common utility functions
+6. **[Util](../util/README.md)** - Common utility functions
    - Balance queries and conversions
    - Address validation
    - Token metadata fetching
@@ -88,7 +88,7 @@ The SDK follows a consistent pattern across all modules:
 3. **Perform operations** - Execute transactions, query data, etc.
 
 ```typescript
-import { client, wallet, utils, chains } from 'panna-sdk';
+import { client, wallet, util, chains } from 'panna-sdk';
 
 // 1. Initialize
 const pannaClient = client.createPannaClient({
@@ -101,7 +101,7 @@ const account = wallet.createAccount({
 });
 
 // 3. Perform operations
-const balance = await utils.accountBalance({
+const balance = await util.accountBalance({
   client: pannaClient,
   chain: chains.lisk,
   address: account.address
@@ -113,14 +113,14 @@ const balance = await utils.accountBalance({
 ### Accepting Payments
 
 ```typescript
-import { transaction, utils, chains } from 'panna-sdk';
+import { transaction, util, chains } from 'panna-sdk';
 
 // Prepare payment receipt
 const tx = transaction.prepareTransaction({
   client: pannaClient,
   chain: chains.lisk,
   to: merchantAddress,
-  value: utils.toWei('10') // 10 ETH
+  value: util.toWei('10') // 10 ETH
 });
 
 // User sends payment
@@ -130,7 +130,7 @@ const result = await transaction.sendTransaction({ account, transaction: tx });
 ### Token Transfers
 
 ```typescript
-import { transaction, utils, chains } from 'panna-sdk';
+import { transaction, util, chains } from 'panna-sdk';
 
 // ERC-20 token transfer
 const tx = transaction.prepareContractCall({
@@ -138,7 +138,7 @@ const tx = transaction.prepareContractCall({
   chain: chains.lisk,
   address: tokenAddress,
   method: 'function transfer(address to, uint256 amount)',
-  params: [recipientAddress, utils.toWei('100')] // 100 ERC-20 tokens with 18 decimals
+  params: [recipientAddress, util.toWei('100')] // 100 ERC-20 tokens with 18 decimals
 });
 
 const result = await transaction.sendTransaction({ account, transaction: tx });
@@ -175,4 +175,4 @@ For detailed information about each module, see the individual documentation:
 - [Transaction Module](./transaction/README.md) - Sending transactions
 - [Chain Module](./chain/README.md) - Network configuration
 - [Onramp Module](./onramp/README.md) - Fiat gateways
-- [Utils Module](./utils/README.md) - Helper functions
+- [Util Module](./util/README.md) - Helper functions

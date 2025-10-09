@@ -3,7 +3,7 @@ export * as client from './core/client';
 export * as chains from './core/chain';
 export * as wallet from './core/wallet';
 export * as transaction from './core/transaction';
-export * as utils from './core/utils';
+export * as util from './core/util';
 export * as onramp from './core/onramp';
 
 // Export constants directly (not namespaced for ergonomics)

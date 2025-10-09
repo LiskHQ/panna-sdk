@@ -1,7 +1,7 @@
 import { getCountry } from 'iso-3166-1-alpha-2';
 import { Bridge } from 'thirdweb';
 import { lisk } from '../chain';
-import type { TokenFiatPrice } from '../utils/types';
+import type { TokenFiatPrice } from '../util/types';
 import { COUNTRY_PROVIDER_MAP, PROVIDERS } from './constants';
 import type {
   GetTokenFiatPricesParams,
