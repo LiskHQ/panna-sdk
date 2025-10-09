@@ -5,6 +5,7 @@ export * as wallet from './core/wallet';
 export * as transaction from './core/transaction';
 export * as util from './core/util';
 export * as onramp from './core/onramp';
+export * as auth from './core/auth';
 
 // Export constants directly (not namespaced for ergonomics)
 export {
@@ -13,28 +14,6 @@ export {
   DEFAULT_COUNTRY_CODE,
   NATIVE_TOKEN_ADDRESS
 } from './core/defaults';
-
-// SIWE authentication exports
-export {
-  generateSiwePayload,
-  siweLogin,
-  isSiweLoggedIn,
-  getSiweUser,
-  siweLogout,
-  siweAuth,
-  type GeneratePayloadParams,
-  type LoginParams as SiweLoginParams
-} from './core/auth';
-
-// SIWE types
-export type {
-  AuthChallengeRequest,
-  AuthChallengeReply,
-  AuthVerifyRequest,
-  AuthVerifyReply,
-  LoginPayload,
-  SignedLoginPayload
-} from './core/utils/types';
 
 export * from './react';
 
