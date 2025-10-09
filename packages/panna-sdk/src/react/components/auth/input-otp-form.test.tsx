@@ -1,12 +1,11 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { act } from 'react';
-import { prepareLogin } from 'src/core';
+import { PannaClient, prepareLogin } from 'src/core';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { InputOTPForm } from './input-otp-form';
 
-// Mock dependencies
 jest.mock('thirdweb/wallets');
 jest.mock('@/hooks');
 jest.mock('@/hooks/use-countdown');
@@ -15,24 +14,13 @@ jest.mock('src/core', () => ({
   prepareLogin: jest.fn()
 }));
 
-// const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
-// const mockUseLogin = useLogin as jest.MockedFunction<typeof useLogin>;
-// const mockUseCountdown = useCountdown as jest.MockedFunction<
-//   typeof useCountdown
-// >;
-// const mockPrepareLogin = prepareLogin as jest.MockedFunction<
-//   typeof prepareLogin
-// >;
-// const mockEcosystemWallet = ecosystemWallet as jest.MockedFunction<
-//   typeof ecosystemWallet
-// >;
-
 const defaultProps = {
   data: { email: 'test@example.com' },
   reset: jest.fn(),
   onClose: jest.fn()
 };
 
+const mockPannaClient = { clientId: 'test-client-id' } as PannaClient;
 const mockConnect = jest.fn();
 
 describe('InputOTPForm', () => {
@@ -47,7 +35,7 @@ describe('InputOTPForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (usePanna as jest.Mock).mockReturnValue({
-      client: {} as any,
+      client: mockPannaClient,
       partnerId: 'test-partner',
       chainId: '1135'
     });
@@ -141,7 +129,7 @@ describe('InputOTPForm', () => {
     await fireEvent.click(resendButton);
 
     expect(prepareLogin as jest.Mock).toHaveBeenCalledWith({
-      client: {},
+      client: mockPannaClient,
       ecosystem: {
         id: 'ecosystem.lisk',
         partnerId: 'test-partner'
@@ -167,7 +155,7 @@ describe('InputOTPForm', () => {
     await fireEvent.click(resendButton);
 
     expect(prepareLogin as jest.Mock).toHaveBeenCalledWith({
-      client: {},
+      client: mockConnect,
       ecosystem: {
         id: 'ecosystem.lisk',
         partnerId: 'test-partner'
@@ -190,7 +178,7 @@ describe('InputOTPForm', () => {
       await callback();
       return mockWallet;
     });
-    (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet as any);
+    (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet);
 
     render(<InputOTPForm {...defaultProps} />);
 
@@ -204,7 +192,7 @@ describe('InputOTPForm', () => {
 
     await waitFor(() => {
       expect(mockEcoWallet.connect).toHaveBeenCalledWith({
-        client: {},
+        client: mockConnect,
         strategy: 'email',
         email: 'test@example.com',
         verificationCode: '123456'
@@ -227,7 +215,7 @@ describe('InputOTPForm', () => {
       await callback();
       return mockWallet;
     });
-    (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet as any);
+    (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet);
 
     const props = {
       ...defaultProps,
@@ -246,7 +234,7 @@ describe('InputOTPForm', () => {
 
     await waitFor(() => {
       expect(mockEcoWallet.connect).toHaveBeenCalledWith({
-        client: {},
+        client: mockConnect,
         strategy: 'phone',
         phoneNumber: '+1234567890',
         verificationCode: '123456'
@@ -262,7 +250,7 @@ describe('InputOTPForm', () => {
     mockConnect.mockImplementation(async (callback) => {
       await callback();
     });
-    (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet as any);
+    (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet);
 
     render(<InputOTPForm {...defaultProps} />);
 
