@@ -245,7 +245,10 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
         </div>
         <Button type="submit" className="w-full" disabled={isInputIncomplete}>
           {form.formState.isSubmitting && (
-            <LoaderCircleIcon className="animate-spin text-black" />
+            <LoaderCircleIcon
+              className="animate-spin text-black"
+              data-testid="loader-icon"
+            />
           )}
           Verify
         </Button>
