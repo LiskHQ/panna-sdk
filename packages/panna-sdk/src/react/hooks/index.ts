@@ -7,7 +7,7 @@ export {
   useActiveAccount,
   useActiveWallet,
   useSetActiveWallet,
-
+  useActiveWalletChain,
   // Balance & Wallet Info hooks
   useWalletBalance as useAccountBalance,
   useWalletInfo as useAccountInfo,

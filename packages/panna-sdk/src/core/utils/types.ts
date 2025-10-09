@@ -206,3 +206,58 @@ export type SmartAccountTransform = {
   entrypointAddress: string;
   sponsorGas: boolean;
 };
+
+// SIWE Authentication types
+export type AuthChallengeRequest = {
+  address: string;
+};
+
+export type AuthChallengeReply = {
+  address: string;
+  chainId: number;
+  domain: string;
+  issuedAt: string;
+  nonce: string;
+  uri: string;
+  version: string;
+};
+
+export type AuthVerifyRequest = {
+  domain: string;
+  address: string;
+  uri: string;
+  version: string;
+  chainId: number;
+  nonce: string;
+  issuedAt: string;
+  signature: string;
+  isSafeWallet: boolean;
+};
+
+export type AuthVerifyReply = {
+  address: string;
+  token: string;
+  expiresIn?: number;
+  expiresAt?: number;
+};
+
+// SIWE Login Payload (compatible with thirdweb)
+export type LoginPayload = {
+  address: string;
+  chain_id?: string;
+  domain: string;
+  expiration_time: string;
+  invalid_before: string;
+  issued_at: string;
+  nonce: string;
+  resources?: Array<string>;
+  statement: string;
+  uri?: string;
+  version: string;
+};
+
+// Signed login payload result
+export type SignedLoginPayload = {
+  payload: LoginPayload;
+  signature: `0x${string}`;
+};

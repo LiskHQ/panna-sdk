@@ -29,7 +29,7 @@ export default defineConfig({
   },
   define: {
     'process.env.PANNA_API_URL': JSON.stringify(
-      process.env.PANNA_API_URL || 'https://api.panna.dev'
+      process.env.PANNA_API_URL || 'https://panna-app.lisk.com/v1'
     ),
     'process.env.MOCK_PANNA_API': JSON.stringify(
       process.env.MOCK_PANNA_API || 'false'

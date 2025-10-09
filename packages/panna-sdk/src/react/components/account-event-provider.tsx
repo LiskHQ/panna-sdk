@@ -20,6 +20,7 @@ import {
   pannaApiService
 } from '../../core/utils';
 import { usePanna } from '../hooks/use-panna';
+import { getOrRefreshSiweToken } from '../utils/auth';
 
 export type AccountEventContextType = {
   sendAccountEvent: (
@@ -37,23 +38,27 @@ const AccountEventContext = createContext<AccountEventContextType | null>(null);
 
 export type AccountEventProviderProps = {
   children: ReactNode;
-  authToken?: string;
 };
 
 /**
  * Provider component that handles wallet events and sends them to the Panna API
  */
-export function AccountEventProvider({
-  children,
-  authToken
-}: AccountEventProviderProps) {
+export function AccountEventProvider({ children }: AccountEventProviderProps) {
   const { client, partnerId } = usePanna();
   const previousAddressRef = useRef<string | null>(null);
+  const lastKnownChainIdRef = useRef<number | null>(null);
   const account = useActiveAccount();
   const activeWallet = useActiveWallet();
   const userAddress = account?.address || null;
   const currentChain = activeWallet?.getChain?.();
   const { data: userProfiles } = useProfiles({ client: client! });
+
+  // Store the chainId whenever it's available so we can use it during disconnect
+  useEffect(() => {
+    if (currentChain?.id) {
+      lastKnownChainIdRef.current = currentChain.id;
+    }
+  }, [currentChain?.id]);
 
   const smartAccountConfig = useMemo(() => {
     const config = activeWallet?.getConfig();
@@ -86,6 +91,8 @@ export function AccountEventProvider({
 
   /**
    * Send account event to Panna API
+   * Automatically handles SIWE token validation and re-authentication if expired.
+   * Makes API calls mandatory when token exists.
    */
   const sendAccountEvent = async (
     eventType: AccountEventPayload['eventType'],
@@ -97,10 +104,22 @@ export function AccountEventProvider({
     } = {}
   ) => {
     try {
-      const chainId = currentChain?.id;
+      const chainId = currentChain?.id ?? lastKnownChainIdRef.current;
 
       if (!chainId) {
         throw new Error('Chain ID not found');
+      }
+
+      // Try to get valid token with automatic re-authentication if expired
+      const siweToken = await getOrRefreshSiweToken(activeWallet ?? undefined, {
+        chainId
+      });
+
+      // If no token after re-auth attempt, throw an error since API calls are now mandatory
+      if (!siweToken) {
+        throw new Error(
+          `${eventType} event failed: SIWE authentication is required but no token was available. Please ensure SIWE authentication is completed.`
+        );
       }
 
       const basePayload = {
@@ -159,9 +178,12 @@ export function AccountEventProvider({
         throw new Error(`Unsupported event type: ${eventType}`);
       }
 
-      await pannaApiService.sendAccountEvent(address, payload, authToken);
+      await pannaApiService.sendAccountEvent(address, payload, siweToken);
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
+
+      // Re-throw error for caller to handle
+      throw error;
     }
   };
 
@@ -201,10 +223,12 @@ export function AccountEventProvider({
 
   /**
    * Handle wallet onConnect event
+   * Polls for SIWE authentication before sending the event
    */
   const handleOnConnect = async (address: string) => {
     try {
       const socialInfo = getSocialInfo();
+
       await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
         social: socialInfo || undefined
       });
@@ -215,6 +239,7 @@ export function AccountEventProvider({
 
   /**
    * Handle wallet disconnect event
+   * Polls for SIWE authentication before sending the event
    */
   const handleDisconnect = async (address: string) => {
     try {
@@ -228,6 +253,7 @@ export function AccountEventProvider({
 
   /**
    * Handle account changed event
+   * Polls for SIWE authentication before sending the event
    */
   const handleAccountChanged = async (address: string) => {
     try {

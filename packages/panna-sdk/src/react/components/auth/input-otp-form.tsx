@@ -22,6 +22,7 @@ import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { getEnvironmentChain } from '../../utils';
+import { handleSiweAuth } from '../../utils/auth';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -108,6 +109,13 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
               localStorage.setItem(USER_CONTACT, contact);
             }
           }
+
+          // Automatically perform SIWE authentication in the background
+          // Pass chainId for consistency with login form
+          await handleSiweAuth(wallet, {
+            chainId: getEnvironmentChain().id as number
+          });
+
           reset();
           onClose();
         }

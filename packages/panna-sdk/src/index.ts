@@ -131,6 +131,28 @@ export {
   type PannaApiConfig
 } from './core';
 
+// SIWE authentication exports
+export {
+  generateSiwePayload,
+  siweLogin,
+  isSiweLoggedIn,
+  getSiweUser,
+  siweLogout,
+  siweAuth,
+  type GeneratePayloadParams,
+  type LoginParams as SiweLoginParams
+} from './core/auth';
+
+// SIWE types
+export type {
+  AuthChallengeRequest,
+  AuthChallengeReply,
+  AuthVerifyRequest,
+  AuthVerifyReply,
+  LoginPayload,
+  SignedLoginPayload
+} from './core/utils/types';
+
 export * from './react';
 
 // React Query integration

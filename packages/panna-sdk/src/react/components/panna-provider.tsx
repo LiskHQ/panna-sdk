@@ -21,10 +21,6 @@ export type PannaProviderProps = {
    */
   autoConnectTimeout?: number;
   /**
-   * Optional authentication token for wallet event API requests
-   */
-  authToken?: string;
-  /**
    * Optional custom error fallback UI
    */
   errorFallback?:
@@ -62,7 +58,6 @@ function PannaProviderInternal(props: PannaProviderProps) {
     chainId,
     children,
     queryClient,
-    authToken,
     autoConnectTimeout
   } = props;
 
@@ -110,9 +105,7 @@ function PannaProviderInternal(props: PannaProviderProps) {
               timeout={autoConnectTimeout}
             />
           ) : null}
-          <AccountEventProvider authToken={authToken}>
-            {children}
-          </AccountEventProvider>
+          <AccountEventProvider>{children}</AccountEventProvider>
         </ThirdwebProvider>
       </PannaClientContext>
     </QueryClientProvider>
