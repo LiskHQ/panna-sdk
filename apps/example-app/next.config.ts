@@ -17,14 +17,6 @@ const nextConfig: NextConfig = {
         permanent: true
       }
     ];
-  },
-  rewrites: async () => {
-    return [
-      {
-        source: '/api/panna/:path*',
-        destination: 'http://localhost:8080/:path*'
-      }
-    ];
   }
 };
 

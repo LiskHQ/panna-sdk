@@ -1,5 +1,6 @@
 import { MailIcon, PhoneIcon } from 'lucide-react';
 import { useActiveWallet, useLogout, useUserProfiles } from '@/hooks';
+import { siweLogout } from '../../../core/auth';
 import { usePanna } from '../../hooks';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
@@ -16,9 +17,17 @@ export function AccountSettingsView() {
     error
   } = useUserProfiles({ client: client! });
 
-  const handleLogout = () => {
-    if (activeWallet) {
-      disconnect(activeWallet);
+  const handleLogout = async () => {
+    try {
+      // Disconnect the wallet first (may trigger account activity events that need auth)
+      if (activeWallet) {
+        disconnect(activeWallet);
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      // Always clear SIWE authentication data, even if disconnect fails
+      await siweLogout();
     }
   };
 

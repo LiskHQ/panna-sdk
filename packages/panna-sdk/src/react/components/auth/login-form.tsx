@@ -24,6 +24,7 @@ import { LAST_AUTH_PROVIDER } from '@/consts';
 import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
 import { getEnvironmentChain } from '../../utils';
+import { handleSiweAuth } from '../../utils/auth';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 
@@ -147,6 +148,12 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
             localStorage.setItem(LAST_AUTH_PROVIDER, 'Google');
             // Note: USER_ADDRESS is automatically managed by thirdweb
           }
+
+          // Automatically perform SIWE authentication in the background
+          await handleSiweAuth(wallet, {
+            chainId: getEnvironmentChain().id as number
+          });
+
           onClose?.();
         }
       }

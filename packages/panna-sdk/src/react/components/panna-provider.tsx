@@ -19,10 +19,6 @@ export type PannaProviderProps = {
    * Optional timeout (ms) for Thirdweb AutoConnect
    */
   autoConnectTimeout?: number;
-  /**
-   * Optional authentication token for wallet event API requests
-   */
-  authToken?: string;
 };
 
 export type PannaContextValue = {
@@ -77,7 +73,6 @@ export function PannaProvider(props: PannaProviderProps) {
     chainId,
     children,
     queryClient,
-    authToken,
     autoConnectTimeout
   } = props;
 
@@ -125,9 +120,7 @@ export function PannaProvider(props: PannaProviderProps) {
               timeout={autoConnectTimeout}
             />
           ) : null}
-          <AccountEventProvider authToken={authToken}>
-            {children}
-          </AccountEventProvider>
+          <AccountEventProvider>{children}</AccountEventProvider>
         </ThirdwebProvider>
       </PannaClientContext>
     </QueryClientProvider>
