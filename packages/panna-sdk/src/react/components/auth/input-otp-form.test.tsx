@@ -155,7 +155,7 @@ describe('InputOTPForm', () => {
     await fireEvent.click(resendButton);
 
     expect(prepareLogin as jest.Mock).toHaveBeenCalledWith({
-      client: mockConnect,
+      client: mockPannaClient,
       ecosystem: {
         id: 'ecosystem.lisk',
         partnerId: 'test-partner'
@@ -192,7 +192,7 @@ describe('InputOTPForm', () => {
 
     await waitFor(() => {
       expect(mockEcoWallet.connect).toHaveBeenCalledWith({
-        client: mockConnect,
+        client: mockPannaClient,
         strategy: 'email',
         email: 'test@example.com',
         verificationCode: '123456'
@@ -234,7 +234,7 @@ describe('InputOTPForm', () => {
 
     await waitFor(() => {
       expect(mockEcoWallet.connect).toHaveBeenCalledWith({
-        client: mockConnect,
+        client: mockPannaClient,
         strategy: 'phone',
         phoneNumber: '+1234567890',
         verificationCode: '123456'
