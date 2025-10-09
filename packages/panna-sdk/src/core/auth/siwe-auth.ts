@@ -138,8 +138,9 @@ export class SiweAuth {
         this.authToken = authResult.token;
         this.userAddress = authResult.address;
 
-        // Handle both expiresAt (timestamp) and expiresIn (duration in seconds) for backward compatibility
-        // Priority: expiresAt > expiresIn > null
+        // The API currently returns the expiry timestamp as the expiresIn property.
+        // For semantic appropriation, the property will be renamed to expiresAt.
+        // Hence, the fallback for backward compatibility.
         this.tokenExpiresAt =
           authResult.expiresAt || authResult.expiresIn || null;
 
@@ -165,6 +166,8 @@ export class SiweAuth {
       return false;
     } catch (error) {
       console.error('Failed to verify login:', error);
+      //  Also clear challenge on error to force new challenge generation
+      this.lastChallenge = null;
       return false;
     }
   }
