@@ -2,7 +2,6 @@ import { ChevronLeftIcon, Loader2Icon, XIcon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { EcosystemId } from 'src/core';
 import { ecosystemWallet } from 'thirdweb/wallets';
-import { LAST_AUTH_PROVIDER } from '@/consts';
 import { useDialog, useLogin, usePanna } from '@/hooks';
 import { getEnvironmentChain } from '@/utils';
 import { handleSiweAuth } from '@/utils/auth';
@@ -66,12 +65,6 @@ export function SocialLoginPendingDialog() {
       }
 
       if (wallet) {
-        const isBrowser = typeof window !== 'undefined';
-        if (isBrowser) {
-          localStorage.setItem(LAST_AUTH_PROVIDER, 'Google');
-          // Note: USER_ADDRESS is automatically managed by thirdweb
-        }
-
         // Automatically perform SIWE authentication in the background
         await handleSiweAuth(wallet, {
           chainId: getEnvironmentChain().id as number

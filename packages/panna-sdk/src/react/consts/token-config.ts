@@ -77,7 +77,3 @@ export const tokenConfig: SupportedTokens = {
   ...liskTokenConfig,
   ...liskSepoliaTokenConfig
 };
-
-export const LAST_AUTH_PROVIDER = 'lastAuthProvider';
-export const USER_CONTACT = 'userContact'; // This is used to store the email or phone number
-export const USER_ADDRESS = 'userAddress';

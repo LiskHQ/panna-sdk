@@ -19,7 +19,6 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp';
-import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { getEnvironmentChain } from '../../utils';
@@ -126,20 +125,6 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       if (wallet) {
         const address = wallet.getAccount()?.address;
         if (address) {
-          const isBrowser = typeof window !== 'undefined';
-          if (isBrowser) {
-            const authProvider = data.email ? 'Email' : 'Phone';
-            const contact = data.email
-              ? (data.email as string)
-              : (data.phoneNumber as string);
-
-            localStorage.setItem(LAST_AUTH_PROVIDER, authProvider);
-            // Note: USER_ADDRESS is automatically managed by thirdweb
-            if (contact) {
-              localStorage.setItem(USER_CONTACT, contact);
-            }
-          }
-
           // Automatically perform SIWE authentication in the background
           // Pass chainId for consistency with login form
           await handleSiweAuth(wallet, {
