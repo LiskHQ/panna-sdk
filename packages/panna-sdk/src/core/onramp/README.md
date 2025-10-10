@@ -122,7 +122,7 @@ if (provider === '') {
 Create a production-ready purchase flow with status tracking:
 
 ```ts
-import { onramp, chains } from 'panna-sdk';
+import { onramp, chain } from 'panna-sdk';
 import type { client } from 'panna-sdk';
 
 class PurchaseManager {
@@ -141,7 +141,7 @@ class PurchaseManager {
       // 2. Prepare purchase
       const session = await onramp.onRampPrepare({
         client: this.client,
-        chainId: chains.lisk.id,
+        chainId: chain.lisk.id,
         tokenAddress,
         receiver: userAddress,
         amount,

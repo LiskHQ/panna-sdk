@@ -35,12 +35,12 @@ In this guide, you will:
 ## Quick Start
 
 ```ts
-import { util, chains } from 'panna-sdk';
+import { util, chain } from 'panna-sdk';
 
 // Essential operations
 const balance = await util.accountBalance({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: userAddress
 });
 const amount = util.toWei('10.5'); // Convert to wei: 10500000000000000000n
@@ -58,7 +58,7 @@ const nfts = await util.getCollectiblesByAddress({
 });
 const fiatBalance = await util.accountBalanceInFiat({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: userAddress,
   currency: util.FiatCurrency.USD
 });
@@ -69,12 +69,12 @@ const fiatBalance = await util.accountBalanceInFiat({
 ### Basic Balance Queries
 
 ```ts
-import { util, chains } from 'panna-sdk';
+import { util, chain } from 'panna-sdk';
 
 // Native token balance (LSK)
 const balance = await util.accountBalance({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e'
 });
 
@@ -88,7 +88,7 @@ console.log({
 // ERC-20 token balance
 const usdtBalance = await util.accountBalance({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: userAddress,
   tokenAddress: '0x1234567890123456789012345678901234567890'
 });
@@ -97,7 +97,7 @@ const usdtBalance = await util.accountBalance({
 ### Multiple Token Balances
 
 ```ts
-import { util, chains } from 'panna-sdk';
+import { util, chain } from 'panna-sdk';
 
 // Query multiple tokens efficiently
 async function getPortfolioBalances(address: string, tokens: string[]) {
@@ -105,7 +105,7 @@ async function getPortfolioBalances(address: string, tokens: string[]) {
     tokens.map((tokenAddress) =>
       util.accountBalance({
         client,
-        chain: chains.lisk,
+        chain: chain.lisk,
         address,
         tokenAddress
       })
@@ -126,12 +126,12 @@ const portfolio = await getPortfolioBalances(userAddress, tokens);
 ### Fiat Conversions
 
 ```ts
-import { util, chains } from 'panna-sdk';
+import { util, chain } from 'panna-sdk';
 
 // Single token balance with fiat value
 const balanceWithFiat = await util.accountBalanceInFiat({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: userAddress,
   currency: util.FiatCurrency.USD
 });
@@ -144,7 +144,7 @@ console.log(
 // Complete portfolio with fiat values
 const portfolio = await util.accountBalancesInFiat({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: userAddress,
   currency: util.FiatCurrency.USD
 });
@@ -161,7 +161,7 @@ console.log(`Total portfolio: $${totalValue.toFixed(2)}`);
 ### Wei Conversions
 
 ```ts
-import { util, transaction, chains } from 'panna-sdk';
+import { util, transaction, chain } from 'panna-sdk';
 
 // Convert token amounts to wei (18 decimals)
 const examples = {
@@ -173,7 +173,7 @@ const examples = {
 // Use in transactions
 const tx = transaction.prepareTransaction({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   to: recipientAddress,
   value: util.toWei('1.5') // Send 1.5 tokens
 });

@@ -88,7 +88,7 @@ The SDK follows a consistent pattern across all modules:
 3. **Perform operations** - Execute transactions, query data, etc.
 
 ```typescript
-import { client, wallet, util, chains } from 'panna-sdk';
+import { client, wallet, util, chain } from 'panna-sdk';
 
 // 1. Initialize
 const pannaClient = client.createPannaClient({
@@ -103,7 +103,7 @@ const account = wallet.createAccount({
 // 3. Perform operations
 const balance = await util.accountBalance({
   client: pannaClient,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: account.address
 });
 ```
@@ -113,12 +113,12 @@ const balance = await util.accountBalance({
 ### Accepting Payments
 
 ```typescript
-import { transaction, util, chains } from 'panna-sdk';
+import { transaction, util, chain } from 'panna-sdk';
 
 // Prepare payment receipt
 const tx = transaction.prepareTransaction({
   client: pannaClient,
-  chain: chains.lisk,
+  chain: chain.lisk,
   to: merchantAddress,
   value: util.toWei('10') // 10 ETH
 });
@@ -130,12 +130,12 @@ const result = await transaction.sendTransaction({ account, transaction: tx });
 ### Token Transfers
 
 ```typescript
-import { transaction, util, chains } from 'panna-sdk';
+import { transaction, util, chain } from 'panna-sdk';
 
 // ERC-20 token transfer
 const tx = transaction.prepareContractCall({
   client: pannaClient,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: tokenAddress,
   method: 'function transfer(address to, uint256 amount)',
   params: [recipientAddress, util.toWei('100')] // 100 ERC-20 tokens with 18 decimals
@@ -147,15 +147,15 @@ const result = await transaction.sendTransaction({ account, transaction: tx });
 ### Multi-Chain Support
 
 ```typescript
-// Use different chains
-import { chains } from 'panna-sdk';
+// Use different chain
+import { chain } from 'panna-sdk';
 
-// Pre-configured chains
-const mainnet = chains.lisk;
-const testnet = chains.liskSepolia;
+// Pre-configured chain
+const mainnet = chain.lisk;
+const testnet = chain.liskSepolia;
 
 // Custom chain
-const customChain = chains.describeChain({
+const customChain = chain.describeChain({
   id: 1234,
   rpc: 'https://my-rpc.com',
   nativeCurrency: {

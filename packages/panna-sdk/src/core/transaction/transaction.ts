@@ -43,12 +43,12 @@ import type {
  *
  * @example
  * ```typescript
- * import { transaction, util, chains } from 'panna-sdk';
+ * import { transaction, util, chain } from 'panna-sdk';
  *
  * // Prepare a simple ETH transfer
  * const tx = transaction.prepareTransaction({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   value: util.toWei("1") // 1 ETH
  * });
@@ -56,7 +56,7 @@ import type {
  * // Prepare a transaction with gas settings
  * const txWithGas = transaction.prepareTransaction({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   value: util.toWei("0.5"),
  *   gasPrice: BigInt(20_000_000_000) // 20 gwei
@@ -65,7 +65,7 @@ import type {
  * // Prepare a contract deployment (no `to` address)
  * const deployTx = transaction.prepareTransaction({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   data: "0x608060405234801561001057600080fd5b50...", // contract bytecode
  *   value: 0n
  * });
@@ -145,12 +145,12 @@ export const prepareTransaction = (
  *
  * @example
  * ```typescript
- * import { transaction, util, chains } from 'panna-sdk';
+ * import { transaction, util, chain } from 'panna-sdk';
  *
  * // 1. Basic usage with method signature (type-safe based on signature)
  * const tx = transaction.prepareContractCall({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", util.toWei("100")]
@@ -159,7 +159,7 @@ export const prepareTransaction = (
  * // 2. With full contract ABI (provides autocompletion and full type safety)
  * const typeSafeCall = transaction.prepareContractCall({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: [
  *     {
@@ -187,7 +187,7 @@ export const prepareTransaction = (
  * // 3. Using ABI snippet (efficient for single method calls)
  * const snippetCall = transaction.prepareContractCall({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: {
  *     name: "mintTo",
@@ -205,7 +205,7 @@ export const prepareTransaction = (
  * // 4. Payable function with value
  * const payableCall = transaction.prepareContractCall({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function mint(address to)",
  *   params: ["0x123..."],
@@ -215,7 +215,7 @@ export const prepareTransaction = (
  * // 5. Advanced gas configuration (EIP-1559)
  * const advancedGasCall = transaction.prepareContractCall({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   method: "function transfer(address to, uint256 amount)",
  *   params: ["0x123...", util.toWei("100")],
@@ -228,7 +228,7 @@ export const prepareTransaction = (
  * try {
  *   const tx = transaction.prepareContractCall({
  *     client: pannaClient,
- *     chain: chains.lisk,
+ *     chain: chain.lisk,
  *     address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *     method: "function nonExistentFunction()",
  *     params: []
@@ -315,19 +315,19 @@ export const prepareContractCall = (
  *
  * @example
  * ```typescript
- * import { transaction, chains } from 'panna-sdk';
+ * import { transaction, chain } from 'panna-sdk';
  *
  * // Without ABI - use string-based method signatures
  * const contract = transaction.getContract({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  * });
  *
  * // With ABI - type-safe with autocompletion
  * const erc20Contract = transaction.getContract({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   abi: erc20Abi, // Full type safety and autocompletion. Define this ABI in your code or import from your contract definitions
  * });
@@ -374,7 +374,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  *
  * @example
  * ```typescript
- * import { transaction, wallet, chains, util } from 'panna-sdk';
+ * import { transaction, wallet, chain, util } from 'panna-sdk';
  *
  * // 1. Create and connect an account
  * const account = wallet.createAccount({ partnerId: 'your-partner-id' });
@@ -383,7 +383,7 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  * // 2. Prepare a transaction
  * const tx = transaction.prepareTransaction({
  *   client: pannaClient,
- *   chain: chains.lisk,
+ *   chain: chain.lisk,
  *   to: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   value: util.toWei("1") // 1 ETH
  * });
@@ -401,12 +401,12 @@ export const getContract = (params: GetContractParams): GetContractResult => {
  * @example
  * ```typescript
  * // Send a contract call transaction
- * import { transaction, chains, util } from 'panna-sdk';
+ * import { transaction, chain, util } from 'panna-sdk';
  *
  * const contract = transaction.getContract({
  *   client: pannaClient,
  *   address: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
- *   chain: chains.lisk
+ *   chain: chain.lisk
  * });
  *
  * const tx = transaction.prepareContractCall({

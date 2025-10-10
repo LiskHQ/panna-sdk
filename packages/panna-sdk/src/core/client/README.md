@@ -35,7 +35,7 @@ Choose your environment and follow the appropriate setup:
 ### Client-Side (Browser/Mobile)
 
 ```ts
-import { client, util, chains } from 'panna-sdk';
+import { client, util, chain } from 'panna-sdk';
 
 // Initialize with public client ID
 const pannaClient = client.createPannaClient({
@@ -45,7 +45,7 @@ const pannaClient = client.createPannaClient({
 // Use client in SDK operations
 const balance = await util.accountBalance({
   client: pannaClient,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: '0x...'
 });
 ```
@@ -99,7 +99,7 @@ export const usePannaClient = () => useContext(PannaContext);
 
 ```ts
 // app/api/wallet/route.ts
-import { client, util, chains } from 'panna-sdk';
+import { client, util, chain } from 'panna-sdk';
 
 const pannaClient = client.createPannaClient({
   clientId: process.env.NEXT_PUBLIC_PANNA_CLIENT_ID!
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
 
   const balance = await util.accountBalance({
     client: pannaClient,
-    chain: chains.lisk,
+    chain: chain.lisk,
     address: data.address
   });
 
@@ -175,7 +175,7 @@ await wallet.login({
 ### Basic Wallet Operations
 
 ```ts
-import { client, util, chains } from 'panna-sdk';
+import { client, util, chain } from 'panna-sdk';
 
 const pannaClient = client.createPannaClient({
   clientId: 'your-client-id'
@@ -184,7 +184,7 @@ const pannaClient = client.createPannaClient({
 // Get balance
 const balance = await util.accountBalance({
   client: pannaClient,
-  chain: chains.lisk,
+  chain: chain.lisk,
   address: '0x...'
 });
 ```

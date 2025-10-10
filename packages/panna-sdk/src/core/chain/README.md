@@ -35,14 +35,14 @@ In this guide, you will:
 ## Quick Start
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Use pre-configured networks
-const mainnet = chains.lisk; // Chain ID: 1135
-const testnet = chains.liskSepolia; // Chain ID: 4202
+const mainnet = chain.lisk; // Chain ID: 1135
+const testnet = chain.liskSepolia; // Chain ID: 4202
 
 // Create custom chain
-const customChain = chains.describeChain({
+const customChain = chain.describeChain({
   id: 12345,
   rpc: 'https://my-custom-rpc.com',
   nativeCurrency: {
@@ -60,20 +60,20 @@ const customChain = chains.describeChain({
 Production network for applications deployed on Lisk.
 
 ```ts
-import { chains, transaction, util } from 'panna-sdk';
+import { chain, transaction, util } from 'panna-sdk';
 
 // Chain properties
 console.log({
-  id: chains.lisk.id, // 1135
-  name: chains.lisk.name, // "Lisk"
-  nativeCurrency: chains.lisk.nativeCurrency, // ETH token
-  blockExplorers: chains.lisk.blockExplorers
+  id: chain.lisk.id, // 1135
+  name: chain.lisk.name, // "Lisk"
+  nativeCurrency: chain.lisk.nativeCurrency, // ETH token
+  blockExplorers: chain.lisk.blockExplorers
 });
 
 // Use in transactions (requires client setup)
 const tx = transaction.prepareTransaction({
   client,
-  chain: chains.lisk,
+  chain: chain.lisk,
   to: recipientAddress,
   value: util.toWei('1')
 });
@@ -84,12 +84,12 @@ const tx = transaction.prepareTransaction({
 Development and testing network with free test tokens.
 
 ```ts
-import { chains, transaction, util } from 'panna-sdk';
+import { chain, transaction, util } from 'panna-sdk';
 
 // Use testnet for development (requires client setup)
 const tx = transaction.prepareTransaction({
   client,
-  chain: chains.liskSepolia,
+  chain: chain.liskSepolia,
   to: testAddress,
   value: util.toWei('10')
 });
@@ -103,13 +103,13 @@ console.log('Get test LSK from: https://sepolia-faucet.lisk.com');
 ### Basic Configuration
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Minimal configuration
-const simpleChain = chains.describeChain(12345);
+const simpleChain = chain.describeChain(12345);
 
 // Full configuration
-const customChain = chains.describeChain({
+const customChain = chain.describeChain({
   id: 12345,
   name: 'My Custom Chain',
   rpc: 'https://rpc.mychain.com',
@@ -130,10 +130,10 @@ const customChain = chains.describeChain({
 ### Development Chains
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Local development
-const localChain = chains.describeChain({
+const localChain = chain.describeChain({
   id: 31337,
   name: 'Local Development',
   rpc: 'http://localhost:8545',
@@ -145,8 +145,8 @@ const localChain = chains.describeChain({
 });
 
 // Forked chain for testing
-const forkedLisk = chains.describeChain({
-  ...chains.lisk,
+const forkedLisk = chain.describeChain({
+  ...chain.lisk,
   rpc: 'http://localhost:8545' // Local fork
 });
 ```
@@ -156,10 +156,10 @@ const forkedLisk = chains.describeChain({
 ### Get Chain Information
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Fetch detailed metadata
-const metadata = await chains.getChainInfo(chains.lisk);
+const metadata = await chain.getChainInfo(chain.lisk);
 console.log({
   name: metadata.name,
   chainId: metadata.chainId,
@@ -174,26 +174,26 @@ console.log({
 ### Get RPC URLs
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Get configured RPC endpoint
-const rpcUrl = chains.getRPCUrlForChain(chains.lisk);
+const rpcUrl = chain.getRPCUrlForChain(chain.lisk);
 console.log('RPC endpoint:', rpcUrl);
 ```
 
 ### Custom RPC Configuration
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Override default RPC
-const customRpcChain = chains.describeChain({
-  ...chains.lisk,
+const customRpcChain = chain.describeChain({
+  ...chain.lisk,
   rpc: 'https://my-custom-lisk-rpc.com'
 });
 
 // Environment-based RPC
-const envChain = chains.describeChain({
+const envChain = chain.describeChain({
   id: 1135,
   rpc: process.env.CUSTOM_RPC || 'https://fallback-rpc.com'
 });
@@ -204,18 +204,18 @@ const envChain = chains.describeChain({
 ### Chain Selection by Environment
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Select chain based on environment
 const getChain = () => {
   switch (process.env.NODE_ENV) {
     case 'production':
-      return chains.lisk;
+      return chain.lisk;
     case 'development':
     case 'test':
-      return chains.liskSepolia;
+      return chain.liskSepolia;
     default:
-      return chains.liskSepolia;
+      return chain.liskSepolia;
   }
 };
 
@@ -225,13 +225,13 @@ const activeChain = getChain();
 ### Multi-Chain Support
 
 ```ts
-import { chains } from 'panna-sdk';
+import { chain } from 'panna-sdk';
 
 // Support multiple networks
 const SUPPORTED_CHAINS = {
-  mainnet: chains.lisk,
-  testnet: chains.liskSepolia,
-  local: chains.describeChain(31337)
+  mainnet: chain.lisk,
+  testnet: chain.liskSepolia,
+  local: chain.describeChain(31337)
 } as const;
 
 // Chain switcher
@@ -244,7 +244,7 @@ const currentChain = selectChain('mainnet');
 
 ## Next Steps
 
-- Learn about [Transaction Module](../transaction/README.md) for sending transactions on configured chains
+- Learn about [Transaction Module](../transaction/README.md) for sending transactions on configured chain
 - Explore [Client Module](../client/README.md) for SDK initialization with custom RPC endpoints
 - Review [Wallet Module](../wallet/README.md) for user authentication across multiple networks
 - Check [Onramp Module](../onramp/README.md) for fiat-to-crypto purchases
