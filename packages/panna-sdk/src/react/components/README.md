@@ -335,7 +335,7 @@ Import default styles:
 }
 ```
 
-In further versions, you can customize with:
+In future versions, you can customize with:
 
 1. **Theme prop** on components like `ConnectButton` (e.g., `theme="dark"`).
 

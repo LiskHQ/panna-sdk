@@ -157,8 +157,7 @@ function TokenInput({ address }: { address: string }) {
 Convert fiat to crypto amount.
 
 ```tsx
-import { useTokenBalances } from 'panna-sdk';
-import { renderCryptoAmount } from 'panna-sdk';
+import { useTokenBalances, renderCryptoAmount } from 'panna-sdk';
 
 function FiatInput({ address }: { address: string }) {
   const { data: balances } = useTokenBalances({ address });
@@ -264,8 +263,12 @@ function LocalizedBuyForm() {
 ### Token Amount Conversion
 
 ```tsx
-import { useTokenBalances, useActiveAccount } from 'panna-sdk';
-import { renderFiatAmount, renderCryptoAmount } from 'panna-sdk';
+import {
+  useTokenBalances,
+  useActiveAccount,
+  renderFiatAmount,
+  renderCryptoAmount
+} from 'panna-sdk';
 import { useState } from 'react';
 
 function SwapCalculator() {
