@@ -81,6 +81,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
               <button
                 type="button"
                 onClick={() => setActiveView(AccountViewEnum.Settings)}
+                data-testid="open-settings"
               >
                 <SettingsIcon
                   size={20}
@@ -109,6 +110,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
               <button
                 type="button"
                 onClick={() => setActiveView(AccountViewEnum.Main)}
+                data-testid="back-to-main"
               >
                 <ArrowLeftIcon
                   size={20}
@@ -241,6 +243,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 variant="outline"
                 className="flex-1"
                 onClick={() => setActiveView(AccountViewEnum.Buy)}
+                disabled
               >
                 <TagIcon />
                 Buy

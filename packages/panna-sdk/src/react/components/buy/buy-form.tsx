@@ -14,7 +14,7 @@ import { SelectBuyRegionStep } from './select-buy-region-step';
 import { SelectBuyTokenStep } from './select-buy-token-step';
 import { SpecifyBuyAmountStep } from './specify-buy-amount-step';
 
-type BuyFormProps = {
+export type BuyFormProps = {
   onClose: () => void;
   stepperRef: ReturnType<typeof useRef<DialogStepperContextValue | null>>;
 };
