@@ -45,6 +45,22 @@ The documentation includes:
 
 Each module includes detailed usage examples, API references, and integration guides.
 
+### React Module Documentation
+
+Complete documentation for building React applications with the Panna SDK:
+
+**[⚛️ View React Module Docs](./packages/panna-sdk/src/react/README.md)**
+
+The React module includes:
+
+- **[Components](./packages/panna-sdk/src/react/components/README.md)** - Pre-built React components for authentication, transactions, and account management
+- **[Hooks](./packages/panna-sdk/src/react/hooks/README.md)** - React hooks for wallet state, blockchain data, and user interactions
+- **[Utils](./packages/panna-sdk/src/react/utils/README.md)** - Utility functions for address formatting, conversions, and more
+- **[Types](./packages/panna-sdk/src/react/types/README.md)** - TypeScript type definitions for React components and hooks
+- **[Consts](./packages/panna-sdk/src/react/consts/README.md)** - Constants and configuration for tokens, countries, and currencies
+
+Each module includes comprehensive examples, type definitions, and best practices for React development.
+
 ---
 
 ## 🧰 Tooling
