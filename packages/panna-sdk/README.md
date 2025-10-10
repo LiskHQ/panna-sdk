@@ -56,14 +56,14 @@ To get started with the Panna SDK, follow these steps:
 2. **Import the SDK in your project**:
 
    ```ts
-   import { createPannaClient } from 'panna-sdk';
+   import { client } from 'panna-sdk';
    ```
 
 3. **Initialize the client**:
 
    ```ts
-   const client = createPannaClient({
-     partnerId: process.env.PARTNER_ID || ''
+   const pannaClient = client.createPannaClient({
+     clientId: process.env.CLIENT_ID || ''
    });
    ```
 
@@ -174,9 +174,9 @@ For creating a custom UI, you can use the provided core functions to manage Pann
 ### Authenticating a User
 
 ```ts
-import { login } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
-const session = await login({
+const session = await wallet.login({
   strategy: 'email',
   email: 'user@email.com',
   verificationCode: '123456'
@@ -186,9 +186,9 @@ const session = await login({
 ### Linking an account
 
 ```ts
-import { linkAccount } from 'panna-sdk';
+import { wallet } from 'panna-sdk';
 
-const result = await linkAccount({
+const result = await wallet.linkAccount({
   strategy: 'phone',
   phoneNumber: '+1234567890',
   verificationCode: '123456'

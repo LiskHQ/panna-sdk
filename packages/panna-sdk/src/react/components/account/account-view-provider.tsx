@@ -1,5 +1,5 @@
 import React, { createContext, ReactNode, use, useState } from 'react';
-import { type StringValues } from '../../../core/utils/types';
+import { type StringValues } from '../../../core/util/types';
 
 export enum AccountViewEnum {
   Main = 'main',

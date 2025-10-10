@@ -1,5 +1,5 @@
 import { type EcosystemConfig, EcosystemId, type PannaClient } from '../client';
-import { type SocialProvider } from '../utils/types';
+import { type SocialProvider } from '../util/types';
 
 // Enum for login strategies
 export const LoginStrategy = {

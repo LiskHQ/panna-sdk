@@ -15,11 +15,13 @@ export type PannaClient = ThirdwebClient;
  *
  * @example
  * ```typescript
+ * import { client } from 'panna-sdk';
+ *
  * // Client-side usage
- * const client = createPannaClient({ clientId: "your-client-id" });
+ * const pannaClient = client.createPannaClient({ clientId: "your-client-id" });
  *
  * // Server-side usage
- * const client = createPannaClient({ secretKey: "your-secret-key" });
+ * const pannaClient = client.createPannaClient({ secretKey: "your-secret-key" });
  * ```
  */
 export function createPannaClient(

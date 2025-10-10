@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
 import { liskSepolia } from '../../../core';
-import { extractNumericPrice } from '../../../core/utils/utils';
+import { extractNumericPrice } from '../../../core/util/utils';
 import {
   useBuyWithFiatQuotes,
   usePanna,

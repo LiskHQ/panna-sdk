@@ -5,7 +5,7 @@ import React from 'react';
 import { SmartAccountOptions } from 'thirdweb/dist/types/wallets/smart/types';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { Account, Profile, SmartWalletOptions, Wallet } from 'thirdweb/wallets';
-import { pannaApiService, AccountEventType } from '../../core/utils';
+import { pannaApiService, AccountEventType } from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import {
   AccountEventProvider,
@@ -26,8 +26,8 @@ jest.mock('../hooks/use-panna', () => ({
 }));
 
 // Mock pannaApiService
-jest.mock('../../core/utils', () => ({
-  ...jest.requireActual('../../core/utils'),
+jest.mock('../../core/util', () => ({
+  ...jest.requireActual('../../core/util'),
   pannaApiService: {
     sendAccountEvent: jest.fn()
   }

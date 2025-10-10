@@ -6,7 +6,7 @@ import {
   getValidSiweAuthToken,
   isSiweTokenExpired
 } from '../../core/auth';
-import type { LoginPayload } from '../../core/utils/types';
+import type { LoginPayload } from '../../core/util/types';
 
 /**
  * Format a SIWE login payload into the format expected by Panna API
