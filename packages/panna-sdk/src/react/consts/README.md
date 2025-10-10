@@ -126,7 +126,7 @@ function CountrySelector() {
   return (
     <div>
       <h3>Select Your Country</h3>
-      {COUNTRIES_SORTED.map((country) => (
+      {COUNTRIES.map((country) => (
         <button
           key={country.code}
           onClick={() => setSelected(country)}
