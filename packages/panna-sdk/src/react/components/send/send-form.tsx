@@ -14,7 +14,7 @@ import { SendSelectTokenStep } from './send-select-token-step';
 import { SendSuccessStep } from './send-success-step';
 import { SendSummaryStep } from './send-summary-step';
 
-type SendFormProps = {
+export type SendFormProps = {
   onStepperChange: (stepper: DialogStepperContextValue | null) => void;
   onClose: () => void;
 };
