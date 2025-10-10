@@ -41,7 +41,7 @@ The documentation includes:
 - **[Transaction](./packages/panna-sdk/src/core/transaction/README.md)** - Blockchain transaction handling
 - **[Chain](./packages/panna-sdk/src/core/chain/README.md)** - Network configuration
 - **[Onramp](./packages/panna-sdk/src/core/onramp/README.md)** - Fiat-to-crypto gateway
-- **[Utils](./packages/panna-sdk/src/core/utils/README.md)** - Helper functions and utilities
+- **[Util](./packages/panna-sdk/src/core/util/README.md)** - Helper functions and utilities
 
 Each module includes detailed usage examples, API references, and integration guides.
 

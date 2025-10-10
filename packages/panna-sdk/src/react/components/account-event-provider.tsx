@@ -18,7 +18,7 @@ import {
   type SocialAuthData,
   AccountEventType,
   pannaApiService
-} from '../../core/utils';
+} from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import { getOrRefreshSiweToken } from '../utils/auth';
 

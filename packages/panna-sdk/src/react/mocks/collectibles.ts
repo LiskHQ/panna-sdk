@@ -1,7 +1,7 @@
 import {
   GetCollectiblesByAddressResult,
   ImageType
-} from 'src/core/utils/collectible.types';
+} from 'src/core/util/collectible.types';
 
 export const mockCollectibles: GetCollectiblesByAddressResult = {
   collectibles: [

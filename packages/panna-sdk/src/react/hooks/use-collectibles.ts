@@ -3,7 +3,7 @@ import { getCollectiblesByAddress, isValidAddress } from 'src/core';
 import {
   GetCollectiblesByAddressParams,
   GetCollectiblesByAddressResult
-} from 'src/core/utils/collectible.types';
+} from 'src/core/util/collectible.types';
 import { generatePaginationQueryFilter } from '@/utils/query-utils';
 import {
   createDefaultRetryFn,

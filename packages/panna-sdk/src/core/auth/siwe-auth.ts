@@ -1,11 +1,11 @@
 import type { Account } from 'thirdweb/wallets';
-import { pannaApiService } from '../utils/api-service';
+import { pannaApiService } from '../util/api-service';
 import type {
   AuthChallengeRequest,
   AuthChallengeReply,
   AuthVerifyRequest,
   LoginPayload
-} from '../utils/types';
+} from '../util/types';
 
 /**
  * LocalStorage keys for SIWE authentication

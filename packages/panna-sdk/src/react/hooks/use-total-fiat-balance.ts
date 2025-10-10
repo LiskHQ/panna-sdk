@@ -5,7 +5,7 @@ import {
   isValidAddress
 } from 'src/core';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
-import type { FiatCurrency } from '../../core/utils/types';
+import type { FiatCurrency } from '../../core/util/types';
 import { usePanna } from './use-panna';
 
 type UseTotalFiatBalanceParams = {

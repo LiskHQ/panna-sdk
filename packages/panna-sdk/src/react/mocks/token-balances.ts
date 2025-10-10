@@ -1,6 +1,6 @@
 import { DEFAULT_CURRENCY, lisk } from 'src/core';
 import { liskTokenConfig } from '@/consts';
-import { AccountBalanceInFiatResult } from '../../core/utils/types';
+import { AccountBalanceInFiatResult } from '../../core/util/types';
 
 export type TokenBalance = AccountBalanceInFiatResult & {
   token: {

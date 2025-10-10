@@ -1,7 +1,7 @@
 import { getCountry } from 'iso-3166-1-alpha-2';
 import { Bridge } from 'thirdweb';
 import { lisk } from '../chain';
-import type { TokenFiatPrice } from '../utils/types';
+import type { TokenFiatPrice } from '../util/types';
 import { COUNTRY_PROVIDER_MAP, PROVIDERS } from './constants';
 import type {
   GetTokenFiatPricesParams,
@@ -30,8 +30,10 @@ import type {
  *
  * @example
  * ```ts
+ * import { onramp } from 'panna-sdk';
+ *
  * // Check the status of an onramp session
- * const status = await onRampStatus({
+ * const status = await onramp.onRampStatus({
  *   id: "022218cc-96af-4291-b90c-dadcb47571ec",
  *   client: pannaClient
  * });
@@ -100,10 +102,10 @@ export async function onRampStatus(
  *
  * @example
  * ```ts
- * import { onRampPrepare, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+ * import { onramp, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
  *
  * // Prepare an onramp session for a fiat-to-crypto transaction
- * const onramp = await onRampPrepare({
+ * const result = await onramp.onRampPrepare({
  *   client: pannaClient,
  *   chainId: 1,
  *   tokenAddress: NATIVE_TOKEN_ADDRESS,
@@ -172,13 +174,16 @@ export async function onRampPrepare(
  * @returns List of providers available in that country
  * @throws Error when the provided country code does not match ISO 3166-1 alpha-2 standards
  * @example
- * ```
- * const germanyProviders = getOnrampProviders("DE");
- * [
- *  { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
- *  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
- *  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
- * ]
+ * ```ts
+ * import { onramp } from 'panna-sdk';
+ *
+ * const germanyProviders = onramp.getOnrampProviders("DE");
+ * // Returns:
+ * // [
+ * //  { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
+ * //  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
+ * //  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
+ * // ]
  * ```
  */
 export function getOnrampProviders(countryCode: string): ProviderInfo[] {
@@ -206,16 +211,16 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
  *
  * @example
  * ```ts
- * import { getTokenFiatPrices, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
+ * import { onramp, NATIVE_TOKEN_ADDRESS } from 'panna-sdk';
  *
  * // Get fiat prices for a specific token (native ETH)
- * const prices = await getTokenFiatPrices({
+ * const prices = await onramp.getTokenFiatPrices({
  *   chainId: 1,
  *   tokenAddress: NATIVE_TOKEN_ADDRESS,
  *   client: pannaClient
  * });
  * // Get fiat prices for all tokens on a chain
- * const allPrices = await getTokenFiatPrices({
+ * const allPrices = await onramp.getTokenFiatPrices({
  *   chainId: 1,
  *   client: pannaClient
  * });
