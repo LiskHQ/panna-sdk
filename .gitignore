@@ -28,3 +28,6 @@ dist-ssr
 # Secrets
 .env*
 !.env.example
+
+*storybook.log
+storybook-static

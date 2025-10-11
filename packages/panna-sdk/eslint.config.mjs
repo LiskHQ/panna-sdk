@@ -1,6 +1,8 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import js from '@eslint/js';
 import typescript from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import storybook from 'eslint-plugin-storybook';
 
 export default [
   js.configs.recommended,
@@ -38,5 +40,6 @@ export default [
       '@typescript-eslint/no-unused-vars': 'error',
       'no-undef': 'off' // TypeScript handles this
     }
-  }
+  },
+  ...storybook.configs['flat/recommended']
 ];
