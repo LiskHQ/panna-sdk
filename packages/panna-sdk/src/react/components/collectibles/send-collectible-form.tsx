@@ -12,7 +12,7 @@ import { SelectCollectibleStep } from './select-collectible-step';
 import { SelectRecipientStep } from './select-recipient-step';
 import { SummaryStep } from './summary-step';
 
-type SendCollectibleFormProps = {
+export type SendCollectibleFormProps = {
   onStepperChange: (stepper: DialogStepperContextValue | null) => void;
   onClose: () => void;
 };
