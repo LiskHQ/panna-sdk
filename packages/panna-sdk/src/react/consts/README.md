@@ -97,7 +97,7 @@ const gbpSymbol = currencyMap.GBP; // "£"
 ### Token Configuration
 
 ```tsx
-import { usePanna, tokenConfig } from 'panna-sdk';
+import { usePanna, tokenConfig, TokenItem } from 'panna-sdk';
 
 function TokenBalanceList() {
   const { chainId } = usePanna();
@@ -107,7 +107,7 @@ function TokenBalanceList() {
     <div>
       <h3>Your Balances</h3>
       {tokens?.map((token) => (
-        <TokenBalanceRow key={token.address} token={token} />
+        <TokenItem key={token.address} token={token} />
       ))}
     </div>
   );
