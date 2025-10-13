@@ -80,6 +80,7 @@ To get started with the Panna SDK, follow these steps:
        <PannaProvider
          clientId={process.env.CLIENT_ID}
          partnerId={process.env.PARTNER_ID}
+         chainId={process.env.CHAIN_ID}
        >
          <ConnectButton />
        </PannaProvider>
@@ -132,11 +133,11 @@ The `createPannaClient` function accepts the following options:
 | --------------------------------------- | ------------- | ------------------------------------------ | ---------------------------------------------------- |
 | `config.rpc.maxBatchSize`               | `number`      | `100`                                      | Maximum number of RPC requests to batch together     |
 | `config.rpc.batchTimeoutMs`             | `number`      | `0` (no timeout)                           | Maximum time to wait before sending batched requests |
-| `config.rpc.fetch.requestTimeoutMs`     | `number`      | `30000`                                    | Request timeout in milliseconds                      |
+| `config.rpc.fetch.requestTimeoutMs`     | `number`      | `300000`                                   | Request timeout in milliseconds                      |
 | `config.rpc.fetch.keepalive`            | `boolean`     | `false`                                    | Enable HTTP keepalive for connections                |
 | `config.rpc.fetch.headers`              | `HeadersInit` | `{}`                                       | Custom HTTP headers for RPC requests                 |
 | `config.storage.gatewayUrl`             | `string`      | `https://<clientId>.ipfscdn.io/ipfs/<cid>` | Custom IPFS gateway URL for storage                  |
-| `config.storage.fetch.requestTimeoutMs` | `number`      | `60000`                                    | Storage request timeout in milliseconds              |
+| `config.storage.fetch.requestTimeoutMs` | `number`      | `600000`                                   | Storage request timeout in milliseconds              |
 
 ---
 
