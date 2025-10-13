@@ -1,10 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { useDialog } from '@/hooks/use-dialog';
 import { Dialog } from '../ui/dialog';
-import {
-  DialogStepperContextValue,
-  useDialogStepper
-} from '../ui/dialog-stepper';
+import { useDialogStepper } from '../ui/dialog-stepper';
 import { AuthFlow } from './auth-flow';
 
 jest.mock('@/hooks/use-dialog');
