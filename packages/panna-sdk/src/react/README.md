@@ -198,16 +198,11 @@ function ActivityList({ address }: { address: string }) {
 ### Next.js App Router
 
 ```tsx
-// app/providers.tsx
 'use client';
 
 import { PannaProvider } from 'panna-sdk';
-import 'panna-sdk/styles.css';
-// app/layout.tsx
-import { Providers } from './providers';
 
 // app/providers.tsx
-
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PannaProvider
@@ -219,6 +214,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
     </PannaProvider>
   );
 }
+```
+
+```tsx
+// app/layout.tsx
+import 'panna-sdk/styles.css';
+import { Providers } from './providers';
 
 export default function RootLayout({
   children

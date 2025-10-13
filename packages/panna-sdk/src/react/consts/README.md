@@ -5,7 +5,7 @@ Constants and configuration data including token configurations, country lists, 
 ## Quick Start
 
 ```tsx
-import { tokenConfig, COUNTRIES, currencyMap } from 'panna-sdk/consts';
+import { tokenConfig, COUNTRIES, currencyMap } from 'panna-sdk';
 
 function App() {
   const liskTokens = tokenConfig[1135];
@@ -23,7 +23,7 @@ function App() {
 Main token configuration for all chains.
 
 ```tsx
-import { tokenConfig } from 'panna-sdk/consts';
+import { tokenConfig } from 'panna-sdk';
 
 // Lisk mainnet tokens
 const liskTokens = tokenConfig[1135];
@@ -39,7 +39,7 @@ Tokens for Lisk mainnet (chain ID: 1135).
 **Includes:** LSK, ETH, USDT, USDC.e, vpLSK
 
 ```tsx
-import { liskTokenConfig } from 'panna-sdk/consts';
+import { liskTokenConfig } from 'panna-sdk';
 
 const tokens = liskTokenConfig[1135];
 ```
@@ -51,7 +51,7 @@ Tokens for Lisk Sepolia testnet (chain ID: 4202).
 **Includes:** LSK, ETH, USDT, USDC.e (testnet versions)
 
 ```tsx
-import { liskSepoliaTokenConfig } from 'panna-sdk/consts';
+import { liskSepoliaTokenConfig } from 'panna-sdk';
 
 const tokens = liskSepoliaTokenConfig[4202];
 ```
@@ -63,7 +63,7 @@ const tokens = liskSepoliaTokenConfig[4202];
 Array of all countries from ISO 3166-1 alpha-2 standard.
 
 ```tsx
-import { COUNTRIES } from 'panna-sdk/consts';
+import { COUNTRIES } from 'panna-sdk';
 
 function CountryPicker() {
   return (
@@ -85,7 +85,7 @@ function CountryPicker() {
 Currency codes to symbols mapping.
 
 ```tsx
-import { currencyMap } from 'panna-sdk/consts';
+import { currencyMap } from 'panna-sdk';
 
 const usdSymbol = currencyMap.USD; // "$"
 const eurSymbol = currencyMap.EUR; // "€"
