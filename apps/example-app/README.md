@@ -2,7 +2,23 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+### 1. Configure Environment Variables
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in your Panna SDK credentials:
+
+```env
+NEXT_PUBLIC_CLIENT_ID=your-client-id
+NEXT_PUBLIC_PARTNER_ID=your-partner-id
+NEXT_PUBLIC_CHAIN_ID=1135  # Lisk mainnet (or 4202 for testnet)
+```
+
+### 2. Run Development Server
 
 ```bash
 npm run dev

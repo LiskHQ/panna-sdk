@@ -379,6 +379,87 @@ describe('PannaProvider', () => {
     });
   });
 
+  describe('error handling', () => {
+    // Suppress console.error for error boundary tests
+    const originalError = console.error;
+    beforeAll(() => {
+      console.error = jest.fn();
+    });
+
+    afterAll(() => {
+      console.error = originalError;
+    });
+
+    it('should catch errors during provider setup', () => {
+      // Mock createPannaClient to throw an error
+      mockCreatePannaClient.mockImplementation(() => {
+        throw new Error('Client creation failed');
+      });
+
+      render(
+        <PannaProvider clientId="test-client-id">
+          <div data-testid="test-child">Test Child</div>
+        </PannaProvider>
+      );
+
+      // Should render default error UI
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.queryByTestId('test-child')).not.toBeInTheDocument();
+    });
+
+    it('should catch errors with custom fallback', () => {
+      mockCreatePannaClient.mockImplementation(() => {
+        throw new Error('Setup error');
+      });
+
+      const customFallback = <div>Custom error message</div>;
+
+      render(
+        <PannaProvider clientId="test-client-id" errorFallback={customFallback}>
+          <div data-testid="test-child">Test Child</div>
+        </PannaProvider>
+      );
+
+      expect(screen.getByText('Custom error message')).toBeInTheDocument();
+      expect(screen.queryByTestId('test-child')).not.toBeInTheDocument();
+    });
+
+    it('should call onError callback when error occurs', () => {
+      const onError = jest.fn();
+
+      mockCreatePannaClient.mockImplementation(() => {
+        throw new Error('Test error');
+      });
+
+      render(
+        <PannaProvider clientId="test-client-id" onError={onError}>
+          <div data-testid="test-child">Test Child</div>
+        </PannaProvider>
+      );
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      const [error] = onError.mock.calls[0];
+      expect(error.message).toContain('Test error');
+    });
+
+    it('should render normally when no error occurs', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      render(
+        <PannaProvider
+          clientId="test-client-id"
+          errorFallback={<div>Error occurred</div>}
+        >
+          <div data-testid="test-child">Test Child</div>
+        </PannaProvider>
+      );
+
+      expect(screen.getByTestId('test-child')).toBeInTheDocument();
+      expect(screen.queryByText('Error occurred')).not.toBeInTheDocument();
+    });
+  });
+
   describe('integration', () => {
     it('should work with multiple nested consumers', () => {
       const mockClient = { id: 'test-client' } as unknown as PannaClient;

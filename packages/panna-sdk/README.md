@@ -10,6 +10,9 @@ Panna SDK is a developer-first toolkit for building seamless, user-friendly dece
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Getting Started](#getting-started)
+  - [Configuration Reference](#configuration-reference)
+    - [PannaProvider Configuration](#pannaprovider-configuration)
+    - [createPannaClient Configuration](#createpannaclient-configuration)
   - [Core Functionality](#core-functionality)
     - [Chain management](#chain-management)
       - [Key Functions](#key-functions)
@@ -70,16 +73,71 @@ To get started with the Panna SDK, follow these steps:
 4. **Integrate UI components**:
 
    ```tsx
-   import { PannaProvider, LoginButton } from 'panna-sdk';
+   import { PannaProvider, ConnectButton } from 'panna-sdk';
 
    function App() {
      return (
-       <PannaProvider clientId={process.env.CLIENT_ID}>
-         <LoginButton label="Sign in with Panna" />
+       <PannaProvider
+         clientId={process.env.CLIENT_ID}
+         partnerId={process.env.PARTNER_ID}
+         chainId={process.env.CHAIN_ID}
+       >
+         <ConnectButton />
        </PannaProvider>
      );
    }
    ```
+
+---
+
+## Configuration Reference
+
+This section provides a complete reference for all SDK configuration options.
+
+### PannaProvider Configuration
+
+The `PannaProvider` component accepts the following props:
+
+| Property             | Type                                             | Required | Default             | Description                                                              |
+| -------------------- | ------------------------------------------------ | -------- | ------------------- | ------------------------------------------------------------------------ |
+| `children`           | `ReactNode`                                      | No       | -                   | Child components wrapped by the provider                                 |
+| `clientId`           | `string`                                         | No       | -                   | Thirdweb client ID for client-side operations                            |
+| `partnerId`          | `string`                                         | No       | `''`                | Partner ID for Lisk ecosystem wallet creation                            |
+| `chainId`            | `string`                                         | No       | `'1135'` (Lisk)     | Chain ID to connect to (`'1135'` for Lisk mainnet, `'4202'` for testnet) |
+| `queryClient`        | `QueryClient`                                    | No       | `new QueryClient()` | Custom React Query client for advanced cache configuration               |
+| `autoConnectTimeout` | `number`                                         | No       | -                   | Timeout in milliseconds for automatic wallet reconnection                |
+| `authToken`          | `string`                                         | No       | -                   | Authentication token for wallet event tracking API requests              |
+| `errorFallback`      | `ReactNode \| ((error, errorInfo) => ReactNode)` | No       | Default error UI    | Custom error UI to display when errors occur                             |
+| `onError`            | `(error: Error, errorInfo: ErrorInfo) => void`   | No       | -                   | Callback function invoked when errors are caught                         |
+
+**Default QueryClient Configuration:**
+
+- `staleTime`: 5 minutes (300000ms)
+- `retry`: 3 attempts
+
+---
+
+### createPannaClient Configuration
+
+The `createPannaClient` function accepts the following options:
+
+#### Required Options
+
+| Property   | Type     | Description                                                |
+| ---------- | -------- | ---------------------------------------------------------- |
+| `clientId` | `string` | Thirdweb client ID for client-side usage (browser, mobile) |
+
+#### Advanced Options
+
+| Property                                | Type          | Default                                    | Description                                          |
+| --------------------------------------- | ------------- | ------------------------------------------ | ---------------------------------------------------- |
+| `config.rpc.maxBatchSize`               | `number`      | `100`                                      | Maximum number of RPC requests to batch together     |
+| `config.rpc.batchTimeoutMs`             | `number`      | `0` (no timeout)                           | Maximum time to wait before sending batched requests |
+| `config.rpc.fetch.requestTimeoutMs`     | `number`      | `300000`                                   | Request timeout in milliseconds                      |
+| `config.rpc.fetch.keepalive`            | `boolean`     | `false`                                    | Enable HTTP keepalive for connections                |
+| `config.rpc.fetch.headers`              | `HeadersInit` | `{}`                                       | Custom HTTP headers for RPC requests                 |
+| `config.storage.gatewayUrl`             | `string`      | `https://<clientId>.ipfscdn.io/ipfs/<cid>` | Custom IPFS gateway URL for storage                  |
+| `config.storage.fetch.requestTimeoutMs` | `number`      | `600000`                                   | Storage request timeout in milliseconds              |
 
 ---
 
@@ -148,10 +206,10 @@ UI components are organized for reusability and maintainability:
 To use a UI component, import it from the SDK and include it in your React application. For example:
 
 ```tsx
-import { LoginButton } from 'panna-sdk';
+import { ConnectButton } from 'panna-sdk';
 
 function App() {
-  return <LoginButton />;
+  return <ConnectButton />;
 }
 ```
 
@@ -161,12 +219,12 @@ function App() {
 
 ### Using a UI Component
 
-The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
+The connect button handles authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
 
 ```tsx
-import { LoginButton } from 'panna-sdk';
+import { ConnectButton } from 'panna-sdk';
 
-<LoginButton label="Sign in with Panna" />;
+<ConnectButton />;
 ```
 
 For creating a custom UI, you can use the provided core functions to manage Panna state and interactions.

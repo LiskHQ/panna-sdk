@@ -87,11 +87,29 @@ pnpm install
 pnpm --filter panna-sdk build
 ```
 
-### 3. Run Example App
+### 3. Configure Example App
+
+Copy the environment file and add your credentials:
+
+```bash
+cp apps/example-app/.env.example apps/example-app/.env
+```
+
+Edit `apps/example-app/.env` and fill in the required values:
+
+```env
+NEXT_PUBLIC_CLIENT_ID=your-client-id
+NEXT_PUBLIC_PARTNER_ID=your-partner-id
+NEXT_PUBLIC_CHAIN_ID=1135  # or 4202 for testnet
+```
+
+### 4. Run Example App
 
 ```bash
 pnpm --filter example-app dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ## 🧪 Test SDK
 
