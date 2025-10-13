@@ -17,12 +17,6 @@ const STORAGE_KEYS = {
 } as const;
 
 /**
- * Default expiration time for SIWE login payload (in milliseconds)
- * TODO: Make this configurable via constructor options
- */
-const DEFAULT_PAYLOAD_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-/**
  * Parameters for generating a login payload
  */
 export type GeneratePayloadParams = {
@@ -66,7 +60,7 @@ export class SiweAuth {
   }
 
   /**
-   * Generate a SIWE compliant login payload
+   * Generate a SIWE compliant login payload (EIP-4361)
    * This function should be called by the frontend to get a challenge message
    */
   public async generatePayload(
@@ -84,22 +78,22 @@ export class SiweAuth {
       // Store the challenge for later use in verification
       this.lastChallenge = challenge;
 
-      // Create minimal LoginPayload for message signing
+      // Create EIP-4361 compliant LoginPayload for message signing
       const payload: LoginPayload = {
+        // Required fields per EIP-4361
         address: challenge.address.toLowerCase(),
-        chain_id: challenge.chainId.toString(),
         domain: challenge.domain,
         uri: challenge.uri,
         version: challenge.version,
+        chainId: challenge.chainId,
         nonce: challenge.nonce,
-        issued_at: challenge.issuedAt,
-        // Minimal required fields only - no expiration, resources, etc.
-        expiration_time: new Date(
-          Date.now() + DEFAULT_PAYLOAD_EXPIRATION_MS
-        ).toISOString(),
-        invalid_before: challenge.issuedAt,
-        statement: '',
-        resources: []
+        issuedAt: challenge.issuedAt,
+        // Optional fields - include from challenge if provided
+        statement: challenge.statement,
+        expirationTime: challenge.expirationTime,
+        notBefore: challenge.notBefore,
+        requestId: challenge.requestId,
+        resources: challenge.resources
       };
 
       return payload;
@@ -110,7 +104,7 @@ export class SiweAuth {
   }
 
   /**
-   * Verify the signed payload and login the user
+   * Verify the signed payload and login the user (EIP-4361)
    * This function should be called by the frontend after the user signs the message
    */
   public async login(params: LoginParams): Promise<boolean> {
@@ -122,12 +116,37 @@ export class SiweAuth {
         );
       }
 
+      // Build EIP-4361 compliant verify request with all fields from challenge
       const verifyRequest: AuthVerifyRequest = {
-        ...this.lastChallenge,
-        // Ensure timestamp is in ISO 8601 format with Z suffix
-        issuedAt: new Date(this.lastChallenge.issuedAt).toISOString(),
+        // Required SIWE message fields
+        domain: this.lastChallenge.domain,
+        address: this.lastChallenge.address,
+        uri: this.lastChallenge.uri,
+        version: this.lastChallenge.version,
+        chainId: this.lastChallenge.chainId,
+        nonce: this.lastChallenge.nonce,
+        issuedAt: this.lastChallenge.issuedAt,
+
+        // Required custom fields for verification
         signature: params.signature,
-        isSafeWallet: params.isSafeWallet || false
+        isSafeWallet: params.isSafeWallet || false,
+
+        // Optional SIWE message fields - include if present in challenge
+        ...(this.lastChallenge.statement && {
+          statement: this.lastChallenge.statement
+        }),
+        ...(this.lastChallenge.expirationTime && {
+          expirationTime: this.lastChallenge.expirationTime
+        }),
+        ...(this.lastChallenge.notBefore && {
+          notBefore: this.lastChallenge.notBefore
+        }),
+        ...(this.lastChallenge.requestId && {
+          requestId: this.lastChallenge.requestId
+        }),
+        ...(this.lastChallenge.resources && {
+          resources: this.lastChallenge.resources
+        })
       };
 
       // Verify with Panna API
@@ -137,23 +156,16 @@ export class SiweAuth {
         // Store auth token and user address
         this.authToken = authResult.token;
         this.userAddress = authResult.address;
-
-        // The API currently returns the expiry timestamp as the expiresIn property.
-        // For semantic appropriation, the property will be renamed to expiresAt.
-        // Hence, the fallback for backward compatibility.
-        this.tokenExpiresAt =
-          authResult.expiresAt || authResult.expiresIn || null;
+        this.tokenExpiresAt = authResult.expiresAt;
 
         // Store in localStorage for persistence (if available)
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResult.token);
           localStorage.setItem(STORAGE_KEYS.USER_ADDRESS, authResult.address);
-          if (this.tokenExpiresAt) {
-            localStorage.setItem(
-              STORAGE_KEYS.TOKEN_EXPIRY,
-              this.tokenExpiresAt.toString()
-            );
-          }
+          localStorage.setItem(
+            STORAGE_KEYS.TOKEN_EXPIRY,
+            this.tokenExpiresAt.toString()
+          );
         }
 
         // Clear challenge after successful login to prevent reuse
@@ -166,7 +178,7 @@ export class SiweAuth {
       return false;
     } catch (error) {
       console.error('Failed to verify login:', error);
-      //  Also clear challenge on error to force new challenge generation
+      // Also clear challenge on error to force new challenge generation
       this.lastChallenge = null;
       return false;
     }

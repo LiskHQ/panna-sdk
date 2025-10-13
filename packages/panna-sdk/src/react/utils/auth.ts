@@ -9,8 +9,8 @@ import {
 import type { LoginPayload } from '../../core/util/types';
 
 /**
- * Format a SIWE login payload into the format expected by Panna API
- * This follows the simplified format used by the Panna API, not the full EIP-4361 spec
+ * Format a SIWE login payload into an EIP-4361 compliant message
+ * This follows the full EIP-4361 specification format
  *
  * @param payload - The SIWE login payload
  * @returns The formatted SIWE message string
@@ -22,17 +22,46 @@ import type { LoginPayload } from '../../core/util/types';
  * ```
  */
 export function buildSiweMessage(payload: LoginPayload): string {
-  const { domain, address, uri, version, chain_id, nonce, issued_at } = payload;
+  const { domain, address, uri, version, chainId, nonce, issuedAt } = payload;
 
-  // Use the simplified format expected by Panna API (matches the working test script)
-  return `${domain} wants you to sign in with your Ethereum account:
-${address}
+  // Build the message according to EIP-4361 format
+  let message = `${domain} wants you to sign in with your Ethereum account:
+${address}`;
 
-URI: ${uri}
-Version: ${version}
-Chain ID: ${chain_id}
-Nonce: ${nonce}
-Issued At: ${issued_at}`;
+  // Add statement if present (with empty line before it per EIP-4361)
+  if (payload.statement) {
+    message += `\n\n${payload.statement}`;
+  }
+
+  // Add required fields
+  message += `\n\nURI: ${uri}`;
+  message += `\nVersion: ${version}`;
+  message += `\nChain ID: ${chainId}`;
+  message += `\nNonce: ${nonce}`;
+  message += `\nIssued At: ${issuedAt}`;
+
+  // Add optional fields if present
+  if (payload.expirationTime) {
+    message += `\nExpiration Time: ${payload.expirationTime}`;
+  }
+
+  if (payload.notBefore) {
+    message += `\nNot Before: ${payload.notBefore}`;
+  }
+
+  if (payload.requestId) {
+    message += `\nRequest ID: ${payload.requestId}`;
+  }
+
+  // Add resources if present
+  if (payload.resources && payload.resources.length > 0) {
+    message += '\nResources:';
+    for (const resource of payload.resources) {
+      message += `\n- ${resource}`;
+    }
+  }
+
+  return message;
 }
 
 /**

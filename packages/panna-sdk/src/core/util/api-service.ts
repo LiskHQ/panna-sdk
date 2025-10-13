@@ -199,7 +199,7 @@ export class PannaApiService {
       const mockResponse: AuthVerifyReply = {
         address: request.address,
         token: MOCK_JWT_TOKEN,
-        expiresIn: 1755645325
+        expiresAt: 1755645325
       };
       return mockResponse;
     }

@@ -49,13 +49,9 @@ describe('Auth Utilities', () => {
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       };
 
       const result = buildSiweMessage(payload);
@@ -78,13 +74,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0xabcdef',
         uri: 'https://example.com',
         version: '2',
-        chain_id: '1',
+        chainId: 1,
         nonce: '0x123',
-        issued_at: '2024-01-01T12:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T12:00:00.000Z'
       };
 
       const result = buildSiweMessage(payload);
@@ -93,6 +85,36 @@ Issued At: 2024-01-01T00:00:00.000Z`
       expect(result).toContain('0xabcdef');
       expect(result).toContain('Chain ID: 1');
       expect(result).toContain('Version: 2');
+    });
+
+    it('should include optional fields when present', () => {
+      const payload = {
+        domain: 'panna-app.lisk.com',
+        address: '0x1234567890123456789012345678901234567890',
+        uri: 'https://panna-app.lisk.com',
+        version: '1',
+        chainId: 4202,
+        nonce: '0xb7b1a40ac418c5bf',
+        issuedAt: '2024-01-01T00:00:00.000Z',
+        statement: 'I accept the Terms of Service',
+        expirationTime: '2024-01-02T00:00:00.000Z',
+        notBefore: '2024-01-01T00:00:00.000Z',
+        requestId: 'req-123',
+        resources: [
+          'https://example.com/resource1',
+          'https://example.com/resource2'
+        ]
+      };
+
+      const result = buildSiweMessage(payload);
+
+      expect(result).toContain('I accept the Terms of Service');
+      expect(result).toContain('Expiration Time: 2024-01-02T00:00:00.000Z');
+      expect(result).toContain('Not Before: 2024-01-01T00:00:00.000Z');
+      expect(result).toContain('Request ID: req-123');
+      expect(result).toContain('Resources:');
+      expect(result).toContain('- https://example.com/resource1');
+      expect(result).toContain('- https://example.com/resource2');
     });
   });
 
@@ -115,13 +137,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -148,13 +166,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -186,13 +200,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -210,13 +220,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockRejectedValue(new Error('User rejected'));
@@ -254,13 +260,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -286,13 +288,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -340,13 +338,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -369,13 +363,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
@@ -410,13 +400,9 @@ Issued At: 2024-01-01T00:00:00.000Z`
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
         version: '1',
-        chain_id: '4202',
+        chainId: 4202,
         nonce: '0xb7b1a40ac418c5bf',
-        issued_at: '2024-01-01T00:00:00.000Z',
-        expiration_time: '2024-01-02T00:00:00.000Z',
-        invalid_before: '2024-01-01T00:00:00.000Z',
-        statement: '',
-        resources: []
+        issuedAt: '2024-01-01T00:00:00.000Z'
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
