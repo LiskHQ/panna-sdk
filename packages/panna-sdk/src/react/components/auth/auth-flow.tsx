@@ -10,28 +10,32 @@ import {
 } from '../ui/dialog';
 import { DialogStepper, useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
+import { ConnectButtonProps } from './connect-button';
 import { InputOTPForm } from './input-otp-form';
 import { LoginForm } from './login-form';
 
-type AuthDialogProps = {
-  title?: string;
-  description?: string;
-};
-
-export function AuthFlow() {
+export function AuthFlow({ connectDialog }: ConnectButtonProps) {
   return (
     <DialogStepper>
-      <LoginFormDialog title="Welcome to Connectify" />
-      <InputOTPFormDialog />
+      <LoginFormDialog
+        title={connectDialog?.title}
+        description={connectDialog?.description}
+      />
+      <InputOTPFormDialog
+        title={connectDialog?.otpTitle}
+        description={connectDialog?.otpDescription}
+      />
     </DialogStepper>
   );
 }
 
-function LoginFormDialog(props: AuthDialogProps) {
+type AuthFormDialogProps = ConnectButtonProps['connectDialog'];
+
+function LoginFormDialog(props: AuthFormDialogProps) {
   const { next } = useDialogStepper();
   const { onClose } = useDialog();
-  const title = props.title ?? 'Login';
-  const description = props.description ?? 'Login form dialog';
+  const title = props?.title ?? 'Welcome to Connectify';
+  const description = props?.description ?? 'Login form dialog';
 
   return (
     <DialogContent>
@@ -47,11 +51,11 @@ function LoginFormDialog(props: AuthDialogProps) {
   );
 }
 
-function InputOTPFormDialog(props: AuthDialogProps) {
+function InputOTPFormDialog(props: AuthFormDialogProps) {
   const { reset, stepData, prev } = useDialogStepper();
   const { onClose } = useDialog();
-  const title = props.title ?? '6-digit code';
-  const description = props.description ?? 'OTP form dialog';
+  const title = props?.title ?? '6-digit code';
+  const description = props?.description ?? 'OTP form dialog';
 
   const handleClose = () => {
     reset();
