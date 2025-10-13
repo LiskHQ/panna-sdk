@@ -77,20 +77,11 @@ export class ErrorBoundary extends Component<
       return (
         <div
           role="alert"
-          style={{
-            padding: '20px',
-            margin: '20px',
-            border: '1px solid #ff6b6b',
-            borderRadius: '8px',
-            backgroundColor: '#fff5f5',
-            color: '#c92a2a'
-          }}
+          className="m-5 rounded-xl border border-[#FF6B6B] bg-[#FFF5F5] p-5 text-[#C92A2A]"
         >
-          <h2 style={{ marginTop: 0 }}>Something went wrong</h2>
-          <details style={{ whiteSpace: 'pre-wrap' }}>
-            <summary style={{ cursor: 'pointer', marginBottom: '10px' }}>
-              Error details
-            </summary>
+          <h2 className="mt-0">Something went wrong</h2>
+          <details className="whitespace-pre-wrap">
+            <summary className="mb-2.5 cursor-pointer">Error details</summary>
             <p>
               <strong>Error:</strong> {this.state.error.message}
             </p>
