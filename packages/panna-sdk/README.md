@@ -58,14 +58,25 @@ To get started with the Panna SDK, follow these steps:
 
 2. **Import the SDK in your project**:
 
+   The SDK provides three import patterns for different use cases:
+
    ```ts
-   import { client } from 'panna-sdk';
+   // Import everything (core + react)
+   import { createPannaClient, ConnectButton } from 'panna-sdk';
+
+   // Import only core functions (no React dependencies)
+   import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+
+   // Import only React components/hooks
+   import { ConnectButton, usePanna } from 'panna-sdk/react';
    ```
 
 3. **Initialize the client**:
 
    ```ts
-   const pannaClient = client.createPannaClient({
+   import { createPannaClient } from 'panna-sdk/core';
+
+   const pannaClient = createPannaClient({
      clientId: process.env.CLIENT_ID || ''
    });
    ```
@@ -73,7 +84,9 @@ To get started with the Panna SDK, follow these steps:
 4. **Integrate UI components**:
 
    ```tsx
-   import { PannaProvider, ConnectButton } from 'panna-sdk';
+   import { PannaProvider, ConnectButton } from 'panna-sdk/react';
+
+   // or import from main entry: import { PannaProvider, ConnectButton } from 'panna-sdk';
 
    function App() {
      return (
@@ -206,12 +219,37 @@ UI components are organized for reusability and maintainability:
 To use a UI component, import it from the SDK and include it in your React application. For example:
 
 ```tsx
+// Import from react entry (recommended for tree-shaking)
+import { ConnectButton } from 'panna-sdk/react';
+
+// Or import from main entry
 import { ConnectButton } from 'panna-sdk';
 
 function App() {
   return <ConnectButton />;
 }
 ```
+
+### Import Patterns
+
+The SDK supports modular imports to optimize bundle size:
+
+```tsx
+// ✅ Core only (for Node.js, backend, or non-React frameworks)
+import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+
+// ✅ React only (for React apps, better tree-shaking)
+import { ConnectButton, usePanna, useTokenBalances } from 'panna-sdk/react';
+
+// ✅ Everything (convenience for apps using both)
+import { sendTransaction, ConnectButton } from 'panna-sdk';
+```
+
+**When to use each pattern:**
+
+- Use `panna-sdk/core` for backend code, CLI tools, or non-React frameworks
+- Use `panna-sdk/react` in React applications for better tree-shaking
+- Use `panna-sdk` (main entry) when you need both core and react features
 
 ---
 
@@ -222,7 +260,7 @@ function App() {
 The connect button handles authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
 
 ```tsx
-import { ConnectButton } from 'panna-sdk';
+import { ConnectButton } from 'panna-sdk/react';
 
 <ConnectButton />;
 ```
@@ -232,9 +270,9 @@ For creating a custom UI, you can use the provided core functions to manage Pann
 ### Authenticating a User
 
 ```ts
-import { wallet } from 'panna-sdk';
+import { login } from 'panna-sdk/core';
 
-const session = await wallet.login({
+const session = await login({
   strategy: 'email',
   email: 'user@email.com',
   verificationCode: '123456'
@@ -244,12 +282,30 @@ const session = await wallet.login({
 ### Linking an account
 
 ```ts
-import { wallet } from 'panna-sdk';
+import { linkAccount } from 'panna-sdk/core';
 
-const result = await wallet.linkAccount({
+const result = await linkAccount({
   strategy: 'phone',
   phoneNumber: '+1234567890',
   verificationCode: '123456'
+});
+```
+
+### Using Core Functions in Backend
+
+```ts
+// Node.js backend example
+import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+
+const client = createPannaClient({
+  clientId: process.env.CLIENT_ID
+});
+
+// Send a transaction
+const result = await sendTransaction({
+  client,
+  account,
+  transaction
 });
 ```
 
@@ -270,7 +326,7 @@ const result = await wallet.linkAccount({
 A: Configure the client with the appropriate network endpoint when initializing.
 
 **Q: Can I use the SDK in a Node.js backend?**
-A: Yes, core utilities are platform-agnostic, but UI components are React-specific.
+A: Yes! Import from `panna-sdk/core` to use core utilities without React dependencies. UI components are React-specific and should be imported from `panna-sdk/react`.
 
 **Q: How do I add a new UI component?**
 A: Add your component to the appropriate directory in `src/react/components` and export it from `src/react/index.ts`.

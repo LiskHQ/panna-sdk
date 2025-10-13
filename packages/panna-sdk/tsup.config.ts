@@ -6,7 +6,11 @@ import { defineConfig } from 'tsup';
 config({ path: resolve(__dirname, '.env') });
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    core: 'src/core/index.ts',
+    react: 'src/react/index.ts'
+  },
   format: ['cjs', 'esm'],
   dts: true,
   sourcemap: true,

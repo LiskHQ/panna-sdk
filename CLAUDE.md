@@ -76,8 +76,33 @@ React-specific UI components and hooks:
 
 - **Builder**: `tsup` generates both ESM (`.mjs`) and CJS (`.cjs`) outputs
 - **CSS**: Tailwind styles built separately via PostCSS
-- **Exports**: Package exports both main entry (`./`) and styles (`./styles.css`)
+- **Exports**: Package provides three entry points:
+  - **Main** (`panna-sdk`): All exports (core + react)
+  - **Core** (`panna-sdk/core`): Framework-agnostic core functions only
+  - **React** (`panna-sdk/react`): React components and hooks only
+  - **Styles** (`panna-sdk/styles.css`): Tailwind styles
 - **Environment Variables**: Injected at build time via tsup config (`PANNA_API_URL`, `MOCK_PANNA_API`). Define these in a `.env` file in `packages/panna-sdk/`.
+
+### Import Patterns
+
+The SDK supports three import patterns for different use cases:
+
+```typescript
+// 1. Import everything (core + react)
+import { sendTransaction, ConnectButton } from 'panna-sdk';
+
+// 2. Import only core functions (no React dependencies)
+import { sendTransaction, prepareTransaction } from 'panna-sdk/core';
+
+// 3. Import only React components/hooks
+import { ConnectButton, usePanna } from 'panna-sdk/react';
+```
+
+**When to use each pattern:**
+
+- Use `panna-sdk/core` for backend code, Node.js scripts, or non-React frameworks
+- Use `panna-sdk/react` when building React apps to get better tree-shaking
+- Use `panna-sdk` (main entry) for convenience when using both core and react features
 
 ### Testing Setup
 
