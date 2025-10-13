@@ -4,7 +4,10 @@ import { LoaderCircleIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { ecosystemWallet } from 'thirdweb/wallets';
+import {
+  ecosystemWallet,
+  InAppWalletConnectionOptions
+} from 'thirdweb/wallets';
 import z from 'zod';
 import {
   Form,
@@ -21,6 +24,7 @@ import {
 } from '@/components/ui/input-otp';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
+import { getErrorMessage } from '@/utils/get-error-message';
 import { getEnvironmentChain } from '../../utils';
 import { handleSiweAuth } from '../../utils/auth';
 import { Button } from '../ui/button';
@@ -65,7 +69,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     }
   }, []);
 
-  const { connect } = useLogin({
+  const { connect, error: loginError } = useLogin({
     client,
     setWalletAsActive: true,
     accountAbstraction: {
@@ -75,72 +79,41 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   });
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
-    try {
-      let connectionError: Error | null = null;
-      form.clearErrors('code');
+    form.clearErrors('code');
 
-      // Connect using smart account with ecosystem wallet
-      const wallet = await connect(async () => {
-        // Create ecosystem wallet and authenticate with OTP
-        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
-          partnerId
+    // Connect using smart account with ecosystem wallet
+    const wallet = await connect(async () => {
+      // Create ecosystem wallet and authenticate with OTP
+      const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
+        partnerId
+      });
+
+      const strategy = data.email ? 'email' : 'phone';
+      const authField = data.email
+        ? { email: data.email as string }
+        : { phoneNumber: data.phoneNumber as string };
+      await ecoWallet.connect({
+        client,
+        strategy,
+        ...authField,
+        verificationCode: values.code
+      } as InAppWalletConnectionOptions);
+
+      return ecoWallet;
+    });
+
+    if (wallet) {
+      const address = wallet.getAccount()?.address;
+      if (address) {
+        // Automatically perform SIWE authentication in the background
+        // Pass chainId for consistency with login form
+        await handleSiweAuth(wallet, {
+          chainId: getEnvironmentChain().id as number
         });
 
-        if (data.email) {
-          try {
-            await ecoWallet.connect({
-              client,
-              strategy: 'email',
-              email: data.email as string,
-              verificationCode: values.code
-            });
-          } catch (error) {
-            connectionError =
-              error instanceof Error ? error : new Error(String(error));
-            throw error;
-          }
-        } else {
-          try {
-            await ecoWallet.connect({
-              client,
-              strategy: 'phone',
-              phoneNumber: data.phoneNumber as string,
-              verificationCode: values.code
-            });
-          } catch (error) {
-            connectionError =
-              error instanceof Error ? error : new Error(String(error));
-            throw error;
-          }
-        }
-
-        return ecoWallet;
-      });
-
-      // If ecoWallet.connect() failed, throw the original error
-      if (connectionError) {
-        throw connectionError;
+        reset();
+        onClose();
       }
-
-      if (wallet) {
-        const address = wallet.getAccount()?.address;
-        if (address) {
-          // Automatically perform SIWE authentication in the background
-          // Pass chainId for consistency with login form
-          await handleSiweAuth(wallet, {
-            chainId: getEnvironmentChain().id as number
-          });
-
-          reset();
-          onClose();
-        }
-      }
-    } catch (error) {
-      console.error('Error during OTP verification:', error);
-      form.setError('code', {
-        type: 'manual',
-        message: 'Invalid verification code.'
-      });
     }
   };
 
@@ -166,6 +139,19 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     });
     resetResendTimer();
   };
+
+  useEffect(() => {
+    if (loginError) {
+      console.error(
+        'Error during OTP verification:',
+        getErrorMessage(loginError)
+      );
+      form.setError('code', {
+        type: 'manual',
+        message: 'Invalid verification code.'
+      });
+    }
+  }, [loginError]);
 
   return (
     <Form {...form}>

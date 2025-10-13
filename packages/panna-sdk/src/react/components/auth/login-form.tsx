@@ -8,7 +8,13 @@ import {
 import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
+import {
+  EcosystemId,
+  EmailPrepareParams,
+  LoginStrategy,
+  PhonePrepareParams,
+  prepareLogin
+} from 'src/core';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,7 +35,8 @@ type LoginFormProps = {
 };
 
 const notBlank = (val?: string) => !!val && val.trim() !== '';
-
+// Move schema to new file
+// Add country code flag selector to phone input
 const formSchema = z
   .object({
     email: z
@@ -61,6 +68,8 @@ const formSchema = z
     }
   );
 
+const GOOGLE_LOGIN_STEP = 2;
+
 export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,8 +79,10 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
     }
   });
   const { client, partnerId } = usePanna();
-  const [showEmailSubmit, setShowEmailSubmit] = useState(true);
-  const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
+  const [focusState, setFocusState] = useState({
+    email: false,
+    phone: false
+  });
 
   const handleFormSubmit = async (field: keyof z.infer<typeof formSchema>) => {
     const isFieldValid = await form.trigger(field);
@@ -81,51 +92,39 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (values.email) {
-      try {
-        await prepareLogin({
-          client,
-          ecosystem: {
-            id: EcosystemId.LISK,
-            partnerId
-          },
+    const loginConfig = values.email
+      ? {
           strategy: LoginStrategy.EMAIL,
-          email: values.email
-        });
-        // Passing error as null to clear any previous error state
-        next({
           email: values.email,
-          error: null
-        });
-      } catch (error) {
-        console.error('Email login preparation failed:', error);
-        next({
-          email: values.email,
-          error: (error as Error).message
-        });
-      }
-    } else if (values.phoneNumber) {
-      try {
-        await prepareLogin({
-          client,
-          ecosystem: {
-            id: EcosystemId.LISK,
-            partnerId
-          },
+          data: { email: values.email }
+        }
+      : {
           strategy: LoginStrategy.PHONE,
-          phoneNumber: values.phoneNumber
-        });
-        next({
-          phoneNumber: values.phoneNumber,
-          error: null
-        });
-      } catch (error) {
-        console.error('Phone login preparation failed:', error);
-        next({
-          phoneNumber: values.phoneNumber,
-          error: (error as Error).message
-        });
-      }
+          phoneNumber: values.phoneNumber!,
+          data: { phoneNumber: values.phoneNumber! }
+        };
+    try {
+      await prepareLogin({
+        client,
+        ecosystem: {
+          id: EcosystemId.LISK,
+          partnerId
+        },
+        strategy: loginConfig.strategy,
+        ...(loginConfig.email && { email: loginConfig.email }),
+        ...(loginConfig.phoneNumber && { phoneNumber: loginConfig.phoneNumber })
+      } as EmailPrepareParams | PhonePrepareParams);
+      // Passing error as null to clear any previous error state
+      next({
+        ...loginConfig.data,
+        error: null
+      });
+    } catch (error) {
+      console.error('Login preparation failed:', error);
+      next({
+        ...loginConfig.data,
+        error: (error as Error).message
+      });
     }
   }
 
@@ -135,7 +134,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
         <Button
           type="button"
           className="flex gap-3"
-          onClick={() => goToStep(2)} // Pending social login step
+          onClick={() => goToStep(GOOGLE_LOGIN_STEP)}
           data-testid="google-login-button"
         >
           <GoogleIcon />
@@ -152,7 +151,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                   placeholder="Email address"
                   className="focus-within:[&_button]:bg-primary"
                   startAdornment={
-                    !showEmailSubmit && (
+                    !focusState.email && (
                       <MailIcon className="h-5 w-5" color="#FAFAFA" />
                     )
                   }
@@ -167,10 +166,10 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                     </Button>
                   }
                   onFocus={() => {
-                    setShowEmailSubmit(true);
+                    setFocusState((prev) => ({ ...prev, email: true }));
                   }}
                   onBlur={() => {
-                    setShowEmailSubmit(false);
+                    setFocusState((prev) => ({ ...prev, email: false }));
                   }}
                 />
               </FormControl>
@@ -189,7 +188,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                   placeholder="Phone number"
                   className="focus-within:[&_button]:bg-primary"
                   startAdornment={
-                    !showPhoneSubmit && (
+                    !focusState.phone && (
                       <PhoneIcon className="h-5 w-5" color="#FAFAFA" />
                     )
                   }
@@ -204,10 +203,10 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                     </Button>
                   }
                   onFocus={() => {
-                    setShowPhoneSubmit(true);
+                    setFocusState((prev) => ({ ...prev, phone: true }));
                   }}
                   onBlur={() => {
-                    setShowPhoneSubmit(false);
+                    setFocusState((prev) => ({ ...prev, phone: false }));
                   }}
                 />
               </FormControl>

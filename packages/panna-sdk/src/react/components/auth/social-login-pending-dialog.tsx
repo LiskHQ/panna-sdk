@@ -23,7 +23,7 @@ export function SocialLoginPendingDialog() {
   const { client, partnerId, chainId } = usePanna();
   const initializeGoogleLogin = useRef(true);
 
-  const { connect } = useLogin({
+  const { connect, error: loginError } = useLogin({
     client,
     setWalletAsActive: true,
     accountAbstraction: {
@@ -38,43 +38,26 @@ export function SocialLoginPendingDialog() {
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      let connectionError: string | null = null;
-
-      const wallet = await connect(async () => {
-        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
-          partnerId
-        });
-
-        try {
-          await ecoWallet.connect({
-            client,
-            strategy: 'google'
-          });
-        } catch (error) {
-          connectionError = getErrorMessage(error);
-          throw error;
-        }
-
-        return ecoWallet;
+    const wallet = await connect(async () => {
+      const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
+        partnerId
       });
 
-      // If ecoWallet.connect() failed, throw the original error
-      if (connectionError) {
-        throw connectionError;
-      }
+      await ecoWallet.connect({
+        client,
+        strategy: 'google'
+      });
 
-      if (wallet) {
-        // Automatically perform SIWE authentication in the background
-        await handleSiweAuth(wallet, {
-          chainId: getEnvironmentChain().id as number
-        });
+      return ecoWallet;
+    });
 
-        onClose?.();
-      }
-    } catch (error) {
-      console.error('Google login failed:', error);
-      next({ error });
+    if (wallet) {
+      // Automatically perform SIWE authentication in the background
+      await handleSiweAuth(wallet, {
+        chainId: getEnvironmentChain().id as number
+      });
+
+      onClose?.();
     }
   };
 
@@ -84,6 +67,13 @@ export function SocialLoginPendingDialog() {
       initializeGoogleLogin.current = false;
     }
   }, []);
+
+  useEffect(() => {
+    if (loginError) {
+      console.error('Login error:', getErrorMessage(loginError));
+      next({ error: getErrorMessage(loginError) });
+    }
+  }, [loginError]);
 
   return (
     <DialogContent showCloseButton={false}>
