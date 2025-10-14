@@ -1,6 +1,6 @@
 'use client';
 
-import { lisk } from 'panna-sdk/core';
+import { chain } from 'panna-sdk/core';
 import { PannaProvider } from 'panna-sdk/react';
 import { SidebarProvider } from './ui/sidebar';
 
@@ -9,7 +9,7 @@ export function Providers(props: { children: React.ReactNode }) {
     <PannaProvider
       clientId={process.env.NEXT_PUBLIC_CLIENT_ID}
       partnerId={process.env.NEXT_PUBLIC_PARTNER_ID}
-      chainId={process.env.NEXT_PUBLIC_CHAIN_ID || String(lisk.id)}
+      chainId={process.env.NEXT_PUBLIC_CHAIN_ID || String(chain.lisk.id)}
     >
       <SidebarProvider>{props.children}</SidebarProvider>
     </PannaProvider>

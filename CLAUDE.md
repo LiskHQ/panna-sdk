@@ -89,10 +89,16 @@ The SDK supports three import patterns for different use cases:
 
 ```typescript
 // 1. Import everything (core + react)
-import { sendTransaction, ConnectButton } from 'panna-sdk';
+// Core modules are namespaced (client, wallet, transaction, util, onramp, chain, auth)
+import { client, transaction, ConnectButton } from 'panna-sdk';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
 // 2. Import only core functions (no React dependencies)
+// Both direct imports and namespaced imports are supported
 import { sendTransaction, prepareTransaction } from 'panna-sdk/core';
+// OR
+import { transaction } from 'panna-sdk/core';
+const tx = await transaction.sendTransaction(...);
 
 // 3. Import only React components/hooks
 import { ConnectButton, usePanna } from 'panna-sdk/react';

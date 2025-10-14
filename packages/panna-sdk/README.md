@@ -62,10 +62,14 @@ To get started with the Panna SDK, follow these steps:
 
    ```ts
    // Import everything (core + react)
-   import { createPannaClient, ConnectButton } from 'panna-sdk';
+   // Core modules are namespaced (client, wallet, transaction, etc.)
+   import { client, wallet, ConnectButton } from 'panna-sdk';
 
    // Import only core functions (no React dependencies)
+   // Both direct imports and namespaced imports are supported
    import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+   // OR
+   import { client, transaction } from 'panna-sdk/core';
 
    // Import only React components/hooks
    import { ConnectButton, usePanna } from 'panna-sdk/react';
@@ -236,13 +240,19 @@ The SDK supports modular imports to optimize bundle size:
 
 ```tsx
 // ✅ Core only (for Node.js, backend, or non-React frameworks)
+// Direct imports
 import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+// OR namespaced imports
+import { client, transaction } from 'panna-sdk/core';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
 // ✅ React only (for React apps, better tree-shaking)
 import { ConnectButton, usePanna, useTokenBalances } from 'panna-sdk/react';
 
 // ✅ Everything (convenience for apps using both)
-import { sendTransaction, ConnectButton } from 'panna-sdk';
+// Note: Core modules are namespaced (client, wallet, transaction, util, etc.)
+import { client, transaction, ConnectButton } from 'panna-sdk';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 ```
 
 **When to use each pattern:**
@@ -270,9 +280,9 @@ For creating a custom UI, you can use the provided core functions to manage Pann
 ### Authenticating a User
 
 ```ts
-import { login } from 'panna-sdk/core';
+import { wallet } from 'panna-sdk/core';
 
-const session = await login({
+const session = await wallet.login({
   strategy: 'email',
   email: 'user@email.com',
   verificationCode: '123456'
@@ -282,9 +292,9 @@ const session = await login({
 ### Linking an account
 
 ```ts
-import { linkAccount } from 'panna-sdk/core';
+import { wallet } from 'panna-sdk/core';
 
-const result = await linkAccount({
+const result = await wallet.linkAccount({
   strategy: 'phone',
   phoneNumber: '+1234567890',
   verificationCode: '123456'
@@ -295,17 +305,17 @@ const result = await linkAccount({
 
 ```ts
 // Node.js backend example
-import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+import { client, transaction } from 'panna-sdk/core';
 
-const client = createPannaClient({
+const walletClient = client.createPannaClient({
   clientId: process.env.CLIENT_ID
 });
 
 // Send a transaction
-const result = await sendTransaction({
-  client,
+const result = await transaction.sendTransaction({
+  client: walletClient,
   account,
-  transaction
+  transaction: tx
 });
 ```
 
