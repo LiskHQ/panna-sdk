@@ -267,6 +267,7 @@ describe('InputOTPForm', () => {
       try {
         await callback(); // This will throw from mockEcoWallet.connect
       } catch (error) {
+        console.log('Caught error in mockConnect:', error);
         // Update the mutable state to simulate what useConnect does
         mockLoginState.error = connectError;
         // Don't rethrow - let the component handle it
