@@ -15,6 +15,37 @@ import { Typography } from '../ui/typography';
 
 const DECIMAL_PLACES = 5;
 
+/**
+ * Format timestamp to relative time or absolute date
+ * @param timestamp ISO timestamp string
+ * @returns Formatted time string
+ */
+function formatTimestamp(timestamp: string): string {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return 'Just now';
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+  } else if (diffInSeconds < 604800) {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+  } else {
+    // For older dates, show formatted date
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+}
+
 type ActivityItemProps = {
   activity: Activity;
 };
@@ -224,6 +255,9 @@ export function ActivityItem({ activity }: ActivityItemProps) {
         <div className="flex flex-col">
           <Typography variant="small">{activity.activityType}</Typography>
           {renderActivitySymbol(activity)}
+          <Typography variant="muted" className="text-xs">
+            {formatTimestamp(activity.timestamp)}
+          </Typography>
         </div>
       </header>
       <div className="flex flex-col justify-center text-right">
