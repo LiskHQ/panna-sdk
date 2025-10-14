@@ -18,9 +18,16 @@ export function TablePagination<TData>({ table, isFetching }: Props<TData>) {
   return (
     <div className="flex items-center justify-center px-2">
       {isFetching ? (
-        <div className="flex items-center gap-4">
-          <Loader2Icon size={16} className="text-muted-foreground" />
-          <Typography as="p" className="text-foreground font-medium">
+        <div className="flex items-center justify-center gap-2">
+          <Loader2Icon
+            size={16}
+            className="text-muted-foreground animate-spin"
+          />
+          <Typography
+            as="p"
+            className="text-foreground leading-none font-medium"
+            variant="small"
+          >
             Loading...
           </Typography>
         </div>

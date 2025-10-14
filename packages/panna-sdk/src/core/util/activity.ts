@@ -376,7 +376,7 @@ export const getActivitiesByAddress = async function (
     console.warn('Failed to fetch token prices:', error);
   }
 
-  const activities: Activity[] = preProcessedActivities
+  const mappedActivities: Activity[] = preProcessedActivities
     .map((tx) => {
       const transactionID = tx.hash;
       const status = tx.result;
@@ -590,7 +590,8 @@ export const getActivitiesByAddress = async function (
           activityType,
           transactionID,
           amount,
-          status
+          status,
+          timestamp: tx.timestamp
         };
         return activity;
       } catch (err) {
@@ -601,13 +602,21 @@ export const getActivitiesByAddress = async function (
       }
     })
     .filter((e) => e !== null)
-    .slice(offset, offset + limit);
+    .filter(
+      (currentEntry, currentIndex, originalSortedArray) =>
+        currentIndex ===
+        originalSortedArray.findIndex(
+          (t) => t?.transactionID === currentEntry?.transactionID
+        )
+    );
+
+  const activities = mappedActivities.slice(offset, offset + limit);
 
   const metadata: ActivityMetadata = {
     count: activities.length,
     offset,
     limit,
-    hasNextPage: preProcessedActivities.length >= offset + limit
+    hasNextPage: mappedActivities.length >= offset + limit
   };
 
   const result: GetActivitiesByAddressResult = { activities, metadata };
