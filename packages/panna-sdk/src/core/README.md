@@ -5,7 +5,7 @@ The Panna SDK Core module provides powerful Web3 primitives for building blockch
 ## Quick Start
 
 ```typescript
-import { client, wallet } from 'panna-sdk';
+import { client, wallet } from 'panna-sdk/core';
 
 // Initialize the SDK client
 const pannaClient = client.createPannaClient({

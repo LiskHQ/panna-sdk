@@ -1,27 +1,15 @@
-// Main entry point - exports both core and react modules
+// Main entry point - exports core and react as top-level namespaces
 // For granular imports, use:
-//   - import { ... } from 'panna-sdk/core' (core only)
-//   - import { ... } from 'panna-sdk/react' (react only)
+//   - import { core } from 'panna-sdk' then access core.wallet, core.client, etc.
+//   - import { react } from 'panna-sdk' then access react.ConnectButton, react.usePanna, etc.
+//   - import { ... } from 'panna-sdk/core' (direct core exports)
+//   - import { ... } from 'panna-sdk/react' (direct react exports)
 
-// Core module namespace exports for clear modular separation
-export * as client from './core/client';
-export * as chain from './core/chain';
-export * as wallet from './core/wallet';
-export * as transaction from './core/transaction';
-export * as util from './core/util';
-export * as onramp from './core/onramp';
-export * as auth from './core/auth';
+// Export core as a single namespace containing all core modules
+export * as core from './core';
 
-// Export constants directly (not namespaced for ergonomics)
-export {
-  DEFAULT_CURRENCY,
-  DEFAULT_CHAIN,
-  DEFAULT_COUNTRY_CODE,
-  NATIVE_TOKEN_ADDRESS
-} from './core/defaults';
-
-// Re-export all react modules
-export * from './react';
+// Export react as a single namespace containing all react modules
+export * as react from './react';
 
 // React Query integration
 export { QueryClient } from '@tanstack/react-query';

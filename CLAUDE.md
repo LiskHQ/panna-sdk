@@ -85,29 +85,26 @@ React-specific UI components and hooks:
 
 ### Import Patterns
 
-The SDK supports three import patterns for different use cases:
+The SDK provides modular imports for optimal tree-shaking:
 
 ```typescript
-// 1. Import everything (core + react)
-// Core modules are namespaced (client, wallet, transaction, util, onramp, chain, auth)
-import { client, transaction, ConnectButton } from 'panna-sdk';
+// 1. Core only (for backend, Node.js, or non-React frameworks)
+import { client, transaction, wallet } from 'panna-sdk/core';
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
-// 2. Import only core functions (no React dependencies)
-// Both direct imports and namespaced imports are supported
-import { sendTransaction, prepareTransaction } from 'panna-sdk/core';
-// OR
-import { transaction } from 'panna-sdk/core';
-const tx = await transaction.sendTransaction(...);
-
-// 3. Import only React components/hooks
+// 2. React only (for React applications)
 import { ConnectButton, usePanna } from 'panna-sdk/react';
+
+// 3. Alternative: Import from main entry (both core and react)
+import { core, react } from 'panna-sdk';
+const pannaClient = core.client.createPannaClient({ clientId: 'your-client-id' });
+const MyApp = () => <react.ConnectButton />;
 ```
 
-**When to use each pattern:**
+**Recommended usage:**
 
 - Use `panna-sdk/core` for backend code, Node.js scripts, or non-React frameworks
-- Use `panna-sdk/react` when building React apps to get better tree-shaking
+- Use `panna-sdk/react` when building React apps
 - Use `panna-sdk` (main entry) for convenience when using both core and react features
 
 ### Testing Setup
