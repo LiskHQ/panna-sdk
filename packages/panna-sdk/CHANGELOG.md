@@ -1,5 +1,11 @@
 # panna-sdk
 
+## 0.2.0-beta.1
+
+### Patch Changes
+
+- eaf24a3: Initial Panna MVP release
+
 ## 0.2.0-alpha.0
 
 ### Minor Changes
