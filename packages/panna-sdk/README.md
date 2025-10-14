@@ -62,14 +62,14 @@ To get started with the Panna SDK, follow these steps:
 
    ```ts
    // Import everything (core + react)
-   // Core modules are namespaced (client, wallet, transaction, etc.)
+   // Core modules are namespaced (client, wallet, transaction, util, onramp, chain, auth)
    import { client, wallet, ConnectButton } from 'panna-sdk';
 
    // Import only core functions (no React dependencies)
-   // Both direct imports and namespaced imports are supported
-   import { createPannaClient, sendTransaction } from 'panna-sdk/core';
-   // OR
+   // Named exports (recommended)
    import { client, transaction } from 'panna-sdk/core';
+   // Direct imports also supported
+   import { createPannaClient, sendTransaction } from 'panna-sdk/core';
 
    // Import only React components/hooks
    import { ConnectButton, usePanna } from 'panna-sdk/react';
@@ -78,8 +78,15 @@ To get started with the Panna SDK, follow these steps:
 3. **Initialize the client**:
 
    ```ts
-   import { createPannaClient } from 'panna-sdk/core';
+   // Using named exports (recommended)
+   import { client } from 'panna-sdk/core';
 
+   const pannaClient = client.createPannaClient({
+     clientId: process.env.CLIENT_ID || ''
+   });
+
+   // Or using direct imports
+   import { createPannaClient } from 'panna-sdk/core';
    const pannaClient = createPannaClient({
      clientId: process.env.CLIENT_ID || ''
    });
@@ -240,17 +247,20 @@ The SDK supports modular imports to optimize bundle size:
 
 ```tsx
 // ✅ Core only (for Node.js, backend, or non-React frameworks)
-// Direct imports
-import { createPannaClient, sendTransaction } from 'panna-sdk/core';
-// OR namespaced imports
+// Named exports (recommended for better organization)
 import { client, transaction } from 'panna-sdk/core';
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+await transaction.sendTransaction({ account, transaction: tx });
+
+// Direct imports also supported
+import { createPannaClient, sendTransaction } from 'panna-sdk/core';
+const pannaClient = createPannaClient({ clientId: 'your-client-id' });
 
 // ✅ React only (for React apps, better tree-shaking)
 import { ConnectButton, usePanna, useTokenBalances } from 'panna-sdk/react';
 
 // ✅ Everything (convenience for apps using both)
-// Note: Core modules are namespaced (client, wallet, transaction, util, etc.)
+// Core modules are namespaced (client, wallet, transaction, util, onramp, chain, auth)
 import { client, transaction, ConnectButton } from 'panna-sdk';
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 ```
