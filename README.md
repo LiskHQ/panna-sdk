@@ -26,6 +26,43 @@ This is a TypeScript monorepo for developing a Panna SDK.
 
 ---
 
+## 📚 Documentation
+
+### Core Module Documentation
+
+Comprehensive guides for all SDK modules are available in the core package:
+
+**[📖 View Core Module Docs](./packages/panna-sdk/src/core/README.md)**
+
+The documentation includes:
+
+- **[Client](./packages/panna-sdk/src/core/client/README.md)** - SDK initialization and configuration
+- **[Wallet](./packages/panna-sdk/src/core/wallet/README.md)** - User authentication and account management
+- **[Transaction](./packages/panna-sdk/src/core/transaction/README.md)** - Blockchain transaction handling
+- **[Chain](./packages/panna-sdk/src/core/chain/README.md)** - Network configuration
+- **[Onramp](./packages/panna-sdk/src/core/onramp/README.md)** - Fiat-to-crypto gateway
+- **[Util](./packages/panna-sdk/src/core/util/README.md)** - Helper functions and utilities
+
+Each module includes detailed usage examples, API references, and integration guides.
+
+### React Module Documentation
+
+Complete documentation for building React applications with the Panna SDK:
+
+**[⚛️ View React Module Docs](./packages/panna-sdk/src/react/README.md)**
+
+The React module includes:
+
+- **[Components](./packages/panna-sdk/src/react/components/README.md)** - Pre-built React components for authentication, transactions, and account management
+- **[Hooks](./packages/panna-sdk/src/react/hooks/README.md)** - React hooks for wallet state, blockchain data, and user interactions
+- **[Utils](./packages/panna-sdk/src/react/utils/README.md)** - Utility functions for address formatting, conversions, and more
+- **[Types](./packages/panna-sdk/src/react/types/README.md)** - TypeScript type definitions for React components and hooks
+- **[Consts](./packages/panna-sdk/src/react/consts/README.md)** - Constants and configuration for tokens, countries, and currencies
+
+Each module includes comprehensive examples, type definitions, and best practices for React development.
+
+---
+
 ## 🧰 Tooling
 
 - **Monorepo:** PNPM Workspaces
@@ -50,11 +87,29 @@ pnpm install
 pnpm --filter panna-sdk build
 ```
 
-### 3. Run Example App
+### 3. Configure Example App
+
+Copy the environment file and add your credentials:
+
+```bash
+cp apps/example-app/.env.example apps/example-app/.env
+```
+
+Edit `apps/example-app/.env` and fill in the required values:
+
+```env
+NEXT_PUBLIC_CLIENT_ID=your-client-id
+NEXT_PUBLIC_PARTNER_ID=your-partner-id
+NEXT_PUBLIC_CHAIN_ID=1135  # or 4202 for testnet
+```
+
+### 4. Run Example App
 
 ```bash
 pnpm --filter example-app dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ## 🧪 Test SDK
 
@@ -77,3 +132,13 @@ your-monorepo/
 └── .prettierrc             # Prettier formatting
 
 ```
+
+---
+
+## 💬 Support & Community
+
+Need help or want to connect with the community?
+
+**[Join our Discord](https://lisk.chat/)** - Get support, share feedback, and collaborate with other developers.
+
+For questions, issues, or contributions, feel free to reach out through our Discord community!

@@ -5,15 +5,24 @@ module.exports = {
       displayName: 'ui',
       testEnvironment: 'jsdom',
       roots: ['<rootDir>/src'],
-      testMatch: ['**/src/**/*.test.{ts,tsx}'],
-      collectCoverageFrom: ['src/ui/**/*.{ts,tsx}', '!src/ui/**/*.d.ts'],
+      testMatch: ['**/src/react/**/*.test.{ts,tsx}'],
+      collectCoverageFrom: ['src/react/**/*.{ts,tsx}', '!src/react/**/*.d.ts'],
       moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
       transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest'
+        '^.+\\.(ts|tsx)$': [
+          'ts-jest',
+          {
+            tsconfig: {
+              jsx: 'react-jsx',
+              esModuleInterop: true
+            }
+          }
+        ]
       },
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {
-        '^@/(.*)$': '<rootDir>/src/$1'
+        '^@/(.*)$': '<rootDir>/src/react/$1',
+        '^src/(.*)$': '<rootDir>/src/$1'
       },
       testEnvironmentOptions: {
         customExportConditions: ['node', 'node-addons']
@@ -23,16 +32,31 @@ module.exports = {
       displayName: 'core',
       testEnvironment: 'node',
       roots: ['<rootDir>/src'],
-      testMatch: ['**/src/**/*.test.{ts}'],
+      testMatch: [
+        '**/src/core/**/*.test.ts',
+        '!**/src/core/**/*.fixture.test.ts'
+      ],
       collectCoverageFrom: ['src/core/**/*.{ts}', '!src/core/**/*.d.ts'],
       moduleFileExtensions: ['ts', 'js', 'json'],
       transform: {
-        '^.+\\.(ts|tsx)$': 'ts-jest'
+        '^.+\\.(ts|tsx)$': [
+          'ts-jest',
+          {
+            tsconfig: {
+              esModuleInterop: true
+            }
+          }
+        ]
       },
       setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
       moduleNameMapper: {
         '^@/(.*)$': '<rootDir>/src/$1'
       }
     }
-  ]
+  ],
+  testTimeout: 10000,
+  detectOpenHandles: true,
+  testEnvironmentOptions: {
+    teardown: 100
+  }
 };

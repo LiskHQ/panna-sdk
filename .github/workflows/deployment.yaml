@@ -46,6 +46,7 @@ jobs:
             "BUILD_APP=${{ vars.BUILD_APP }}"
             "NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }}"
             "NEXT_PUBLIC_PARTNER_ID=${{ secrets.NEXT_PUBLIC_PARTNER_ID }}"
+            "NEXT_PUBLIC_CHAIN_ID=${{ vars.NEXT_PUBLIC_CHAIN_ID }}"
 
       - name: Download task definition
         run: |

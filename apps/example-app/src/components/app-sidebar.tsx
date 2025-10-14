@@ -22,7 +22,7 @@ const data = {
       items: [
         {
           title: 'Account',
-          url: '/',
+          url: '/account',
           icon: User,
           isActive: true
         }

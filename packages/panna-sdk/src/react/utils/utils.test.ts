@@ -1,0 +1,565 @@
+import { DEFAULT_CURRENCY } from 'src/core';
+import { TokenBalance } from '@/mocks/token-balances';
+import { getCountryByCode } from './countries';
+import {
+  detectUserCountry,
+  getEnvironmentChain,
+  getSupportedTokens,
+  renderCryptoAmount,
+  renderFiatAmount
+} from './utils';
+
+// Mock the countries utility
+jest.mock('./countries', () => ({
+  getCountryByCode: jest.fn()
+}));
+
+// Mock the core imports
+jest.mock('../../core', () => ({
+  lisk: { id: 1135, name: 'Lisk' },
+  liskSepolia: { id: 4202, name: 'Lisk Sepolia' },
+  chains: {
+    1135: { id: 1135, name: 'Lisk' },
+    4202: { id: 4202, name: 'Lisk Sepolia' }
+  }
+}));
+
+// Mock the consts imports
+jest.mock('../consts', () => ({
+  tokenConfig: {
+    1135: [{ symbol: 'LSK', name: 'Lisk' }],
+    4202: [{ symbol: 'LSK', name: 'Lisk Sepolia' }]
+  }
+}));
+
+const mockGetCountryByCode = getCountryByCode as jest.MockedFunction<
+  typeof getCountryByCode
+>;
+
+describe('Utils Functions', () => {
+  describe('getSupportedTokens', () => {
+    it('should return lisk token config when lisk ID is passed', () => {
+      const result = getSupportedTokens('1135');
+      expect(result).toEqual([{ symbol: 'LSK', name: 'Lisk' }]);
+    });
+
+    it('should return lisk sepolia token config when lisk Sepolia ID is passed', () => {
+      const result = getSupportedTokens('4202');
+      expect(result).toEqual([{ symbol: 'LSK', name: 'Lisk Sepolia' }]);
+    });
+
+    it('should return lisk token config when no chain ID is provided', () => {
+      const result = getSupportedTokens();
+      expect(result).toEqual([{ symbol: 'LSK', name: 'Lisk' }]);
+    });
+  });
+
+  describe('getEnvironmentChain', () => {
+    it('should return lisk chain when lisk Chain ID is passed', () => {
+      const result = getEnvironmentChain('1135');
+      expect(result).toEqual({ id: 1135, name: 'Lisk' });
+    });
+
+    it('should return lisk sepolia chain when lisk Sepolia ID is passed', () => {
+      const result = getEnvironmentChain('4202');
+      expect(result).toEqual({ id: 4202, name: 'Lisk Sepolia' });
+    });
+
+    it('should return lisk chain when chain ID is not set', () => {
+      const result = getEnvironmentChain();
+      expect(result).toEqual({ id: 1135, name: 'Lisk' });
+    });
+  });
+});
+
+describe('detectUserCountry', () => {
+  // Store original navigator to restore after tests
+  const originalNavigator = global.navigator;
+
+  beforeEach(() => {
+    // Reset mocks
+    mockGetCountryByCode.mockReset();
+
+    // Mock a basic navigator object
+    Object.defineProperty(global, 'navigator', {
+      writable: true,
+      value: {
+        language: 'en-US',
+        languages: ['en-US', 'en']
+      }
+    });
+  });
+
+  afterAll(() => {
+    // Restore original navigator
+    Object.defineProperty(global, 'navigator', {
+      writable: true,
+      value: originalNavigator
+    });
+  });
+
+  describe('Method 1: Primary browser locale detection', () => {
+    it('should detect country from navigator.language', () => {
+      // Mock successful country lookup
+      mockGetCountryByCode.mockReturnValue({
+        code: 'US',
+        name: 'United States',
+        flag: '🇺🇸'
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('US');
+      expect(result).toBe('US');
+    });
+
+    it('should handle different locale formats', () => {
+      const testCases = [
+        {
+          locale: 'en-GB',
+          expectedCode: 'GB',
+          country: { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' }
+        },
+        {
+          locale: 'fr-FR',
+          expectedCode: 'FR',
+          country: { code: 'FR', name: 'France', flag: '🇫🇷' }
+        },
+        {
+          locale: 'de-DE',
+          expectedCode: 'DE',
+          country: { code: 'DE', name: 'Germany', flag: '🇩🇪' }
+        }
+      ];
+
+      testCases.forEach(({ locale, expectedCode, country }) => {
+        // Reset mock and set up new locale
+        mockGetCountryByCode.mockReset();
+        mockGetCountryByCode.mockReturnValue(country);
+
+        Object.defineProperty(global.navigator, 'language', {
+          writable: true,
+          value: locale
+        });
+
+        const result = detectUserCountry();
+
+        expect(mockGetCountryByCode).toHaveBeenCalledWith(expectedCode);
+        expect(result).toBe(expectedCode);
+      });
+    });
+
+    it('should return null when country is not supported', () => {
+      // Mock unsupported country
+      mockGetCountryByCode.mockReturnValue(undefined);
+
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: 'en-XX' // Invalid country code
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('XX');
+      expect(result).toBeNull();
+    });
+
+    it('should handle locales without country codes', () => {
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: 'en' // No country code
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
+
+    it('should handle invalid locale formats', () => {
+      const testCases = [
+        { locale: '', shouldCallMock: false },
+        { locale: 'invalid', shouldCallMock: false },
+        { locale: 'en_US', shouldCallMock: false }, // No dash, should not process
+        { locale: 'en.US', shouldCallMock: false } // No dash, should not process
+      ];
+
+      testCases.forEach(({ locale, shouldCallMock }) => {
+        mockGetCountryByCode.mockReset();
+
+        Object.defineProperty(global.navigator, 'language', {
+          writable: true,
+          value: locale
+        });
+
+        Object.defineProperty(global.navigator, 'languages', {
+          writable: true,
+          value: [locale]
+        });
+
+        const result = detectUserCountry();
+
+        if (shouldCallMock) {
+          expect(mockGetCountryByCode).toHaveBeenCalled();
+        } else {
+          expect(mockGetCountryByCode).not.toHaveBeenCalled();
+        }
+        expect(result).toBeNull();
+      });
+    });
+  });
+
+  describe('Method 2: Fallback browser locales', () => {
+    it('should try fallback locales when primary fails', () => {
+      // Primary locale fails, fallback succeeds
+      mockGetCountryByCode
+        .mockReturnValueOnce(undefined) // First call (XX) fails
+        .mockReturnValueOnce({
+          code: 'GB',
+          name: 'United Kingdom',
+          flag: '🇬🇧'
+        }); // Second call (GB) succeeds
+
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: 'en-XX' // Invalid primary
+      });
+
+      Object.defineProperty(global.navigator, 'languages', {
+        writable: true,
+        value: ['en-XX', 'en-GB', 'en'] // Valid fallback
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('XX');
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('GB');
+      expect(result).toBe('GB');
+    });
+
+    it('should skip locales without country codes in fallback', () => {
+      mockGetCountryByCode.mockReturnValue(undefined);
+
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: 'en-XX'
+      });
+
+      Object.defineProperty(global.navigator, 'languages', {
+        writable: true,
+        value: ['en-XX', 'en', 'fr'] // No valid country codes in fallback
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('XX');
+      expect(mockGetCountryByCode).toHaveBeenCalledTimes(1); // Only called for primary
+      expect(result).toBeNull();
+    });
+
+    it('should handle empty or single-item languages array', () => {
+      mockGetCountryByCode.mockReturnValue(undefined);
+
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: 'en-XX'
+      });
+
+      // Test empty array
+      Object.defineProperty(global.navigator, 'languages', {
+        writable: true,
+        value: []
+      });
+
+      let result = detectUserCountry();
+      expect(result).toBeNull();
+
+      // Test single-item array
+      Object.defineProperty(global.navigator, 'languages', {
+        writable: true,
+        value: ['en-XX']
+      });
+
+      result = detectUserCountry();
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Edge cases and error handling', () => {
+    it('should handle missing navigator.language', () => {
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: undefined
+      });
+
+      Object.defineProperty(global.navigator, 'languages', {
+        writable: true,
+        value: undefined
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).not.toHaveBeenCalled();
+      expect(result).toBeNull();
+    });
+
+    it('should handle navigator.languages fallback when language is missing', () => {
+      mockGetCountryByCode.mockReturnValue({
+        code: 'CA',
+        name: 'Canada',
+        flag: '🇨🇦'
+      });
+
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: undefined
+      });
+
+      Object.defineProperty(global.navigator, 'languages', {
+        writable: true,
+        value: ['en-CA']
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('CA');
+      expect(result).toBe('CA');
+    });
+
+    it('should handle exceptions gracefully', () => {
+      // Mock getCountryByCode to throw an error
+      mockGetCountryByCode.mockImplementation(() => {
+        throw new Error('Test error');
+      });
+
+      const result = detectUserCountry();
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle missing navigator object', () => {
+      // Temporarily remove navigator
+      Object.defineProperty(global, 'navigator', {
+        writable: true,
+        value: undefined
+      });
+
+      const result = detectUserCountry();
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('Case sensitivity', () => {
+    it('should handle lowercase country codes', () => {
+      mockGetCountryByCode.mockReturnValue({
+        code: 'US',
+        name: 'United States',
+        flag: '🇺🇸'
+      });
+
+      Object.defineProperty(global.navigator, 'language', {
+        writable: true,
+        value: 'en-us' // lowercase
+      });
+
+      const result = detectUserCountry();
+
+      expect(mockGetCountryByCode).toHaveBeenCalledWith('US'); // Should be uppercase
+      expect(result).toBe('US');
+    });
+  });
+});
+
+describe('render functions', () => {
+  describe('renderFiatAmount', () => {
+    it('should correctly render fiat amount for valid input', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY }, // $2 per token
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('1000000000000000000'),
+          displayValue: '100.0'
+        } // 1 token
+      };
+      const amount = '1'; // 1 token
+      const result = renderFiatAmount(tokenInfo, amount);
+
+      // Calculation: (2 * 1 * 10^18 * 10^18) / 10^18 = 2 * 10^18
+      // formatEther(2 * 10^18) = "2.0"
+      expect(result).toBe('2.00');
+    });
+
+    it('should return 0.00 for non-numeric amount', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('1000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = 'abc';
+
+      const result = renderFiatAmount(tokenInfo, amount);
+      expect(result).toBe('0.00');
+    });
+
+    it('should handle zero token balance gracefully', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: { value: BigInt(0), displayValue: '0.00' }
+      };
+      const amount = '1';
+
+      const result = renderFiatAmount(tokenInfo, amount);
+      // Should avoid division by zero, fallback to BigInt(1 * 10 ** tokenInfo.token.decimals)
+      expect(result).not.toBe('Infinity');
+      expect(result).toBe('2.00');
+    });
+
+    it('should handle missing tokenBalance.value', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 5.32, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {}
+      };
+      const amount = '1';
+
+      const result = renderFiatAmount(tokenInfo as TokenBalance, amount);
+      expect(result).not.toBe('Infinity');
+      expect(result).toBe('5.32');
+    });
+
+    it('should handle large amounts correctly', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 1.5, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = '100000000';
+
+      const result = renderFiatAmount(tokenInfo, amount);
+      // Calculation: (1.5 * 100000000 * 10^18 * 10^18) / 10^20 = 1.5 * 100000000 * 10^16
+      // formatEther(1.5 * 1000000 * 10^18) = "1500000.0"
+      expect(result).toBe('1500000.00');
+    });
+  });
+
+  describe('renderCryptoAmount', () => {
+    it('should correctly render crypto amount for valid input', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY }, // $2 per token
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        } // 100 tokens
+      };
+      const amount = '2'; // $2
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      // Calculation: (100 tokens * 2 * 10^18) / (2 * 10^18) = 100 tokens
+      // formatUnits(100 tokens, 18) = "100.0"
+      expect(result).toBe('100.000000');
+    });
+
+    it('should return 0.000000 for non-numeric amount', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 2, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = 'abc';
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      expect(result).toBe('0.000000');
+    });
+
+    it('should handle zero fiat balance gracefully', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 0, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('0'),
+          displayValue: '0.00'
+        }
+      };
+      const amount = '2';
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      // Should avoid division by zero, fallback to '1'
+      expect(result).not.toBe('Infinity');
+      expect(result).toBe('0.000000');
+    });
+
+    it('should handle large fiat amounts correctly', () => {
+      const tokenInfo = {
+        fiatBalance: { amount: 1000, currency: DEFAULT_CURRENCY },
+        token: {
+          symbol: 'LSK',
+          name: 'Lisk',
+          decimals: 18,
+          icon: ''
+        },
+        tokenBalance: {
+          value: BigInt('100000000000000000000'),
+          displayValue: '100.0'
+        }
+      };
+      const amount = '1000';
+
+      const result = renderCryptoAmount(tokenInfo, amount);
+      // Calculation: (1 token * 1000 * 10^18) / (1000 * 10^18) = 1 token
+      // formatUnits(1 token, 18) = "1.0"
+      expect(result).toBe('100.000000');
+    });
+  });
+});

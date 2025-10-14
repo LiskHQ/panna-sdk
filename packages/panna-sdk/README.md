@@ -10,6 +10,9 @@ Panna SDK is a developer-first toolkit for building seamless, user-friendly dece
   - [Table of Contents](#table-of-contents)
   - [Overview](#overview)
   - [Getting Started](#getting-started)
+  - [Configuration Reference](#configuration-reference)
+    - [PannaProvider Configuration](#pannaprovider-configuration)
+    - [createPannaClient Configuration](#createpannaclient-configuration)
   - [Core Functionality](#core-functionality)
     - [Chain management](#chain-management)
       - [Key Functions](#key-functions)
@@ -55,31 +58,95 @@ To get started with the Panna SDK, follow these steps:
 
 2. **Import the SDK in your project**:
 
+   The SDK provides modular imports for optimal tree-shaking and bundle size:
+
    ```ts
-   import { createPannaClient } from 'panna-sdk';
+   // Core functions (no React dependencies) - recommended for backend/Node.js
+   import { client, transaction, wallet } from 'panna-sdk/core';
+   // React components and hooks - recommended for React apps
+   import { ConnectButton, usePanna } from 'panna-sdk/react';
+
+   const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
    ```
 
 3. **Initialize the client**:
 
    ```ts
-   const client = createPannaClient({
-     partnerId: process.env.PARTNER_ID || ''
+   import { client } from 'panna-sdk/core';
+
+   const pannaClient = client.createPannaClient({
+     clientId: process.env.CLIENT_ID || ''
    });
    ```
 
 4. **Integrate UI components**:
 
    ```tsx
-   import { PannaProvider, LoginButton } from 'panna-sdk';
+   import { PannaProvider, ConnectButton } from 'panna-sdk/react';
 
    function App() {
      return (
-       <PannaProvider clientId={process.env.CLIENT_ID}>
-         <LoginButton label="Sign in with Panna" />
+       <PannaProvider
+         clientId={process.env.CLIENT_ID}
+         partnerId={process.env.PARTNER_ID}
+         chainId={process.env.CHAIN_ID}
+       >
+         <ConnectButton />
        </PannaProvider>
      );
    }
    ```
+
+---
+
+## Configuration Reference
+
+This section provides a complete reference for all SDK configuration options.
+
+### PannaProvider Configuration
+
+The `PannaProvider` component accepts the following props:
+
+| Property             | Type                                             | Required | Default             | Description                                                              |
+| -------------------- | ------------------------------------------------ | -------- | ------------------- | ------------------------------------------------------------------------ |
+| `children`           | `ReactNode`                                      | No       | -                   | Child components wrapped by the provider                                 |
+| `clientId`           | `string`                                         | No       | -                   | Thirdweb client ID for client-side operations                            |
+| `partnerId`          | `string`                                         | No       | `''`                | Partner ID for Lisk ecosystem wallet creation                            |
+| `chainId`            | `string`                                         | No       | `'1135'` (Lisk)     | Chain ID to connect to (`'1135'` for Lisk mainnet, `'4202'` for testnet) |
+| `queryClient`        | `QueryClient`                                    | No       | `new QueryClient()` | Custom React Query client for advanced cache configuration               |
+| `autoConnectTimeout` | `number`                                         | No       | -                   | Timeout in milliseconds for automatic wallet reconnection                |
+| `authToken`          | `string`                                         | No       | -                   | Authentication token for wallet event tracking API requests              |
+| `errorFallback`      | `ReactNode \| ((error, errorInfo) => ReactNode)` | No       | Default error UI    | Custom error UI to display when errors occur                             |
+| `onError`            | `(error: Error, errorInfo: ErrorInfo) => void`   | No       | -                   | Callback function invoked when errors are caught                         |
+
+**Default QueryClient Configuration:**
+
+- `staleTime`: 5 minutes (300000ms)
+- `retry`: 3 attempts
+
+---
+
+### createPannaClient Configuration
+
+The `createPannaClient` function accepts the following options:
+
+#### Required Options
+
+| Property   | Type     | Description                                                |
+| ---------- | -------- | ---------------------------------------------------------- |
+| `clientId` | `string` | Thirdweb client ID for client-side usage (browser, mobile) |
+
+#### Advanced Options
+
+| Property                                | Type          | Default                                    | Description                                          |
+| --------------------------------------- | ------------- | ------------------------------------------ | ---------------------------------------------------- |
+| `config.rpc.maxBatchSize`               | `number`      | `100`                                      | Maximum number of RPC requests to batch together     |
+| `config.rpc.batchTimeoutMs`             | `number`      | `0` (no timeout)                           | Maximum time to wait before sending batched requests |
+| `config.rpc.fetch.requestTimeoutMs`     | `number`      | `300000`                                   | Request timeout in milliseconds                      |
+| `config.rpc.fetch.keepalive`            | `boolean`     | `false`                                    | Enable HTTP keepalive for connections                |
+| `config.rpc.fetch.headers`              | `HeadersInit` | `{}`                                       | Custom HTTP headers for RPC requests                 |
+| `config.storage.gatewayUrl`             | `string`      | `https://<clientId>.ipfscdn.io/ipfs/<cid>` | Custom IPFS gateway URL for storage                  |
+| `config.storage.fetch.requestTimeoutMs` | `number`      | `600000`                                   | Storage request timeout in milliseconds              |
 
 ---
 
@@ -130,7 +197,7 @@ The SDK includes a set of React components and utilities for building user inter
 
 ### Purpose
 
-The `src/ui` directory contains all UI-related code, including:
+The `src/react` directory contains all UI-related code, including:
 
 - React components for Panna interactions (e.g., login, transaction, pay embed, etc)
 - React hooks for blockchain operations
@@ -148,12 +215,38 @@ UI components are organized for reusability and maintainability:
 To use a UI component, import it from the SDK and include it in your React application. For example:
 
 ```tsx
-import { LoginButton } from 'panna-sdk';
+// Import from react entry (recommended for tree-shaking)
+import { ConnectButton } from 'panna-sdk/react';
 
 function App() {
-  return <LoginButton />;
+  return <ConnectButton />;
 }
 ```
+
+### Import Patterns
+
+The SDK supports modular imports to optimize bundle size:
+
+```tsx
+// ✅ Core only (for Node.js, backend, or non-React frameworks)
+import { client, transaction, wallet } from 'panna-sdk/core';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+await transaction.sendTransaction({ account, transaction: tx });
+
+// ✅ React only (for React apps)
+import { ConnectButton, usePanna, useTokenBalances } from 'panna-sdk/react';
+
+// ✅ Import from both entries
+import { ConnectButton } from 'panna-sdk/react';
+import { client } from 'panna-sdk/core';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+const MyApp = () => <ConnectButton />;
+```
+
+**Recommended usage:**
+
+- Use `panna-sdk/core` for backend code, CLI tools, or non-React frameworks
+- Use `panna-sdk/react` in React applications
 
 ---
 
@@ -161,12 +254,12 @@ function App() {
 
 ### Using a UI Component
 
-The login button uses the sign in strategy chosen by the builder to handle authentication automatically. However, builders can build custom login pannas as needed, using the provided core functions.
+The connect button handles authentication automatically. However, builders can build custom login flows as needed, using the provided core functions.
 
 ```tsx
-import { LoginButton } from 'panna-sdk';
+import { ConnectButton } from 'panna-sdk/react';
 
-<LoginButton label="Sign in with Panna" />;
+<ConnectButton />;
 ```
 
 For creating a custom UI, you can use the provided core functions to manage Panna state and interactions.
@@ -174,9 +267,9 @@ For creating a custom UI, you can use the provided core functions to manage Pann
 ### Authenticating a User
 
 ```ts
-import { login } from 'panna-sdk';
+import { wallet } from 'panna-sdk/core';
 
-const session = await login({
+const session = await wallet.login({
   strategy: 'email',
   email: 'user@email.com',
   verificationCode: '123456'
@@ -186,12 +279,30 @@ const session = await login({
 ### Linking an account
 
 ```ts
-import { linkAccount } from 'panna-sdk';
+import { wallet } from 'panna-sdk/core';
 
-const result = await linkAccount({
+const result = await wallet.linkAccount({
   strategy: 'phone',
   phoneNumber: '+1234567890',
   verificationCode: '123456'
+});
+```
+
+### Using Core Functions in Backend
+
+```ts
+// Node.js backend example
+import { client, transaction } from 'panna-sdk/core';
+
+const walletClient = client.createPannaClient({
+  clientId: process.env.CLIENT_ID
+});
+
+// Send a transaction
+const result = await transaction.sendTransaction({
+  client: walletClient,
+  account,
+  transaction: tx
 });
 ```
 
@@ -212,10 +323,10 @@ const result = await linkAccount({
 A: Configure the client with the appropriate network endpoint when initializing.
 
 **Q: Can I use the SDK in a Node.js backend?**
-A: Yes, core utilities are platform-agnostic, but UI components are React-specific.
+A: Yes! Import from `panna-sdk/core` to use core utilities without React dependencies. UI components are React-specific and should be imported from `panna-sdk/react`.
 
 **Q: How do I add a new UI component?**
-A: Add your component to the appropriate directory in `src/ui/components` and export it from `src/ui/index.ts`.
+A: Add your component to the appropriate directory in `src/react/components` and export it from `src/react/index.ts`.
 
 ---
 

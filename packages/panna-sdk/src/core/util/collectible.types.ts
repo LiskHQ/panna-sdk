@@ -1,0 +1,50 @@
+import { Chain } from 'thirdweb';
+
+// Parameters for fetching account collections
+export interface GetCollectiblesByAddressParams {
+  address: string;
+  chain?: Chain;
+  limit?: number;
+  offset?: number;
+}
+
+// Result for fetched account collections
+export interface GetCollectiblesByAddressResult {
+  collectibles: Collectible[];
+  metadata: CollectibleMetadata;
+}
+
+export interface Collectible {
+  token: Token;
+  numInstancesOwned: number;
+  instances: TokenInstance[];
+}
+
+export interface Token {
+  name: string;
+  symbol: string;
+  type: string;
+  address: string;
+  icon: string | null;
+}
+
+export interface TokenInstance {
+  id: string;
+  imageType: (typeof ImageType)[keyof typeof ImageType];
+  image: string | null;
+  name?: string;
+  value?: string | null;
+}
+
+export interface CollectibleMetadata {
+  count: number;
+  offset: number;
+  limit: number;
+  hasNextPage: boolean;
+}
+
+export enum ImageType {
+  URL = 'url',
+  SVG = 'svg',
+  UNKNOWN = 'unknown'
+}
