@@ -10,10 +10,16 @@ jest.mock('../ui/dialog-stepper', () => ({
   useDialogStepper: jest.fn()
 }));
 jest.mock('./login-form', () => ({
-  LoginForm: ({ next, onClose }: { next: () => void; onClose: () => void }) => (
+  LoginForm: ({
+    next,
+    goToStep
+  }: {
+    next: () => void;
+    goToStep: () => void;
+  }) => (
     <div data-testid="login-form">
       <button onClick={next}>Next</button>
-      <button onClick={onClose}>Close</button>
+      <button onClick={goToStep}>Go to step 2</button>
     </div>
   )
 }));
@@ -42,23 +48,20 @@ describe('AuthFlow', () => {
   const mockPrev = jest.fn();
   const mockReset = jest.fn();
   const mockOnClose = jest.fn();
+  const mockGoToStep = jest.fn();
 
   beforeEach(() => {
-    mockUseDialog.mockReturnValue({
+    (mockUseDialog as jest.Mock).mockReturnValue({
       isOpen: true,
       onOpen: jest.fn(),
       onClose: mockOnClose,
       setIsOpen: jest.fn()
     });
-    mockUseDialogStepper.mockReturnValue({
+    (mockUseDialogStepper as jest.Mock).mockReturnValue({
       next: mockNext,
       prev: mockPrev,
       reset: mockReset,
-      stepData: {},
-      goToStep: jest.fn(),
-      currentStep: 0,
-      lastStep: 1,
-      canGoBack: true
+      goToStep: mockGoToStep
     });
   });
 
@@ -99,17 +102,6 @@ describe('AuthFlow', () => {
     const nextButton = screen.getByText('Next');
     fireEvent.click(nextButton);
     expect(mockNext).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls onClose when close button is clicked in login form', () => {
-    render(
-      <Dialog open>
-        <AuthFlow />
-      </Dialog>
-    );
-    const closeButton = screen.getAllByText('Close')[0];
-    fireEvent.click(closeButton);
-    expect(mockOnClose).toHaveBeenCalledTimes(1);
   });
 
   it.skip('calls prev function when back button is clicked in OTP form', () => {
