@@ -25,8 +25,7 @@ export function buildSiweMessage(payload: LoginPayload): string {
   const { domain, address, uri, version, chainId, nonce, issuedAt } = payload;
 
   // Build the message according to EIP-4361 format
-  let message = `${domain} wants you to sign in with your Ethereum account:
-${address}`;
+  let message = `${domain} wants you to sign in with your Ethereum account:\n${address}`;
 
   // Add statement if present (with empty line before it per EIP-4361)
   if (payload.statement) {
