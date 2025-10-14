@@ -57,8 +57,6 @@ export function ActivityList({ className }: ActivityListProps) {
     meta: data?.metadata
   });
 
-  console.log({ data });
-
   if (isLoading) {
     return (
       <section
