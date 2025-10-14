@@ -10,7 +10,7 @@ import {
   usePanna,
   useSocialAccounts,
   useUserProfiles
-} from 'panna-sdk';
+} from 'panna-sdk/react';
 import { Button } from '@/components/ui/button';
 import { Typography } from '@/components/ui/typography';
 import { AccountInformationCard } from './components/account-information-card';
