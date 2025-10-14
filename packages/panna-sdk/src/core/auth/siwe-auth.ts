@@ -81,13 +81,14 @@ export class SiweAuth {
       // Create EIP-4361 compliant LoginPayload for message signing
       const payload: LoginPayload = {
         // Required fields per EIP-4361
-        address: challenge.address.toLowerCase(),
         domain: challenge.domain,
+        address: challenge.address,
         uri: challenge.uri,
         version: challenge.version,
         chainId: challenge.chainId,
         nonce: challenge.nonce,
         issuedAt: challenge.issuedAt,
+
         // Optional fields - include from challenge if provided
         statement: challenge.statement,
         expirationTime: challenge.expirationTime,
@@ -156,16 +157,23 @@ export class SiweAuth {
         // Store auth token and user address
         this.authToken = authResult.token;
         this.userAddress = authResult.address;
-        this.tokenExpiresAt = authResult.expiresAt;
+
+        // The API currently returns the expiry timestamp as the expiresIn property.
+        // For semantic appropriation, the property will be renamed to expiresAt.
+        // Hence, the fallback for backward compatibility.
+        this.tokenExpiresAt =
+          authResult.expiresAt || authResult.expiresIn || null;
 
         // Store in localStorage for persistence (if available)
         if (typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResult.token);
           localStorage.setItem(STORAGE_KEYS.USER_ADDRESS, authResult.address);
-          localStorage.setItem(
-            STORAGE_KEYS.TOKEN_EXPIRY,
-            this.tokenExpiresAt.toString()
-          );
+          if (this.tokenExpiresAt) {
+            localStorage.setItem(
+              STORAGE_KEYS.TOKEN_EXPIRY,
+              this.tokenExpiresAt.toString()
+            );
+          }
         }
 
         // Clear challenge after successful login to prevent reuse

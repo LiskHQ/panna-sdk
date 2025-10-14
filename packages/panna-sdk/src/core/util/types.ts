@@ -240,7 +240,8 @@ export type AuthVerifyRequest = SiweMessageProps & {
 export type AuthVerifyReply = {
   address: string;
   token: string;
-  expiresAt: number;
+  expiresIn?: number;
+  expiresAt?: number;
 };
 
 // SIWE Login Payload (EIP-4361 compliant, compatible with thirdweb)
