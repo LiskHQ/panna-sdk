@@ -63,14 +63,10 @@ To get started with the Panna SDK, follow these steps:
    ```ts
    // Core functions (no React dependencies) - recommended for backend/Node.js
    import { client, transaction, wallet } from 'panna-sdk/core';
-   const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
-
    // React components and hooks - recommended for React apps
    import { ConnectButton, usePanna } from 'panna-sdk/react';
 
-   // Alternative: Import from main entry (both core and react)
-   import { core, react } from 'panna-sdk';
-   const pannaClient = core.client.createPannaClient({ clientId: 'your-client-id' });
+   const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
    ```
 
 3. **Initialize the client**:
@@ -220,12 +216,10 @@ To use a UI component, import it from the SDK and include it in your React appli
 
 ```tsx
 // Import from react entry (recommended for tree-shaking)
-// Or import from main entry
-import { react } from 'panna-sdk';
 import { ConnectButton } from 'panna-sdk/react';
 
 function App() {
-  return <react.ConnectButton />;
+  return <ConnectButton />;
 }
 ```
 
@@ -242,17 +236,17 @@ await transaction.sendTransaction({ account, transaction: tx });
 // ✅ React only (for React apps)
 import { ConnectButton, usePanna, useTokenBalances } from 'panna-sdk/react';
 
-// ✅ Alternative: Import from main entry (both core and react)
-import { core, react } from 'panna-sdk';
-const pannaClient = core.client.createPannaClient({ clientId: 'your-client-id' });
-const MyApp = () => <react.ConnectButton />;
+// ✅ Import from both entries
+import { ConnectButton } from 'panna-sdk/react';
+import { client } from 'panna-sdk/core';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+const MyApp = () => <ConnectButton />;
 ```
 
 **Recommended usage:**
 
 - Use `panna-sdk/core` for backend code, CLI tools, or non-React frameworks
 - Use `panna-sdk/react` in React applications
-- Use `panna-sdk` (main entry) only when you need to import both core and react in the same file
 
 ---
 

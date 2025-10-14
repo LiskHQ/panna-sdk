@@ -1,7 +1,5 @@
 // Main entry point - exports core and react as top-level namespaces
 // For granular imports, use:
-//   - import { core } from 'panna-sdk' then access core.wallet, core.client, etc.
-//   - import { react } from 'panna-sdk' then access react.ConnectButton, react.usePanna, etc.
 //   - import { ... } from 'panna-sdk/core' (direct core exports)
 //   - import { ... } from 'panna-sdk/react' (direct react exports)
 

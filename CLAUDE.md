@@ -95,17 +95,17 @@ const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 // 2. React only (for React applications)
 import { ConnectButton, usePanna } from 'panna-sdk/react';
 
-// 3. Alternative: Import from main entry (both core and react)
-import { core, react } from 'panna-sdk';
-const pannaClient = core.client.createPannaClient({ clientId: 'your-client-id' });
-const MyApp = () => <react.ConnectButton />;
+// 3. Import from both core and react
+import { client } from 'panna-sdk/core';
+import { ConnectButton } from 'panna-sdk/react';
+const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+const MyApp = () => <ConnectButton />;
 ```
 
 **Recommended usage:**
 
 - Use `panna-sdk/core` for backend code, Node.js scripts, or non-React frameworks
 - Use `panna-sdk/react` when building React apps
-- Use `panna-sdk` (main entry) for convenience when using both core and react features
 
 ### Testing Setup
 
