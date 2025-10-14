@@ -1,9 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp';
 import { LoaderCircleIcon } from 'lucide-react';
+import { useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { ecosystemWallet } from 'thirdweb/wallets';
+import {
+  ecosystemWallet,
+  InAppWalletConnectionOptions
+} from 'thirdweb/wallets';
 import z from 'zod';
 import {
   Form,
@@ -18,9 +22,9 @@ import {
   InputOTPSeparator,
   InputOTPSlot
 } from '@/components/ui/input-otp';
-import { LAST_AUTH_PROVIDER, USER_CONTACT } from '@/consts';
 import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
+import { getErrorMessage } from '@/utils/get-error-message';
 import { getEnvironmentChain } from '../../utils';
 import { handleSiweAuth } from '../../utils/auth';
 import { Button } from '../ui/button';
@@ -49,12 +53,23 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       code: ''
     }
   });
+  const { error: codeFormError } = form.getFieldState('code');
   const { client, partnerId, chainId } = usePanna();
   const [resendTimer, resetResendTimer] = useCountdown(45);
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
 
-  const { connect } = useLogin({
+  useEffect(() => {
+    // Display any error passed from previous step
+    if (data?.error) {
+      form.setError('code', {
+        type: 'manual',
+        message: data.error as string
+      });
+    }
+  }, []);
+
+  const { connect, error: loginError } = useLogin({
     client,
     setWalletAsActive: true,
     accountAbstraction: {
@@ -64,68 +79,41 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
   });
 
   const handleSubmit: SubmitHandler<FormValues> = async (values) => {
-    try {
-      form.clearErrors('code');
+    form.clearErrors('code');
 
-      // Connect using smart account with ecosystem wallet
-      const wallet = await connect(async () => {
-        // Create ecosystem wallet and authenticate with OTP
-        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
-          partnerId
+    // Connect using smart account with ecosystem wallet
+    const wallet = await connect(async () => {
+      // Create ecosystem wallet and authenticate with OTP
+      const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
+        partnerId
+      });
+
+      const strategy = data.email ? 'email' : 'phone';
+      const authField = data.email
+        ? { email: data.email as string }
+        : { phoneNumber: data.phoneNumber as string };
+      await ecoWallet.connect({
+        client,
+        strategy,
+        ...authField,
+        verificationCode: values.code
+      } as InAppWalletConnectionOptions);
+
+      return ecoWallet;
+    });
+
+    if (wallet) {
+      const address = wallet.getAccount()?.address;
+      if (address) {
+        // Automatically perform SIWE authentication in the background
+        // Pass chainId for consistency with login form
+        await handleSiweAuth(wallet, {
+          chainId: getEnvironmentChain().id as number
         });
 
-        if (data.email) {
-          await ecoWallet.connect({
-            client,
-            strategy: 'email',
-            email: data.email as string,
-            verificationCode: values.code
-          });
-        } else {
-          await ecoWallet.connect({
-            client,
-            strategy: 'phone',
-            phoneNumber: data.phoneNumber as string,
-            verificationCode: values.code
-          });
-        }
-
-        return ecoWallet;
-      });
-
-      if (wallet) {
-        const address = wallet.getAccount()?.address;
-        if (address) {
-          const isBrowser = typeof window !== 'undefined';
-          if (isBrowser) {
-            const authProvider = data.email ? 'Email' : 'Phone';
-            const contact = data.email
-              ? (data.email as string)
-              : (data.phoneNumber as string);
-
-            localStorage.setItem(LAST_AUTH_PROVIDER, authProvider);
-            // Note: USER_ADDRESS is automatically managed by thirdweb
-            if (contact) {
-              localStorage.setItem(USER_CONTACT, contact);
-            }
-          }
-
-          // Automatically perform SIWE authentication in the background
-          // Pass chainId for consistency with login form
-          await handleSiweAuth(wallet, {
-            chainId: getEnvironmentChain().id as number
-          });
-
-          reset();
-          onClose();
-        }
+        reset();
+        onClose();
       }
-    } catch (error) {
-      console.error('Error during OTP verification:', error);
-      form.setError('code', {
-        type: 'manual',
-        message: 'Invalid verification code.'
-      });
     }
   };
 
@@ -151,6 +139,19 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     });
     resetResendTimer();
   };
+
+  useEffect(() => {
+    if (loginError) {
+      console.error(
+        'Error during OTP verification:',
+        getErrorMessage(loginError)
+      );
+      form.setError('code', {
+        type: 'manual',
+        message: 'Invalid verification code.'
+      });
+    }
+  }, [loginError]);
 
   return (
     <Form {...form}>
@@ -182,13 +183,21 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
                     data-type="text"
                     inputMode="text"
                   >
-                    <InputOTPGroup>
+                    <InputOTPGroup
+                      className={
+                        codeFormError ? '[&>div]:border-destructive border' : ''
+                      }
+                    >
                       <InputOTPSlot index={0} />
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                     </InputOTPGroup>
                     <InputOTPSeparator />
-                    <InputOTPGroup>
+                    <InputOTPGroup
+                      className={
+                        codeFormError ? '[&>div]:border-destructive border' : ''
+                      }
+                    >
                       <InputOTPSlot index={3} />
                       <InputOTPSlot index={4} />
                       <InputOTPSlot index={5} />
@@ -222,7 +231,10 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
         </div>
         <Button type="submit" className="w-full" disabled={isInputIncomplete}>
           {form.formState.isSubmitting && (
-            <LoaderCircleIcon className="animate-spin text-black" />
+            <LoaderCircleIcon
+              className="animate-spin text-black"
+              data-testid="loader-icon"
+            />
           )}
           Verify
         </Button>

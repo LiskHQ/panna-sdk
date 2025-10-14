@@ -1,15 +1,16 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  isValidPhoneNumber,
-  parsePhoneNumberWithError
-} from 'libphonenumber-js';
 import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { EcosystemId, LoginStrategy, prepareLogin } from 'src/core';
-import { ecosystemWallet } from 'thirdweb/wallets';
+import {
+  EcosystemId,
+  EmailPrepareParams,
+  LoginStrategy,
+  PhonePrepareParams,
+  prepareLogin
+} from 'src/core';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,53 +21,20 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { LAST_AUTH_PROVIDER } from '@/consts';
-import { useLogin } from '@/hooks';
 import { usePanna } from '@/hooks/use-panna';
-import { getEnvironmentChain } from '../../utils';
-import { handleSiweAuth } from '../../utils/auth';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
+import { formSchema } from './schema';
 
 type LoginFormProps = {
   next: DialogStepperContextValue['next'];
-  onClose?: () => void;
+  goToStep: DialogStepperContextValue['goToStep'];
 };
+// Add country code flag selector to phone input
 
-const notBlank = (val?: string) => !!val && val.trim() !== '';
+const GOOGLE_LOGIN_STEP = 2;
 
-const formSchema = z
-  .object({
-    email: z
-      .string()
-      .min(7, { message: 'Email should be filled.' })
-      .email('This is not a valid email.')
-      .optional()
-      .or(z.literal('')),
-    phoneNumber: z
-      .string()
-      .min(10, { message: 'Phone number must be at least 10 digits' })
-      .refine(isValidPhoneNumber, {
-        message: 'Please specify a valid phone number'
-      })
-      .transform((value) => parsePhoneNumberWithError(value).number.toString())
-      .optional()
-      .or(z.literal(''))
-  })
-  .refine(
-    (data) => {
-      const emailFilled = notBlank(data.email);
-      const phoneFilled = notBlank(data.phoneNumber);
-      // Only ONE of the fields must be filled
-      return (emailFilled && !phoneFilled) || (!emailFilled && phoneFilled);
-    },
-    {
-      message: 'You must provide either an email OR a phone number—never both.',
-      path: ['email', 'phoneNumber']
-    }
-  );
-
-export function LoginForm({ next, onClose }: LoginFormProps) {
+export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,17 +42,10 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
       phoneNumber: ''
     }
   });
-  const { client, partnerId, chainId } = usePanna();
-  const [showEmailSubmit, setShowEmailSubmit] = useState(true);
-  const [showPhoneSubmit, setShowPhoneSubmit] = useState(false);
-
-  const { connect } = useLogin({
-    client,
-    setWalletAsActive: true,
-    accountAbstraction: {
-      chain: getEnvironmentChain(chainId),
-      sponsorGas: true
-    }
+  const { client, partnerId } = usePanna();
+  const [focusState, setFocusState] = useState({
+    email: false,
+    phone: false
   });
 
   const handleFormSubmit = async (field: keyof z.infer<typeof formSchema>) => {
@@ -95,72 +56,41 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (values.email) {
+    const loginConfig = values.email
+      ? {
+          strategy: LoginStrategy.EMAIL,
+          email: values.email,
+          data: { email: values.email }
+        }
+      : {
+          strategy: LoginStrategy.PHONE,
+          phoneNumber: values.phoneNumber!,
+          data: { phoneNumber: values.phoneNumber! }
+        };
+    try {
       await prepareLogin({
         client,
         ecosystem: {
           id: EcosystemId.LISK,
           partnerId
         },
-        strategy: LoginStrategy.EMAIL,
-        email: values.email
-      });
+        strategy: loginConfig.strategy,
+        ...(loginConfig.email && { email: loginConfig.email }),
+        ...(loginConfig.phoneNumber && { phoneNumber: loginConfig.phoneNumber })
+      } as EmailPrepareParams | PhonePrepareParams);
+      // Passing error as null to clear any previous error state
       next({
-        email: values.email
+        ...loginConfig.data,
+        error: null
       });
-    } else if (values.phoneNumber) {
-      await prepareLogin({
-        client,
-        ecosystem: {
-          id: EcosystemId.LISK,
-          partnerId
-        },
-        strategy: LoginStrategy.PHONE,
-        phoneNumber: values.phoneNumber
-      });
+    } catch (error) {
+      console.error('Login preparation failed:', error);
       next({
-        phoneNumber: values.phoneNumber
+        ...loginConfig.data,
+        error: (error as Error).message
       });
     }
   }
-
-  const handleGoogleLogin = async () => {
-    try {
-      const wallet = await connect(async () => {
-        // Create ecosystem wallet for Google auth
-        const ecoWallet = ecosystemWallet(EcosystemId.LISK, {
-          partnerId
-        });
-
-        await ecoWallet.connect({
-          client,
-          strategy: 'google'
-        });
-
-        return ecoWallet;
-      });
-
-      if (wallet) {
-        const address = wallet.getAccount()?.address;
-        if (address) {
-          const isBrowser = typeof window !== 'undefined';
-          if (isBrowser) {
-            localStorage.setItem(LAST_AUTH_PROVIDER, 'Google');
-            // Note: USER_ADDRESS is automatically managed by thirdweb
-          }
-
-          // Automatically perform SIWE authentication in the background
-          await handleSiweAuth(wallet, {
-            chainId: getEnvironmentChain().id as number
-          });
-
-          onClose?.();
-        }
-      }
-    } catch (error) {
-      console.error('Google login failed:', error);
-    }
-  };
 
   return (
     <Form {...form}>
@@ -168,7 +98,8 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
         <Button
           type="button"
           className="flex gap-3"
-          onClick={handleGoogleLogin}
+          onClick={() => goToStep(GOOGLE_LOGIN_STEP)}
+          data-testid="google-login-button"
         >
           <GoogleIcon />
           Continue with Google
@@ -184,7 +115,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                   placeholder="Email address"
                   className="focus-within:[&_button]:bg-primary"
                   startAdornment={
-                    !showEmailSubmit && (
+                    !focusState.email && (
                       <MailIcon className="h-5 w-5" color="#FAFAFA" />
                     )
                   }
@@ -199,10 +130,10 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                     </Button>
                   }
                   onFocus={() => {
-                    setShowEmailSubmit(true);
+                    setFocusState((prev) => ({ ...prev, email: true }));
                   }}
                   onBlur={() => {
-                    setShowEmailSubmit(false);
+                    setFocusState((prev) => ({ ...prev, email: false }));
                   }}
                 />
               </FormControl>
@@ -221,7 +152,7 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                   placeholder="Phone number"
                   className="focus-within:[&_button]:bg-primary"
                   startAdornment={
-                    !showPhoneSubmit && (
+                    !focusState.phone && (
                       <PhoneIcon className="h-5 w-5" color="#FAFAFA" />
                     )
                   }
@@ -236,10 +167,10 @@ export function LoginForm({ next, onClose }: LoginFormProps) {
                     </Button>
                   }
                   onFocus={() => {
-                    setShowPhoneSubmit(true);
+                    setFocusState((prev) => ({ ...prev, phone: true }));
                   }}
                   onBlur={() => {
-                    setShowPhoneSubmit(false);
+                    setFocusState((prev) => ({ ...prev, phone: false }));
                   }}
                 />
               </FormControl>

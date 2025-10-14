@@ -1,5 +1,5 @@
 import { ChevronLeftIcon, XIcon } from 'lucide-react';
-import { useDialog } from '@/hooks/use-dialog';
+import { useDialog } from '@/hooks';
 import {
   DialogClose,
   DialogContent,
@@ -13,6 +13,8 @@ import { Typography } from '../ui/typography';
 import { ConnectButtonProps } from './connect-button';
 import { InputOTPForm } from './input-otp-form';
 import { LoginForm } from './login-form';
+import { SocialLoginErrorDialog } from './social-login-error-dialog';
+import { SocialLoginPendingDialog } from './social-login-pending-dialog';
 
 export function AuthFlow({ connectDialog }: ConnectButtonProps) {
   return (
@@ -25,6 +27,8 @@ export function AuthFlow({ connectDialog }: ConnectButtonProps) {
         title={connectDialog?.otpTitle}
         description={connectDialog?.otpDescription}
       />
+      <SocialLoginPendingDialog />
+      <SocialLoginErrorDialog />
     </DialogStepper>
   );
 }
@@ -32,8 +36,7 @@ export function AuthFlow({ connectDialog }: ConnectButtonProps) {
 type AuthFormDialogProps = ConnectButtonProps['connectDialog'];
 
 function LoginFormDialog(props: AuthFormDialogProps) {
-  const { next } = useDialogStepper();
-  const { onClose } = useDialog();
+  const { next, goToStep } = useDialogStepper();
   const title = props?.title ?? 'Welcome to Connectify';
   const description = props?.description ?? 'Login form dialog';
 
@@ -44,7 +47,7 @@ function LoginFormDialog(props: AuthFormDialogProps) {
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
         </DialogHeader>
-        <LoginForm next={next} onClose={onClose} />
+        <LoginForm next={next} goToStep={goToStep} />
         <AccountDialogFooter />
       </div>
     </DialogContent>
@@ -91,10 +94,10 @@ function InputOTPFormDialog(props: AuthFormDialogProps) {
   );
 }
 
-function AccountDialogFooter() {
+export function AccountDialogFooter() {
   return (
-    <DialogFooter className="text-muted-foreground flex flex-col justify-center! text-xs">
-      <Typography>Powered by Panna</Typography>
+    <DialogFooter className="flex flex-col justify-center! text-xs">
+      <Typography variant="muted">Powered by Panna</Typography>
     </DialogFooter>
   );
 }
