@@ -32,12 +32,14 @@ export function SocialLoginErrorDialog() {
           <DialogTitle className="flex justify-between text-center">
             <ChevronLeftIcon
               className="text-muted-foreground hover:text-primary left-4"
+              data-testid="back-icon"
               onClick={() => goToStep(0)}
             />
             <DialogClose>
               <XIcon
                 size={20}
                 className="text-muted-foreground hover:text-primary right-4 transition-colors"
+                data-testid="close-icon"
                 onClick={handleClose}
               />
             </DialogClose>

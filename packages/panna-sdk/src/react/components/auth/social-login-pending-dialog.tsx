@@ -85,12 +85,14 @@ export function SocialLoginPendingDialog() {
           <DialogTitle className="flex justify-between text-center">
             <ChevronLeftIcon
               className="text-muted-foreground hover:text-primary left-4"
+              data-testid="back-icon"
               onClick={() => goToStep(0)}
             />
             <DialogClose>
               <XIcon
                 size={20}
                 className="text-muted-foreground hover:text-primary right-4 transition-colors"
+                data-testid="close-icon"
                 onClick={handleClose}
               />
             </DialogClose>
@@ -100,7 +102,11 @@ export function SocialLoginPendingDialog() {
           Sign in
         </Typography>
         <div className="flex flex-col items-center gap-3">
-          <Loader2Icon size={80} className="animate-spin" />
+          <Loader2Icon
+            size={80}
+            className="animate-spin"
+            data-testid="loader-icon"
+          />
           <Typography variant="muted">
             Sign into your account in the pop-up
           </Typography>

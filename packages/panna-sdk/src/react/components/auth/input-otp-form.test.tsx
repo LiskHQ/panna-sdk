@@ -87,11 +87,11 @@ describe('InputOTPForm', () => {
     expect(submitButton).toBeDisabled();
   });
 
-  it('enables submit button when code is complete', async () => {
+  it('enables submit button when code is complete', () => {
     render(<InputOTPForm {...defaultProps} />);
 
     const otpInput = screen.getByTestId('login-code-input');
-    await act(() => {
+    act(() => {
       fireEvent.change(otpInput, { target: { value: '123456' } });
     });
 
@@ -126,21 +126,23 @@ describe('InputOTPForm', () => {
     render(<InputOTPForm {...defaultProps} />);
 
     const resendButton = screen.getByRole('button', { name: 'Resend' });
-    await fireEvent.click(resendButton);
+    fireEvent.click(resendButton);
 
-    expect(prepareLogin as jest.Mock).toHaveBeenCalledWith({
-      client: mockPannaClient,
-      ecosystem: {
-        id: 'ecosystem.lisk',
-        partnerId: 'test-partner'
-      },
-      strategy: 'email',
-      email: 'test@example.com'
+    await waitFor(() => {
+      expect(prepareLogin as jest.Mock).toHaveBeenCalledWith({
+        client: mockPannaClient,
+        ecosystem: {
+          id: 'ecosystem.lisk',
+          partnerId: 'test-partner'
+        },
+        strategy: 'email',
+        email: 'test@example.com'
+      });
+      expect(resetResendTimer).toHaveBeenCalled();
     });
-    expect(resetResendTimer).toHaveBeenCalled();
   });
 
-  it('handles resend functionality for phone', async () => {
+  it('handles resend functionality for phone', () => {
     const resetResendTimer = jest.fn();
     (useCountdown as jest.Mock).mockReturnValue([0, resetResendTimer]);
 
@@ -152,7 +154,7 @@ describe('InputOTPForm', () => {
     render(<InputOTPForm {...props} />);
 
     const resendButton = screen.getByRole('button', { name: 'Resend' });
-    await fireEvent.click(resendButton);
+    fireEvent.click(resendButton);
 
     expect(prepareLogin as jest.Mock).toHaveBeenCalledWith({
       client: mockPannaClient,
@@ -183,12 +185,12 @@ describe('InputOTPForm', () => {
     render(<InputOTPForm {...defaultProps} />);
 
     const otpInput = screen.getByTestId('login-code-input');
-    await act(() => {
+    act(() => {
       fireEvent.change(otpInput, { target: { value: '123456' } });
     });
 
     const submitButton = screen.getByRole('button', { name: 'Verify' });
-    await fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockEcoWallet.connect).toHaveBeenCalledWith({
@@ -225,12 +227,12 @@ describe('InputOTPForm', () => {
     render(<InputOTPForm {...props} />);
 
     const otpInput = screen.getByTestId('login-code-input');
-    await act(() => {
+    act(() => {
       fireEvent.change(otpInput, { target: { value: '123456' } });
     });
 
     const submitButton = screen.getByRole('button', { name: 'Verify' });
-    await fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockEcoWallet.connect).toHaveBeenCalledWith({
@@ -243,25 +245,55 @@ describe('InputOTPForm', () => {
   });
 
   it('displays error message on invalid OTP', async () => {
+    const connectError = new Error('Invalid code');
     const mockEcoWallet = {
-      connect: jest.fn().mockRejectedValue(new Error('Invalid code'))
+      connect: jest.fn().mockRejectedValue(connectError)
     };
 
+    // Create a mutable state object that useLogin will reference
+    const mockLoginState = { error: null as Error | null };
+
+    // Make useLogin return a getter that references the mutable state
+    (useLogin as jest.Mock).mockImplementation(() => ({
+      connect: mockConnect,
+      get error() {
+        return mockLoginState.error;
+      },
+      isConnecting: false
+    }));
+
+    // Mock connect to throw error and update the state
     mockConnect.mockImplementation(async (callback) => {
-      await callback();
+      try {
+        await callback(); // This will throw from mockEcoWallet.connect
+      } catch (error) {
+        // Update the mutable state to simulate what useConnect does
+        mockLoginState.error = connectError;
+        // Don't rethrow - let the component handle it
+      }
     });
+
     (ecosystemWallet as jest.Mock).mockReturnValue(mockEcoWallet);
 
-    render(<InputOTPForm {...defaultProps} />);
+    const { rerender } = render(<InputOTPForm {...defaultProps} />);
 
     const otpInput = screen.getByTestId('login-code-input');
-    await act(() => {
+    act(() => {
       fireEvent.change(otpInput, { target: { value: '123456' } });
     });
 
     const submitButton = screen.getByRole('button', { name: 'Verify' });
-    await fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
 
+    // Wait for the connection attempt
+    await waitFor(() => {
+      expect(mockEcoWallet.connect).toHaveBeenCalled();
+    });
+
+    // Trigger a rerender to pick up the error state change
+    rerender(<InputOTPForm {...defaultProps} />);
+
+    // Wait for the error message to appear
     await waitFor(() => {
       expect(
         screen.getByText('Invalid verification code.')
@@ -269,7 +301,7 @@ describe('InputOTPForm', () => {
     });
   });
 
-  it('shows loading spinner during submission', async () => {
+  it('shows loading spinner during submission', () => {
     let resolveConnect: () => void;
     const connectPromise = new Promise<void>((resolve) => {
       resolveConnect = resolve;
@@ -280,12 +312,12 @@ describe('InputOTPForm', () => {
     render(<InputOTPForm {...defaultProps} />);
 
     const otpInput = screen.getByTestId('login-code-input');
-    await act(() => {
+    act(() => {
       fireEvent.change(otpInput, { target: { value: '123456' } });
     });
 
     const submitButton = screen.getByRole('button', { name: 'Verify' });
-    await fireEvent.click(submitButton);
+    fireEvent.click(submitButton);
 
     expect(screen.getByTestId('loader-icon')).toBeInTheDocument();
 
