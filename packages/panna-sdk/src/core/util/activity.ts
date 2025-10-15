@@ -185,7 +185,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         currency: 'USD'
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-15T12:34:56.000Z'
  * //   }, {
  * //     activityType: 'Received',
  * //     transactionID: '0x...',
@@ -205,7 +206,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         currency: 'USD'
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-15T10:20:30.000Z'
  * //   }, {
  * //     activityType: 'Received',
  * //     transactionID: '0x...',
@@ -226,7 +228,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         }
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-14T15:45:12.000Z'
  * //   }, {
  * //     activityType: 'Minted',
  * //     transactionID: '0x...',
@@ -248,7 +251,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         }
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-13T08:15:30.000Z'
  * //   }],
  * //   metadata: { count: 10, offset: 0, limit: 10, hasNextPage: true }
  * // }
