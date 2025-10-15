@@ -1,9 +1,9 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
     "example-app": "0.1.0",
-    "panna-sdk": "0.1.0"
+    "panna-sdk": "0.2.0-alpha.0"
   },
-  "changesets": ["stale-pandas-rush", "wet-schools-raise"]
+  "changesets": ["social-cars-smash", "stale-pandas-rush", "wet-schools-raise"]
 }

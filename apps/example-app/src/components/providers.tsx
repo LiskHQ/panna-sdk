@@ -1,6 +1,7 @@
 'use client';
 
-import { chain, PannaProvider } from 'panna-sdk';
+import { chain } from 'panna-sdk/core';
+import { PannaProvider } from 'panna-sdk/react';
 import { SidebarProvider } from './ui/sidebar';
 
 export function Providers(props: { children: React.ReactNode }) {

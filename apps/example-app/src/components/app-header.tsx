@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { ConnectButton, useActiveAccount } from 'panna-sdk';
+import { ConnectButton, useActiveAccount } from 'panna-sdk/react';
 import {
   Breadcrumb,
   BreadcrumbItem,
