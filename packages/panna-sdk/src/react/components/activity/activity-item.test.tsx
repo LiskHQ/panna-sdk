@@ -29,7 +29,8 @@ describe('ActivityItem', () => {
           currency: DEFAULT_CURRENCY
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);
@@ -60,7 +61,8 @@ describe('ActivityItem', () => {
           currency: DEFAULT_CURRENCY
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);
@@ -87,7 +89,8 @@ describe('ActivityItem', () => {
           icon: null
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);
@@ -117,7 +120,8 @@ describe('ActivityItem', () => {
           currency: FiatCurrency.EUR
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);
@@ -145,7 +149,8 @@ describe('ActivityItem', () => {
           currency: FiatCurrency.GBP
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);
@@ -177,7 +182,8 @@ describe('ActivityItem', () => {
           }
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);
@@ -217,7 +223,8 @@ describe('ActivityItem', () => {
           currency: DEFAULT_CURRENCY
         }
       },
-      status: 'success'
+      status: 'success',
+      timestamp: '2024-01-01T00:00:00.000000Z'
     };
 
     render(<ActivityItem activity={activity} />);

@@ -1,6 +1,6 @@
+import { keepPreviousData } from '@tanstack/react-query';
 import {
   getCoreRowModel,
-  getPaginationRowModel,
   PaginationState,
   useReactTable
 } from '@tanstack/react-table';
@@ -23,33 +23,33 @@ type ActivityListProps = {
 
 export function ActivityList({ className }: ActivityListProps) {
   const account = useActiveAccount();
-  const { chainId } = usePanna();
+  const { chainId, client } = usePanna();
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: DEFAULT_OFFSET,
     pageSize: DEFAULT_LIMIT
   });
+
   const { data, isLoading, isFetching, isError } = useActivities(
     {
       address: account?.address as string,
+      client: client!,
       limit: pagination.pageSize,
       offset: pagination.pageIndex * pagination.pageSize,
       chain: getEnvironmentChain(chainId)
     },
     {
-      enabled: !!account?.address
+      enabled: !!account?.address && !!client,
+      placeholderData: keepPreviousData
     }
   );
 
   const activitiesData = data?.activities || [];
-  const totalCount = data?.metadata.count || 0;
 
   const table = useReactTable({
     columns: [],
     data: activitiesData,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     manualPagination: true,
-    rowCount: totalCount,
     onPaginationChange: setPagination,
     state: {
       pagination
@@ -88,7 +88,7 @@ export function ActivityList({ className }: ActivityListProps) {
     );
   }
 
-  if (!data?.activities.length) {
+  if (!data?.activities.length && pagination.pageIndex === 0) {
     return (
       <section
         className={cn(
@@ -107,9 +107,15 @@ export function ActivityList({ className }: ActivityListProps) {
 
   return (
     <section className="flex flex-col gap-6">
-      {activitiesData.map((activity) => (
-        <ActivityItem key={activity.transactionID} activity={activity} />
-      ))}
+      {activitiesData.length > 0 ? (
+        activitiesData.map((activity) => (
+          <ActivityItem key={activity.transactionID} activity={activity} />
+        ))
+      ) : (
+        <Typography variant="muted" className="text-center">
+          No activities on this page
+        </Typography>
+      )}
       <TablePagination table={table} isFetching={isFetching} />
     </section>
   );
