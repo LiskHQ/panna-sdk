@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Activity } from 'src/core';
 import { useActiveAccount } from 'thirdweb/react';
 import { useActivities, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
@@ -16,6 +17,44 @@ import { ActivityItem } from './activity-item';
 
 const DEFAULT_LIMIT = 10;
 const DEFAULT_OFFSET = 0;
+
+/**
+ * Format a date to "DD MMM, YYYY" format (e.g., "9 Oct, 2025")
+ */
+function formatDateHeader(date: Date): string {
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+}
+
+/**
+ * Get the date string (YYYY-MM-DD) from a timestamp for grouping
+ */
+function getDateKey(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Group activities by date
+ */
+function groupActivitiesByDate(
+  activities: Activity[]
+): Map<string, Activity[]> {
+  const grouped = new Map<string, Activity[]>();
+
+  activities.forEach((activity) => {
+    const dateKey = getDateKey(activity.timestamp);
+    if (!grouped.has(dateKey)) {
+      grouped.set(dateKey, []);
+    }
+    grouped.get(dateKey)!.push(activity);
+  });
+
+  return grouped;
+}
 
 type ActivityListProps = {
   className?: string;
@@ -105,12 +144,29 @@ export function ActivityList({ className }: ActivityListProps) {
     );
   }
 
+  const groupedActivities = groupActivitiesByDate(activitiesData);
+
   return (
     <section className="flex flex-col gap-6">
       {activitiesData.length > 0 ? (
-        activitiesData.map((activity) => (
-          <ActivityItem key={activity.transactionID} activity={activity} />
-        ))
+        Array.from(groupedActivities.entries()).map(([dateKey, activities]) => {
+          const date = new Date(dateKey);
+          return (
+            <div key={dateKey} className="flex flex-col gap-4">
+              <Typography variant="muted" className="text-sm">
+                {formatDateHeader(date)}
+              </Typography>
+              <div className="flex flex-col gap-6">
+                {activities.map((activity) => (
+                  <ActivityItem
+                    key={activity.transactionID}
+                    activity={activity}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })
       ) : (
         <Typography variant="muted" className="text-center">
           No activities on this page
