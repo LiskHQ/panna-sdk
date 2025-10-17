@@ -29,6 +29,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
 
+const MAX_AMOUNT_DIGITS = 15;
+
 type SendSelectTokenStepProps = {
   form: UseFormReturn<SendFormData>;
 };
@@ -279,8 +281,13 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
                 }
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Only allow digits and a single period
-                  if (/^\d*\.?\d*$/.test(value)) {
+                  // Remove decimal point for digit counting
+                  const digitsOnly = value.replace('.', '');
+                  // Only allow digits, single period, and max MAX_AMOUNT_DIGITS
+                  if (
+                    /^\d*\.?\d*$/.test(value) &&
+                    digitsOnly.length <= MAX_AMOUNT_DIGITS
+                  ) {
                     field.onChange(value);
                   }
                 }}
