@@ -1,4 +1,5 @@
 import { DialogTitle } from '@radix-ui/react-dialog';
+import { CheckCircleIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FiatCurrency } from 'src/core';
@@ -70,8 +71,9 @@ export function SendSummaryStep({ form }: SendSummaryStepProps) {
         </Typography>
       </div>
       {isGasSponsored && (
-        <div className="flex flex-col gap-2">
-          <Typography variant="small">Gas sponsored</Typography>
+        <div className="flex items-center gap-2">
+          <CheckCircleIcon size={16} className="text-muted-foreground" />
+          <Typography variant="muted"> Gas sponsored</Typography>
         </div>
       )}
       <Button type="button" onClick={() => next({ hideBackButton: true })}>
