@@ -23,6 +23,9 @@ In this guide, you will:
   - [Social Login](#social-login)
     - [Basic Social Login](#basic-social-login)
     - [Handle Auth Callback](#handle-auth-callback)
+  - [External Wallet Login](#external-wallet-login)
+    - [Connect with MetaMask](#connect-with-metamask)
+    - [Supported Wallets](#supported-wallets)
   - [Phone Authentication](#phone-authentication)
   - [Account Management](#account-management)
     - [Account Operations](#account-operations)
@@ -45,21 +48,19 @@ const ecosystem = { id: wallet.EcosystemId.LISK, partnerId: 'your-partner-id' };
 await wallet.prepareLogin({
   client: pannaClient,
   ecosystem,
-  strategy: 'email',
+  strategy: wallet.LoginStrategy.EMAIL,
   email: 'user@example.com'
 });
 
-// 3. User enters code, then authenticate
-const authResult = await wallet.login({
+// 3. User enters code, then connect
+const account = await wallet.connect({
   client: pannaClient,
   ecosystem,
-  strategy: 'email',
+  strategy: wallet.LoginStrategy.EMAIL,
   email: 'user@example.com',
   verificationCode: '123456'
 });
 
-// 4. Create account instance
-const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 console.log('Authenticated:', account.address);
 ```
 
@@ -104,27 +105,27 @@ async function authenticateWithEmail(email: string, code?: string) {
     await wallet.prepareLogin({
       client,
       ecosystem,
-      strategy: 'email',
+      strategy: wallet.LoginStrategy.EMAIL,
       email
     });
     return { codeSent: true };
   }
 
-  // Step 2: Verify code and authenticate
-  const result = await wallet.login({
+  // Step 2: Verify code and connect
+  const account = await wallet.connect({
     client,
     ecosystem,
-    strategy: 'email',
+    strategy: wallet.LoginStrategy.EMAIL,
     email,
     verificationCode: code
   });
 
-  return { authenticated: true, result };
+  return { authenticated: true, account };
 }
 
 // Usage
 await authenticateWithEmail('user@example.com'); // Sends code
-await authenticateWithEmail('user@example.com', '123456'); // Verifies code
+await authenticateWithEmail('user@example.com', '123456'); // Connects with code
 ```
 
 ## Social Login
@@ -142,7 +143,7 @@ const ecosystem = { id: wallet.EcosystemId.LISK, partnerId: 'your-partner-id' };
 // 'x', 'coinbase', 'farcaster', 'telegram'
 
 async function loginWithProvider(provider: string) {
-  await wallet.socialLogin({
+  const account = await wallet.connect({
     client,
     ecosystem,
     strategy: provider,
@@ -152,6 +153,7 @@ async function loginWithProvider(provider: string) {
 
   // User will be redirected to provider OAuth
   // After success, they return to redirectUrl
+  return account;
 }
 
 // Usage
@@ -165,7 +167,9 @@ await loginWithProvider('github');
 import { wallet } from 'panna-sdk';
 
 // In your callback route/component
+// The account was already created during connect(), you can now access it
 function handleAuthCallback() {
+  // After redirect, create account instance to access user data
   const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 
   if (account.address) {
@@ -174,6 +178,103 @@ function handleAuthCallback() {
   }
 }
 ```
+
+## External Wallet Login
+
+Allow users to authenticate using their existing Web3 wallets like MetaMask, Coinbase Wallet, or WalletConnect. This method uses Sign-In With Ethereum (SIWE) to securely connect external wallets to your ecosystem.
+
+**Important:** The external wallet must be installed and available in the user's browser. The SDK automatically checks for wallet availability and throws an error if the wallet is not found.
+
+### Connect with MetaMask
+
+```ts
+import { wallet, chain } from 'panna-sdk';
+
+async function connectWithMetaMask() {
+  try {
+    // Connect with MetaMask
+    // The SDK will:
+    // 1. Check if MetaMask is installed
+    // 2. Create ecosystem wallet
+    // 3. Create wallet instance
+    // 4. Prompt user to sign in via MetaMask popup
+    const account = await wallet.connect({
+      client: pannaClient,
+      ecosystem: { id: wallet.EcosystemId.LISK, partnerId: 'your-partner-id' },
+      strategy: wallet.LoginStrategy.WALLET,
+      walletId: 'io.metamask',
+      chain: chain.liskSepolia // Chain required for SIWE
+    });
+
+    console.log('Connected with MetaMask:', account.address);
+    return account;
+  } catch (error) {
+    if (error.message.includes('not installed')) {
+      console.error('MetaMask is not installed. Please install it first.');
+      // Redirect user to install MetaMask
+      window.open('https://metamask.io/download/', '_blank');
+    } else {
+      console.error('Failed to connect:', error);
+    }
+  }
+}
+
+// Usage
+await connectWithMetaMask();
+```
+
+### Supported Wallets
+
+The SDK supports any Web3 wallet through WalletConnect or browser extensions. Each wallet is automatically checked for availability before connection.
+
+```ts
+import { wallet, chain } from 'panna-sdk';
+
+// Helper function to connect with error handling
+async function connectWallet(walletId: string, walletName: string) {
+  try {
+    const account = await wallet.connect({
+      client: pannaClient,
+      ecosystem: { id: wallet.EcosystemId.LISK, partnerId: 'your-partner-id' },
+      strategy: wallet.LoginStrategy.WALLET,
+      walletId,
+      chain: chain.liskSepolia
+    });
+    console.log(`Connected with ${walletName}:`, account.address);
+    return account;
+  } catch (error) {
+    if (error.message.includes('not installed')) {
+      console.error(`${walletName} is not installed.`);
+    }
+    throw error;
+  }
+}
+
+// MetaMask
+await connectWallet('io.metamask', 'MetaMask');
+
+// Coinbase Wallet
+await connectWallet('com.coinbase.wallet', 'Coinbase Wallet');
+
+// WalletConnect (supports 300+ wallets, doesn't require browser extension)
+await connectWallet('walletConnect', 'WalletConnect');
+
+// Trust Wallet
+await connectWallet('com.trustwallet.app', 'Trust Wallet');
+```
+
+**Common Wallet IDs:**
+
+| Wallet          | Wallet ID             | Requires Extension |
+| --------------- | --------------------- | ------------------ |
+| MetaMask        | `io.metamask`         | Yes                |
+| Coinbase Wallet | `com.coinbase.wallet` | Yes                |
+| WalletConnect   | `walletConnect`       | No                 |
+| Trust Wallet    | `com.trustwallet.app` | Yes                |
+| Rainbow         | `me.rainbow`          | Yes                |
+| Phantom         | `app.phantom`         | Yes                |
+
+**Note:** WalletConnect doesn't require a browser extension and can connect to mobile wallets via QR code.
 
 ## Phone Authentication
 
@@ -186,15 +287,15 @@ import { wallet } from 'panna-sdk';
 await wallet.prepareLogin({
   client,
   ecosystem,
-  strategy: 'phone',
+  strategy: wallet.LoginStrategy.PHONE,
   phoneNumber: '+1234567890' // Include country code
 });
 
-// Verify code
-const result = await wallet.login({
+// Verify code and connect
+const account = await wallet.connect({
   client,
   ecosystem,
-  strategy: 'phone',
+  strategy: wallet.LoginStrategy.PHONE,
   phoneNumber: '+1234567890',
   verificationCode: '123456'
 });
@@ -237,6 +338,7 @@ import { wallet } from 'panna-sdk';
 const ecosystem = { id: 'ecosystem.lisk', partnerId: 'your-partner-id' };
 
 // Link additional authentication methods
+// Note: For linking, continue to use linkAccount function
 await wallet.linkAccount({
   client,
   ecosystem,
@@ -249,7 +351,7 @@ await wallet.linkAccount({
 await wallet.linkAccount({
   client,
   ecosystem,
-  strategy: 'phone',
+  strategy: wallet.LoginStrategy.PHONE,
   phoneNumber: '+1234567890',
   verificationCode: '123456'
 });
