@@ -1,6 +1,7 @@
 import {
   authenticate,
   authenticateWithRedirect,
+  createWallet,
   ecosystemWallet,
   getProfiles,
   getUserEmail,
@@ -15,6 +16,7 @@ import {
   type AuthParams,
   type CreateAccountOptions,
   type EmailPrepareParams,
+  type ExternalWalletConnectParams,
   type LinkedAccount,
   type PhonePrepareParams,
   type SocialLoginParams
@@ -38,6 +40,53 @@ export async function socialLogin(params: SocialLoginParams): Promise<void> {
   return authenticateWithRedirect(
     params as Parameters<typeof authenticateWithRedirect>[0]
   );
+}
+
+/**
+ * Connect with an external wallet (MetaMask, Coinbase, etc.)
+ * @param params - Parameters including client, ecosystem wallet, chain, and external wallet ID
+ * @returns Connected account
+ * @example
+ * ```typescript
+ * import { wallet, client, chain } from 'panna-sdk/core';
+ *
+ * // Create Panna client
+ * const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
+ *
+ * // Create ecosystem wallet
+ * const ecoWallet = wallet.createAccount({ partnerId: 'your-partner-id' });
+ *
+ * // Connect with MetaMask
+ * const account = await wallet.connectWithExternalWallet({
+ *   client: pannaClient,
+ *   wallet: ecoWallet,
+ *   walletId: 'io.metamask',
+ *   chain: chain.liskSepolia
+ * });
+ * ```
+ */
+export async function connectWithExternalWallet(
+  params: ExternalWalletConnectParams
+): Promise<Account> {
+  // Create an external wallet instance using the provided wallet ID
+  const externalWallet = createWallet(
+    params.walletId as Parameters<typeof createWallet>[0]
+  );
+
+  // Connect the external wallet
+  await externalWallet.connect({
+    client: params.client,
+    chain: params.chain
+  });
+
+  // Link the connected external wallet to the ecosystem wallet
+  const account = await params.wallet.connect({
+    client: params.client,
+    strategy: 'wallet',
+    chain: params.chain,
+    wallet: externalWallet
+  } as Parameters<typeof params.wallet.connect>[0]);
+  return account as unknown as Account;
 }
 
 /**

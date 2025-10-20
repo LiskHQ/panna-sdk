@@ -1,3 +1,5 @@
+import { type Wallet } from 'thirdweb/wallets';
+import { type Chain } from '../chain/types';
 import { type EcosystemConfig, EcosystemId, type PannaClient } from '../client';
 import { type SocialProvider } from '../util/types';
 
@@ -50,6 +52,14 @@ export interface SocialLoginParams extends BaseAuthParams {
   strategy: SocialProvider;
   mode: 'redirect';
   redirectUrl: string;
+}
+
+// External wallet connection parameters
+export interface ExternalWalletConnectParams {
+  client: PannaClient;
+  walletId: string;
+  chain: Chain;
+  wallet: Wallet;
 }
 
 // Combined types for different authentication flows
