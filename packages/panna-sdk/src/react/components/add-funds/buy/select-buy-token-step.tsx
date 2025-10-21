@@ -1,8 +1,8 @@
 import { CheckIcon, ChevronRightIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { useSupportedTokens } from '../../hooks';
-import { Button } from '../ui/button';
+import { useSupportedTokens } from '@/hooks';
+import { Button } from '../../ui/button';
 import {
   Command,
   CommandEmpty,
@@ -10,17 +10,17 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from '../ui/command';
-import { DialogHeader, DialogTitle } from '../ui/dialog';
-import { useDialogStepper } from '../ui/dialog-stepper';
+} from '../../ui/command';
+import { DialogHeader, DialogTitle } from '../../ui/dialog';
+import { useDialogStepper } from '../../ui/dialog-stepper';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage
-} from '../ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+} from '../../ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
 import type { BuyFormData } from './schema';
 
 type SelectBuyTokenStepProps = {

@@ -1,10 +1,10 @@
 import { ExternalLinkIcon, Loader2Icon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { Button } from '../ui/button';
-import { DialogHeader, DialogTitle } from '../ui/dialog';
-import { useDialogStepper } from '../ui/dialog-stepper';
-import { Typography } from '../ui/typography';
+import { Button } from '../../ui/button';
+import { DialogHeader, DialogTitle } from '../../ui/dialog';
+import { useDialogStepper } from '../../ui/dialog-stepper';
+import { Typography } from '../../ui/typography';
 import type { BuyFormData } from './schema';
 
 type ProcessingBuyStepProps = {

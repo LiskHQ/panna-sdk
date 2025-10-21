@@ -1,13 +1,13 @@
 import { useMemo, useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_CURRENCY } from 'src/core';
-import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
-import { getEnvironmentChain } from '../../utils';
-import { Button } from '../ui/button';
-import { DialogHeader, DialogTitle } from '../ui/dialog';
-import { useDialogStepper } from '../ui/dialog-stepper';
-import { FormControl, FormField, FormItem, FormMessage } from '../ui/form';
-import { Typography } from '../ui/typography';
+import { useFiatToCrypto, useSupportedTokens } from '@/hooks';
+import { getEnvironmentChain } from '@/utils';
+import { Button } from '../../ui/button';
+import { DialogHeader, DialogTitle } from '../../ui/dialog';
+import { useDialogStepper } from '../../ui/dialog-stepper';
+import { FormControl, FormField, FormItem, FormMessage } from '../../ui/form';
+import { Typography } from '../../ui/typography';
 import type { BuyFormData } from './schema';
 
 const DECIMAL_NUMBER_REGEX = /^\d*\.?\d*$/;

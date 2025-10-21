@@ -5,8 +5,8 @@ import {
   DialogStepper,
   useDialogStepper,
   type DialogStepperContextValue
-} from '../ui/dialog-stepper';
-import { Form } from '../ui/form';
+} from '../../ui/dialog-stepper';
+import { Form } from '../../ui/form';
 import { ProcessingBuyStep } from './processing-buy-step';
 import { buyFormSchema, type BuyFormData } from './schema';
 import { SelectBuyProviderStep } from './select-buy-provider-step';

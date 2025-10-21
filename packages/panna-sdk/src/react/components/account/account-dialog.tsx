@@ -1,8 +1,8 @@
 import {
   ArrowLeftIcon,
+  PlusIcon,
   SendIcon,
   SettingsIcon,
-  TagIcon,
   XIcon
 } from 'lucide-react';
 import { useRef, useState } from 'react';
@@ -10,8 +10,8 @@ import { DEFAULT_CURRENCY } from 'src/core';
 import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
+import { AddFundsForm } from '../add-funds/add-funds-form';
 import { TokensList } from '../balance/tokens-list';
-import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
 import { SendCollectibleForm } from '../collectibles/send-collectible-form';
 import { SendForm } from '../send/send-form';
@@ -51,7 +51,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
   const [activeTab, setActiveTab] = useState<AccountDialogTab>(
     AccountDialogTab.Balance
   );
-  const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
+  const addFundsStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
     useState<DialogStepperContextValue | null>(null);
   const [sendCollectibleStepperContext, setSendCollectibleStepperContext] =
@@ -127,15 +127,15 @@ export function AccountDialog({ address }: AccountDialogProps) {
             <DialogTitle>Settings</DialogTitle>
           </DialogHeader>
         );
-      case AccountViewEnum.Buy:
+      case AccountViewEnum.AddFunds:
         return (
           <DialogHeader className="items-center gap-0">
             <div className="flex w-full items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => {
-                  if (buyStepperRef.current?.canGoBack) {
-                    buyStepperRef.current.prev();
+                  if (addFundsStepperRef.current?.canGoBack) {
+                    addFundsStepperRef.current.prev();
                   } else {
                     setActiveView(AccountViewEnum.Main);
                   }
@@ -153,7 +153,7 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 />
               </DialogClose>
             </div>
-            {/* No dialog title for Buy flow; each step renders its own title */}
+            {/* No dialog title for Add Funds flow; each step renders its own title */}
           </DialogHeader>
         );
       case AccountViewEnum.Send:
@@ -242,11 +242,10 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 type="button"
                 variant="outline"
                 className="flex-1"
-                onClick={() => setActiveView(AccountViewEnum.Buy)}
-                disabled
+                onClick={() => setActiveView(AccountViewEnum.AddFunds)}
               >
-                <TagIcon />
-                Buy
+                <PlusIcon />
+                Add funds
               </Button>
             </div>
             <Separator orientation="horizontal" />
@@ -289,11 +288,11 @@ export function AccountDialog({ address }: AccountDialogProps) {
         );
       case AccountViewEnum.Settings:
         return <AccountSettingsView />;
-      case AccountViewEnum.Buy:
+      case AccountViewEnum.AddFunds:
         return (
-          <BuyForm
+          <AddFundsForm
             onClose={() => setActiveView(AccountViewEnum.Main)}
-            stepperRef={buyStepperRef}
+            stepperRef={addFundsStepperRef}
           />
         );
       case AccountViewEnum.Send:

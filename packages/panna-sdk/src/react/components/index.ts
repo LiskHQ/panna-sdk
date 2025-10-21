@@ -1,7 +1,8 @@
 export { ConnectButton } from './auth/connect-button';
 export { PannaProvider, type PannaProviderProps } from './panna-provider';
 export { AccountDialog } from './account/account-dialog';
-export { BuyForm } from './buy/buy-form';
+export { AddFundsForm } from './add-funds/add-funds-form';
+export { BuyForm } from './add-funds/buy/buy-form';
 export {
   AccountEventProvider,
   type AccountEventProviderProps,
