@@ -19,7 +19,7 @@ import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
 
-const TRANSACTION_TIMEOUT_MS = 30000; // 30 seconds
+const TRANSACTION_TIMEOUT_MS = 10_000; // 10 seconds
 const TRANSACTION_TIMEOUT_MESSAGE =
   'Transaction is taking longer than expected. Please wait...';
 

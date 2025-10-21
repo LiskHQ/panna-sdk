@@ -30,6 +30,8 @@ import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
 
 const MAX_AMOUNT_DIGITS = 15;
+const DIGIT_EXTRACTION_REGEX = /(\d+)/g;
+const AMOUNT_FORMAT_REGEX = /^\d+(\.\d+)?$/;
 
 type SendSelectTokenStepProps = {
   form: UseFormReturn<SendFormData>;
@@ -281,12 +283,23 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
                 }
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Remove decimal point for digit counting
-                  const digitsOnly = value.replace('.', '');
+
+                  // Allow empty string
+                  if (value === '') {
+                    field.onChange(value);
+                    return;
+                  }
+
+                  // Count the number of digits
+                  const digits = value.match(DIGIT_EXTRACTION_REGEX);
+                  const numDigits = digits
+                    ? digits.reduce((a, c) => a + c.length, 0)
+                    : 0;
+
                   // Only allow digits, single period, and max MAX_AMOUNT_DIGITS
                   if (
-                    /^\d*\.?\d*$/.test(value) &&
-                    digitsOnly.length <= MAX_AMOUNT_DIGITS
+                    AMOUNT_FORMAT_REGEX.test(value) &&
+                    numDigits <= MAX_AMOUNT_DIGITS
                   ) {
                     field.onChange(value);
                   }

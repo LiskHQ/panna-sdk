@@ -19,9 +19,10 @@ const DEFAULT_LIMIT = 10;
 const DEFAULT_OFFSET = 0;
 
 /**
- * Format a date to "DD MMM, YYYY" format (e.g., "9 Oct, 2025")
+ * Format a timestamp to "DD MMM, YYYY" format (e.g., "9 Oct, 2025")
  */
-function formatDateHeader(date: Date): string {
+export function getDateKey(timestamp: string): string {
+  const date = new Date(timestamp);
   return date.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
@@ -30,17 +31,9 @@ function formatDateHeader(date: Date): string {
 }
 
 /**
- * Get the date string (YYYY-MM-DD) from a timestamp for grouping
- */
-function getDateKey(timestamp: string): string {
-  const date = new Date(timestamp);
-  return date.toISOString().split('T')[0];
-}
-
-/**
  * Group activities by date
  */
-function groupActivitiesByDate(
+export function groupActivitiesByDate(
   activities: Activity[]
 ): Map<string, Activity[]> {
   const grouped = new Map<string, Activity[]>();
@@ -150,11 +143,10 @@ export function ActivityList({ className }: ActivityListProps) {
     <section className="flex flex-col gap-6">
       {activitiesData.length > 0 ? (
         Array.from(groupedActivities.entries()).map(([dateKey, activities]) => {
-          const date = new Date(dateKey);
           return (
             <div key={dateKey} className="flex flex-col gap-4">
               <Typography variant="muted" className="text-sm">
-                {formatDateHeader(date)}
+                {dateKey}
               </Typography>
               <div className="flex flex-col gap-6">
                 {activities.map((activity) => (

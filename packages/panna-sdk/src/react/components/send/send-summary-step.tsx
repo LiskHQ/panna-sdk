@@ -73,7 +73,7 @@ export function SendSummaryStep({ form }: SendSummaryStepProps) {
       {isGasSponsored && (
         <div className="flex items-center gap-2">
           <CheckCircleIcon size={16} className="text-muted-foreground" />
-          <Typography variant="muted"> Gas sponsored</Typography>
+          <Typography variant="muted">Gas sponsored</Typography>
         </div>
       )}
       <Button type="button" onClick={() => next({ hideBackButton: true })}>
