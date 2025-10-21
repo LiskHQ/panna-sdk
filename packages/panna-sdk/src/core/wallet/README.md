@@ -265,6 +265,8 @@ await connectWallet('com.trustwallet.app', 'Trust Wallet');
 
 **Common Wallet IDs:**
 
+<!-- TODO: Update with final list of supported wallets -->
+
 | Wallet          | Wallet ID             | Requires Extension |
 | --------------- | --------------------- | ------------------ |
 | MetaMask        | `io.metamask`         | Yes                |
