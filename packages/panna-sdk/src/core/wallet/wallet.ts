@@ -104,7 +104,7 @@ export async function connect(params: ConnectParams): Promise<Account> {
   });
 
   // Handle strategy-specific connection logic
-  if (params.strategy === 'wallet') {
+  if (params.strategy === LoginStrategy.WALLET) {
     // External wallet strategy: check availability, create wallet, connect
     const walletParams = params as typeof params & {
       walletId: string;
@@ -127,7 +127,7 @@ export async function connect(params: ConnectParams): Promise<Account> {
 
     const account = await ecoWallet.connect({
       client: walletParams.client,
-      strategy: 'wallet',
+      strategy: LoginStrategy.WALLET,
       chain: walletParams.chain,
       wallet: externalWallet
     } as Parameters<typeof ecoWallet.connect>[0]);
