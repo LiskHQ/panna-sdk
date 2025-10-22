@@ -124,26 +124,6 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
-  function renderCollectibleImage(
-    instance: TokenInstance,
-    item: Collectible,
-    instanceKey: string
-  ) {
-    return (
-      <Card key={instanceKey} className="p-0">
-        <CardContent className="p-0">
-          <CollectibleImageRenderer
-            instance={instance}
-            token={item.token}
-            setActiveView={setActiveView}
-            setActiveCollectible={setActiveCollectible}
-            setActiveToken={setActiveToken}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <section>
       {table.getRowModel().rows.map((row, index) => {
@@ -184,29 +164,18 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="grid grid-cols-2 gap-4">
-                {/* Since ERC-1155 allows owning multiple tokens with the same ID,
-                check instance value to display multiple tokens with the same ID */}
                 {item.instances.map((instance, instanceIndex) => (
-                  <Fragment key={`${instance.id}-${instanceIndex}`}>
-                    {item.token.type === TokenERC.ERC1155 ? (
-                      <>
-                        {Array.from({ length: Number(instance.value) }).map(
-                          (_, valueIndex) =>
-                            renderCollectibleImage(
-                              instance,
-                              item,
-                              `${instance.id}-${valueIndex}`
-                            )
-                        )}
-                      </>
-                    ) : (
-                      renderCollectibleImage(
-                        instance,
-                        item,
-                        String(instanceIndex)
-                      )
-                    )}
-                  </Fragment>
+                  <Card key={instanceIndex} className="p-0">
+                    <CardContent className="p-0">
+                      <CollectibleImageRenderer
+                        instance={instance}
+                        token={item.token}
+                        setActiveView={setActiveView}
+                        setActiveCollectible={setActiveCollectible}
+                        setActiveToken={setActiveToken}
+                      />
+                    </CardContent>
+                  </Card>
                 ))}
               </AccordionContent>
             </AccordionItem>
