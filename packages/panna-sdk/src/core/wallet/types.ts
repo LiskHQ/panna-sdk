@@ -1,32 +1,22 @@
+import { type Chain } from '../chain/types';
 import { type EcosystemConfig, EcosystemId, type PannaClient } from '../client';
 import { type SocialProvider } from '../util/types';
 
 // Enum for login strategies
 export const LoginStrategy = {
   EMAIL: 'email',
-  PHONE: 'phone'
+  PHONE: 'phone',
+  GOOGLE: 'google',
+  WALLET: 'wallet'
 } as const;
 
 export type LoginStrategyType =
   (typeof LoginStrategy)[keyof typeof LoginStrategy];
 
-// Base authentication parameters
+// Base authentication parameters (used for prepareLogin only)
 export interface BaseAuthParams {
   client: PannaClient;
   ecosystem: EcosystemConfig;
-}
-
-// Single-step authentication (email/phone with verification code)
-export interface EmailAuthParams extends BaseAuthParams {
-  strategy: typeof LoginStrategy.EMAIL;
-  email: string;
-  verificationCode: string;
-}
-
-export interface PhoneAuthParams extends BaseAuthParams {
-  strategy: typeof LoginStrategy.PHONE;
-  phoneNumber: string;
-  verificationCode: string;
 }
 
 // Multi-step authentication (preparation phase)
@@ -45,19 +35,46 @@ export type CreateAccountOptions = {
   partnerId: string;
 };
 
-// Social login parameters for redirect flow
-export interface SocialLoginParams extends BaseAuthParams {
+// Base connect parameters
+interface BaseConnectParams {
+  client: PannaClient;
+  ecosystem: EcosystemConfig;
+}
+
+// Email connect params
+export interface EmailConnectParams extends BaseConnectParams {
+  strategy: typeof LoginStrategy.EMAIL;
+  email: string;
+  verificationCode: string;
+}
+
+// Phone connect params
+export interface PhoneConnectParams extends BaseConnectParams {
+  strategy: typeof LoginStrategy.PHONE;
+  phoneNumber: string;
+  verificationCode: string;
+}
+
+// Social connect params
+export interface SocialConnectParams extends BaseConnectParams {
   strategy: SocialProvider;
   mode: 'redirect';
   redirectUrl: string;
 }
 
-// Combined types for different authentication flows
-export type SingleStepAuthParams = EmailAuthParams | PhoneAuthParams;
+// External wallet connect params
+export interface WalletConnectParams extends BaseConnectParams {
+  strategy: typeof LoginStrategy.WALLET;
+  walletId: string;
+  chain: Chain;
+}
 
-export type MultiStepAuthParams = EmailPrepareParams | PhonePrepareParams;
-
-export type AuthParams = SingleStepAuthParams | MultiStepAuthParams;
+// Union type for all connect strategies
+export type ConnectParams =
+  | EmailConnectParams
+  | PhoneConnectParams
+  | SocialConnectParams
+  | WalletConnectParams;
 
 // Re-export types with web2-friendly names
 export type {

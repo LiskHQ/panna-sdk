@@ -18,13 +18,13 @@ const account = wallet.createAccount({
 });
 
 // Authenticate the user
-await wallet.login({
+await wallet.connect({
   client: pannaClient,
   ecosystem: {
     id: 'ecosystem.lisk',
     partnerId: 'your-partner-id'
   },
-  strategy: 'email',
+  strategy: wallet.LoginStrategy.EMAIL,
   email: 'user@example.com',
   verificationCode: '123456'
 });

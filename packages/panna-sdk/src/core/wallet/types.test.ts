@@ -1,11 +1,12 @@
+import { liskSepolia } from '../chain/chain-definitions/lisk-sepolia';
 import { type PannaClient, EcosystemId, type EcosystemConfig } from '../client';
 import {
   LoginStrategy,
-  type AuthParams,
-  type SingleStepAuthParams,
-  type MultiStepAuthParams,
-  type EmailAuthParams,
-  type PhoneAuthParams,
+  type ConnectParams,
+  type EmailConnectParams,
+  type PhoneConnectParams,
+  type SocialConnectParams,
+  type WalletConnectParams,
   type EmailPrepareParams,
   type PhonePrepareParams,
   type LoginStrategyType,
@@ -33,15 +34,15 @@ describe('Wallet Types', () => {
 
     it('should have correct number of strategies', () => {
       const strategies = Object.values(LoginStrategy);
-      expect(strategies).toHaveLength(2);
-      expect(strategies).toEqual(['email', 'phone']);
+      expect(strategies).toHaveLength(4);
+      expect(strategies).toEqual(['email', 'phone', 'google', 'wallet']);
     });
   });
 
-  describe('Authentication Types', () => {
-    describe('EmailAuthParams', () => {
+  describe('Connect Types', () => {
+    describe('EmailConnectParams', () => {
       it('should match expected structure', () => {
-        const emailAuth: EmailAuthParams = {
+        const emailConnect: EmailConnectParams = {
           client: mockClient,
           ecosystem: testEcosystem,
           strategy: LoginStrategy.EMAIL,
@@ -49,17 +50,19 @@ describe('Wallet Types', () => {
           verificationCode: '123456'
         };
 
-        expect(emailAuth.strategy).toBe('email');
-        expect(emailAuth.email).toBe('test@example.com');
-        expect(emailAuth.verificationCode).toBe('123456');
-        expect(emailAuth.client).toBe(mockClient);
-        expect(emailAuth.ecosystem).toBe(testEcosystem);
+        expect(emailConnect.strategy).toBe('email');
+        expect(emailConnect.email).toBe('test@example.com');
+        expect(emailConnect.verificationCode).toBe('123456');
+        expect(emailConnect.client).toBe(mockClient);
+        expect(emailConnect.ecosystem).toBe(testEcosystem);
+        expect(emailConnect.ecosystem.partnerId).toBe('test-partner-id');
+        expect(emailConnect.ecosystem.id).toBe(EcosystemId.LISK);
       });
     });
 
-    describe('PhoneAuthParams', () => {
+    describe('PhoneConnectParams', () => {
       it('should match expected structure', () => {
-        const phoneAuth: PhoneAuthParams = {
+        const phoneConnect: PhoneConnectParams = {
           client: mockClient,
           ecosystem: testEcosystem,
           strategy: LoginStrategy.PHONE,
@@ -67,14 +70,130 @@ describe('Wallet Types', () => {
           verificationCode: '123456'
         };
 
-        expect(phoneAuth.strategy).toBe('phone');
-        expect(phoneAuth.phoneNumber).toBe('+1234567890');
-        expect(phoneAuth.verificationCode).toBe('123456');
-        expect(phoneAuth.client).toBe(mockClient);
-        expect(phoneAuth.ecosystem).toBe(testEcosystem);
+        expect(phoneConnect.strategy).toBe('phone');
+        expect(phoneConnect.phoneNumber).toBe('+1234567890');
+        expect(phoneConnect.verificationCode).toBe('123456');
+        expect(phoneConnect.client).toBe(mockClient);
+        expect(phoneConnect.ecosystem).toBe(testEcosystem);
+        expect(phoneConnect.ecosystem.partnerId).toBe('test-partner-id');
+        expect(phoneConnect.ecosystem.id).toBe(EcosystemId.LISK);
       });
     });
 
+    describe('SocialConnectParams', () => {
+      it('should match expected structure', () => {
+        const socialConnect: SocialConnectParams = {
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.GOOGLE,
+          mode: 'redirect',
+          redirectUrl: 'https://example.com/callback'
+        };
+
+        expect(socialConnect.strategy).toBe(LoginStrategy.GOOGLE);
+        expect(socialConnect.mode).toBe('redirect');
+        expect(socialConnect.redirectUrl).toBe('https://example.com/callback');
+        expect(socialConnect.client).toBe(mockClient);
+        expect(socialConnect.ecosystem).toBe(testEcosystem);
+        expect(socialConnect.ecosystem.partnerId).toBe('test-partner-id');
+        expect(socialConnect.ecosystem.id).toBe(EcosystemId.LISK);
+      });
+
+      it('should support various social providers', () => {
+        const providers = [
+          'google',
+          'apple',
+          'facebook',
+          'discord',
+          'github'
+        ] as const;
+
+        providers.forEach((provider) => {
+          const socialConnect: SocialConnectParams = {
+            client: mockClient,
+            ecosystem: testEcosystem,
+            strategy: provider,
+            mode: 'redirect',
+            redirectUrl: 'https://example.com/callback'
+          };
+
+          expect(socialConnect.strategy).toBe(provider);
+        });
+      });
+    });
+
+    describe('WalletConnectParams', () => {
+      it('should match expected structure', () => {
+        const walletConnect: WalletConnectParams = {
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'io.metamask',
+          chain: liskSepolia
+        };
+
+        expect(walletConnect.strategy).toBe(LoginStrategy.WALLET);
+        expect(walletConnect.walletId).toBe('io.metamask');
+        expect(walletConnect.chain).toBe(liskSepolia);
+        expect(walletConnect.client).toBe(mockClient);
+        expect(walletConnect.ecosystem).toBe(testEcosystem);
+        expect(walletConnect.ecosystem.partnerId).toBe('test-partner-id');
+        expect(walletConnect.ecosystem.id).toBe(EcosystemId.LISK);
+      });
+    });
+
+    describe('ConnectParams Union', () => {
+      it('should accept EmailConnectParams', () => {
+        const params: ConnectParams = {
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.EMAIL,
+          email: 'test@example.com',
+          verificationCode: '123456'
+        };
+
+        expect(params.strategy).toBe('email');
+      });
+
+      it('should accept PhoneConnectParams', () => {
+        const params: ConnectParams = {
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.PHONE,
+          phoneNumber: '+1234567890',
+          verificationCode: '123456'
+        };
+
+        expect(params.strategy).toBe('phone');
+      });
+
+      it('should accept SocialConnectParams', () => {
+        const params: ConnectParams = {
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.GOOGLE,
+          mode: 'redirect',
+          redirectUrl: 'https://example.com/callback'
+        };
+
+        expect(params.strategy).toBe(LoginStrategy.GOOGLE);
+      });
+
+      it('should accept WalletConnectParams', () => {
+        const params: ConnectParams = {
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'io.metamask',
+          chain: liskSepolia
+        };
+
+        expect(params.strategy).toBe(LoginStrategy.WALLET);
+      });
+    });
+  });
+
+  describe('Prepare Login Types', () => {
     describe('EmailPrepareParams', () => {
       it('should match expected structure', () => {
         const emailPrepare: EmailPrepareParams = {
@@ -104,92 +223,6 @@ describe('Wallet Types', () => {
         expect(phonePrepare.phoneNumber).toBe('+1234567890');
         expect(phonePrepare.client).toBe(mockClient);
         expect(phonePrepare.ecosystem).toBe(testEcosystem);
-      });
-    });
-  });
-
-  describe('Union Types', () => {
-    describe('SingleStepAuthParams', () => {
-      it('should accept EmailAuthParams', () => {
-        const emailAuth: SingleStepAuthParams = {
-          client: mockClient,
-          ecosystem: testEcosystem,
-          strategy: LoginStrategy.EMAIL,
-          email: 'test@example.com',
-          verificationCode: '123456'
-        };
-
-        expect(emailAuth.strategy).toBe('email');
-      });
-
-      it('should accept PhoneAuthParams', () => {
-        const phoneAuth: SingleStepAuthParams = {
-          client: mockClient,
-          ecosystem: testEcosystem,
-          strategy: LoginStrategy.PHONE,
-          phoneNumber: '+1234567890',
-          verificationCode: '123456'
-        };
-
-        expect(phoneAuth.strategy).toBe('phone');
-      });
-
-      it('should accept all auth types', () => {
-        const strategies: Array<SingleStepAuthParams['strategy']> = [
-          LoginStrategy.EMAIL,
-          LoginStrategy.PHONE
-        ];
-
-        expect(strategies).toHaveLength(2);
-      });
-    });
-
-    describe('MultiStepAuthParams', () => {
-      it('should accept EmailPrepareParams', () => {
-        const emailPrepare: MultiStepAuthParams = {
-          client: mockClient,
-          ecosystem: testEcosystem,
-          strategy: LoginStrategy.EMAIL,
-          email: 'test@example.com'
-        };
-
-        expect(emailPrepare.strategy).toBe('email');
-      });
-
-      it('should accept PhonePrepareParams', () => {
-        const phonePrepare: MultiStepAuthParams = {
-          client: mockClient,
-          ecosystem: testEcosystem,
-          strategy: LoginStrategy.PHONE,
-          phoneNumber: '+1234567890'
-        };
-
-        expect(phonePrepare.strategy).toBe('phone');
-      });
-    });
-
-    describe('AuthParams', () => {
-      it('should accept SingleStepAuthParams', () => {
-        const singleStep: AuthParams = {
-          client: mockClient,
-          ecosystem: testEcosystem,
-          strategy: LoginStrategy.EMAIL,
-          email: 'test@example.com',
-          verificationCode: '123456'
-        };
-
-        expect(singleStep.strategy).toBe('email');
-      });
-
-      it('should accept MultiStepAuthParams', () => {
-        const multiStep: AuthParams = {
-          client: mockClient,
-          ecosystem: testEcosystem,
-          strategy: LoginStrategy.EMAIL,
-          email: 'test@example.com'
-        };
-
-        expect(multiStep.strategy).toBe('email');
       });
     });
   });

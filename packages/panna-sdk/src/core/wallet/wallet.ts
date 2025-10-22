@@ -1,43 +1,152 @@
 import {
   authenticate,
   authenticateWithRedirect,
+  createWallet,
   ecosystemWallet,
   getProfiles,
   getUserEmail,
   getUserPhoneNumber,
+  injectedProvider,
   linkProfile,
   preAuthenticate,
   unlinkProfile
 } from 'thirdweb/wallets';
+import { type Chain } from '../chain/types';
 import { EcosystemId, type PannaClient } from '../client';
 import {
   type Account,
-  type AuthParams,
+  type ConnectParams,
   type CreateAccountOptions,
   type EmailPrepareParams,
   type LinkedAccount,
-  type PhonePrepareParams,
-  type SocialLoginParams
+  LoginStrategy,
+  type PhonePrepareParams
 } from './types';
 
 /**
- * Login a user with various authentication methods
- * @param params - Login parameters including client and authentication method
- * @returns Authenticated result
+ * Connect to ecosystem wallet with any authentication strategy
+ * Handles email, phone, social, and external wallet connections
+ *
+ * @param params - Connection parameters with strategy-specific fields
+ * @returns Connected Account instance
+ * @throws Error if wallet strategy and external wallet is not installed
+ *
+ * @example Email Authentication
+ * ```typescript
+ * import { wallet, EcosystemId } from 'panna-sdk/core';
+ *
+ * const ecosystem = {
+ *   id: EcosystemId.LISK,
+ *   partnerId: 'your-partner-id'
+ * };
+ *
+ * // Step 1: Prepare login (send OTP)
+ * await wallet.prepareLogin({
+ *   client: pannaClient,
+ *   ecosystem,
+ *   strategy: wallet.LoginStrategy.EMAIL,
+ *   email: 'user@example.com'
+ * });
+ *
+ * // Step 2: Connect with verification code
+ * const account = await wallet.connect({
+ *   client: pannaClient,
+ *   ecosystem,
+ *   strategy: wallet.LoginStrategy.EMAIL,
+ *   email: 'user@example.com',
+ *   verificationCode: '123456'
+ * });
+ * ```
+ *
+ * @example Social Authentication
+ * ```typescript
+ * const ecosystem = {
+ *   id: EcosystemId.LISK,
+ *   partnerId: 'your-partner-id'
+ * };
+ *
+ * const account = await wallet.connect({
+ *   client: pannaClient,
+ *   ecosystem,
+ *   strategy: LoginStrategy.GOOGLE,
+ *   mode: 'redirect',
+ *   redirectUrl: `${window.location.origin}/callback`
+ * });
+ * ```
+ *
+ * @example External Wallet Connection
+ * ```typescript
+ * const ecosystem = {
+ *   id: EcosystemId.LISK,
+ *   partnerId: 'your-partner-id'
+ * };
+ *
+ * try {
+ *   const account = await wallet.connect({
+ *     client: pannaClient,
+ *     ecosystem,
+ *     strategy: LoginStrategy.WALLET,
+ *     walletId: 'io.metamask',
+ *     chain: chain.liskSepolia
+ *   });
+ *   console.log('Connected:', account.address);
+ * } catch (error) {
+ *   if (error.message.includes('not installed')) {
+ *     console.error('Wallet not available');
+ *   }
+ * }
+ * ```
  */
-export async function login(params: AuthParams) {
-  return authenticate(params as Parameters<typeof authenticate>[0]);
-}
+export async function connect(params: ConnectParams): Promise<Account> {
+  // Create ecosystem wallet instance
+  const ecoWallet = ecosystemWallet(params.ecosystem.id, {
+    partnerId: params.ecosystem.partnerId
+  });
 
-/**
- * Login a user using social authentication providers with redirect flow
- * @param params - Social login parameters including client, provider strategy and redirect URL
- * @returns Promise that resolves when redirect is initiated
- */
-export async function socialLogin(params: SocialLoginParams): Promise<void> {
-  return authenticateWithRedirect(
-    params as Parameters<typeof authenticateWithRedirect>[0]
-  );
+  // Handle strategy-specific connection logic
+  if (params.strategy === LoginStrategy.WALLET) {
+    // External wallet strategy: check availability, create wallet, connect
+    const walletParams = params as typeof params & {
+      walletId: string;
+      chain: Chain;
+    };
+
+    const provider = injectedProvider(
+      walletParams.walletId as Parameters<typeof injectedProvider>[0]
+    );
+
+    if (!provider) {
+      throw new Error(
+        `External wallet "${walletParams.walletId}" is not installed or available. Please install the wallet extension and try again.`
+      );
+    }
+
+    const externalWallet = createWallet(
+      walletParams.walletId as Parameters<typeof createWallet>[0]
+    );
+
+    const account = await ecoWallet.connect({
+      client: walletParams.client,
+      strategy: LoginStrategy.WALLET,
+      chain: walletParams.chain,
+      wallet: externalWallet
+    } as Parameters<typeof ecoWallet.connect>[0]);
+
+    return account as unknown as Account;
+  } else if (
+    params.strategy === LoginStrategy.EMAIL ||
+    params.strategy === LoginStrategy.PHONE
+  ) {
+    // Email/Phone strategy: authenticate with verification code
+    await authenticate(params as Parameters<typeof authenticate>[0]);
+    return ecoWallet as Account;
+  } else {
+    // Social strategy: redirect-based OAuth flow
+    await authenticateWithRedirect(
+      params as Parameters<typeof authenticateWithRedirect>[0]
+    );
+    return ecoWallet as Account;
+  }
 }
 
 /**
@@ -101,9 +210,9 @@ export async function getPhoneNumber(params: {
  * @returns Updated list of linked profiles
  */
 export async function linkAccount(
-  params: AuthParams
+  params: Parameters<typeof linkProfile>[0]
 ): Promise<LinkedAccount[]> {
-  return linkProfile(params as Parameters<typeof linkProfile>[0]);
+  return linkProfile(params);
 }
 
 /**

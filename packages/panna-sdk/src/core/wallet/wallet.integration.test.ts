@@ -1,12 +1,12 @@
 import { createPannaClient, EcosystemId } from '../client';
 import { type Account } from './types';
 import {
+  connect,
   createAccount,
   getEmail,
   getLinkedAccounts,
   getPhoneNumber,
   linkAccount,
-  login,
   prepareLogin,
   unlinkAccount
 } from './wallet';
@@ -30,9 +30,9 @@ describe('Wallet Functions - Integration Tests', () => {
   };
 
   describe('Authentication functions', () => {
-    test('login should have correct function signature', () => {
-      expect(typeof login).toBe('function');
-      expect(login.length).toBe(1); // Expects 1 parameter
+    test('connect should have correct function signature', () => {
+      expect(typeof connect).toBe('function');
+      expect(connect.length).toBe(1); // Expects 1 parameter
     });
   });
 
@@ -185,7 +185,7 @@ describe('Wallet Functions - Integration Tests', () => {
 
       // These functions work with the client but require authentication
       // We're just verifying they accept the client parameter
-      expect(typeof login).toBe('function');
+      expect(typeof connect).toBe('function');
       expect(typeof prepareLogin).toBe('function');
       expect(typeof createAccount).toBe('function');
       expect(typeof getEmail).toBe('function');
