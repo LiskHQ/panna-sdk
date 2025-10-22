@@ -1,15 +1,15 @@
 import * as thirdwebWallets from 'thirdweb/wallets';
+import { type Chain } from '../chain/types';
 import { type PannaClient, EcosystemId } from '../client';
-import { LoginStrategy } from './types';
+import { LoginStrategy, type Account } from './types';
 import {
+  connect,
   createAccount,
   getEmail,
   getLinkedAccounts,
   getPhoneNumber,
   linkAccount,
-  login,
   prepareLogin,
-  socialLogin,
   unlinkAccount
 } from './wallet';
 
@@ -22,6 +22,10 @@ describe('Wallet Functions - Unit Tests', () => {
     id: EcosystemId.LISK,
     partnerId: 'test-partner-id'
   };
+  const mockChain = {
+    id: 4202,
+    rpc: 'https://rpc.sepolia-api.lisk.com'
+  } as Chain;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,51 +42,443 @@ describe('Wallet Functions - Unit Tests', () => {
 
     it('should have all supported strategies', () => {
       const strategies = Object.values(LoginStrategy);
-      expect(strategies).toHaveLength(2);
+      expect(strategies).toHaveLength(4);
       expect(strategies).toContain('email');
       expect(strategies).toContain('phone');
+      expect(strategies).toContain('google');
+      expect(strategies).toContain('wallet');
     });
   });
 
-  describe('login', () => {
-    it('should call authenticate with single-step auth params', async () => {
-      const mockAuthResult = { success: true };
-      (thirdwebWallets.authenticate as jest.Mock).mockResolvedValue(
-        mockAuthResult
-      );
+  describe('connect', () => {
+    describe('Email strategy', () => {
+      it('should connect with email and verification code', async () => {
+        const mockEcosystemWallet = { type: 'ecosystem' } as unknown as Account;
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.authenticate as jest.Mock).mockResolvedValue(
+          undefined
+        );
 
-      const params = {
-        client: mockClient,
-        strategy: 'email' as const,
-        email: 'test@example.com',
-        verificationCode: '123456',
-        ecosystem: testEcosystem
-      };
+        const result = await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.EMAIL,
+          email: 'test@example.com',
+          verificationCode: '123456'
+        });
 
-      const result = await login(params);
+        expect(thirdwebWallets.ecosystemWallet).toHaveBeenCalledWith(
+          EcosystemId.LISK,
+          { partnerId: 'test-partner-id' }
+        );
+        expect(thirdwebWallets.authenticate).toHaveBeenCalledWith({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.EMAIL,
+          email: 'test@example.com',
+          verificationCode: '123456'
+        });
+        expect(result).toEqual(mockEcosystemWallet);
+      });
 
-      expect(thirdwebWallets.authenticate).toHaveBeenCalledWith(params);
-      expect(result).toEqual(mockAuthResult);
+      it('should use custom ecosystem ID if provided', async () => {
+        const mockEcosystemWallet = { type: 'ecosystem' } as unknown as Account;
+        const customEcosystem = {
+          id: 'ecosystem.custom' as EcosystemId,
+          partnerId: 'test-partner-id'
+        };
+
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.authenticate as jest.Mock).mockResolvedValue(
+          undefined
+        );
+
+        await connect({
+          client: mockClient,
+          ecosystem: customEcosystem,
+          strategy: LoginStrategy.EMAIL,
+          email: 'test@example.com',
+          verificationCode: '123456'
+        });
+
+        expect(thirdwebWallets.ecosystemWallet).toHaveBeenCalledWith(
+          'ecosystem.custom',
+          { partnerId: 'test-partner-id' }
+        );
+      });
     });
 
-    it('should call authenticate with multi-step auth params', async () => {
-      const mockAuthResult = { success: true };
-      (thirdwebWallets.authenticate as jest.Mock).mockResolvedValue(
-        mockAuthResult
-      );
+    describe('Phone strategy', () => {
+      it('should connect with phone and verification code', async () => {
+        const mockEcosystemWallet = { type: 'ecosystem' } as unknown as Account;
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.authenticate as jest.Mock).mockResolvedValue(
+          undefined
+        );
 
-      const params = {
-        client: mockClient,
-        strategy: 'email' as const,
-        email: 'test@example.com',
-        verificationCode: '123456',
-        ecosystem: testEcosystem
-      };
+        const result = await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.PHONE,
+          phoneNumber: '+1234567890',
+          verificationCode: '123456'
+        });
 
-      const result = await login(params);
+        expect(thirdwebWallets.ecosystemWallet).toHaveBeenCalledWith(
+          EcosystemId.LISK,
+          { partnerId: 'test-partner-id' }
+        );
+        expect(thirdwebWallets.authenticate).toHaveBeenCalledWith({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.PHONE,
+          phoneNumber: '+1234567890',
+          verificationCode: '123456'
+        });
+        expect(result).toEqual(mockEcosystemWallet);
+      });
+    });
 
-      expect(thirdwebWallets.authenticate).toHaveBeenCalledWith(params);
-      expect(result).toEqual(mockAuthResult);
+    describe('Social strategy', () => {
+      it('should connect with Google OAuth', async () => {
+        const mockEcosystemWallet = { type: 'ecosystem' } as unknown as Account;
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (
+          thirdwebWallets.authenticateWithRedirect as jest.Mock
+        ).mockResolvedValue(undefined);
+
+        const result = await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.GOOGLE,
+          mode: 'redirect',
+          redirectUrl: 'https://example.com/callback'
+        });
+
+        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.GOOGLE,
+          mode: 'redirect',
+          redirectUrl: 'https://example.com/callback'
+        });
+        expect(result).toEqual(mockEcosystemWallet);
+      });
+
+      it('should connect with Facebook OAuth', async () => {
+        const mockEcosystemWallet = { type: 'ecosystem' } as unknown as Account;
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (
+          thirdwebWallets.authenticateWithRedirect as jest.Mock
+        ).mockResolvedValue(undefined);
+
+        await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: 'facebook',
+          mode: 'redirect',
+          redirectUrl: 'https://example.com/auth'
+        });
+
+        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+          expect.objectContaining({
+            strategy: 'facebook'
+          })
+        );
+      });
+
+      it('should work with multiple social providers', async () => {
+        const providers = ['apple', 'discord', 'github', 'x'] as const;
+        const mockEcosystemWallet = { type: 'ecosystem' } as unknown as Account;
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+
+        for (const provider of providers) {
+          (
+            thirdwebWallets.authenticateWithRedirect as jest.Mock
+          ).mockResolvedValue(undefined);
+
+          await connect({
+            client: mockClient,
+            ecosystem: testEcosystem,
+            strategy: provider,
+            mode: 'redirect',
+            redirectUrl: 'https://example.com/callback'
+          });
+
+          expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
+            expect.objectContaining({
+              strategy: provider
+            })
+          );
+        }
+      });
+    });
+
+    describe('Wallet strategy', () => {
+      const mockProvider = { name: 'MetaMask', isMetaMask: true };
+
+      it('should connect with MetaMask when available', async () => {
+        const mockExternalWallet = { id: 'io.metamask' };
+        const mockConnectedAccount = {
+          address: '0x123',
+          id: 'connected'
+        } as unknown as Account;
+        const mockEcosystemWallet = {
+          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+        } as unknown as Account;
+
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          mockProvider
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.createWallet as jest.Mock).mockReturnValue(
+          mockExternalWallet
+        );
+
+        const result = await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'io.metamask',
+          chain: mockChain
+        });
+
+        expect(thirdwebWallets.injectedProvider).toHaveBeenCalledWith(
+          'io.metamask'
+        );
+        expect(thirdwebWallets.createWallet).toHaveBeenCalledWith(
+          'io.metamask'
+        );
+        expect(mockEcosystemWallet.connect).toHaveBeenCalledWith({
+          client: mockClient,
+          strategy: LoginStrategy.WALLET,
+          chain: mockChain,
+          wallet: mockExternalWallet
+        });
+        expect(result).toEqual(mockConnectedAccount);
+      });
+
+      it('should connect with Coinbase Wallet when available', async () => {
+        const mockExternalWallet = { id: 'com.coinbase.wallet' };
+        const mockConnectedAccount = {
+          address: '0x456',
+          id: 'coinbase'
+        } as unknown as Account;
+        const mockEcosystemWallet = {
+          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+        } as unknown as Account;
+
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          mockProvider
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.createWallet as jest.Mock).mockReturnValue(
+          mockExternalWallet
+        );
+
+        const result = await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'com.coinbase.wallet',
+          chain: mockChain
+        });
+
+        expect(thirdwebWallets.injectedProvider).toHaveBeenCalledWith(
+          'com.coinbase.wallet'
+        );
+        expect(result).toEqual(mockConnectedAccount);
+      });
+
+      it('should connect with WalletConnect', async () => {
+        const mockExternalWallet = { id: 'walletConnect' };
+        const mockConnectedAccount = {
+          address: '0x789',
+          id: 'wc'
+        } as unknown as Account;
+        const mockEcosystemWallet = {
+          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+        } as unknown as Account;
+
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          mockProvider
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.createWallet as jest.Mock).mockReturnValue(
+          mockExternalWallet
+        );
+
+        const result = await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'walletConnect',
+          chain: mockChain
+        });
+
+        expect(thirdwebWallets.createWallet).toHaveBeenCalledWith(
+          'walletConnect'
+        );
+        expect(result).toEqual(mockConnectedAccount);
+      });
+
+      it('should check injectedProvider before connecting', async () => {
+        const mockExternalWallet = { id: 'io.metamask' };
+        const mockConnectedAccount = { address: '0xabc' } as unknown as Account;
+        const mockEcosystemWallet = {
+          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+        } as unknown as Account;
+
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          mockProvider
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.createWallet as jest.Mock).mockReturnValue(
+          mockExternalWallet
+        );
+
+        await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'io.metamask',
+          chain: mockChain
+        });
+
+        expect(thirdwebWallets.injectedProvider).toHaveBeenCalledWith(
+          'io.metamask'
+        );
+      });
+
+      it('should throw error when wallet is not installed', async () => {
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          undefined
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue({});
+
+        await expect(
+          connect({
+            client: mockClient,
+            ecosystem: testEcosystem,
+            strategy: LoginStrategy.WALLET,
+            walletId: 'io.metamask',
+            chain: mockChain
+          })
+        ).rejects.toThrow(
+          'External wallet "io.metamask" is not installed or available. Please install the wallet extension and try again.'
+        );
+
+        expect(thirdwebWallets.injectedProvider).toHaveBeenCalledWith(
+          'io.metamask'
+        );
+        expect(thirdwebWallets.createWallet).not.toHaveBeenCalled();
+      });
+
+      it('should throw error when wallet is null', async () => {
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(null);
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue({});
+
+        await expect(
+          connect({
+            client: mockClient,
+            ecosystem: testEcosystem,
+            strategy: LoginStrategy.WALLET,
+            walletId: 'com.coinbase.wallet',
+            chain: mockChain
+          })
+        ).rejects.toThrow(
+          'External wallet "com.coinbase.wallet" is not installed or available. Please install the wallet extension and try again.'
+        );
+
+        expect(thirdwebWallets.createWallet).not.toHaveBeenCalled();
+      });
+
+      it('should pass correct chain parameter', async () => {
+        const mockExternalWallet = { id: 'io.metamask' };
+        const mockConnectedAccount = { address: '0xdef' } as unknown as Account;
+        const mockEcosystemWallet = {
+          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+        } as unknown as Account;
+
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          mockProvider
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.createWallet as jest.Mock).mockReturnValue(
+          mockExternalWallet
+        );
+
+        await connect({
+          client: mockClient,
+          ecosystem: testEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'io.metamask',
+          chain: mockChain
+        });
+
+        expect(mockEcosystemWallet.connect).toHaveBeenCalledWith(
+          expect.objectContaining({
+            chain: mockChain
+          })
+        );
+      });
+
+      it('should use custom ecosystemId if provided for wallet strategy', async () => {
+        const mockExternalWallet = { id: 'io.metamask' };
+        const mockConnectedAccount = { address: '0xghi' } as unknown as Account;
+        const mockEcosystemWallet = {
+          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+        } as unknown as Account;
+        const customEcosystem = {
+          id: 'ecosystem.custom' as EcosystemId,
+          partnerId: 'custom-partner'
+        };
+
+        (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
+          mockProvider
+        );
+        (thirdwebWallets.ecosystemWallet as jest.Mock).mockReturnValue(
+          mockEcosystemWallet
+        );
+        (thirdwebWallets.createWallet as jest.Mock).mockReturnValue(
+          mockExternalWallet
+        );
+
+        await connect({
+          client: mockClient,
+          ecosystem: customEcosystem,
+          strategy: LoginStrategy.WALLET,
+          walletId: 'io.metamask',
+          chain: mockChain
+        });
+
+        expect(thirdwebWallets.ecosystemWallet).toHaveBeenCalledWith(
+          'ecosystem.custom',
+          { partnerId: 'custom-partner' }
+        );
+      });
     });
   });
 
@@ -225,7 +621,7 @@ describe('Wallet Functions - Unit Tests', () => {
 
       const params = {
         client: mockClient,
-        strategy: 'email' as const,
+        strategy: LoginStrategy.EMAIL,
         email: 'test@example.com',
         verificationCode: '123456',
         ecosystem: testEcosystem
@@ -300,116 +696,6 @@ describe('Wallet Functions - Unit Tests', () => {
 
       expect(thirdwebWallets.unlinkProfile).toHaveBeenCalledWith(params);
       expect(result).toEqual(mockUnlinkResult);
-    });
-  });
-
-  describe('socialLogin', () => {
-    it('should initiate social login with Google provider', async () => {
-      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
-        undefined
-      );
-
-      const params = {
-        client: mockClient,
-        strategy: 'google' as const,
-        mode: 'redirect' as const,
-        redirectUrl: 'https://example.com/callback',
-        ecosystem: testEcosystem
-      };
-
-      const result = await socialLogin(params);
-
-      expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
-        params
-      );
-      expect(result).toBeUndefined();
-    });
-
-    it('should work with various social providers', async () => {
-      const providers = [
-        'apple',
-        'discord',
-        'github',
-        'facebook',
-        'x',
-        'twitch'
-      ] as const;
-
-      for (const provider of providers) {
-        (
-          thirdwebWallets.authenticateWithRedirect as jest.Mock
-        ).mockResolvedValue(undefined);
-
-        const params = {
-          client: mockClient,
-          strategy: provider,
-          mode: 'redirect' as const,
-          redirectUrl: 'https://example.com/auth',
-          ecosystem: testEcosystem
-        };
-
-        const result = await socialLogin(params);
-
-        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
-          params
-        );
-        expect(result).toBeUndefined();
-      }
-    });
-
-    it('should work with different redirect URLs', async () => {
-      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
-        undefined
-      );
-
-      const redirectUrls = [
-        'https://localhost:3000/auth',
-        'https://staging.example.com/callback',
-        'https://production.app.com/oauth/return'
-      ];
-
-      for (const redirectUrl of redirectUrls) {
-        const params = {
-          client: mockClient,
-          strategy: 'google' as const,
-          mode: 'redirect' as const,
-          redirectUrl,
-          ecosystem: testEcosystem
-        };
-
-        const result = await socialLogin(params);
-
-        expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
-          params
-        );
-        expect(result).toBeUndefined();
-      }
-    });
-
-    it('should work with custom ecosystem configuration', async () => {
-      (thirdwebWallets.authenticateWithRedirect as jest.Mock).mockResolvedValue(
-        undefined
-      );
-
-      const customEcosystem = {
-        id: EcosystemId.LISK,
-        partnerId: 'custom-partner-id'
-      };
-
-      const params = {
-        client: mockClient,
-        strategy: 'google' as const,
-        mode: 'redirect' as const,
-        redirectUrl: 'https://example.com/callback',
-        ecosystem: customEcosystem
-      };
-
-      const result = await socialLogin(params);
-
-      expect(thirdwebWallets.authenticateWithRedirect).toHaveBeenCalledWith(
-        params
-      );
-      expect(result).toBeUndefined();
     });
   });
 });

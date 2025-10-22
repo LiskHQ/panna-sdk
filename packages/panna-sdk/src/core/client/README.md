@@ -161,10 +161,10 @@ const ecosystem: wallet.EcosystemConfig = {
 };
 
 // Use in authentication
-await wallet.login({
+await wallet.connect({
   client: pannaClient,
   ecosystem,
-  strategy: 'email',
+  strategy: wallet.LoginStrategy.EMAIL,
   email: 'user@example.com',
   verificationCode: '123456'
 });

@@ -182,7 +182,7 @@ Wallet management utilities provide tools for user authentication, allowing user
 
 #### Key Functions
 
-- `login`: Authenticates a user with the various authentication methods.
+- `connect`: Authenticates a user with the various authentication methods.
 - `createAccount`: Creates a new Lisk ecosystem account.
 - `getEmail`: Retrieves a user's email address.
 - `getPhoneNumber`: Retrieves a user's phone number.
@@ -269,8 +269,13 @@ For creating a custom UI, you can use the provided core functions to manage Pann
 ```ts
 import { wallet } from 'panna-sdk/core';
 
-const session = await wallet.login({
-  strategy: 'email',
+const session = await wallet.connect({
+  client: pannaClient,
+  ecosystem: {
+    id: wallet.EcosystemId.LISK,
+    partnerId: 'your-partner-id'
+  },
+  strategy: wallet.LoginStrategy.EMAIL,
   email: 'user@email.com',
   verificationCode: '123456'
 });
@@ -282,7 +287,12 @@ const session = await wallet.login({
 import { wallet } from 'panna-sdk/core';
 
 const result = await wallet.linkAccount({
-  strategy: 'phone',
+  client: pannaClient,
+  ecosystem: {
+    id: wallet.EcosystemId.LISK,
+    partnerId: 'your-partner-id'
+  },
+  strategy: wallet.LoginStrategy.PHONE,
   phoneNumber: '+1234567890',
   verificationCode: '123456'
 });
