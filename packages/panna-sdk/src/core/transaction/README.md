@@ -9,6 +9,7 @@ In this guide, you will:
 - Send native ETH tokens between addresses
 - Transfer ERC-20 tokens using contract calls
 - Interact with smart contracts and call their methods
+- Transfer tokens from external wallets (MetaMask, WalletConnect, etc.)
 - Manage gas fees effectively (both legacy and EIP-1559)
 - Implement common transaction patterns for production apps
 - Use the complete transaction lifecycle from preparation to confirmation
@@ -23,6 +24,7 @@ In this guide, you will:
     - [1. Native ETH Transfers](#1-native-eth-transfers)
     - [2. ERC-20 Token Transfers](#2-erc-20-token-transfers)
     - [3. Smart Contract Interactions](#3-smart-contract-interactions)
+    - [4. Transfers from External Wallets](#4-transfers-from-external-wallets)
   - [Gas Management](#gas-management)
     - [Modern Gas Pricing (EIP-1559) - Recommended](#modern-gas-pricing-eip-1559---recommended)
     - [Legacy Gas Pricing](#legacy-gas-pricing)
@@ -181,6 +183,106 @@ const tx2 = transaction.prepareContractCall({
 });
 ```
 
+### 4. Transfers from External Wallets
+
+Transfer tokens directly from external wallets like MetaMask, WalletConnect, or Coinbase Wallet.
+
+```ts
+import { transaction, util, chain, extensions } from 'panna-sdk';
+
+// Check if MetaMask is available
+if (!extensions.isEIP1193Provider(window.ethereum)) {
+  throw new Error('No compatible wallet found');
+}
+
+// Get user's address from the wallet
+const accounts = await window.ethereum.request({
+  method: 'eth_requestAccounts'
+});
+const userAddress = accounts[0];
+
+// Transfer native tokens (ETH/LSK)
+const result = await transaction.transferBalanceFromExternalWallet({
+  provider: window.ethereum,
+  from: userAddress,
+  to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
+  amount: util.toWei('1'), // 1 ETH/LSK
+  client: pannaClient,
+  chain: chain.lisk
+});
+
+console.log('Transfer complete:', result.transactionHash);
+```
+
+**Transfer ERC-20 Tokens:**
+
+```ts
+import { transaction, util, chain } from 'panna-sdk';
+
+// Transfer ERC-20 tokens from MetaMask
+const tokenResult = await transaction.transferBalanceFromExternalWallet({
+  provider: window.ethereum,
+  from: userAddress,
+  to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
+  amount: BigInt(100_000_000), // 100 tokens (assuming 6 decimals)
+  client: pannaClient,
+  chain: chain.lisk,
+  tokenAddress: '0xTOKEN_CONTRACT_ADDRESS'
+});
+
+console.log('Token transfer complete:', tokenResult.transactionHash);
+```
+
+**With Error Handling:**
+
+```ts
+import { transaction, util, chain, extensions } from 'panna-sdk';
+
+try {
+  // Validate provider first
+  if (!extensions.isEIP1193Provider(window.ethereum)) {
+    throw new Error('Please install MetaMask or a compatible wallet');
+  }
+
+  const accounts = await window.ethereum.request({
+    method: 'eth_requestAccounts'
+  });
+
+  const result = await transaction.transferBalanceFromExternalWallet({
+    provider: window.ethereum,
+    from: accounts[0],
+    to: recipientAddress,
+    amount: util.toWei('0.5'),
+    client: pannaClient,
+    chain: chain.lisk
+  });
+
+  console.log('Success! Transaction hash:', result.transactionHash);
+} catch (error) {
+  if (error.message.includes('User rejected')) {
+    console.error('User cancelled the transaction');
+  } else if (error.message.includes('insufficient funds')) {
+    console.error('Not enough balance to complete transfer');
+  } else {
+    console.error('Transfer failed:', error.message);
+  }
+}
+```
+
+**Key Benefits:**
+
+- Single function for both native and ERC-20 transfers
+- Automatic provider conversion and connection
+- Built-in validation and error handling
+- Works with any EIP-1193 compatible wallet
+
+**Important Notes:**
+
+- For native token transfers, omit `tokenAddress` or set it to the native token constant
+- For ERC-20 transfers, provide the token contract address
+- The `amount` parameter uses the token's smallest unit (wei for native, token decimals for ERC-20)
+- User must approve the transaction in their wallet
+
 ## Gas Management
 
 Gas fees determine transaction speed and cost. The SDK supports both modern (EIP-1559) and legacy gas pricing.
@@ -218,6 +320,7 @@ const tx = transaction.prepareTransaction({
 
 ## Next Steps
 
+- Explore [Extensions Module](../extensions/README.md) for integrating external wallets (MetaMask, WalletConnect, etc.)
 - Explore [Client Module](../client/README.md) for SDK initialization and configuration
 - Explore [Chain Module](../chain/README.md) for configuring networks and RPC endpoints
 - Review [Util Module](../util/README.md) for balance queries and token conversions

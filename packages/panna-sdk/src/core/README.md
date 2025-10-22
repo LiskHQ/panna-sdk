@@ -63,11 +63,16 @@ await wallet.connect({
 
 ### Utilities & Helpers
 
-6. **[Util](../util/README.md)** - Common utility functions
+6. **[Util](./util/README.md)** - Common utility functions
    - Balance queries and conversions
    - Address validation
    - Token metadata fetching
    - Activity tracking
+
+7. **[Extensions](./extensions/README.md)** - External wallet integration
+   - Connect MetaMask, WalletConnect, and other EIP-1193 wallets
+   - Convert between Panna and external wallet formats
+   - Cross-wallet compatibility helpers
 
 ## Installation
 
@@ -166,6 +171,34 @@ const customChain = chain.describeChain({
 });
 ```
 
+### External Wallet Integration
+
+```typescript
+import { extensions, transaction, util } from 'panna-sdk';
+
+// Connect MetaMask or other external wallets
+if (extensions.isEIP1193Provider(window.ethereum)) {
+  const wallet = extensions.fromEIP1193Provider({
+    provider: window.ethereum,
+    walletId: 'io.metamask'
+  });
+
+  const account = await wallet.connect({
+    client: pannaClient,
+    chain: chain.lisk
+  });
+
+  // Transfer from external wallet
+  const result = await transaction.transferBalanceFromExternalWallet({
+    provider: window.ethereum,
+    from: account.address,
+    to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
+    amount: util.toWei('1'),
+    client: pannaClient
+  });
+}
+```
+
 ## Module Documentation
 
 For detailed information about each module, see the individual documentation:
@@ -176,3 +209,4 @@ For detailed information about each module, see the individual documentation:
 - [Chain Module](./chain/README.md) - Network configuration
 - [Onramp Module](./onramp/README.md) - Fiat gateways
 - [Util Module](./util/README.md) - Helper functions
+- [Extensions Module](./extensions/README.md) - External wallet integration
