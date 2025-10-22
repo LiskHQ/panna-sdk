@@ -6,7 +6,10 @@ import {
 } from 'thirdweb';
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
-import type { Abi, Address, Hex } from '../types/external';
+import { DEFAULT_CHAIN, NATIVE_TOKEN_ADDRESS } from '../defaults';
+import { fromEIP1193Provider } from '../extensions';
+import type { Abi, Address, Hex, PreparedTransaction } from '../types/external';
+import { isValidAddress } from '../util/common';
 import { removeUndefined } from '../util/object';
 import type {
   PrepareTransactionParams,
@@ -16,7 +19,8 @@ import type {
   GetContractParams,
   GetContractResult,
   SendTransactionParams,
-  SendTransactionResult
+  SendTransactionResult,
+  TransferBalanceFromExternalWalletParams
 } from './types';
 
 /**
@@ -458,6 +462,155 @@ export async function sendTransaction(
     // Re-throw with more context
     throw new Error(
       `Failed to send transaction: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`
+    );
+  }
+}
+
+/**
+ * Transfer balance from an external wallet (e.g., MetaMask, WalletConnect) to a recipient address
+ *
+ * This function enables transfers from external wallet providers that implement the EIP-1193 standard.
+ * It can transfer either native tokens (ETH/LSK) or ERC20 tokens. The function handles all the necessary
+ * steps: provider conversion, transaction preparation, and execution.
+ *
+ * @param params - Parameters for the transfer
+ * @param params.provider - EIP-1193 compatible provider (e.g., window.ethereum for MetaMask)
+ * @param params.from - The address to send from (must be controlled by the provider)
+ * @param params.to - The recipient address
+ * @param params.amount - The amount to transfer in smallest unit (wei for native, token's smallest unit for ERC20)
+ * @param params.client - The Panna client instance
+ * @param params.chain - (Optional) The chain to execute on (defaults to Lisk mainnet)
+ * @param params.tokenAddress - (Optional) The token contract address (if undefined, transfers native token)
+ * @returns Promise resolving to the transaction result with transaction hash
+ * @throws Error when:
+ *   - Provider is invalid or undefined
+ *   - From, to, or token addresses are invalid
+ *   - Amount is zero or negative
+ *   - User rejects the transaction
+ *   - Insufficient balance
+ *   - Network connectivity issues
+ *
+ * @example
+ * ```typescript
+ * import { transaction, util } from 'panna-sdk/core';
+ *
+ * // 1. Transfer native token (ETH/LSK) from MetaMask
+ * const result = await transaction.transferBalanceFromExternalWallet({
+ *   provider: window.ethereum,
+ *   from: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   to: "0x123...",
+ *   amount: util.toWei("1"), // 1 ETH
+ *   client: pannaClient
+ * });
+ *
+ * console.log("Transaction hash:", result.transactionHash);
+ *
+ * // 2. Transfer ERC20 token from external wallet
+ * const erc20Result = await transaction.transferBalanceFromExternalWallet({
+ *   provider: window.ethereum,
+ *   from: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
+ *   to: "0x123...",
+ *   amount: BigInt(100_000_000), // 100 USDC (6 decimals)
+ *   client: pannaClient,
+ *   chain: chain.lisk,
+ *   tokenAddress: "0xUSDC_CONTRACT_ADDRESS"
+ * });
+ *
+ * // 3. With error handling
+ * try {
+ *   const result = await transaction.transferBalanceFromExternalWallet({
+ *     provider: window.ethereum,
+ *     from: userAddress,
+ *     to: recipientAddress,
+ *     amount: transferAmount,
+ *     client: pannaClient
+ *   });
+ *
+ *   console.log("Transfer successful:", result.transactionHash);
+ * } catch (error) {
+ *   if (error.message.includes("User rejected")) {
+ *     console.error("User cancelled the transaction");
+ *   } else if (error.message.includes("insufficient funds")) {
+ *     console.error("Not enough balance");
+ *   } else {
+ *     console.error("Transfer failed:", error.message);
+ *   }
+ * }
+ * ```
+ */
+export async function transferBalanceFromExternalWallet(
+  params: TransferBalanceFromExternalWalletParams
+): Promise<SendTransactionResult> {
+  const {
+    provider,
+    from,
+    to,
+    amount,
+    client,
+    chain = DEFAULT_CHAIN,
+    tokenAddress
+  } = params;
+
+  // Validation
+  if (!provider) {
+    throw new Error('Provider is required');
+  }
+
+  if (!isValidAddress(from)) {
+    throw new Error(`Invalid 'from' address: ${from}`);
+  }
+
+  if (!isValidAddress(to)) {
+    throw new Error(`Invalid 'to' address: ${to}`);
+  }
+
+  if (tokenAddress && !isValidAddress(tokenAddress)) {
+    throw new Error(`Invalid token address: ${tokenAddress}`);
+  }
+
+  if (amount <= 0n) {
+    throw new Error('Amount must be greater than zero');
+  }
+
+  try {
+    // Convert EIP1193 provider to a wallet, then connect to get an account
+    const wallet = fromEIP1193Provider({ provider });
+    const account = await wallet.connect({ client, chain });
+
+    let transaction: PrepareTransactionResult | PrepareContractCallResult;
+
+    if (tokenAddress && tokenAddress !== NATIVE_TOKEN_ADDRESS) {
+      // ERC20 transfer
+      transaction = prepareContractCall({
+        client,
+        chain,
+        address: tokenAddress,
+        method: 'function transfer(address to, uint256 amount)',
+        params: [to, amount]
+      });
+    } else {
+      // Native token transfer
+      transaction = prepareTransaction({
+        client,
+        chain,
+        to,
+        value: amount
+      });
+    }
+
+    // Send the transaction
+    const result = await sendTransaction({
+      account,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      transaction: transaction as PreparedTransaction<any>
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error(
+      `Failed to transfer balance from external wallet: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`
     );

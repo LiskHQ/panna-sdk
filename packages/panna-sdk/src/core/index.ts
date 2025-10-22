@@ -7,6 +7,7 @@ export * from './util';
 export * from './defaults';
 export * from './onramp';
 export * from './transaction';
+export * from './extensions';
 
 // Also export as namespaces for modular imports
 export * as client from './client';
@@ -16,3 +17,4 @@ export * as transaction from './transaction';
 export * as util from './util';
 export * as onramp from './onramp';
 export * as auth from './auth';
+export * as extensions from './extensions';
