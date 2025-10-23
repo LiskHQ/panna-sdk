@@ -104,7 +104,11 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
         <DialogTitle>Sending</DialogTitle>
       </DialogHeader>
       <div className="flex flex-col items-center gap-3">
-        <Loader2Icon size={80} className="animate-spin" />
+        <Loader2Icon
+          size={80}
+          className="animate-spin"
+          data-testid="loader-icon"
+        />
         <div className="space-y-2 text-center">
           <Typography variant="muted">Processing your transfer...</Typography>
         </div>

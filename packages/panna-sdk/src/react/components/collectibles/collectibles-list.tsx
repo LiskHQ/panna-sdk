@@ -6,13 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
-import {
-  Collectible,
-  ImageType,
-  Token,
-  TokenERC,
-  TokenInstance
-} from 'src/core';
+import { ImageType, Token, TokenERC, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
 import {
@@ -269,7 +263,11 @@ function CollectibleImageRenderer({
       <div className="relative">
         <ImageRenderer instance={instance} />
         {token.type === TokenERC.ERC1155 && (
-          <Badge className="absolute right-2 bottom-2" variant="secondary">
+          <Badge
+            className="absolute right-2 bottom-2"
+            variant="secondary"
+            data-testid="collectible-quantity-badge"
+          >
             {instance.value}
           </Badge>
         )}
