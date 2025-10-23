@@ -6,7 +6,8 @@ const tokenInstanceSchema = z.object({
   id: z.string().min(1, 'Token instance ID is required'),
   imageType: z.nativeEnum(ImageType),
   image: z.string().nullable(),
-  name: z.string().min(1, 'Token name is required').optional()
+  name: z.string().min(1, 'Token name is required').optional(),
+  value: z.string().min(1, 'Token instance value is required').nullable()
 });
 
 const tokenSchema = z.object({
@@ -22,15 +23,36 @@ const tokenSchema = z.object({
   icon: z.string().nullable()
 });
 
-export const sendCollectibleFormSchema = z.object({
-  collectible: tokenInstanceSchema,
-  token: tokenSchema,
-  recipientAddress: z
-    .string()
-    .min(1, 'Recipient address is required')
-    .refine(isValidAddress, {
-      message: 'Please enter a valid address'
-    })
-});
+export const sendCollectibleFormSchema = z
+  .object({
+    collectible: tokenInstanceSchema,
+    token: tokenSchema,
+    recipientAddress: z
+      .string()
+      .min(1, 'Recipient address is required')
+      .refine(isValidAddress, {
+        message: 'Please enter a valid address'
+      }),
+    amount: z
+      .string()
+      .min(1, 'Amount is required')
+      .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+        message: 'Amount must be a number greater than 0'
+      })
+  })
+  .superRefine((data, ctx) => {
+    const amountNum = Number(data.amount);
+    if (
+      (data.collectible?.value &&
+        amountNum > Number(data.collectible?.value)) ||
+      (!data.collectible?.value && amountNum > 1)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Amount must not be greater than max available',
+        path: ['amount']
+      });
+    }
+  });
 
 export type SendCollectibleFormData = z.infer<typeof sendCollectibleFormSchema>;

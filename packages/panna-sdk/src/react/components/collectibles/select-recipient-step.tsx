@@ -10,6 +10,7 @@ import {
   FormMessage
 } from '../ui/form';
 import { Input } from '../ui/input';
+import { Typography } from '../ui/typography';
 import { SendCollectibleFormData } from './schema';
 
 type SelectRecipientStepProps = {
@@ -18,7 +19,19 @@ type SelectRecipientStepProps = {
 
 export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
   const { next } = useDialogStepper();
-  const { recipientAddress } = form.watch();
+  const { recipientAddress, collectible } = form.watch();
+
+  const handleSubmit = async () => {
+    const isFieldValid = await form.trigger();
+    if (isFieldValid) {
+      next();
+    }
+  };
+
+  const handleMaxValue = () => {
+    const maxValue = collectible?.value ?? '1';
+    form.setValue('amount', maxValue);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -38,7 +51,52 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
           </FormItem>
         )}
       />
-      <Button type="button" onClick={() => next()} disabled={!recipientAddress}>
+      <FormField
+        control={form.control}
+        name="amount"
+        render={({ field }) => (
+          <FormItem className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between">
+                <FormLabel>Quantity</FormLabel>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  className="bg-muted hover:bg-border! h-6 p-2"
+                  onClick={() => handleMaxValue()}
+                >
+                  Max
+                </Button>
+              </div>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Quantity"
+                  type="number"
+                  min={1}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow digits to a maximum of 4 characters
+                    if (/^\d{1,4}$/.test(value)) {
+                      field.onChange(value);
+                    }
+                  }}
+                />
+              </FormControl>
+            </div>
+            <Typography variant="muted" className="text-xs">
+              Max {collectible?.value ?? 1} available
+            </Typography>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <Button
+        type="button"
+        onClick={() => handleSubmit()}
+        disabled={!recipientAddress}
+      >
         Next
       </Button>
     </div>

@@ -17,7 +17,6 @@ import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 import { SendCollectibleFormData } from './schema';
 
-const DEFAULT_ERC1155_VALUE = 1;
 const DEFAULT_ERC1155_DATA = '0x';
 
 type ProcessingStepProps = {
@@ -29,7 +28,7 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
   const { next, goToStep, lastStep } = useDialogStepper();
   const account = useActiveAccount();
   const initializeTokenSend = useRef(true);
-  const { collectible, token, recipientAddress } = form.getValues();
+  const { collectible, token, recipientAddress, amount } = form.getValues();
 
   // TODO: Possibly create hook for this logic
   useEffect(() => {
@@ -58,7 +57,7 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
           account?.address as Address,
           recipientAddress as Address,
           BigInt(collectible.id),
-          DEFAULT_ERC1155_VALUE,
+          amount,
           DEFAULT_ERC1155_DATA
         ],
         address: token.address as Address

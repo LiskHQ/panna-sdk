@@ -27,7 +27,8 @@ export function SendCollectibleForm({
     defaultValues: {
       collectible: activeCollectible,
       token: activeToken,
-      recipientAddress: ''
+      recipientAddress: '',
+      amount: '0'
     }
   });
 
