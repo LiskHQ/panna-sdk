@@ -1,8 +1,8 @@
 import * as thirdweb from 'thirdweb';
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
+import * as extensions from '../extensions';
 import type { Address, EIP1193Provider } from '../types/external';
-import { EIP1193 } from '../types/external';
 import {
   prepareTransaction,
   prepareContractCall,
@@ -20,12 +20,10 @@ jest.mock('thirdweb', () => ({
   sendTransaction: jest.fn()
 }));
 
-// Mock EIP1193.fromProvider
-jest.mock('../types/external', () => ({
-  ...jest.requireActual('../types/external'),
-  EIP1193: {
-    fromProvider: jest.fn()
-  }
+// Mock extensions module
+jest.mock('../extensions', () => ({
+  ...jest.requireActual('../extensions'),
+  fromEIP1193Provider: jest.fn()
 }));
 
 jest.mock('./transaction', () => jest.requireActual('./transaction'));
@@ -829,7 +827,7 @@ describe('Transaction Functions', () => {
       jest.clearAllMocks();
       // Reset mock wallet connect to resolve with mockAccount
       mockWallet.connect.mockResolvedValue(mockAccount);
-      (EIP1193.fromProvider as jest.Mock).mockReturnValue(mockWallet);
+      (extensions.fromEIP1193Provider as jest.Mock).mockReturnValue(mockWallet);
     });
 
     describe('validation', () => {
@@ -948,7 +946,7 @@ describe('Transaction Functions', () => {
 
         const result = await transferBalanceFromExternalWallet(params);
 
-        expect(EIP1193.fromProvider).toHaveBeenCalledWith({
+        expect(extensions.fromEIP1193Provider).toHaveBeenCalledWith({
           provider: mockProvider
         });
         expect(mockWallet.connect).toHaveBeenCalledWith({
@@ -1032,7 +1030,7 @@ describe('Transaction Functions', () => {
 
         const result = await transferBalanceFromExternalWallet(params);
 
-        expect(EIP1193.fromProvider).toHaveBeenCalledWith({
+        expect(extensions.fromEIP1193Provider).toHaveBeenCalledWith({
           provider: mockProvider
         });
         expect(mockWallet.connect).toHaveBeenCalledWith({
