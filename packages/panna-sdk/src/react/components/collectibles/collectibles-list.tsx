@@ -5,7 +5,7 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import {
   Collectible,
   ImageType,
@@ -27,6 +27,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '../ui/accordion';
+import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
 import { CustomMediaRenderer } from '../ui/custom-media-renderer';
 import { Skeleton } from '../ui/skeleton';
@@ -265,7 +266,14 @@ function CollectibleImageRenderer({
       onClick={handleClick}
       className="h-full w-full cursor-pointer border-none bg-transparent"
     >
-      <ImageRenderer instance={instance} />
+      <div className="relative">
+        <ImageRenderer instance={instance} />
+        {token.type === TokenERC.ERC1155 && (
+          <Badge className="absolute right-2 bottom-2" variant="secondary">
+            {instance.value}
+          </Badge>
+        )}
+      </div>
     </button>
   );
 }
