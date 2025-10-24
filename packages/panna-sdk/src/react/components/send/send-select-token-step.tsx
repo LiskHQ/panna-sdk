@@ -31,7 +31,7 @@ import { SendFormData } from './schema';
 
 const MAX_AMOUNT_DIGITS = 15;
 const DIGIT_EXTRACTION_REGEX = /(\d+)/g;
-const AMOUNT_FORMAT_REGEX = /^\d+(\.\d+)?$/;
+const AMOUNT_INPUT_REGEX = /^\d*\.?\d*$/;
 
 type SendSelectTokenStepProps = {
   form: UseFormReturn<SendFormData>;
@@ -284,12 +284,6 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
                 onChange={(e) => {
                   const value = e.target.value;
 
-                  // Allow empty string
-                  if (value === '') {
-                    field.onChange(value);
-                    return;
-                  }
-
                   // Count the number of digits
                   const digits = value.match(DIGIT_EXTRACTION_REGEX);
                   const numDigits = digits
@@ -298,7 +292,7 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
 
                   // Only allow digits, single period, and max MAX_AMOUNT_DIGITS
                   if (
-                    AMOUNT_FORMAT_REGEX.test(value) &&
+                    AMOUNT_INPUT_REGEX.test(value) &&
                     numDigits <= MAX_AMOUNT_DIGITS
                   ) {
                     field.onChange(value);
