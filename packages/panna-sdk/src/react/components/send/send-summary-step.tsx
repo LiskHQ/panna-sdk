@@ -1,10 +1,6 @@
 import { DialogTitle } from '@radix-ui/react-dialog';
-import { CheckCircleIcon } from 'lucide-react';
-import { useMemo } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FiatCurrency } from 'src/core';
-import { useActiveWallet } from 'thirdweb/react';
-import { SmartWalletOptions } from 'thirdweb/wallets';
 import { currencyMap } from '@/consts/currencies';
 import { Button } from '../ui/button';
 import { DialogHeader } from '../ui/dialog';
@@ -18,31 +14,8 @@ type SendSummaryStepProps = {
 
 export function SendSummaryStep({ form }: SendSummaryStepProps) {
   const { next } = useDialogStepper();
-  const activeWallet = useActiveWallet();
   const currency = (form.getValues('tokenInfo.fiatBalance.currency') ||
     FiatCurrency.USD) as FiatCurrency;
-
-  const isGasSponsored = useMemo(() => {
-    const config = activeWallet?.getConfig();
-    if (!config) {
-      return false;
-    }
-
-    const smartAccountConfig = (
-      config as unknown as { smartAccount: SmartWalletOptions }
-    ).smartAccount;
-
-    if (!smartAccountConfig) {
-      return false;
-    }
-
-    // Check for sponsorGas property (handling both sponsorGas and legacy gasless)
-    return 'sponsorGas' in smartAccountConfig
-      ? smartAccountConfig.sponsorGas
-      : 'gasless' in smartAccountConfig
-        ? smartAccountConfig.gasless
-        : false;
-  }, [activeWallet]);
 
   const renderCryptoAmount = () => {
     const cryptoAmount = form.getValues('cryptoAmount');
@@ -70,12 +43,6 @@ export function SendSummaryStep({ form }: SendSummaryStepProps) {
           {form.getValues('recipientAddress')}
         </Typography>
       </div>
-      {isGasSponsored && (
-        <div className="flex items-center gap-2">
-          <CheckCircleIcon size={16} className="text-muted-foreground" />
-          <Typography variant="muted">Gas sponsored</Typography>
-        </div>
-      )}
       <Button type="button" onClick={() => next({ hideBackButton: true })}>
         Send
       </Button>
