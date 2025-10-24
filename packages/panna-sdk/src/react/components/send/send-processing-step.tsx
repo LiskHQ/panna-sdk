@@ -1,5 +1,5 @@
 import { Loader2Icon } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import {
   liskSepolia,
@@ -19,6 +19,10 @@ import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
 
+const TRANSACTION_TIMEOUT_MS = 10_000; // 10 seconds
+const TRANSACTION_TIMEOUT_MESSAGE =
+  'Transaction is taking longer than expected. Please wait...';
+
 type SendProcessingStepProps = {
   form: UseFormReturn<SendFormData>;
 };
@@ -30,6 +34,16 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
   const initializeTokenSend = useRef(true);
   const tokenData = form.getValues('tokenInfo.token');
   const cryptoAmount = form.getValues('cryptoAmount') || '0';
+  const [showTimeoutMessage, setShowTimeoutMessage] = useState(false);
+
+  // Show timeout message after TRANSACTION_TIMEOUT_MS
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowTimeoutMessage(true);
+    }, TRANSACTION_TIMEOUT_MS);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // @Todo: Possibly create hook for this logic
   useEffect(() => {
@@ -100,6 +114,11 @@ export function SendProcessingStep({ form }: SendProcessingStepProps) {
         <Loader2Icon size={80} className="animate-spin" />
         <div className="space-y-2 text-center">
           <Typography variant="muted">Processing your transfer...</Typography>
+          {showTimeoutMessage && (
+            <Typography variant="muted">
+              {TRANSACTION_TIMEOUT_MESSAGE}
+            </Typography>
+          )}
         </div>
       </div>
     </div>
