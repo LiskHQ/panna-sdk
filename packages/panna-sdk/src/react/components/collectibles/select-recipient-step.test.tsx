@@ -39,10 +39,6 @@ jest.mock('../ui/form', () => ({
   FormMessage: () => <span data-testid="form-message" />
 }));
 
-// jest.mock('../ui/input', () => ({
-//   Input: (props: any) => <input {...props} />
-// }));
-
 const mockNext = jest.fn();
 
 describe('SelectRecipientStep', () => {
