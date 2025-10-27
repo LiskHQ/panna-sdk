@@ -676,7 +676,9 @@ console.log('Token transfer complete:', tokenResult.transactionHash);
 
 ## Next Steps
 
-- Explore [Transaction Module](../transaction/README.md) for sending transactions from external wallets
-- Review [Wallet Module](../wallet/README.md) for Panna account management
-- Check [Client Module](../client/README.md) for SDK initialization
-- Learn about [Chain Module](../chain/README.md) for network configuration
+- [Client Module](../client/README.md) - SDK initialization
+- [Wallet Module](../wallet/README.md) - Panna account management
+- [Transaction Module](../transaction/README.md) - Sending transactions from external wallets
+- [Chain Module](../chain/README.md) - Network configuration
+- [Onramp Module](../onramp/README.md) - Fiat-to-crypto purchases
+- [Util Module](../util/README.md) - Helper functions for common operations

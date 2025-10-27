@@ -320,9 +320,9 @@ const tx = transaction.prepareTransaction({
 
 ## Next Steps
 
-- Explore [Extensions Module](../extensions/README.md) for integrating external wallets (MetaMask, WalletConnect, etc.)
-- Explore [Client Module](../client/README.md) for SDK initialization and configuration
-- Explore [Chain Module](../chain/README.md) for configuring networks and RPC endpoints
-- Review [Util Module](../util/README.md) for balance queries and token conversions
-- Learn about [Wallet Module](../wallet/README.md) for user account management and authentication
-- Check [Onramp Module](../onramp/README.md) for integrating fiat-to-crypto purchases
+- [Client Module](../client/README.md) - SDK initialization and configuration
+- [Wallet Module](../wallet/README.md) - User account management and authentication
+- [Chain Module](../chain/README.md) - Configuring networks and RPC endpoints
+- [Onramp Module](../onramp/README.md) - Integrating fiat-to-crypto purchases
+- [Util Module](../util/README.md) - Balance queries and token conversions
+- [Extensions Module](../extensions/README.md) - Integrating external wallets (MetaMask, WalletConnect, etc.)

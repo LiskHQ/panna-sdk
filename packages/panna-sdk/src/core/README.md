@@ -71,7 +71,7 @@ await wallet.connect({
 
 7. **[Extensions](./extensions/README.md)** - External wallet integration
    - Connect MetaMask, WalletConnect, and other EIP-1193 wallets
-   - Convert between Panna and external wallet formats
+   - Convert between Panna and external wallet formats for example converting from Panna wallet to EIP-1193 provider or vice-versa.
    - Cross-wallet compatibility helpers
 
 ## Installation
@@ -178,12 +178,12 @@ import { extensions, transaction, util } from 'panna-sdk';
 
 // Connect MetaMask or other external wallets
 if (extensions.isEIP1193Provider(window.ethereum)) {
-  const wallet = extensions.fromEIP1193Provider({
+  const eoaWallet = extensions.fromEIP1193Provider({
     provider: window.ethereum,
     walletId: 'io.metamask'
   });
 
-  const account = await wallet.connect({
+  const eoaAccount = await eoaWallet.connect({
     client: pannaClient,
     chain: chain.lisk
   });
@@ -191,8 +191,8 @@ if (extensions.isEIP1193Provider(window.ethereum)) {
   // Transfer from external wallet
   const result = await transaction.transferBalanceFromExternalWallet({
     provider: window.ethereum,
-    from: account.address,
-    to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
+    from: eoaAccount.address, // Connected EOA wallet from which user signed in to their Panna wallet account
+    to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e', // Panna wallet address
     amount: util.toWei('1'),
     client: pannaClient
   });

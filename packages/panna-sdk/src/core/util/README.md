@@ -366,8 +366,9 @@ socialButtons.forEach((button) => {
 
 ## Next Steps
 
-- Explore the [Wallet Module](../wallet/README.md) for user authentication and account management
-- Check the [Transaction Module](../transaction/README.md) for sending tokens and smart contract interactions
-- Review the [Client Module](../client/README.md) for SDK initialization and configuration
-- Learn about [Onramp Module](../onramp/README.md) for fiat-to-crypto purchases
-- Learn about [Chain Module](../chain/README.md) for network configuration
+- [Client Module](../client/README.md) - SDK initialization and configuration
+- [Wallet Module](../wallet/README.md) - User authentication and account management
+- [Transaction Module](../transaction/README.md) - Sending tokens and smart contract interactions
+- [Chain Module](../chain/README.md) - Network configuration
+- [Onramp Module](../onramp/README.md) - Fiat-to-crypto purchases
+- [Extensions Module](../extensions/README.md) - External wallet integration

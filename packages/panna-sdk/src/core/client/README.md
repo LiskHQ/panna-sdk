@@ -214,8 +214,9 @@ const myClient = getClient();
 
 Now that you have a configured client, explore these SDK modules:
 
-- **[Wallet](../wallet/README.md)** - User authentication and account management
-- **[Transactions](../transaction/README.md)** - Send and prepare blockchain transactions
-- **[Chain](../chain/README.md)** - Configure supported blockchain networks
-- **[Onramp](../onramp/README.md)** - Integrate fiat-to-crypto payments
-- **[Util](../util/README.md)** - Helper functions for common operations
+- [Wallet Module](../wallet/README.md) - User authentication and account management
+- [Transaction Module](../transaction/README.md) - Send and prepare blockchain transactions
+- [Chain Module](../chain/README.md) - Configure supported blockchain networks
+- [Onramp Module](../onramp/README.md) - Integrate fiat-to-crypto payments
+- [Util Module](../util/README.md) - Helper functions for common operations
+- [Extensions Module](../extensions/README.md) - External wallet integration
