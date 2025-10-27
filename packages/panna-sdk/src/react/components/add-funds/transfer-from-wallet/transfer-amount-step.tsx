@@ -57,13 +57,11 @@ const renderFiatAmount = (
 // Amount display component for input endAdornment
 function AmountDisplay({
   tokenInfo,
-  primaryInput,
   secondaryInput,
   secondaryAmount,
   handleInputSwap
 }: {
   tokenInfo: TokenBalance;
-  primaryInput: 'crypto' | 'fiat';
   secondaryInput: 'crypto' | 'fiat';
   secondaryAmount: string;
   handleInputSwap: () => void;
@@ -259,7 +257,6 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
                   tokenInfo ? (
                     <AmountDisplay
                       tokenInfo={tokenInfo}
-                      primaryInput={primaryInput}
                       secondaryInput={secondaryInput}
                       secondaryAmount={secondaryAmount}
                       handleInputSwap={handleInputSwap}

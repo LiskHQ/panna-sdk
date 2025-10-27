@@ -1,7 +1,8 @@
-import { CreditCardIcon, WalletIcon } from 'lucide-react';
+import { BanknoteIcon, WalletIcon } from 'lucide-react';
 import { useExternalWallet } from '../../hooks';
 import { Card } from '../ui/card';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
+import { Label } from '../ui/label';
 import { Typography } from '../ui/typography';
 
 type AddFundsEntryStepProps = {
@@ -32,57 +33,46 @@ export function AddFundsEntryStep({
       </DialogHeader>
 
       <div className="flex flex-col gap-4">
-        <Typography variant="muted" className="text-center">
-          Choose how you want to add funds
-        </Typography>
-
-        {/* Buy Crypto Option */}
-        <Card
-          className="hover:bg-muted/50 cursor-pointer transition-colors"
-          onClick={handleBuyClick}
-        >
-          <div className="flex items-start gap-4 p-6">
-            <div className="bg-primary/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-              <CreditCardIcon className="text-primary h-6 w-6" />
-            </div>
+        <div className="flex flex-col gap-4">
+          <Label>Buy</Label>
+          <Card
+            className="hover:bg-muted/50 flex flex-row items-center gap-4 px-3 py-3 transition-colors"
+            onClick={handleBuyClick}
+          >
+            <BanknoteIcon className="text-primary size-8" />
             <div className="flex-1">
-              <Typography variant="large" className="font-semibold">
+              <Typography as="h1" variant="small">
                 Buy crypto
               </Typography>
-              <Typography variant="muted" className="mt-1 text-sm">
-                Purchase cryptocurrency using your credit card or other payment
-                methods
+              <Typography variant="muted">
+                Buy using your preferred payment method
               </Typography>
             </div>
-          </div>
-        </Card>
-
-        {/* Transfer from Wallet Option */}
-        <Card
-          className={`transition-colors ${
-            hasExternalWallet
-              ? 'hover:bg-muted/50 cursor-pointer'
-              : 'cursor-not-allowed opacity-50'
-          }`}
-          onClick={handleTransferClick}
-        >
-          <div className="flex items-start gap-4 p-6">
-            <div className="bg-primary/10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full">
-              <WalletIcon className="text-primary h-6 w-6" />
-            </div>
+          </Card>
+        </div>
+        <div className="flex flex-col gap-4">
+          <Label>Transfer from wallet</Label>
+          <Card
+            className={`flex flex-row items-center gap-4 px-3 py-3 transition-colors ${
+              hasExternalWallet
+                ? 'hover:bg-muted/50 cursor-pointer'
+                : 'cursor-not-allowed opacity-50'
+            }`}
+            onClick={handleTransferClick}
+          >
+            <WalletIcon className="text-primary size-8" />
             <div className="flex-1">
-              <Typography variant="large" className="font-semibold">
+              <Typography as="h1" variant="small">
                 Transfer from wallet
               </Typography>
-              <Typography variant="muted" className="mt-1 text-sm">
+              <Typography variant="muted">
                 {hasExternalWallet
                   ? 'Transfer assets from your connected external wallet'
                   : 'Connect an external wallet (e.g., MetaMask) to transfer assets'}
               </Typography>
             </div>
-          </div>
-        </Card>
-
+          </Card>
+        </div>
         {!hasExternalWallet && (
           <div className="bg-muted/50 rounded-lg p-3">
             <Typography
