@@ -37,15 +37,15 @@ In this guide, you will:
 ## Quick Start
 
 ```ts
-import { extensions, client, chain } from 'panna-sdk/core';
+import { extensions, client, chain, WalletId } from 'panna-sdk/core';
 
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
-// Convert MetaMask to Panna wallet
+// Convert MetaMask to Panna wallet using WalletId enum
 if (extensions.isEIP1193Provider(window.ethereum)) {
   const wallet = extensions.fromEIP1193Provider({
     provider: window.ethereum,
-    walletId: 'io.metamask'
+    walletId: WalletId.MetaMask // Use enum for type-safe wallet IDs
   });
 
   const account = await wallet.connect({
@@ -69,6 +69,90 @@ EIP-1193 is the Ethereum standard for wallet provider APIs. It defines a consist
 
 The Extensions module bridges EIP-1193 providers with Panna SDK's wallet system.
 
+## Wallet Identifiers (EIP-6963)
+
+The SDK provides a `WalletId` enum with reverse DNS (rDNS) identifiers for popular wallets, following the [EIP-6963 standard](https://eips.ethereum.org/EIPS/eip-6963) for Multi Injected Provider Discovery.
+
+### Available Wallet IDs
+
+The SDK includes identifiers for the most commonly supported wallets:
+
+```ts
+import { WalletId, getWalletName, isWalletId } from 'panna-sdk/core';
+
+// Use enum values for type-safe wallet identification
+console.log(WalletId.MetaMask); // "io.metamask"
+console.log(WalletId.Coinbase); // "com.coinbase.wallet"
+console.log(WalletId.Trust); // "com.trustwallet.app"
+console.log(WalletId.Rainbow); // "me.rainbow"
+console.log(WalletId.Phantom); // "app.phantom"
+console.log(WalletId.Adapter); // "adapter" (fallback for other wallets)
+
+// Get human-readable wallet name
+console.log(getWalletName(WalletId.MetaMask)); // "MetaMask"
+console.log(getWalletName(WalletId.Coinbase)); // "Coinbase Wallet"
+
+// Validate wallet ID strings
+if (isWalletId('io.metamask')) {
+  console.log('Valid wallet ID');
+}
+```
+
+**Supported Wallets:**
+
+| Wallet          | Wallet ID             | WalletId Enum       |
+| --------------- | --------------------- | ------------------- |
+| MetaMask        | `io.metamask`         | `WalletId.MetaMask` |
+| Coinbase Wallet | `com.coinbase.wallet` | `WalletId.Coinbase` |
+| Trust Wallet    | `com.trustwallet.app` | `WalletId.Trust`    |
+| Rainbow         | `me.rainbow`          | `WalletId.Rainbow`  |
+| Phantom         | `app.phantom`         | `WalletId.Phantom`  |
+| Other Wallets   | `adapter`             | `WalletId.Adapter`  |
+
+### Why Use WalletId Enum?
+
+1. **Type Safety**: Autocomplete and compile-time checking prevent typos
+2. **Standardization**: Follows EIP-6963 reverse DNS naming convention
+3. **Consistency**: Ensures stable wallet identifiers across your app
+4. **Maintainability**: Centralized wallet ID management
+
+### Example: Multi-Wallet Detection
+
+```ts
+import { WalletId, getWalletName, fromEIP1193Provider } from 'panna-sdk/core';
+
+function detectWallet() {
+  if (!window.ethereum) return null;
+
+  let walletId: WalletId = WalletId.Adapter; // Default fallback
+
+  // Detect specific wallet
+  if (window.ethereum.isMetaMask) {
+    walletId = WalletId.MetaMask;
+  } else if (window.ethereum.isCoinbaseWallet) {
+    walletId = WalletId.Coinbase;
+  } else if (window.ethereum.isTrust) {
+    walletId = WalletId.Trust;
+  }
+
+  return {
+    walletId,
+    walletName: getWalletName(walletId),
+    provider: window.ethereum
+  };
+}
+
+const detected = detectWallet();
+if (detected) {
+  console.log(`Detected: ${detected.walletName}`);
+
+  const wallet = fromEIP1193Provider({
+    provider: detected.provider,
+    walletId: detected.walletId
+  });
+}
+```
+
 ## Converting External Providers to Panna Wallets
 
 ### 1. MetaMask Integration
@@ -76,7 +160,14 @@ The Extensions module bridges EIP-1193 providers with Panna SDK's wallet system.
 Connect MetaMask as a Panna wallet to use all SDK features.
 
 ```ts
-import { extensions, client, chain, transaction, util } from 'panna-sdk/core';
+import {
+  extensions,
+  client,
+  chain,
+  transaction,
+  util,
+  WalletId
+} from 'panna-sdk/core';
 
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
@@ -86,10 +177,10 @@ if (!window.ethereum?.isMetaMask) {
   throw new Error('Please install MetaMask');
 }
 
-// Create wallet from MetaMask provider
+// Create wallet from MetaMask provider using WalletId enum
 const wallet = extensions.fromEIP1193Provider({
   provider: window.ethereum,
-  walletId: 'io.metamask'
+  walletId: WalletId.MetaMask
 });
 
 // Connect to get account
@@ -130,7 +221,7 @@ const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 // Initialize WalletConnect provider
 const walletConnectProvider = await EthereumProvider.init({
   projectId: 'your-walletconnect-project-id',
-  chains: [1135], // Lisk mainnet
+  chains: [chain.lisk.id], // Lisk mainnet
   showQrModal: true,
   metadata: {
     name: 'Your App Name',
@@ -169,7 +260,7 @@ const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 // Detect available providers
 const detectProvider = () => {
   if (window.ethereum?.isCoinbaseWallet) {
-    return { provider: window.ethereum, id: 'coinbase' };
+    return { provider: window.ethereum, id: 'com.coinbase.wallet' };
   } else if (window.ethereum?.isMetaMask) {
     return { provider: window.ethereum, id: 'io.metamask' };
   } else if (window.ethereum) {
@@ -337,13 +428,13 @@ function detectWalletProvider() {
     walletId = 'io.metamask';
     walletName = 'MetaMask';
   } else if (window.ethereum.isCoinbaseWallet) {
-    walletId = 'coinbase';
+    walletId = 'com.coinbase.wallet';
     walletName = 'Coinbase Wallet';
   } else if (window.ethereum.isRabby) {
-    walletId = 'rabby';
+    walletId = 'io.rabby';
     walletName = 'Rabby';
   } else if (window.ethereum.isBraveWallet) {
-    walletId = 'brave';
+    walletId = 'com.brave.wallet';
     walletName = 'Brave Wallet';
   }
 
@@ -407,7 +498,7 @@ async function connectWallet(option: WalletOption) {
       });
       await pannaAccount.connect({
         client: pannaClient,
-        strategy: 'email',
+        strategy: wallet.LoginStrategy.EMAIL,
         email: 'user@example.com'
       });
       account = pannaAccount;
@@ -420,7 +511,7 @@ async function connectWallet(option: WalletOption) {
       });
       await pannaAccount.connect({
         client: pannaClient,
-        strategy: 'google'
+        strategy: wallet.LoginStrategy.GOOGLE
       });
       account = pannaAccount;
       break;
@@ -497,12 +588,12 @@ const accounts = await window.ethereum.request({
 });
 const userAddress = accounts[0];
 
-// Transfer native tokens (ETH/LSK)
+// Transfer native tokens (ETH)
 const result = await transaction.transferBalanceFromExternalWallet({
   provider: window.ethereum,
   from: userAddress,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
-  amount: util.toWei('1'), // 1 ETH/LSK
+  amount: util.toWei('1'), // 1 ETH
   client: pannaClient,
   chain: chain.lisk
 });

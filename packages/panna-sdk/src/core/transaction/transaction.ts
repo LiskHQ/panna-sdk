@@ -472,7 +472,7 @@ export async function sendTransaction(
  * Transfer balance from an external wallet (e.g., MetaMask, WalletConnect) to a recipient address
  *
  * This function enables transfers from external wallet providers that implement the EIP-1193 standard.
- * It can transfer either native tokens (ETH/LSK) or ERC20 tokens. The function handles all the necessary
+ * It can transfer either native tokens (ETH) or ERC20 tokens. The function handles all the necessary
  * steps: provider conversion, transaction preparation, and execution.
  *
  * @param params - Parameters for the transfer
@@ -496,7 +496,7 @@ export async function sendTransaction(
  * ```typescript
  * import { transaction, util } from 'panna-sdk/core';
  *
- * // 1. Transfer native token (ETH/LSK) from MetaMask
+ * // 1. Transfer native token (ETH) from MetaMask
  * const result = await transaction.transferBalanceFromExternalWallet({
  *   provider: window.ethereum,
  *   from: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",

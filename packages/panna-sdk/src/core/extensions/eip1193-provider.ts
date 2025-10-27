@@ -6,11 +6,53 @@
  *
  * @module extensions/eip1193-provider
  */
+import type { ThirdwebClient } from 'thirdweb';
+import type { Chain } from 'thirdweb/chains';
 import { EIP1193 } from 'thirdweb/wallets';
+import type { Wallet, WalletId } from 'thirdweb/wallets';
+import type { Account } from 'viem/accounts';
 import type { EIP1193Provider } from '../types/external';
 
 /**
- * Convert an EIP-1193 compatible provider into a wallet instance
+ * Options for creating a wallet from an EIP-1193 provider
+ */
+export type FromEIP1193ProviderOptions = {
+  /**
+   * The EIP-1193 compatible provider (e.g., window.ethereum) or a function that returns one
+   */
+  provider:
+    | EIP1193Provider
+    | ((params?: { chainId?: number }) => Promise<EIP1193Provider>);
+  /**
+   * Optional wallet identifier (defaults to "adapter")
+   */
+  walletId?: WalletId;
+};
+
+/**
+ * Options for converting a wallet to an EIP-1193 provider
+ */
+export type ToEIP1193ProviderOptions = {
+  /**
+   * The wallet to convert
+   */
+  wallet: Wallet;
+  /**
+   * The chain to use for RPC requests
+   */
+  chain: Chain;
+  /**
+   * The client instance
+   */
+  client: ThirdwebClient;
+  /**
+   * Optional custom connect handler to override default connection behavior
+   */
+  connectOverride?: (wallet: Wallet) => Promise<Account>;
+};
+
+/**
+ * Convert an EIP-1193 compatible provider into a Panna wallet instance
  *
  * This function creates a wallet from any EIP-1193 compatible provider
  * (such as window.ethereum for MetaMask, WalletConnect, Coinbase Wallet, etc.).
@@ -23,12 +65,12 @@ import type { EIP1193Provider } from '../types/external';
  *
  * @example
  * ```typescript
- * import { fromEIP1193Provider } from 'panna-sdk/core';
+ * import { fromEIP1193Provider, WalletId } from 'panna-sdk/core';
  *
- * // Create a wallet from MetaMask
+ * // Create a wallet from MetaMask using WalletId enum
  * const wallet = fromEIP1193Provider({
  *   provider: window.ethereum,
- *   walletId: "io.metamask"
+ *   walletId: WalletId.MetaMask
  * });
  *
  * // Connect the wallet
@@ -56,7 +98,14 @@ import type { EIP1193Provider } from '../types/external';
  * });
  * ```
  */
-export const fromEIP1193Provider = EIP1193.fromProvider;
+export function fromEIP1193Provider(
+  options: FromEIP1193ProviderOptions
+): Wallet {
+  // Type assertion needed due to potential type conflicts in dependencies
+  return EIP1193.fromProvider(
+    options as Parameters<typeof EIP1193.fromProvider>[0]
+  );
+}
 
 /**
  * Convert a wallet or account into an EIP-1193 compatible provider
@@ -112,7 +161,14 @@ export const fromEIP1193Provider = EIP1193.fromProvider;
  * const ethersProvider = new ethers.BrowserProvider(eip1193Provider);
  * ```
  */
-export const toEIP1193Provider = EIP1193.toProvider;
+export function toEIP1193Provider(
+  options: ToEIP1193ProviderOptions
+): EIP1193Provider {
+  // Type assertion needed due to viem version differences between Thirdweb's internal types
+  return EIP1193.toProvider(
+    options as Parameters<typeof EIP1193.toProvider>[0]
+  );
+}
 
 /**
  * Type guard to check if an object is an EIP-1193 compatible provider

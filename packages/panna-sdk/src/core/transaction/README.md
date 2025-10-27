@@ -201,12 +201,12 @@ const accounts = await window.ethereum.request({
 });
 const userAddress = accounts[0];
 
-// Transfer native tokens (ETH/LSK)
+// Transfer native tokens (ETH)
 const result = await transaction.transferBalanceFromExternalWallet({
   provider: window.ethereum,
   from: userAddress,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
-  amount: util.toWei('1'), // 1 ETH/LSK
+  amount: util.toWei('1'), // 1 ETH
   client: pannaClient,
   chain: chain.lisk
 });
@@ -278,9 +278,9 @@ try {
 
 **Important Notes:**
 
-- For native token transfers, omit `tokenAddress` or set it to the native token constant
+- For native token transfers, omit `tokenAddress` or set it to the native token constant (`NATIVE_TOKEN_ADDRESS`)
 - For ERC-20 transfers, provide the token contract address
-- The `amount` parameter uses the token's smallest unit (wei for native, token decimals for ERC-20)
+- The `amount` parameter uses the token's smallest unit (wei for native or token's smallest unit for ERC20)
 - User must approve the transaction in their wallet
 
 ## Gas Management

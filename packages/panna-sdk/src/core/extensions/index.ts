@@ -8,3 +8,4 @@
  */
 
 export * from './eip1193-provider';
+export * from './wallet-ids';
