@@ -2,7 +2,7 @@ import { CheckIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { TokenBalance } from '@/mocks/token-balances';
-import { useTokenBalances } from '../../../hooks';
+import { useExternalWallet, useTokenBalances } from '../../../hooks';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
@@ -19,13 +19,20 @@ export function TransferSelectTokenStep({
   form
 }: TransferSelectTokenStepProps) {
   const { next } = useDialogStepper();
-  const fromAddress = form.watch('fromAddress');
+  const { externalAddress } = useExternalWallet();
   const [selectedToken, setSelectedToken] = useState<TokenBalance | null>(null);
 
+  // Set the external wallet address when component loads
+  useEffect(() => {
+    if (externalAddress) {
+      form.setValue('fromAddress', externalAddress);
+    }
+  }, [externalAddress, form]);
+
   const { data: tokens = [], isLoading } = useTokenBalances(
-    { address: fromAddress },
+    { address: externalAddress || '' },
     {
-      enabled: !!fromAddress
+      enabled: !!externalAddress
     }
   );
 

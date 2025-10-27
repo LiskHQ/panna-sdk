@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { TokenBalance } from '@/mocks/token-balances';
 import { truncateAddress } from '@/utils/address';
-import { useActiveAccount } from '../../../hooks';
+import { useActiveAccount, useExternalWallet } from '../../../hooks';
 import { Button } from '../../ui/button';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
 import { useDialogStepper } from '../../ui/dialog-stepper';
@@ -86,6 +86,7 @@ function AmountDisplay({
 export function TransferAmountStep({ form }: TransferAmountStepProps) {
   const { next } = useDialogStepper();
   const account = useActiveAccount();
+  const { externalWallet } = useExternalWallet();
   const fromAddress = form.watch('fromAddress');
   const tokenInfo = form.watch('tokenInfo') as TokenBalance;
   const amount = form.watch('amount') || '0';
@@ -96,6 +97,19 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
   );
   const [secondaryAmount, setSecondaryAmount] = useState<string>('0');
   const [inputSwap, setInputSwap] = useState<boolean>(false);
+
+  // Get wallet name from wallet ID
+  const getWalletName = () => {
+    if (!externalWallet) return 'External Wallet';
+
+    const walletId = externalWallet.id;
+    if (walletId.includes('metamask')) return 'MetaMask';
+    if (walletId.includes('coinbase')) return 'Coinbase Wallet';
+    if (walletId.includes('walletconnect')) return 'WalletConnect';
+    if (walletId.includes('rainbow')) return 'Rainbow';
+
+    return 'External Wallet';
+  };
 
   // Set the to address (embedded wallet)
   useEffect(() => {
@@ -179,7 +193,7 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
         {/* From */}
         <div className="flex items-center justify-between">
           <Typography variant="small" className="text-muted-foreground">
-            From
+            From ({getWalletName()})
           </Typography>
           <Typography variant="small" className="font-medium">
             {truncateAddress(fromAddress)}

@@ -1,5 +1,6 @@
 import { BanknoteIcon, WalletIcon } from 'lucide-react';
 import { useExternalWallet } from '../../hooks';
+import { truncateAddress } from '../../utils/address';
 import { Card } from '../ui/card';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { Label } from '../ui/label';
@@ -14,7 +15,20 @@ export function AddFundsEntryStep({
   onBuySelected,
   onTransferSelected
 }: AddFundsEntryStepProps) {
-  const { hasExternalWallet } = useExternalWallet();
+  const { hasExternalWallet, externalWallet, externalAddress } =
+    useExternalWallet();
+
+  const getWalletName = () => {
+    if (!externalWallet) return 'External Wallet';
+
+    const walletId = externalWallet.id;
+    if (walletId.includes('metamask')) return 'MetaMask';
+    if (walletId.includes('coinbase')) return 'Coinbase Wallet';
+    if (walletId.includes('walletconnect')) return 'WalletConnect';
+    if (walletId.includes('rainbow')) return 'Rainbow';
+
+    return 'External Wallet';
+  };
 
   const handleBuyClick = () => {
     onBuySelected();
@@ -32,7 +46,7 @@ export function AddFundsEntryStep({
         <DialogTitle>Add funds</DialogTitle>
       </DialogHeader>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-4">
           <Label>Buy</Label>
           <Card
@@ -62,14 +76,26 @@ export function AddFundsEntryStep({
           >
             <WalletIcon className="text-primary size-8" />
             <div className="flex-1">
-              <Typography as="h1" variant="small">
-                Transfer from wallet
-              </Typography>
-              <Typography variant="muted">
-                {hasExternalWallet
-                  ? 'Transfer assets from your connected external wallet'
-                  : 'Connect an external wallet (e.g., MetaMask) to transfer assets'}
-              </Typography>
+              {hasExternalWallet ? (
+                <>
+                  <Typography as="h1" variant="small">
+                    {getWalletName()}
+                  </Typography>
+                  <Typography variant="muted">
+                    {externalAddress ? truncateAddress(externalAddress) : ''}
+                  </Typography>
+                </>
+              ) : (
+                <>
+                  <Typography as="h1" variant="small">
+                    Transfer from wallet
+                  </Typography>
+                  <Typography variant="muted">
+                    Connect an external wallet (e.g., MetaMask) to transfer
+                    assets
+                  </Typography>
+                </>
+              )}
             </div>
           </Card>
         </div>
@@ -79,7 +105,7 @@ export function AddFundsEntryStep({
               variant="small"
               className="text-muted-foreground text-center"
             >
-              💡 Tip: Connect MetaMask or another wallet to enable transfers
+              Tip: Connect MetaMask or another wallet to enable transfers
             </Typography>
           </div>
         )}

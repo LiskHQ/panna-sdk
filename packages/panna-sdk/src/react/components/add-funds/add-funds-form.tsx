@@ -22,7 +22,6 @@ import { TransferAmountStep } from './transfer-from-wallet/transfer-amount-step'
 import { TransferErrorStep } from './transfer-from-wallet/transfer-error-step';
 import { TransferProcessingStep } from './transfer-from-wallet/transfer-processing-step';
 import { TransferSelectTokenStep } from './transfer-from-wallet/transfer-select-token-step';
-import { TransferSelectWalletStep } from './transfer-from-wallet/transfer-select-wallet-step';
 import { TransferSuccessStep } from './transfer-from-wallet/transfer-success-step';
 
 export type AddFundsFormProps = {
@@ -138,9 +137,6 @@ export function AddFundsForm({ onClose, stepperRef }: AddFundsFormProps) {
         <Form {...transferForm}>
           <form className="space-y-6">
             <DialogStepper>
-              <StepperRefProvider stepperRef={stepperRef}>
-                <TransferSelectWalletStep form={transferForm} />
-              </StepperRefProvider>
               <StepperRefProvider stepperRef={stepperRef}>
                 <TransferSelectTokenStep form={transferForm} />
               </StepperRefProvider>
