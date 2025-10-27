@@ -35,9 +35,9 @@ export const sendCollectibleFormSchema = z
       }),
     amount: z
       .string()
-      .min(1, 'Amount is required')
+      .min(1, 'Quantity is required')
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-        message: 'Amount must be a number greater than 0'
+        message: 'Quantity must be a number greater than 0'
       })
   })
   .superRefine((data, ctx) => {
@@ -49,7 +49,7 @@ export const sendCollectibleFormSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Amount must not be greater than max available',
+        message: 'Quantity must not be greater than max available',
         path: ['amount']
       });
     }

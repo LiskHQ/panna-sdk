@@ -161,7 +161,7 @@ describe('ProcessingStep', () => {
         chain: mockChain,
         method:
           'function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes data)',
-        params: [mockAccount.address, '0x456', BigInt('1'), '3', '0x'],
+        params: [mockAccount.address, '0x456', BigInt('1'), BigInt('3'), '0x'],
         address: mockTokenERC1155.address
       });
     });

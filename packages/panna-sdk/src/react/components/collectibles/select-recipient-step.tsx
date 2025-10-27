@@ -78,7 +78,7 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
                   onChange={(e) => {
                     const value = e.target.value;
                     // Only allow digits to a maximum of 4 characters
-                    if (/^\d{1,4}$/.test(value)) {
+                    if (/^\d{0,4}$/.test(value)) {
                       field.onChange(value);
                     }
                   }}

@@ -57,7 +57,7 @@ export function ProcessingStep({ form }: ProcessingStepProps) {
           account?.address as Address,
           recipientAddress as Address,
           BigInt(collectible.id),
-          amount,
+          BigInt(amount),
           DEFAULT_ERC1155_DATA
         ],
         address: token.address as Address

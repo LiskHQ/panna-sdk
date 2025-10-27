@@ -9,25 +9,6 @@ jest.mock('../ui/dialog-stepper', () => ({
   useDialogStepper: jest.fn()
 }));
 
-// jest.mock('../ui/button', () => ({
-//   Button: ({ children, onClick }: any) => (
-//     <button onClick={onClick}>{children}</button>
-//   )
-// }));
-
-// jest.mock('../ui/card', () => ({
-//   Card: ({ children }: any) => <div data-testid="card">{children}</div>,
-//   CardContent: ({ children }: any) => (
-//     <div data-testid="card-content">{children}</div>
-//   )
-// }));
-
-// jest.mock('../ui/typography', () => ({
-//   Typography: ({ children, className }: any) => (
-//     <span className={className}>{children}</span>
-//   )
-// }));
-
 jest.mock('../ui/dialog', () => ({
   DialogHeader: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="dialog-header">{children}</div>
