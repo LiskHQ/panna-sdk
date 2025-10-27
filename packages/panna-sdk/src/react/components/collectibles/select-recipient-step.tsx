@@ -95,7 +95,7 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
       <Button
         type="button"
         onClick={() => handleSubmit()}
-        disabled={!recipientAddress && !amount}
+        disabled={!recipientAddress || !amount}
       >
         Next
       </Button>
