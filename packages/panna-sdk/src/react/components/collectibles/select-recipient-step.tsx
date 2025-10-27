@@ -19,7 +19,7 @@ type SelectRecipientStepProps = {
 
 export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
   const { next } = useDialogStepper();
-  const { recipientAddress, collectible } = form.watch();
+  const { recipientAddress, collectible, amount } = form.watch();
 
   const handleSubmit = async () => {
     const isFieldValid = await form.trigger();
@@ -95,7 +95,7 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
       <Button
         type="button"
         onClick={() => handleSubmit()}
-        disabled={!recipientAddress}
+        disabled={!recipientAddress && !amount}
       >
         Next
       </Button>

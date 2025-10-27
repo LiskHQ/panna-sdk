@@ -42,16 +42,22 @@ export const sendCollectibleFormSchema = z
   })
   .superRefine((data, ctx) => {
     const amountNum = Number(data.amount);
-    if (
-      (data.collectible?.value &&
-        amountNum > Number(data.collectible?.value)) ||
-      (!data.collectible?.value && amountNum > 1)
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Quantity must not be greater than max available',
-        path: ['amount']
-      });
+    if (data.collectible?.value) {
+      if (amountNum > Number(data.collectible.value)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Quantity must not be greater than max available',
+          path: ['amount']
+        });
+      }
+    } else {
+      if (amountNum > 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Quantity must not be greater than max available',
+          path: ['amount']
+        });
+      }
     }
   });
 
