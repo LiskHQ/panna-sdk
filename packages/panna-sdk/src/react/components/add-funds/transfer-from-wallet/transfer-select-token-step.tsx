@@ -1,6 +1,6 @@
-import { CheckIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { Label } from '@/components/ui/label';
 import { TokenBalance } from '@/mocks/token-balances';
 import { useExternalWallet, useTokenBalances } from '../../../hooks';
 import { Button } from '../../ui/button';
@@ -36,16 +36,6 @@ export function TransferSelectTokenStep({
     }
   );
 
-  // Set default token to ETH when tokens are loaded
-  useEffect(() => {
-    if (tokens.length && !selectedToken) {
-      const defaultToken = tokens.find((token) => token.token.symbol === 'ETH');
-      if (defaultToken) {
-        setSelectedToken(defaultToken);
-      }
-    }
-  }, [tokens, selectedToken]);
-
   const handleTokenSelect = (token: TokenBalance) => {
     setSelectedToken(token);
   };
@@ -60,13 +50,11 @@ export function TransferSelectTokenStep({
   return (
     <div className="flex flex-col gap-6">
       <DialogHeader className="items-center gap-0">
-        <DialogTitle>Select token</DialogTitle>
+        <DialogTitle>Select a token</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col gap-4">
-        <Typography variant="muted" className="text-center">
-          Choose which token to transfer
-        </Typography>
+        <Label>Your token balances</Label>
 
         <div className="flex max-h-[400px] flex-col gap-2 overflow-y-auto">
           {isLoading ? (
@@ -76,7 +64,7 @@ export function TransferSelectTokenStep({
               ))}
             </>
           ) : tokens.length === 0 ? (
-            <Card className="p-6 text-center">
+            <Card className="flex flex-row items-center gap-4 px-3 py-3 text-center">
               <Typography variant="muted">
                 No tokens found in this wallet
               </Typography>
@@ -89,19 +77,18 @@ export function TransferSelectTokenStep({
               return (
                 <Card
                   key={token.token.symbol}
-                  className={`hover:bg-muted/50 relative cursor-pointer transition-colors ${
+                  className={`hover:bg-muted/50 relative flex cursor-pointer flex-row items-center gap-4 px-3 py-3 transition-colors ${
                     isSelected ? 'border-primary bg-primary/5' : ''
                   }`}
                   onClick={() => handleTokenSelect(token)}
                 >
-                  <div className="flex items-center gap-4 p-4">
-                    {/* Token Icon */}
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700">
+                  <div className="relative">
+                    <div className="bg-muted flex size-10 items-center justify-center rounded-full">
                       {token.token.icon ? (
                         <img
                           src={token.token.icon}
                           alt={token.token.symbol}
-                          className="h-6 w-6"
+                          className="size-6"
                         />
                       ) : (
                         <Typography variant="small">
@@ -109,30 +96,33 @@ export function TransferSelectTokenStep({
                         </Typography>
                       )}
                     </div>
-
-                    {/* Token Info */}
-                    <div className="flex-1">
-                      <Typography variant="small" className="font-medium">
-                        {token.token.name}
-                      </Typography>
-                      <Typography variant="muted" className="text-xs">
-                        {token.tokenBalance.displayValue} {token.token.symbol}
-                      </Typography>
+                    <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
+                      {token.token.icon ? (
+                        <img
+                          src={token.token.icon}
+                          alt="chain"
+                          className="size-3"
+                        />
+                      ) : (
+                        <div className="bg-muted size-2 rounded-full" />
+                      )}
                     </div>
+                  </div>
 
-                    {/* Fiat Value */}
-                    <div className="text-right">
-                      <Typography variant="small" className="font-medium">
-                        ${token.fiatBalance.amount.toFixed(2)}
-                      </Typography>
-                    </div>
+                  <div className="flex-1">
+                    <Typography as="h1" variant="small">
+                      {token.token.symbol}
+                    </Typography>
+                    <Typography variant="muted">{token.token.name}</Typography>
+                  </div>
 
-                    {/* Selected Indicator */}
-                    {isSelected && (
-                      <div className="bg-primary flex h-6 w-6 items-center justify-center rounded-full">
-                        <CheckIcon className="h-4 w-4 text-white" />
-                      </div>
-                    )}
+                  <div className="text-right">
+                    <Typography as="h1" variant="small">
+                      ${token.fiatBalance.amount.toFixed(2)}
+                    </Typography>
+                    <Typography variant="muted">
+                      {token.tokenBalance.displayValue} {token.token.symbol}
+                    </Typography>
                   </div>
                 </Card>
               );
