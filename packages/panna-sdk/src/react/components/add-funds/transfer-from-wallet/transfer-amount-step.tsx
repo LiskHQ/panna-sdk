@@ -1,10 +1,12 @@
-import { ArrowDownIcon } from 'lucide-react';
+import { ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { TokenBalance } from '@/mocks/token-balances';
 import { truncateAddress } from '@/utils/address';
+import { renderCryptoAmount } from '@/utils/utils';
 import { useActiveAccount, useExternalWallet } from '../../../hooks';
 import { Button } from '../../ui/button';
+import { Card } from '../../ui/card';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
 import { useDialogStepper } from '../../ui/dialog-stepper';
 import {
@@ -15,6 +17,8 @@ import {
   FormMessage
 } from '../../ui/form';
 import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import { Separator } from '../../ui/separator';
 import { Typography } from '../../ui/typography';
 import { TransferFormData } from './schema';
 
@@ -22,64 +26,28 @@ type TransferAmountStepProps = {
   form: UseFormReturn<TransferFormData>;
 };
 
-// Helper to render crypto amount based on token and fiat input
-const renderCryptoAmount = (
-  tokenData: TokenBalance,
-  fiatAmount: string
-): string => {
-  const fiatValue = parseFloat(fiatAmount);
-  if (isNaN(fiatValue) || fiatValue === 0) return '0';
-
-  const tokenPrice =
-    tokenData.fiatBalance.amount /
-    parseFloat(tokenData.tokenBalance.displayValue);
-
-  if (tokenPrice === 0) return '0';
-
-  return (fiatValue / tokenPrice).toFixed(8);
-};
-
-// Helper to render fiat amount based on token and crypto input
-const renderFiatAmount = (
-  tokenData: TokenBalance,
-  cryptoAmount: string
-): string => {
-  const cryptoValue = parseFloat(cryptoAmount);
-  if (isNaN(cryptoValue) || cryptoValue === 0) return '0';
-
-  const tokenPrice =
-    tokenData.fiatBalance.amount /
-    parseFloat(tokenData.tokenBalance.displayValue);
-
-  return (cryptoValue * tokenPrice).toFixed(2);
-};
-
-// Amount display component for input endAdornment
+// Amount display component for input endAdornment - shows USD and crypto equivalent
 function AmountDisplay({
   tokenInfo,
-  secondaryInput,
-  secondaryAmount,
-  handleInputSwap
+  cryptoAmount
 }: {
   tokenInfo: TokenBalance;
-  secondaryInput: 'crypto' | 'fiat';
-  secondaryAmount: string;
-  handleInputSwap: () => void;
+  cryptoAmount: string;
 }) {
+  // Format the crypto amount - remove trailing zeros
+  const formattedAmount = parseFloat(cryptoAmount)
+    .toFixed(6)
+    .replace(/\.?0+$/, '');
+
   return (
-    <button
-      type="button"
-      onClick={handleInputSwap}
-      className="hover:bg-muted flex items-center gap-2 rounded px-2 py-1 transition-colors"
-    >
-      <div className="text-right">
-        <Typography variant="small" className="text-muted-foreground text-xs">
-          {secondaryInput === 'crypto'
-            ? `${secondaryAmount} ${tokenInfo.token.symbol}`
-            : `$${secondaryAmount}`}
-        </Typography>
-      </div>
-    </button>
+    <div className="flex flex-col pr-3 text-right">
+      <Typography variant="small" className="text-primary">
+        USD
+      </Typography>
+      <Typography variant="muted" className="text-xs">
+        {formattedAmount} {tokenInfo.token.symbol}
+      </Typography>
+    </div>
   );
 }
 
@@ -89,14 +57,9 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
   const { externalWallet } = useExternalWallet();
   const fromAddress = form.watch('fromAddress');
   const tokenInfo = form.watch('tokenInfo') as TokenBalance;
-  const amount = form.watch('amount') || '0';
+  const fiatAmount = form.watch('amount') || '0';
 
-  const [primaryInput, setPrimaryInput] = useState<'crypto' | 'fiat'>('fiat');
-  const [secondaryInput, setSecondaryInput] = useState<'crypto' | 'fiat'>(
-    'crypto'
-  );
-  const [secondaryAmount, setSecondaryAmount] = useState<string>('0');
-  const [inputSwap, setInputSwap] = useState<boolean>(false);
+  const [cryptoAmount, setCryptoAmount] = useState<string>('0');
 
   // Get wallet name from wallet ID
   const getWalletName = () => {
@@ -118,63 +81,30 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
     }
   }, [account, form]);
 
-  // Update secondary amount when primary amount changes
+  // Update crypto amount when fiat amount changes
   useEffect(() => {
-    if (!inputSwap && tokenInfo) {
-      handleAmountChange(tokenInfo, amount);
+    if (tokenInfo && fiatAmount) {
+      const crypto = renderCryptoAmount(tokenInfo, fiatAmount);
+      setCryptoAmount(crypto);
     } else {
-      setInputSwap(false);
+      setCryptoAmount('0');
     }
-  }, [amount, tokenInfo]);
-
-  const handleAmountChange = (tokenData: TokenBalance, inputAmount: string) => {
-    if (primaryInput === 'fiat') {
-      setSecondaryAmount(renderCryptoAmount(tokenData, inputAmount) || '0');
-    } else {
-      setSecondaryAmount(renderFiatAmount(tokenData, inputAmount) || '0');
-    }
-  };
-
-  // Swap primary and secondary input types
-  const handleInputSwap = () => {
-    setInputSwap(true);
-    setPrimaryInput(secondaryInput);
-    setSecondaryInput(primaryInput);
-
-    if (primaryInput === 'fiat') {
-      setSecondaryAmount(amount);
-      form.setValue('amount', secondaryAmount);
-      form.setValue('primaryAmountInput', 'crypto');
-    } else {
-      setSecondaryAmount(amount);
-      form.setValue('amount', secondaryAmount);
-      form.setValue('primaryAmountInput', 'fiat');
-    }
-  };
+  }, [fiatAmount, tokenInfo]);
 
   const handleMaxValue = () => {
-    if (primaryInput === 'crypto') {
-      form.setValue('amount', tokenInfo.tokenBalance.displayValue || '0');
-    } else {
-      // Round down fiat amount to avoid insufficient balance errors
-      form.setValue(
-        'amount',
-        Number(Math.floor(tokenInfo.fiatBalance.amount * 100) / 100).toFixed(
-          2
-        ) || '0'
-      );
-    }
+    // Round down fiat amount to avoid insufficient balance errors
+    form.setValue(
+      'amount',
+      Number(Math.floor(tokenInfo.fiatBalance.amount * 100) / 100).toFixed(2) ||
+        '0'
+    );
   };
 
   // Trigger validation and move to next step
   const handleFormSubmit = async () => {
-    if (primaryInput === 'fiat') {
-      form.setValue('cryptoAmount', secondaryAmount);
-      form.setValue('fiatAmount', amount);
-    } else {
-      form.setValue('fiatAmount', secondaryAmount);
-      form.setValue('cryptoAmount', amount);
-    }
+    form.setValue('cryptoAmount', cryptoAmount);
+    form.setValue('fiatAmount', fiatAmount);
+    form.setValue('primaryAmountInput', 'fiat');
 
     const isFieldValid = await form.trigger();
     if (isFieldValid) {
@@ -185,62 +115,161 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
   return (
     <div className="flex flex-col gap-6">
       <DialogHeader className="items-center gap-0">
-        <DialogTitle>Transfer details</DialogTitle>
+        <DialogTitle>Transfer {tokenInfo?.token.symbol || ''}</DialogTitle>
       </DialogHeader>
 
-      {/* From/To Section */}
-      <div className="border-border flex flex-col gap-3 rounded-lg border p-4">
-        {/* From */}
-        <div className="flex items-center justify-between">
-          <Typography variant="small" className="text-muted-foreground">
-            From ({getWalletName()})
-          </Typography>
-          <Typography variant="small" className="font-medium">
-            {truncateAddress(fromAddress)}
-          </Typography>
-        </div>
+      {/* Transfer Section */}
+      <div className="flex flex-col gap-4">
+        <Label>Transfer</Label>
 
-        {/* Arrow */}
-        <div className="flex justify-center">
-          <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
-            <ArrowDownIcon className="text-muted-foreground h-4 w-4" />
+        <div className="relative flex flex-col gap-2">
+          {/* From Card */}
+          <Card className="flex flex-col gap-0 p-0">
+            {/* Wallet Row */}
+            <div className="flex flex-row items-center gap-4 px-3 py-3">
+              <div className="bg-muted flex size-10 items-center justify-center rounded-full">
+                <Typography variant="small">
+                  {getWalletName().slice(0, 1)}
+                </Typography>
+              </div>
+
+              <div className="flex-1">
+                <Typography as="h1" variant="small">
+                  {getWalletName()}
+                </Typography>
+                <Typography variant="muted">
+                  {truncateAddress(fromAddress)}
+                </Typography>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Token Row */}
+            <div className="flex flex-row items-center gap-4 px-3 py-3">
+              <div className="relative">
+                <div className="bg-muted flex size-10 items-center justify-center rounded-full">
+                  {tokenInfo?.token.icon ? (
+                    <img
+                      src={tokenInfo.token.icon}
+                      alt={tokenInfo.token.symbol}
+                      className="size-6"
+                    />
+                  ) : (
+                    <Typography variant="small">
+                      {tokenInfo?.token.symbol.slice(0, 1) || 'T'}
+                    </Typography>
+                  )}
+                </div>
+                <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
+                  {tokenInfo?.token.icon ? (
+                    <img
+                      src={tokenInfo.token.icon}
+                      alt="chain"
+                      className="size-3"
+                    />
+                  ) : (
+                    <div className="bg-muted size-2 rounded-full" />
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <Typography as="h1" variant="small">
+                  {tokenInfo?.token.symbol || ''}
+                </Typography>
+                <Typography variant="muted">
+                  {tokenInfo?.token.name || ''}
+                </Typography>
+              </div>
+
+              <div className="text-right">
+                <Typography as="h1" variant="small">
+                  ${tokenInfo?.fiatBalance.amount.toFixed(2) || '0.00'}
+                </Typography>
+                <Typography variant="muted">
+                  {tokenInfo?.tokenBalance.displayValue || '0'}{' '}
+                  {tokenInfo?.token.symbol || ''}
+                </Typography>
+              </div>
+            </div>
+          </Card>
+
+          {/* Caret Arrow Icon */}
+          <div className="absolute top-1/2 left-1/2 z-10 -translate-x-1/2 -translate-y-1/2">
+            <div className="border-border bg-background flex size-10 items-center justify-center rounded-full border">
+              <ChevronDownIcon className="text-primary size-6" />
+            </div>
           </div>
-        </div>
 
-        {/* To */}
-        <div className="flex items-center justify-between">
-          <Typography variant="small" className="text-muted-foreground">
-            To (Embedded Wallet)
-          </Typography>
-          <Typography variant="small" className="font-medium">
-            {account?.address ? truncateAddress(account.address) : '...'}
-          </Typography>
-        </div>
-      </div>
+          {/* To Card */}
+          <Card className="flex flex-col gap-0 p-0">
+            {/* Wallet Row */}
+            <div className="flex flex-row items-center gap-4 px-3 py-3">
+              <div className="bg-muted flex size-10 items-center justify-center rounded-full">
+                <Typography variant="small">Y</Typography>
+              </div>
 
-      {/* Token Info */}
-      <div className="border-border flex items-center gap-3 rounded-lg border p-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700">
-          {tokenInfo?.token.icon ? (
-            <img
-              src={tokenInfo.token.icon}
-              alt={tokenInfo.token.symbol}
-              className="h-6 w-6"
-            />
-          ) : (
-            <Typography variant="small">
-              {tokenInfo?.token.symbol.slice(0, 1)}
-            </Typography>
-          )}
-        </div>
-        <div className="flex-1">
-          <Typography variant="small" className="font-medium">
-            {tokenInfo?.token.name}
-          </Typography>
-          <Typography variant="muted" className="text-xs">
-            Available: {tokenInfo?.tokenBalance.displayValue}{' '}
-            {tokenInfo?.token.symbol}
-          </Typography>
+              <div className="flex-1">
+                <Typography as="h1" variant="small">
+                  Your account
+                </Typography>
+                <Typography variant="muted">
+                  {account?.address ? truncateAddress(account.address) : '...'}
+                </Typography>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Token Row */}
+            <div className="flex flex-row items-center gap-4 px-3 py-3">
+              <div className="relative">
+                <div className="bg-muted flex size-10 items-center justify-center rounded-full">
+                  {tokenInfo?.token.icon ? (
+                    <img
+                      src={tokenInfo.token.icon}
+                      alt={tokenInfo.token.symbol}
+                      className="size-6"
+                    />
+                  ) : (
+                    <Typography variant="small">
+                      {tokenInfo?.token.symbol.slice(0, 1) || 'T'}
+                    </Typography>
+                  )}
+                </div>
+                <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
+                  {tokenInfo?.token.icon ? (
+                    <img
+                      src={tokenInfo.token.icon}
+                      alt="chain"
+                      className="size-3"
+                    />
+                  ) : (
+                    <div className="bg-muted size-2 rounded-full" />
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <Typography as="h1" variant="small">
+                  {tokenInfo?.token.symbol || ''}
+                </Typography>
+                <Typography variant="muted">
+                  {tokenInfo?.token.name || ''}
+                </Typography>
+              </div>
+
+              <div className="text-right">
+                <Typography as="h1" variant="small">
+                  $0
+                </Typography>
+                <Typography variant="muted">
+                  0 {tokenInfo?.token.symbol || ''}
+                </Typography>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
 
@@ -256,7 +285,7 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
                 variant="ghost"
                 size="sm"
                 type="button"
-                className="bg-muted hover:bg-border! h-6 p-2"
+                className="bg-muted hover:bg-border h-6 p-2"
                 onClick={handleMaxValue}
               >
                 Max
@@ -265,15 +294,13 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
             <FormControl>
               <Input
                 {...field}
-                placeholder={`0 ${tokenInfo?.token.symbol || 'LSK'}`}
-                className="[&>input]:h-13"
+                placeholder="0"
+                className="[&>input]:h-12"
                 endAdornment={
-                  tokenInfo ? (
+                  tokenInfo && cryptoAmount !== '0' ? (
                     <AmountDisplay
                       tokenInfo={tokenInfo}
-                      secondaryInput={secondaryInput}
-                      secondaryAmount={secondaryAmount}
-                      handleInputSwap={handleInputSwap}
+                      cryptoAmount={cryptoAmount}
                     />
                   ) : undefined
                 }
@@ -293,19 +320,14 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
       />
 
       {/* Estimated Time */}
-      <div className="bg-muted/50 rounded-lg p-3">
-        <Typography
-          variant="small"
-          className="text-muted-foreground text-center"
-        >
-          Estimated transfer time: ~2 min
-        </Typography>
-      </div>
+      <Typography variant="muted" className="text-center">
+        Estimated time <span className="text-primary">~2 min</span>
+      </Typography>
 
       <Button
         type="button"
         onClick={handleFormSubmit}
-        disabled={!tokenInfo || !amount || amount === '0'}
+        disabled={!tokenInfo || !fiatAmount || fiatAmount === '0'}
       >
         Transfer
       </Button>
