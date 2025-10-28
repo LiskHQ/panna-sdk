@@ -86,10 +86,12 @@ console.log(WalletId.Coinbase); // "com.coinbase.wallet"
 console.log(WalletId.Trust); // "com.trustwallet.app"
 console.log(WalletId.Rainbow); // "me.rainbow"
 console.log(WalletId.Phantom); // "app.phantom"
+console.log(WalletId.WalletConnect); // "walletconnect"
 
 // Get human-readable wallet name
 console.log(getWalletName(WalletId.MetaMask)); // "MetaMask"
 console.log(getWalletName(WalletId.Coinbase)); // "Coinbase Wallet"
+console.log(getWalletName(WalletId.WalletConnect)); // "WalletConnect"
 
 // Validate wallet ID strings
 if (isWalletId('io.metamask')) {
@@ -99,13 +101,14 @@ if (isWalletId('io.metamask')) {
 
 **Supported Wallets:**
 
-| Wallet          | Wallet ID             | WalletId Enum       |
-| --------------- | --------------------- | ------------------- |
-| MetaMask        | `io.metamask`         | `WalletId.MetaMask` |
-| Coinbase Wallet | `com.coinbase.wallet` | `WalletId.Coinbase` |
-| Trust Wallet    | `com.trustwallet.app` | `WalletId.Trust`    |
-| Rainbow         | `me.rainbow`          | `WalletId.Rainbow`  |
-| Phantom         | `app.phantom`         | `WalletId.Phantom`  |
+| Wallet          | Wallet ID             | WalletId Enum            |
+| --------------- | --------------------- | ------------------------ |
+| MetaMask        | `io.metamask`         | `WalletId.MetaMask`      |
+| Coinbase Wallet | `com.coinbase.wallet` | `WalletId.Coinbase`      |
+| Trust Wallet    | `com.trustwallet.app` | `WalletId.Trust`         |
+| Rainbow         | `me.rainbow`          | `WalletId.Rainbow`       |
+| Phantom         | `app.phantom`         | `WalletId.Phantom`       |
+| WalletConnect   | `walletconnect`       | `WalletId.WalletConnect` |
 
 ### Why Use WalletId Enum?
 
@@ -241,7 +244,7 @@ await walletConnectProvider.enable();
 // Convert to Panna wallet
 const wallet = extensions.fromEIP1193Provider({
   provider: walletConnectProvider,
-  walletId: WalletId.MetaMask // Use appropriate WalletId for the connected wallet
+  walletId: WalletId.WalletConnect
 });
 
 const account = await wallet.connect({

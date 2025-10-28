@@ -68,7 +68,13 @@ export enum WalletId {
    * Phantom - Solana and multi-chain wallet
    * @see https://phantom.app
    */
-  Phantom = 'app.phantom'
+  Phantom = 'app.phantom',
+
+  /**
+   * WalletConnect - Open protocol for connecting wallets to dApps
+   * @see https://walletconnect.com
+   */
+  WalletConnect = 'walletconnect'
 }
 
 /**
@@ -115,7 +121,8 @@ export function getWalletName(id: WalletId): string {
     [WalletId.Coinbase]: 'Coinbase Wallet',
     [WalletId.Trust]: 'Trust Wallet',
     [WalletId.Rainbow]: 'Rainbow',
-    [WalletId.Phantom]: 'Phantom'
+    [WalletId.Phantom]: 'Phantom',
+    [WalletId.WalletConnect]: 'WalletConnect'
   };
 
   const name = names[id];

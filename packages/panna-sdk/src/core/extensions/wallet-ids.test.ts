@@ -21,6 +21,10 @@ describe('WalletId', () => {
     it('should have correct rDNS format for Phantom', () => {
       expect(WalletId.Phantom).toBe('app.phantom');
     });
+
+    it('should have correct identifier for WalletConnect', () => {
+      expect(WalletId.WalletConnect).toBe('walletconnect');
+    });
   });
 
   describe('isWalletId', () => {
@@ -30,6 +34,7 @@ describe('WalletId', () => {
       expect(isWalletId('com.trustwallet.app')).toBe(true);
       expect(isWalletId('me.rainbow')).toBe(true);
       expect(isWalletId('app.phantom')).toBe(true);
+      expect(isWalletId('walletconnect')).toBe(true);
     });
 
     it('should return false for invalid WalletId strings', () => {
@@ -72,6 +77,10 @@ describe('WalletId', () => {
       expect(getWalletName(WalletId.Phantom)).toBe('Phantom');
     });
 
+    it('should return correct name for WalletConnect', () => {
+      expect(getWalletName(WalletId.WalletConnect)).toBe('WalletConnect');
+    });
+
     it('should return all names for all wallet IDs', () => {
       Object.values(WalletId).forEach((id) => {
         const name = getWalletName(id);
@@ -104,12 +113,14 @@ describe('WalletId', () => {
     it('should follow reverse DNS format (domain.tld.subdomain)', () => {
       const reverseDomainsRegex = /^[a-z0-9]+(\.[a-z0-9]+)+$/;
 
-      // All supported wallets should follow rDNS format
+      // All supported wallets should follow rDNS format (except WalletConnect which uses a simple identifier)
       expect(WalletId.MetaMask).toMatch(reverseDomainsRegex);
       expect(WalletId.Coinbase).toMatch(reverseDomainsRegex);
       expect(WalletId.Trust).toMatch(reverseDomainsRegex);
       expect(WalletId.Rainbow).toMatch(reverseDomainsRegex);
       expect(WalletId.Phantom).toMatch(reverseDomainsRegex);
+      // WalletConnect uses a simple identifier instead of rDNS format
+      expect(WalletId.WalletConnect).toBe('walletconnect');
     });
 
     it('should have unique identifiers for each wallet', () => {
