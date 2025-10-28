@@ -4,6 +4,7 @@ import {
   getContract as thirdwebGetContract,
   sendTransaction as thirdwebSendTransaction
 } from 'thirdweb';
+import { WalletId } from 'thirdweb/wallets';
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
 import { DEFAULT_CHAIN, NATIVE_TOKEN_ADDRESS } from '../defaults';
@@ -573,7 +574,10 @@ export async function transferBalanceFromExternalWallet(
 
   try {
     // Convert EIP1193 provider to a wallet, then connect to get an account
-    const wallet = fromEIP1193Provider({ provider, walletId });
+    const wallet = fromEIP1193Provider({
+      provider,
+      walletId: walletId as WalletId
+    });
     const account = await wallet.connect({ client, chain });
 
     let transaction: PrepareTransactionResult | PrepareContractCallResult;

@@ -1,6 +1,6 @@
-import type { WalletId } from 'thirdweb/wallets';
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
+import type { WalletId } from '../extensions/wallet-ids';
 import type {
   Abi,
   PreparedTransaction,
