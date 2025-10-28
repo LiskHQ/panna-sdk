@@ -309,7 +309,7 @@ const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 await account.connect({
   client: pannaClient,
-  strategy: 'email',
+  strategy: wallet.LoginStrategy.EMAIL,
   email: 'user@example.com'
 });
 
@@ -349,7 +349,7 @@ const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 const account = wallet.createAccount({ partnerId: 'your-partner-id' });
 await account.connect({
   client: pannaClient,
-  strategy: 'google'
+  strategy: wallet.LoginStrategy.GOOGLE
 });
 
 // Convert to EIP-1193 provider for web3.js
