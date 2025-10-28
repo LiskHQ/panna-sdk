@@ -10,6 +10,7 @@ import {
 } from '../ui/dialog';
 import { DialogStepper, useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
+import ChooseWalletDialog from './choose-wallet-dialog';
 import { ConnectButtonProps } from './connect-button';
 import { InputOTPForm } from './input-otp-form';
 import { LoginForm } from './login-form';
@@ -29,6 +30,7 @@ export function AuthFlow({ connectDialog }: ConnectButtonProps) {
       />
       <SocialLoginPendingDialog />
       <SocialLoginErrorDialog />
+      <ChooseWalletDialog />
     </DialogStepper>
   );
 }

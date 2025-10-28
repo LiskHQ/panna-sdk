@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
+import { MailIcon, MoveRightIcon, PhoneIcon, WalletIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -11,7 +11,7 @@ import {
   PhonePrepareParams,
   prepareLogin
 } from 'src/core';
-import { z } from 'zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -36,7 +36,7 @@ const GOOGLE_LOGIN_STEP = 2;
 
 export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema as any),
     defaultValues: {
       email: '',
       phoneNumber: ''
@@ -91,6 +91,10 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
       });
     }
   }
+
+  const handleConnectWallet = async () => {
+    goToStep(4);
+  };
 
   return (
     <Form {...form}>
@@ -178,6 +182,17 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
             </FormItem>
           )}
         />
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleConnectWallet}
+            className="flex w-full justify-start gap-3"
+          >
+            <WalletIcon />
+            Connect a wallet
+          </Button>
+        </div>
       </form>
     </Form>
   );

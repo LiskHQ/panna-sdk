@@ -1,6 +1,10 @@
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
+import { AppKitNetwork, mainnet } from '@reown/appkit/networks';
+import { createAppKit } from '@reown/appkit/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorInfo, ReactNode, createContext, useMemo } from 'react';
 import { AutoConnect, ThirdwebProvider } from 'thirdweb/react';
+import { WagmiProvider } from 'wagmi';
 import {
   createAccount,
   createPannaClient,
@@ -12,6 +16,22 @@ import { PannaApiService } from '../../core/util/api-service';
 import { getPannaApiUrl } from '../utils/panna-api';
 import { AccountEventProvider } from './account-event-provider';
 import { ErrorBoundary } from './error-boundary';
+
+export const projectId =
+  process.env.WALLETCONNECT_PROJECT_ID || '294d98c8d45e727a9d346cb180749e0c';
+
+const networks = [mainnet as AppKitNetwork];
+const wagmiAdapter = new WagmiAdapter({
+  networks,
+  projectId,
+  ssr: true
+});
+
+createAppKit({
+  adapters: [wagmiAdapter],
+  networks: networks as [AppKitNetwork, ...AppKitNetwork[]],
+  projectId
+});
 
 export type PannaProviderProps = {
   children?: ReactNode;
@@ -117,20 +137,22 @@ function PannaProviderInternal(props: PannaProviderProps) {
   }, [contextValue.partnerId]);
 
   return (
-    <QueryClientProvider client={activeQueryClient}>
-      <PannaClientContext value={contextValue}>
-        <ThirdwebProvider>
-          {contextValue.client && contextValue.partnerId ? (
-            <AutoConnect
-              client={contextValue.client}
-              wallets={wallets}
-              timeout={autoConnectTimeout}
-            />
-          ) : null}
-          <AccountEventProvider>{children}</AccountEventProvider>
-        </ThirdwebProvider>
-      </PannaClientContext>
-    </QueryClientProvider>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={activeQueryClient}>
+        <PannaClientContext value={contextValue}>
+          <ThirdwebProvider>
+            {contextValue.client && contextValue.partnerId ? (
+              <AutoConnect
+                client={contextValue.client}
+                wallets={wallets}
+                timeout={autoConnectTimeout}
+              />
+            ) : null}
+            <AccountEventProvider>{children}</AccountEventProvider>
+          </ThirdwebProvider>
+        </PannaClientContext>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 
