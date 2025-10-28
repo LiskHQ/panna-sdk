@@ -6,11 +6,11 @@
  *
  * @module extensions/eip1193-provider
  */
-import type { ThirdwebClient } from 'thirdweb';
 import type { Chain } from 'thirdweb/chains';
 import { EIP1193 } from 'thirdweb/wallets';
 import type { Wallet, WalletId } from 'thirdweb/wallets';
 import type { Account } from 'viem/accounts';
+import { PannaClient } from '../client';
 import type { EIP1193Provider } from '../types/external';
 
 /**
@@ -44,7 +44,7 @@ export type ToEIP1193ProviderOptions = {
   /**
    * The client instance
    */
-  client: ThirdwebClient;
+  client: PannaClient;
   /**
    * Optional custom connect handler to override default connection behavior
    */
@@ -118,7 +118,7 @@ export function fromEIP1193Provider(
  * @param options - Options for creating the provider
  * @param options.wallet - The wallet to convert
  * @param options.chain - The chain to use for RPC requests
- * @param options.client - The client instance
+ * @param options.client - The Panna client instance
  * @returns An EIP-1193 compatible provider
  *
  * @example

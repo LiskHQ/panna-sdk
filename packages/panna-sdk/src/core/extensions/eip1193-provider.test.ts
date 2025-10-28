@@ -6,6 +6,7 @@ import {
   toEIP1193Provider,
   isEIP1193Provider
 } from './eip1193-provider';
+import { WalletId } from './wallet-ids';
 
 // Mock thirdweb/wallets
 jest.mock('thirdweb/wallets', () => ({
@@ -35,10 +36,14 @@ describe('EIP1193 Provider Extensions', () => {
 
       (EIP1193.fromProvider as jest.Mock).mockReturnValue(mockWallet);
 
-      const result = fromEIP1193Provider({ provider: mockProvider });
+      const result = fromEIP1193Provider({
+        provider: mockProvider,
+        walletId: WalletId.MetaMask
+      });
 
       expect(EIP1193.fromProvider).toHaveBeenCalledWith({
-        provider: mockProvider
+        provider: mockProvider,
+        walletId: WalletId.MetaMask
       });
       expect(result).toBe(mockWallet);
     });
@@ -280,7 +285,10 @@ describe('EIP1193 Provider Extensions', () => {
       (EIP1193.toProvider as jest.Mock).mockReturnValue(convertedProvider);
 
       // Convert provider to wallet
-      const wallet = fromEIP1193Provider({ provider: originalProvider });
+      const wallet = fromEIP1193Provider({
+        provider: originalProvider,
+        walletId: WalletId.MetaMask
+      });
       expect(wallet).toBe(mockWallet);
 
       // Convert wallet back to provider
@@ -309,7 +317,10 @@ describe('EIP1193 Provider Extensions', () => {
       (EIP1193.fromProvider as jest.Mock).mockReturnValue(mockWallet);
 
       if (isEIP1193Provider(validProvider)) {
-        const wallet = fromEIP1193Provider({ provider: validProvider });
+        const wallet = fromEIP1193Provider({
+          provider: validProvider,
+          walletId: WalletId.MetaMask
+        });
         expect(wallet).toBe(mockWallet);
       }
 
@@ -323,7 +334,10 @@ describe('EIP1193 Provider Extensions', () => {
       };
 
       if (isEIP1193Provider(invalidProvider)) {
-        fromEIP1193Provider({ provider: invalidProvider as EIP1193Provider });
+        fromEIP1193Provider({
+          provider: invalidProvider as EIP1193Provider,
+          walletId: WalletId.MetaMask
+        });
       }
 
       expect(EIP1193.fromProvider).not.toHaveBeenCalled();
