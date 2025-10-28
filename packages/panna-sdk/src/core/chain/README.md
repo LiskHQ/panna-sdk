@@ -244,8 +244,9 @@ const currentChain = selectChain('mainnet');
 
 ## Next Steps
 
-- Learn about [Transaction Module](../transaction/README.md) for sending transactions on configured chain
-- Explore [Client Module](../client/README.md) for SDK initialization with custom RPC endpoints
-- Review [Wallet Module](../wallet/README.md) for user authentication across multiple networks
-- Check [Onramp Module](../onramp/README.md) for fiat-to-crypto purchases
-- Check [Util Module](../util/README.md) for chain-related utility functions
+- [Client Module](../client/README.md) - SDK initialization with custom RPC endpoints
+- [Wallet Module](../wallet/README.md) - User authentication across multiple networks
+- [Transaction Module](../transaction/README.md) - Sending transactions on configured chains
+- [Onramp Module](../onramp/README.md) - Fiat-to-crypto purchases
+- [Util Module](../util/README.md) - Chain-related utility functions
+- [Extensions Module](../extensions/README.md) - External wallet integration

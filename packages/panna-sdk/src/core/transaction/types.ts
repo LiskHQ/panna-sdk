@@ -1,11 +1,13 @@
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
+import type { WalletId } from '../extensions/wallet-ids';
 import type {
   Abi,
   PreparedTransaction,
   Account,
   Address,
-  Hex
+  Hex,
+  EIP1193Provider
 } from '../types/external';
 
 /**
@@ -142,4 +144,24 @@ export interface SendTransactionParams {
 export interface SendTransactionResult {
   /** The transaction hash */
   transactionHash: Address;
+}
+
+/**
+ * Parameters for transferring balance from an external wallet
+ */
+export interface TransferBalanceFromExternalWalletParams {
+  /** EIP-1193 compatible provider (e.g., MetaMask, WalletConnect) */
+  provider: EIP1193Provider;
+  /** Wallet identifier following EIP-6963 standard (e.g., "io.metamask", "com.coinbase.wallet") */
+  walletId: WalletId;
+  /** The recipient address */
+  to: Address;
+  /** The amount to transfer (in wei for native token, or token's smallest unit for ERC20) */
+  amount: bigint;
+  /** The Panna client instance */
+  client: PannaClient;
+  /** The chain to execute on (optional, defaults to Lisk mainnet) */
+  chain?: Chain;
+  /** The token contract address (optional, if undefined transfers native token) */
+  tokenAddress?: Address;
 }

@@ -1,12 +1,15 @@
 import * as thirdweb from 'thirdweb';
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
-import type { Address } from '../types/external';
+import * as extensions from '../extensions';
+import { WalletId } from '../extensions/wallet-ids';
+import type { Address, EIP1193Provider } from '../types/external';
 import {
   prepareTransaction,
   prepareContractCall,
   getContract,
-  sendTransaction
+  sendTransaction,
+  transferBalanceFromExternalWallet
 } from './transaction';
 import * as transaction from './transaction';
 
@@ -17,6 +20,13 @@ jest.mock('thirdweb', () => ({
   getContract: jest.fn(),
   sendTransaction: jest.fn()
 }));
+
+// Mock extensions module
+jest.mock('../extensions', () => ({
+  ...jest.requireActual('../extensions'),
+  fromEIP1193Provider: jest.fn()
+}));
+
 jest.mock('./transaction', () => jest.requireActual('./transaction'));
 
 describe('Transaction Functions', () => {
@@ -786,6 +796,394 @@ describe('Transaction Functions', () => {
       await expect(sendTransaction(params)).rejects.toThrow(
         'Failed to send transaction: Network request failed'
       );
+    });
+  });
+
+  describe('transferBalanceFromExternalWallet', () => {
+    const mockProvider = {
+      request: jest.fn(),
+      on: jest.fn(),
+      removeListener: jest.fn()
+    } as unknown as EIP1193Provider;
+
+    const mockAccount = {
+      address: '0x123456789abcdef123456789abcdef123456789ab' as Address,
+      signTransaction: jest.fn(),
+      signMessage: jest.fn(),
+      sendTransaction: jest.fn(),
+      signTypedData: jest.fn()
+    };
+
+    const mockWallet = {
+      connect: jest.fn().mockResolvedValue(mockAccount)
+    };
+
+    const toAddress = '0x123456789abcdef123456789abcdef123456789a' as Address;
+    const tokenAddress =
+      '0xA0b86a33E6417a8fdf77C4d0e6B9d6a66B5B8f78' as Address;
+    const amount = BigInt('1000000000000000000'); // 1 ETH
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Reset mock wallet connect to resolve with mockAccount
+      mockWallet.connect.mockResolvedValue(mockAccount);
+      (extensions.fromEIP1193Provider as jest.Mock).mockReturnValue(mockWallet);
+    });
+
+    describe('validation', () => {
+      it('should throw error when provider is undefined', async () => {
+        const params = {
+          provider: undefined as unknown as EIP1193Provider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Provider is required'
+        );
+      });
+
+      it('should throw error when to address is invalid', async () => {
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: '0xinvalid' as Address,
+          amount,
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          "Invalid 'to' address: 0xinvalid"
+        );
+      });
+
+      it('should throw error when token address is invalid', async () => {
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient,
+          tokenAddress: '0xinvalid' as Address
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Invalid token address: 0xinvalid'
+        );
+      });
+
+      it('should throw error when amount is zero', async () => {
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount: BigInt(0),
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Amount must be greater than zero'
+        );
+      });
+
+      it('should throw error when amount is negative', async () => {
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount: BigInt(-1),
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Amount must be greater than zero'
+        );
+      });
+    });
+
+    describe('native token transfer', () => {
+      it('should successfully transfer native token from external wallet', async () => {
+        const mockTransactionHash =
+          '0xabcdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef12' as Address;
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: toAddress,
+          value: amount
+        };
+
+        jest
+          .spyOn(transaction, 'prepareTransaction')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockResolvedValue({
+          transactionHash: mockTransactionHash
+        });
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient,
+          chain: mockChain
+        };
+
+        const result = await transferBalanceFromExternalWallet(params);
+
+        expect(extensions.fromEIP1193Provider).toHaveBeenCalledWith({
+          provider: mockProvider,
+          walletId: WalletId.MetaMask
+        });
+        expect(mockWallet.connect).toHaveBeenCalledWith({
+          client: mockClient,
+          chain: mockChain
+        });
+        expect(transaction.prepareTransaction).toHaveBeenCalledWith({
+          client: mockClient,
+          chain: mockChain,
+          to: toAddress,
+          value: amount
+        });
+        expect(thirdweb.sendTransaction).toHaveBeenCalled();
+        expect(result).toEqual({ transactionHash: mockTransactionHash });
+      });
+
+      it('should use default chain when chain is not provided', async () => {
+        const mockTransactionHash =
+          '0xabcdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef12' as Address;
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: toAddress,
+          value: amount
+        };
+
+        jest
+          .spyOn(transaction, 'prepareTransaction')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockResolvedValue({
+          transactionHash: mockTransactionHash
+        });
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient
+        };
+
+        await transferBalanceFromExternalWallet(params);
+
+        expect(transaction.prepareTransaction).toHaveBeenCalledWith(
+          expect.objectContaining({
+            client: mockClient,
+            to: toAddress,
+            value: amount
+          })
+        );
+      });
+    });
+
+    describe('ERC20 token transfer', () => {
+      it('should successfully transfer ERC20 token from external wallet', async () => {
+        const mockTransactionHash =
+          '0xdef123456789abcdef123456789abcdef123456789abcdef123456789abcdef1234' as Address;
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: tokenAddress,
+          data: jest.fn()
+        };
+
+        jest
+          .spyOn(transaction, 'prepareContractCall')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockResolvedValue({
+          transactionHash: mockTransactionHash
+        });
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient,
+          chain: mockChain,
+          tokenAddress
+        };
+
+        const result = await transferBalanceFromExternalWallet(params);
+
+        expect(extensions.fromEIP1193Provider).toHaveBeenCalledWith({
+          provider: mockProvider,
+          walletId: WalletId.MetaMask
+        });
+        expect(mockWallet.connect).toHaveBeenCalledWith({
+          client: mockClient,
+          chain: mockChain
+        });
+        expect(transaction.prepareContractCall).toHaveBeenCalledWith({
+          client: mockClient,
+          chain: mockChain,
+          address: tokenAddress,
+          method: 'function transfer(address to, uint256 amount)',
+          params: [toAddress, amount]
+        });
+        expect(thirdweb.sendTransaction).toHaveBeenCalled();
+        expect(result).toEqual({ transactionHash: mockTransactionHash });
+      });
+
+      it('should handle ERC20 transfer with custom decimals', async () => {
+        const usdcAmount = BigInt('100000000'); // 100 USDC (6 decimals)
+        const mockTransactionHash =
+          '0xabc123def456789abc123def456789abc123def456789abc123def456789abc123' as Address;
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: tokenAddress,
+          data: jest.fn()
+        };
+
+        jest
+          .spyOn(transaction, 'prepareContractCall')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockResolvedValue({
+          transactionHash: mockTransactionHash
+        });
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount: usdcAmount,
+          client: mockClient,
+          chain: mockChain,
+          tokenAddress
+        };
+
+        const result = await transferBalanceFromExternalWallet(params);
+
+        expect(transaction.prepareContractCall).toHaveBeenCalledWith({
+          client: mockClient,
+          chain: mockChain,
+          address: tokenAddress,
+          method: 'function transfer(address to, uint256 amount)',
+          params: [toAddress, usdcAmount]
+        });
+        expect(result).toEqual({ transactionHash: mockTransactionHash });
+      });
+    });
+
+    describe('error handling', () => {
+      it('should wrap wallet connection errors', async () => {
+        const mockError = new Error('Provider connection failed');
+        mockWallet.connect.mockRejectedValue(mockError);
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Failed to transfer balance from external wallet: Provider connection failed'
+        );
+      });
+
+      it('should wrap sendTransaction errors', async () => {
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: toAddress,
+          value: amount
+        };
+        const mockError = new Error(
+          'insufficient funds for gas * price + value'
+        );
+
+        // Ensure wallet.connect succeeds before transaction error
+        mockWallet.connect.mockResolvedValue(mockAccount);
+        jest
+          .spyOn(transaction, 'prepareTransaction')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(mockError);
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Failed to transfer balance from external wallet: Failed to send transaction: insufficient funds for gas * price + value'
+        );
+      });
+
+      it('should handle user rejection', async () => {
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: toAddress,
+          value: amount
+        };
+        const mockError = new Error('User rejected the transaction');
+
+        // Ensure wallet.connect succeeds before transaction error
+        mockWallet.connect.mockResolvedValue(mockAccount);
+        jest
+          .spyOn(transaction, 'prepareTransaction')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(mockError);
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Failed to transfer balance from external wallet: Failed to send transaction: User rejected the transaction'
+        );
+      });
+
+      it('should handle unknown errors gracefully', async () => {
+        const mockPreparedTx = {
+          client: mockClient,
+          chain: mockChain,
+          to: toAddress,
+          value: amount
+        };
+
+        // Ensure wallet.connect succeeds before transaction error
+        mockWallet.connect.mockResolvedValue(mockAccount);
+        jest
+          .spyOn(transaction, 'prepareTransaction')
+          .mockReturnValue(mockPreparedTx);
+        (thirdweb.sendTransaction as jest.Mock).mockRejectedValue(
+          'Unknown error object'
+        );
+
+        const params = {
+          provider: mockProvider,
+          walletId: WalletId.MetaMask,
+          to: toAddress,
+          amount,
+          client: mockClient
+        };
+
+        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
+          'Failed to transfer balance from external wallet: Failed to send transaction: Unknown error'
+        );
+      });
     });
   });
 });

@@ -229,8 +229,9 @@ const provider = getBestProvider(countryCode);
 
 ## Next Steps
 
-- Explore [Client Module](../client/README.md) for SDK initialization and configuration
-- Explore [Wallet Module](../wallet/README.md) for user authentication and account setup
-- Review [Transaction Module](../transaction/README.md) for handling purchased tokens
-- Check [Util Module](../util/README.md) for balance tracking and fiat conversions
-- Learn about [Chain Module](../chain/README.md) for multi-chain onramp support
+- [Client Module](../client/README.md) - SDK initialization and configuration
+- [Wallet Module](../wallet/README.md) - User authentication and account setup
+- [Transaction Module](../transaction/README.md) - Handling purchased tokens
+- [Chain Module](../chain/README.md) - Multi-chain onramp support
+- [Util Module](../util/README.md) - Balance tracking and fiat conversions
+- [Extensions Module](../extensions/README.md) - External wallet integration
