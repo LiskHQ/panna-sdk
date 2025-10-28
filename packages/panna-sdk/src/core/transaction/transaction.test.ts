@@ -845,20 +845,6 @@ describe('Transaction Functions', () => {
         );
       });
 
-      it('should throw error when from address is invalid', async () => {
-        const params = {
-          provider: mockProvider,
-          from: '0xinvalid' as Address,
-          to: toAddress,
-          amount,
-          client: mockClient
-        };
-
-        await expect(transferBalanceFromExternalWallet(params)).rejects.toThrow(
-          "Invalid 'from' address: 0xinvalid"
-        );
-      });
-
       it('should throw error when to address is invalid', async () => {
         const params = {
           provider: mockProvider,

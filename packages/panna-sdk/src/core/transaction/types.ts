@@ -151,8 +151,6 @@ export interface SendTransactionResult {
 export interface TransferBalanceFromExternalWalletParams {
   /** EIP-1193 compatible provider (e.g., MetaMask, WalletConnect) */
   provider: EIP1193Provider;
-  /** The address to send from (must be controlled by the provider) */
-  from: Address;
   /** The recipient address */
   to: Address;
   /** The amount to transfer (in wei for native token, or token's smallest unit for ERC20) */

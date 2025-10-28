@@ -545,7 +545,6 @@ export async function transferBalanceFromExternalWallet(
 ): Promise<SendTransactionResult> {
   const {
     provider,
-    from,
     to,
     amount,
     client,
@@ -556,10 +555,6 @@ export async function transferBalanceFromExternalWallet(
   // Validation
   if (!provider) {
     throw new Error('Provider is required');
-  }
-
-  if (!isValidAddress(from)) {
-    throw new Error(`Invalid 'from' address: ${from}`);
   }
 
   if (!isValidAddress(to)) {
@@ -603,8 +598,7 @@ export async function transferBalanceFromExternalWallet(
     // Send the transaction
     const result = await sendTransaction({
       account,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      transaction: transaction as PreparedTransaction<any>
+      transaction: transaction as PreparedTransaction
     });
 
     return result;
