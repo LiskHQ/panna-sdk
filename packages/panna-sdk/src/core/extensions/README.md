@@ -241,7 +241,7 @@ await walletConnectProvider.enable();
 // Convert to Panna wallet
 const wallet = extensions.fromEIP1193Provider({
   provider: walletConnectProvider,
-  walletId: 'walletconnect'
+  walletId: WalletId.MetaMask // Use appropriate WalletId for the connected wallet
 });
 
 const account = await wallet.connect({
@@ -257,35 +257,39 @@ console.log('WalletConnect connected:', account.address);
 Connect any EIP-1193 compatible provider.
 
 ```ts
-import { extensions, client, chain } from 'panna-sdk/core';
+import { extensions, client, chain, WalletId } from 'panna-sdk/core';
 
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
 // Detect available providers
 const detectProvider = () => {
   if (window.ethereum?.isCoinbaseWallet) {
-    return { provider: window.ethereum, id: 'com.coinbase.wallet' };
+    return { provider: window.ethereum, walletId: WalletId.Coinbase };
   } else if (window.ethereum?.isMetaMask) {
-    return { provider: window.ethereum, id: 'io.metamask' };
-  } else if (window.ethereum) {
-    return { provider: window.ethereum, id: 'unknown' };
+    return { provider: window.ethereum, walletId: WalletId.MetaMask };
+  } else if (window.ethereum?.isTrust) {
+    return { provider: window.ethereum, walletId: WalletId.Trust };
   }
-  return null;
+  throw new Error('No supported wallet detected');
 };
 
-const detected = detectProvider();
-if (detected && extensions.isEIP1193Provider(detected.provider)) {
-  const wallet = extensions.fromEIP1193Provider({
-    provider: detected.provider,
-    walletId: detected.id
-  });
+try {
+  const detected = detectProvider();
+  if (extensions.isEIP1193Provider(detected.provider)) {
+    const wallet = extensions.fromEIP1193Provider({
+      provider: detected.provider,
+      walletId: detected.walletId
+    });
 
-  const account = await wallet.connect({
-    client: pannaClient,
-    chain: chain.lisk
-  });
+    const account = await wallet.connect({
+      client: pannaClient,
+      chain: chain.lisk
+    });
 
-  console.log(`Connected with ${detected.id}:`, account.address);
+    console.log(`Connected with wallet:`, account.address);
+  }
+} catch (error) {
+  console.error(error.message);
 }
 ```
 
@@ -375,14 +379,14 @@ console.log('Transaction receipt:', receipt);
 ### 3. Using with other EIP-1193 compatible libraries
 
 ```ts
-import { extensions, wallet, client, chain } from 'panna-sdk/core';
+import { extensions, wallet, client, chain, WalletId } from 'panna-sdk/core';
 
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
 // Create external wallet from provider
 const externalWallet = extensions.fromEIP1193Provider({
   provider: window.ethereum,
-  walletId: 'io.metamask'
+  walletId: WalletId.MetaMask
 });
 
 const externalAccount = await externalWallet.connect({
@@ -410,7 +414,7 @@ console.log('Accounts:', accounts);
 Safely detect and validate EIP-1193 providers before use.
 
 ```ts
-import { extensions } from 'panna-sdk/core';
+import { extensions, WalletId, getWalletName } from 'panna-sdk/core';
 
 // Type-safe provider detection
 function detectWalletProvider() {
@@ -425,27 +429,31 @@ function detectWalletProvider() {
   }
 
   // Identify specific wallet
-  let walletId = 'unknown';
-  let walletName = 'Unknown Wallet';
+  let walletId: WalletId | null = null;
 
   if (window.ethereum.isMetaMask) {
-    walletId = 'io.metamask';
-    walletName = 'MetaMask';
+    walletId = WalletId.MetaMask;
   } else if (window.ethereum.isCoinbaseWallet) {
-    walletId = 'com.coinbase.wallet';
-    walletName = 'Coinbase Wallet';
-  } else if (window.ethereum.isRabby) {
-    walletId = 'io.rabby';
-    walletName = 'Rabby';
-  } else if (window.ethereum.isBraveWallet) {
-    walletId = 'com.brave.wallet';
-    walletName = 'Brave Wallet';
+    walletId = WalletId.Coinbase;
+  } else if (window.ethereum.isTrust) {
+    walletId = WalletId.Trust;
+  } else if (window.ethereum.isRainbow) {
+    walletId = WalletId.Rainbow;
+  } else if (window.ethereum.isPhantom) {
+    walletId = WalletId.Phantom;
+  }
+
+  if (!walletId) {
+    return {
+      error:
+        'Unsupported wallet - please use MetaMask, Coinbase, Trust, Rainbow, or Phantom'
+    };
   }
 
   return {
     provider: window.ethereum,
     walletId,
-    walletName,
+    walletName: getWalletName(walletId),
     error: null
   };
 }
@@ -480,17 +488,14 @@ import {
   client,
   chain,
   transaction,
-  util
+  util,
+  WalletId
 } from 'panna-sdk/core';
 
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
 // Define wallet connection options
-type WalletOption =
-  | 'panna-email'
-  | 'panna-social'
-  | 'metamask'
-  | 'walletconnect';
+type WalletOption = 'panna-email' | 'panna-social' | 'metamask' | 'coinbase';
 
 async function connectWallet(option: WalletOption) {
   let account;
@@ -527,7 +532,7 @@ async function connectWallet(option: WalletOption) {
       }
       const externalWallet = extensions.fromEIP1193Provider({
         provider: window.ethereum,
-        walletId: 'io.metamask'
+        walletId: WalletId.MetaMask
       });
       account = await externalWallet.connect({
         client: pannaClient,
@@ -536,12 +541,13 @@ async function connectWallet(option: WalletOption) {
       break;
     }
 
-    case 'walletconnect': {
-      // Initialize WalletConnect (see earlier example)
-      const wcProvider = await initWalletConnect();
+    case 'coinbase': {
+      if (!window.ethereum?.isCoinbaseWallet) {
+        throw new Error('Coinbase Wallet not installed');
+      }
       const externalWallet = extensions.fromEIP1193Provider({
-        provider: wcProvider,
-        walletId: 'walletconnect'
+        provider: window.ethereum,
+        walletId: WalletId.Coinbase
       });
       account = await externalWallet.connect({
         client: pannaClient,
@@ -577,7 +583,14 @@ await transaction.sendTransaction({
 Simplified transfers from external wallets using the transaction module.
 
 ```ts
-import { extensions, transaction, util, chain, client } from 'panna-sdk/core';
+import {
+  extensions,
+  transaction,
+  util,
+  chain,
+  client,
+  WalletId
+} from 'panna-sdk/core';
 
 const pannaClient = client.createPannaClient({ clientId: 'your-client-id' });
 
