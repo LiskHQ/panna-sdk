@@ -1,5 +1,6 @@
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
+import type { WalletId } from '../extensions/wallet-ids';
 import type {
   Abi,
   PreparedTransaction,
@@ -151,6 +152,8 @@ export interface SendTransactionResult {
 export interface TransferBalanceFromExternalWalletParams {
   /** EIP-1193 compatible provider (e.g., MetaMask, WalletConnect) */
   provider: EIP1193Provider;
+  /** Wallet identifier following EIP-6963 standard (e.g., "io.metamask", "com.coinbase.wallet") */
+  walletId: WalletId;
   /** The recipient address */
   to: Address;
   /** The amount to transfer (in wei for native token, or token's smallest unit for ERC20) */

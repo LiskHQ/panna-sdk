@@ -24,9 +24,9 @@ export type FromEIP1193ProviderOptions = {
     | EIP1193Provider
     | ((params?: { chainId?: number }) => Promise<EIP1193Provider>);
   /**
-   * Optional wallet identifier (defaults to "adapter")
+   * Wallet identifier following EIP-6963 standard (e.g., "io.metamask", "com.coinbase.wallet")
    */
-  walletId?: WalletId;
+  walletId: WalletId;
 };
 
 /**
@@ -60,8 +60,9 @@ export type ToEIP1193ProviderOptions = {
  *
  * @param options - Options for creating the wallet
  * @param options.provider - The EIP-1193 compatible provider (e.g., window.ethereum)
- * @param options.walletId - Optional wallet identifier (defaults to "adapter")
+ * @param options.walletId - Wallet identifier following EIP-6963 standard (required)
  * @returns A wallet instance that can be connected
+ * @throws {Error} If walletId is not provided
  *
  * @example
  * ```typescript

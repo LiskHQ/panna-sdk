@@ -68,12 +68,7 @@ export enum WalletId {
    * Phantom - Solana and multi-chain wallet
    * @see https://phantom.app
    */
-  Phantom = 'app.phantom',
-
-  /**
-   * Generic adapter - Use this as fallback for unlisted wallets
-   */
-  Adapter = 'adapter'
+  Phantom = 'app.phantom'
 }
 
 /**
@@ -115,14 +110,17 @@ export function isWalletId(id: string): id is WalletIdValue {
  * ```
  */
 export function getWalletName(id: WalletId): string {
-  const names: Record<WalletId, string> = {
+  const names: Partial<Record<WalletId, string>> = {
     [WalletId.MetaMask]: 'MetaMask',
     [WalletId.Coinbase]: 'Coinbase Wallet',
     [WalletId.Trust]: 'Trust Wallet',
     [WalletId.Rainbow]: 'Rainbow',
-    [WalletId.Phantom]: 'Phantom',
-    [WalletId.Adapter]: 'Adapter'
+    [WalletId.Phantom]: 'Phantom'
   };
 
-  return names[id] || id;
+  const name = names[id];
+  if (!name) {
+    throw new Error(`Unknown wallet ID: ${id}`);
+  }
+  return name;
 }

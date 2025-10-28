@@ -2,6 +2,7 @@ import * as thirdweb from 'thirdweb';
 import type { Chain } from '../chain/types';
 import type { PannaClient } from '../client';
 import * as extensions from '../extensions';
+import { WalletId } from '../extensions/wallet-ids';
 import type { Address, EIP1193Provider } from '../types/external';
 import {
   prepareTransaction,
@@ -833,6 +834,7 @@ describe('Transaction Functions', () => {
       it('should throw error when provider is undefined', async () => {
         const params = {
           provider: undefined as unknown as EIP1193Provider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient
@@ -846,6 +848,7 @@ describe('Transaction Functions', () => {
       it('should throw error when to address is invalid', async () => {
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: '0xinvalid' as Address,
           amount,
           client: mockClient
@@ -859,6 +862,7 @@ describe('Transaction Functions', () => {
       it('should throw error when token address is invalid', async () => {
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient,
@@ -873,6 +877,7 @@ describe('Transaction Functions', () => {
       it('should throw error when amount is zero', async () => {
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount: BigInt(0),
           client: mockClient
@@ -886,6 +891,7 @@ describe('Transaction Functions', () => {
       it('should throw error when amount is negative', async () => {
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount: BigInt(-1),
           client: mockClient
@@ -917,6 +923,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient,
@@ -926,7 +933,8 @@ describe('Transaction Functions', () => {
         const result = await transferBalanceFromExternalWallet(params);
 
         expect(extensions.fromEIP1193Provider).toHaveBeenCalledWith({
-          provider: mockProvider
+          provider: mockProvider,
+          walletId: WalletId.MetaMask
         });
         expect(mockWallet.connect).toHaveBeenCalledWith({
           client: mockClient,
@@ -961,6 +969,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient
@@ -998,6 +1007,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient,
@@ -1008,7 +1018,8 @@ describe('Transaction Functions', () => {
         const result = await transferBalanceFromExternalWallet(params);
 
         expect(extensions.fromEIP1193Provider).toHaveBeenCalledWith({
-          provider: mockProvider
+          provider: mockProvider,
+          walletId: WalletId.MetaMask
         });
         expect(mockWallet.connect).toHaveBeenCalledWith({
           client: mockClient,
@@ -1045,6 +1056,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount: usdcAmount,
           client: mockClient,
@@ -1072,6 +1084,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient
@@ -1102,6 +1115,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient
@@ -1130,6 +1144,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient
@@ -1159,6 +1174,7 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
+          walletId: WalletId.MetaMask,
           to: toAddress,
           amount,
           client: mockClient

@@ -86,7 +86,6 @@ console.log(WalletId.Coinbase); // "com.coinbase.wallet"
 console.log(WalletId.Trust); // "com.trustwallet.app"
 console.log(WalletId.Rainbow); // "me.rainbow"
 console.log(WalletId.Phantom); // "app.phantom"
-console.log(WalletId.Adapter); // "adapter" (fallback for other wallets)
 
 // Get human-readable wallet name
 console.log(getWalletName(WalletId.MetaMask)); // "MetaMask"
@@ -107,7 +106,6 @@ if (isWalletId('io.metamask')) {
 | Trust Wallet    | `com.trustwallet.app` | `WalletId.Trust`    |
 | Rainbow         | `me.rainbow`          | `WalletId.Rainbow`  |
 | Phantom         | `app.phantom`         | `WalletId.Phantom`  |
-| Other Wallets   | `adapter`             | `WalletId.Adapter`  |
 
 ### Why Use WalletId Enum?
 
@@ -124,7 +122,7 @@ import { WalletId, getWalletName, fromEIP1193Provider } from 'panna-sdk/core';
 function detectWallet() {
   if (!window.ethereum) return null;
 
-  let walletId: WalletId = WalletId.Adapter; // Default fallback
+  let walletId: WalletId | null = null;
 
   // Detect specific wallet
   if (window.ethereum.isMetaMask) {
@@ -133,6 +131,12 @@ function detectWallet() {
     walletId = WalletId.Coinbase;
   } else if (window.ethereum.isTrust) {
     walletId = WalletId.Trust;
+  }
+
+  if (!walletId) {
+    throw new Error(
+      'Unknown wallet provider - please specify a valid walletId'
+    );
   }
 
   return {
@@ -591,6 +595,7 @@ const userAddress = accounts[0];
 // Transfer native tokens (ETH)
 const result = await transaction.transferBalanceFromExternalWallet({
   provider: window.ethereum,
+  walletId: WalletId.MetaMask,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
   amount: util.toWei('1'), // 1 ETH
   client: pannaClient,
@@ -602,6 +607,7 @@ console.log('Transfer complete:', result.transactionHash);
 // Transfer ERC-20 tokens
 const tokenResult = await transaction.transferBalanceFromExternalWallet({
   provider: window.ethereum,
+  walletId: WalletId.MetaMask,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
   amount: BigInt(100_000_000), // 100 tokens (assuming 6 decimals)
   client: pannaClient,
