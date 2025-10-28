@@ -817,7 +817,6 @@ describe('Transaction Functions', () => {
       connect: jest.fn().mockResolvedValue(mockAccount)
     };
 
-    const fromAddress = '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' as Address;
     const toAddress = '0x123456789abcdef123456789abcdef123456789a' as Address;
     const tokenAddress =
       '0xA0b86a33E6417a8fdf77C4d0e6B9d6a66B5B8f78' as Address;
@@ -834,7 +833,6 @@ describe('Transaction Functions', () => {
       it('should throw error when provider is undefined', async () => {
         const params = {
           provider: undefined as unknown as EIP1193Provider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient
@@ -848,7 +846,6 @@ describe('Transaction Functions', () => {
       it('should throw error when to address is invalid', async () => {
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: '0xinvalid' as Address,
           amount,
           client: mockClient
@@ -862,7 +859,6 @@ describe('Transaction Functions', () => {
       it('should throw error when token address is invalid', async () => {
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient,
@@ -877,7 +873,6 @@ describe('Transaction Functions', () => {
       it('should throw error when amount is zero', async () => {
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount: BigInt(0),
           client: mockClient
@@ -891,7 +886,6 @@ describe('Transaction Functions', () => {
       it('should throw error when amount is negative', async () => {
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount: BigInt(-1),
           client: mockClient
@@ -923,7 +917,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient,
@@ -968,7 +961,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient
@@ -1006,7 +998,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient,
@@ -1054,7 +1045,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount: usdcAmount,
           client: mockClient,
@@ -1082,7 +1072,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient
@@ -1113,7 +1102,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient
@@ -1142,7 +1130,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient
@@ -1172,7 +1159,6 @@ describe('Transaction Functions', () => {
 
         const params = {
           provider: mockProvider,
-          from: fromAddress,
           to: toAddress,
           amount,
           client: mockClient
