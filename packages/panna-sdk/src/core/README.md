@@ -180,7 +180,7 @@ import { extensions, transaction, util } from 'panna-sdk';
 if (extensions.isEIP1193Provider(window.ethereum)) {
   const eoaWallet = extensions.fromEIP1193Provider({
     provider: window.ethereum,
-    walletId: 'io.metamask'
+    walletId: WalletId.MetaMask
   });
 
   const eoaAccount = await eoaWallet.connect({
@@ -191,7 +191,6 @@ if (extensions.isEIP1193Provider(window.ethereum)) {
   // Transfer from external wallet
   const result = await transaction.transferBalanceFromExternalWallet({
     provider: window.ethereum,
-    from: eoaAccount.address, // Connected EOA wallet from which user signed in to their Panna wallet account
     to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e', // Panna wallet address
     amount: util.toWei('1'),
     client: pannaClient

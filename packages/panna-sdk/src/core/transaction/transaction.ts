@@ -477,7 +477,6 @@ export async function sendTransaction(
  *
  * @param params - Parameters for the transfer
  * @param params.provider - EIP-1193 compatible provider (e.g., window.ethereum for MetaMask)
- * @param params.from - The address to send from (must be controlled by the provider)
  * @param params.to - The recipient address
  * @param params.amount - The amount to transfer in smallest unit (wei for native, token's smallest unit for ERC20)
  * @param params.client - The Panna client instance
@@ -499,7 +498,6 @@ export async function sendTransaction(
  * // 1. Transfer native token (ETH) from MetaMask
  * const result = await transaction.transferBalanceFromExternalWallet({
  *   provider: window.ethereum,
- *   from: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   to: "0x123...",
  *   amount: util.toWei("1"), // 1 ETH
  *   client: pannaClient
@@ -510,7 +508,6 @@ export async function sendTransaction(
  * // 2. Transfer ERC20 token from external wallet
  * const erc20Result = await transaction.transferBalanceFromExternalWallet({
  *   provider: window.ethereum,
- *   from: "0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e",
  *   to: "0x123...",
  *   amount: BigInt(100_000_000), // 100 USDC (6 decimals)
  *   client: pannaClient,
@@ -522,7 +519,6 @@ export async function sendTransaction(
  * try {
  *   const result = await transaction.transferBalanceFromExternalWallet({
  *     provider: window.ethereum,
- *     from: userAddress,
  *     to: recipientAddress,
  *     amount: transferAmount,
  *     client: pannaClient

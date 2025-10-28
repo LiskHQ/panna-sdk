@@ -204,7 +204,6 @@ const userAddress = accounts[0];
 // Transfer native tokens (ETH)
 const result = await transaction.transferBalanceFromExternalWallet({
   provider: window.ethereum,
-  from: userAddress,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
   amount: util.toWei('1'), // 1 ETH
   client: pannaClient,
@@ -222,7 +221,6 @@ import { transaction, util, chain } from 'panna-sdk';
 // Transfer ERC-20 tokens from MetaMask
 const tokenResult = await transaction.transferBalanceFromExternalWallet({
   provider: window.ethereum,
-  from: userAddress,
   to: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e',
   amount: BigInt(100_000_000), // 100 tokens (assuming 6 decimals)
   client: pannaClient,
@@ -250,7 +248,6 @@ try {
 
   const result = await transaction.transferBalanceFromExternalWallet({
     provider: window.ethereum,
-    from: accounts[0],
     to: recipientAddress,
     amount: util.toWei('0.5'),
     client: pannaClient,
