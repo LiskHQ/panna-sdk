@@ -1,5 +1,5 @@
 import { isValidAddress } from 'src/core';
-import { z } from 'zod';
+import * as z from 'zod';
 
 // Token schema
 export const tokenSchema = z.object({
@@ -30,19 +30,19 @@ export const sendFormSchema = z
         fiatBalance: fiatBalanceSchema
       })
       .refine((val) => val.token.name !== '', {
-        message: 'Token is required'
+        error: 'Token is required'
       }),
     recipientAddress: z
       .string()
       .min(1, 'Recipient address is required')
       .refine(isValidAddress, {
-        message: 'Please enter a valid address'
+        error: 'Please enter a valid address'
       }),
     amount: z
       .string()
       .min(1, 'Amount is required')
       .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-        message: 'Amount must be a number greater than 0'
+        error: 'Amount must be a number greater than 0'
       }),
     fiatAmount: z.string().optional(),
     cryptoAmount: z.string().optional(),
@@ -59,7 +59,7 @@ export const sendFormSchema = z
       isNaN(amountNum)
     ) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         message: 'Insufficient balance',
         path: ['amount']
       });

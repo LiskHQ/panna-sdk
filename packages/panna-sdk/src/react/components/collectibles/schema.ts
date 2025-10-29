@@ -1,13 +1,13 @@
 import { isValidAddress, TokenERC } from 'src/core';
 import { ImageType } from 'src/core/util/collectible.types';
-import { z } from 'zod';
+import * as z from 'zod';
 
 export const MIN_ERC1155_VALUE = 1;
 const WALLET_ADDRESS_LENGTH = 42;
 
 const tokenInstanceSchema = z.object({
   id: z.string().min(1, 'Token instance ID is required'),
-  imageType: z.nativeEnum(ImageType),
+  imageType: z.enum(ImageType),
   image: z.string().nullable(),
   name: z.string().min(1, 'Token name is required').optional(),
   value: z
@@ -24,7 +24,7 @@ const tokenSchema = z.object({
     .string()
     .min(1, 'Token address is required')
     .refine(isValidAddress, {
-      message: 'Please enter a valid address'
+      error: 'Please enter a valid address'
     }),
   icon: z.string().nullable()
 });

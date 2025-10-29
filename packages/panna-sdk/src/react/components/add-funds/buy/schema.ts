@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 // Country schema - supports only 2-letter (ISO 3166-1 alpha-2) codes as required by core functions
 export const countrySchema = z.object({
