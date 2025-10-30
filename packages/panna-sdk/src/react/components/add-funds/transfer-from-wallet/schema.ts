@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 // Token schema (reused from send schema)
 export const tokenSchema = z.object({
+  address: z.string().min(1, 'Token address is required'),
   decimals: z.number().min(1, 'Token decimals is required'),
   symbol: z.string().min(1, 'Token symbol is required'),
   name: z.string().min(1, 'Token name is required'),

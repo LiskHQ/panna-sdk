@@ -1,7 +1,15 @@
 import { Loader2Icon } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { transferBalanceFromExternalWallet } from 'src/core';
+import { toEIP1193Provider } from 'src/core/extensions';
+import {
+  WalletId,
+  isWalletId,
+  type WalletIdValue
+} from 'src/core/extensions/wallet-ids';
+import { transferBalanceFromExternalWallet } from 'src/core/transaction/transaction';
+import type { Address } from 'src/core/types/external';
+import type { TokenBalance } from '@/mocks/token-balances';
 import { getEnvironmentChain } from '@/utils';
 import { useExternalWallet, usePanna } from '../../../hooks';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
@@ -19,7 +27,7 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
   const { externalWallet } = useExternalWallet();
   const initializeTransfer = useRef(true);
 
-  const tokenData = form.getValues('tokenInfo.token');
+  const tokenData = form.getValues('tokenInfo.token') as TokenBalance['token'];
   const cryptoAmount = form.getValues('cryptoAmount') || '0';
   const toAddress = form.getValues('toAddress');
 
@@ -27,34 +35,122 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
     async function executeTransfer() {
       try {
         if (!externalWallet) {
-          throw new Error('No external wallet connected');
+          throw new Error('No external wallet connected.');
         }
 
-        const externalAccount = externalWallet.getAccount();
-        if (!externalAccount) {
-          throw new Error('Could not get external wallet account');
+        const account = externalWallet.getAccount();
+
+        if (!account) {
+          throw new Error('Could not retrieve external wallet account.');
+        }
+
+        if (!tokenData) {
+          throw new Error('No token information available.');
         }
 
         const chain = getEnvironmentChain(chainId);
 
-        // Determine token address (use zero address for native token)
-        const tokenAddress =
-          tokenData.symbol === 'ETH'
-            ? '0x0000000000000000000000000000000000000000'
-            : tokenData.address || '0x0000000000000000000000000000000000000000';
+        const provider = toEIP1193Provider({
+          wallet: externalWallet,
+          chain,
+          client
+        });
 
-        // Convert amount to smallest unit (wei for ETH, token units for ERC-20)
+        const walletIdMap: Record<string, WalletIdValue> = {
+          [WalletId.MetaMask]: WalletId.MetaMask,
+          [WalletId.Coinbase]: WalletId.Coinbase,
+          [WalletId.Trust]: WalletId.Trust,
+          [WalletId.Rainbow]: WalletId.Rainbow,
+          [WalletId.Phantom]: WalletId.Phantom,
+          walletConnect: WalletId.WalletConnect,
+          walletconnect: WalletId.WalletConnect
+        };
+
+        const externalWalletId = externalWallet.id;
+        const normalizedWalletId = externalWalletId.toLowerCase();
+
+        let resolvedWalletId: WalletIdValue | null = null;
+
+        if (walletIdMap[externalWalletId]) {
+          resolvedWalletId = walletIdMap[externalWalletId];
+        } else if (walletIdMap[normalizedWalletId]) {
+          resolvedWalletId = walletIdMap[normalizedWalletId];
+        } else if (normalizedWalletId.startsWith('ecosystem.')) {
+          resolvedWalletId = WalletId.WalletConnect;
+        } else if (normalizedWalletId.includes('metamask')) {
+          resolvedWalletId = WalletId.MetaMask;
+        } else if (normalizedWalletId.includes('coinbase')) {
+          resolvedWalletId = WalletId.Coinbase;
+        } else if (normalizedWalletId.includes('trust')) {
+          resolvedWalletId = WalletId.Trust;
+        } else if (normalizedWalletId.includes('rainbow')) {
+          resolvedWalletId = WalletId.Rainbow;
+        } else if (normalizedWalletId.includes('phantom')) {
+          resolvedWalletId = WalletId.Phantom;
+        } else if (normalizedWalletId.includes('walletconnect')) {
+          resolvedWalletId = WalletId.WalletConnect;
+        } else if (isWalletId(externalWalletId)) {
+          resolvedWalletId = externalWalletId as WalletIdValue;
+        }
+
+        if (!resolvedWalletId) {
+          throw new Error('This wallet is not supported.');
+        }
+
+        const transferWalletId = normalizedWalletId.startsWith('ecosystem.')
+          ? WalletId.WalletConnect
+          : resolvedWalletId;
+
+        const rawTokenAddress = tokenData.address;
+        const isNativeToken =
+          !rawTokenAddress ||
+          rawTokenAddress === '0x0000000000000000000000000000000000000000' ||
+          tokenData.symbol === 'ETH';
+
+        const tokenAddress = isNativeToken
+          ? undefined
+          : (rawTokenAddress as Address);
+
         const amount = BigInt(
           Math.floor(Number(cryptoAmount) * 10 ** tokenData.decimals)
         );
 
-        const result = await transferBalanceFromExternalWallet({
-          externalAccount,
-          embeddedWalletAddress: toAddress,
-          tokenAddress,
+        if (!toAddress) {
+          throw new Error('Destination address is invalid.');
+        }
+
+        const recipientAddress = toAddress as Address;
+
+        console.log({
+          provider,
+          walletId: transferWalletId,
+          to: recipientAddress,
           amount,
           client,
-          chain
+          chain,
+          tokenAddress,
+          externalWallet,
+          account,
+          externalWalletId,
+          normalizedWalletId,
+          resolvedWalletId,
+          rawTokenAddress,
+          isNativeToken,
+          tokenData,
+          cryptoAmount,
+          toAddress,
+          recipientAddress
+        });
+
+        const result = await transferBalanceFromExternalWallet({
+          provider,
+          walletId: transferWalletId,
+          to: recipientAddress,
+          amount,
+          client,
+          chain,
+          tokenAddress,
+          account
         });
 
         console.log('Transfer successful:', result.transactionHash);
@@ -65,15 +161,14 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
 
         console.error('Transfer failed:', errorMessage);
 
-        if (errorMessage.includes('insufficient funds')) {
-          console.error('Not enough balance to complete transfer');
-        } else if (
-          errorMessage.includes('user rejected') ||
-          errorMessage.includes('User rejected')
-        ) {
-          console.error('User rejected the transaction');
+        const normalizedError = errorMessage.toLowerCase();
+
+        if (normalizedError.includes('insufficient funds')) {
+          console.error('Insufficient balance to complete the transfer.');
+        } else if (normalizedError.includes('user rejected')) {
+          console.error('The transaction was rejected by the user.');
         } else {
-          console.error('Transaction failed:', errorMessage);
+          console.error('The transaction failed:', errorMessage);
         }
 
         // Navigate to error step (always the last step)

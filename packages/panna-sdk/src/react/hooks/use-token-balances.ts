@@ -47,21 +47,40 @@ export function useTokenBalances(
         });
 
         const fallbackIcon = supportedTokens[0]?.icon ?? '';
-        const symbolToIcon = supportedTokens.reduce<Record<string, string>>(
-          (acc, t) => {
-            if (t.symbol) acc[t.symbol] = t.icon ?? fallbackIcon;
-            return acc;
-          },
-          {}
-        );
+        const fallbackAddress = supportedTokens[0]?.address ?? '';
 
-        const balancesWithIcons: TokenBalance[] = tokenBalances.map((b) => ({
-          ...b,
-          token: {
-            ...b.token,
-            icon: symbolToIcon[b.token.symbol] ?? fallbackIcon
-          }
-        }));
+        const tokenLookup = supportedTokens.reduce<
+          Record<string, (typeof supportedTokens)[number]>
+        >((acc, t) => {
+          const symbolKey = t.symbol?.toLowerCase();
+          const nameKey = t.name?.toLowerCase();
+
+          if (symbolKey) acc[symbolKey] = t;
+          if (nameKey) acc[nameKey] = t;
+
+          return acc;
+        }, {});
+
+        const balancesWithIcons: TokenBalance[] = tokenBalances.map((b) => {
+          const lookupKeySymbol = b.token.symbol?.toLowerCase();
+          const lookupKeyName = b.token.name?.toLowerCase();
+          const matchingToken =
+            (lookupKeySymbol ? tokenLookup[lookupKeySymbol] : undefined) ||
+            (lookupKeyName ? tokenLookup[lookupKeyName] : undefined);
+
+          const resolvedIcon = matchingToken?.icon ?? fallbackIcon;
+          const resolvedAddress =
+            matchingToken?.address ?? b.token.address ?? fallbackAddress;
+
+          return {
+            ...b,
+            token: {
+              ...b.token,
+              icon: resolvedIcon,
+              address: resolvedAddress
+            }
+          };
+        });
 
         return balancesWithIcons;
       } catch (error) {

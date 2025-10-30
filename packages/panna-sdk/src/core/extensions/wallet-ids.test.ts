@@ -35,12 +35,14 @@ describe('WalletId', () => {
       expect(isWalletId('me.rainbow')).toBe(true);
       expect(isWalletId('app.phantom')).toBe(true);
       expect(isWalletId('walletconnect')).toBe(true);
+      expect(isWalletId('ecosystem.lisk')).toBe(true);
     });
 
     it('should return false for invalid WalletId strings', () => {
       expect(isWalletId('invalid.wallet')).toBe(false);
       expect(isWalletId('random-string')).toBe(false);
       expect(isWalletId('')).toBe(false);
+      expect(isWalletId('ecosystem-')).toBe(false);
     });
 
     it('should work with all enum values', () => {
@@ -79,6 +81,11 @@ describe('WalletId', () => {
 
     it('should return correct name for WalletConnect', () => {
       expect(getWalletName(WalletId.WalletConnect)).toBe('WalletConnect');
+    });
+
+    it('should return formatted name for ecosystem wallets', () => {
+      expect(getWalletName('ecosystem.lisk')).toBe('Lisk Ecosystem Wallet');
+      expect(getWalletName('ecosystem.test')).toBe('Test Ecosystem Wallet');
     });
 
     it('should return all names for all wallet IDs', () => {

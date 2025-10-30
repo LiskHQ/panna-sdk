@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { TokenBalance } from '@/mocks/token-balances';
-import { useExternalWallet, useTokenBalances } from '../../../hooks';
+import { getSupportedTokens } from '@/utils';
+import { useExternalWallet, usePanna, useTokenBalances } from '../../../hooks';
 import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
@@ -20,7 +21,9 @@ export function TransferSelectTokenStep({
 }: TransferSelectTokenStepProps) {
   const { next } = useDialogStepper();
   const { externalAddress } = useExternalWallet();
+  const { chainId } = usePanna();
   const [selectedToken, setSelectedToken] = useState<TokenBalance | null>(null);
+  const supportedTokens = getSupportedTokens(chainId);
 
   // Set the external wallet address when component loads
   useEffect(() => {
@@ -37,12 +40,41 @@ export function TransferSelectTokenStep({
   );
 
   const handleTokenSelect = (token: TokenBalance) => {
-    setSelectedToken(token);
+    const matchingSupportedToken = supportedTokens.find((supportedToken) => {
+      const matchesSymbol =
+        supportedToken.symbol?.toLowerCase() ===
+        token.token.symbol?.toLowerCase();
+      const matchesName =
+        supportedToken.name?.toLowerCase() === token.token.name?.toLowerCase();
+
+      return matchesSymbol || matchesName;
+    });
+
+    const tokenAddress = token.token.address ?? matchingSupportedToken?.address;
+
+    if (!tokenAddress) {
+      console.warn(
+        'Selected token is missing address and cannot be transferred',
+        token
+      );
+      return;
+    }
+
+    setSelectedToken({
+      ...token,
+      token: {
+        ...token.token,
+        address: tokenAddress
+      }
+    });
   };
 
   const handleNext = () => {
     if (selectedToken) {
-      form.setValue('tokenInfo', selectedToken);
+      form.setValue(
+        'tokenInfo',
+        selectedToken as unknown as TransferFormData['tokenInfo']
+      );
       next();
     }
   };
