@@ -24,6 +24,8 @@ import { Input } from '@/components/ui/input';
 import { usePanna } from '@/hooks/use-panna';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
+import { Separator } from '../ui/separator';
+import { Typography } from '../ui/typography';
 import { formSchema } from './schema';
 
 type LoginFormProps = {
@@ -182,6 +184,13 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
             </FormItem>
           )}
         />
+        <div className="grid grid-cols-9 items-center gap-4">
+          <Separator className="col-span-4" />
+          <Typography variant="muted" className="text-center">
+            or
+          </Typography>
+          <Separator className="col-span-4" />
+        </div>
         <div>
           <Button
             type="button"
