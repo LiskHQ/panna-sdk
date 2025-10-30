@@ -4,7 +4,6 @@ import { Label } from '@/components/ui/label';
 import { TokenBalance } from '@/mocks/token-balances';
 import { getSupportedTokens } from '@/utils';
 import { useExternalWallet, usePanna, useTokenBalances } from '../../../hooks';
-import { Button } from '../../ui/button';
 import { Card } from '../../ui/card';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
 import { useDialogStepper } from '../../ui/dialog-stepper';
@@ -22,7 +21,9 @@ export function TransferSelectTokenStep({
   const { next } = useDialogStepper();
   const { externalAddress } = useExternalWallet();
   const { chainId } = usePanna();
-  const [selectedToken, setSelectedToken] = useState<TokenBalance | null>(null);
+  const [selectedToken, setSelectedToken] = useState<
+    TransferFormData['tokenInfo'] | null
+  >(null);
   const supportedTokens = getSupportedTokens(chainId);
 
   // Set the external wallet address when component loads
@@ -60,23 +61,21 @@ export function TransferSelectTokenStep({
       return;
     }
 
-    setSelectedToken({
-      ...token,
+    const resolvedToken: TransferFormData['tokenInfo'] = {
       token: {
         ...token.token,
         address: tokenAddress
-      }
-    });
-  };
+      },
+      tokenBalance: token.tokenBalance,
+      fiatBalance: token.fiatBalance
+    };
 
-  const handleNext = () => {
-    if (selectedToken) {
-      form.setValue(
-        'tokenInfo',
-        selectedToken as unknown as TransferFormData['tokenInfo']
-      );
-      next();
-    }
+    setSelectedToken(resolvedToken);
+    form.setValue('tokenInfo', resolvedToken, {
+      shouldDirty: true,
+      shouldValidate: true
+    });
+    next();
   };
 
   return (
@@ -162,14 +161,6 @@ export function TransferSelectTokenStep({
           )}
         </div>
       </div>
-
-      <Button
-        type="button"
-        onClick={handleNext}
-        disabled={!selectedToken || isLoading}
-      >
-        Next
-      </Button>
     </div>
   );
 }
