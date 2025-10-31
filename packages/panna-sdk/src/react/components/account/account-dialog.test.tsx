@@ -157,13 +157,13 @@ describe('AccountDialog', () => {
     expect(screen.getByTestId('send-form')).toBeInTheDocument();
   });
 
-  it('buy button is disabled', () => {
+  it('navigates to add funds form when add funds button is clicked', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
     fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
 
-    const buyButton = screen.getByRole('button', { name: /buy/i });
-    expect(buyButton).toBeDisabled();
+    const addFundsButton = screen.getByRole('button', { name: /add funds/i });
+    expect(addFundsButton).toBeInTheDocument();
   });
 
   it('closes send form and returns to main view', () => {
