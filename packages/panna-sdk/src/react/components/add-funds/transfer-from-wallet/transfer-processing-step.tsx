@@ -121,27 +121,6 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
 
         const recipientAddress = toAddress as Address;
 
-        console.log({
-          provider,
-          walletId: transferWalletId,
-          to: recipientAddress,
-          amount,
-          client,
-          chain,
-          tokenAddress,
-          externalWallet,
-          account,
-          externalWalletId,
-          normalizedWalletId,
-          resolvedWalletId,
-          rawTokenAddress,
-          isNativeToken,
-          tokenData,
-          cryptoAmount,
-          toAddress,
-          recipientAddress
-        });
-
         const result = await transferBalanceFromExternalWallet({
           provider,
           walletId: transferWalletId,

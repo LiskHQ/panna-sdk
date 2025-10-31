@@ -15,8 +15,16 @@ export function AddFundsEntryStep({
   onBuySelected,
   onTransferSelected
 }: AddFundsEntryStepProps) {
-  const { hasExternalWallet, externalWallet, externalAddress } =
-    useExternalWallet();
+  const {
+    hasExternalWallet,
+    externalWallet,
+    externalAddress,
+    hasLinkedExternalWallet,
+    isLinkedExternalWalletLoading
+  } = useExternalWallet();
+
+  const shouldRenderTransferSection =
+    hasLinkedExternalWallet && !isLinkedExternalWalletLoading;
 
   const getWalletName = () => {
     if (!externalWallet) return 'External Wallet';
@@ -64,51 +72,57 @@ export function AddFundsEntryStep({
             </div>
           </Card>
         </div>
-        <div className="flex flex-col gap-4">
-          <Label>Transfer from wallet</Label>
-          <Card
-            className={`flex flex-row items-center gap-4 px-3 py-3 transition-colors ${
-              hasExternalWallet
-                ? 'hover:bg-muted/50 cursor-pointer'
-                : 'cursor-not-allowed opacity-50'
-            }`}
-            onClick={handleTransferClick}
-          >
-            <WalletIcon className="text-primary size-8" />
-            <div className="flex-1">
-              {hasExternalWallet ? (
-                <>
-                  <Typography as="h1" variant="small">
-                    {getWalletName()}
-                  </Typography>
-                  <Typography variant="muted">
-                    {externalAddress ? truncateAddress(externalAddress) : ''}
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <Typography as="h1" variant="small">
-                    Transfer from wallet
-                  </Typography>
-                  <Typography variant="muted">
-                    Connect an external wallet (e.g., MetaMask) to transfer
-                    assets
-                  </Typography>
-                </>
-              )}
+        {shouldRenderTransferSection ? (
+          <>
+            <div className="flex flex-col gap-4">
+              <Label>Transfer from wallet</Label>
+              <Card
+                className={`flex flex-row items-center gap-4 px-3 py-3 transition-colors ${
+                  hasExternalWallet
+                    ? 'hover:bg-muted/50 cursor-pointer'
+                    : 'cursor-not-allowed opacity-50'
+                }`}
+                onClick={handleTransferClick}
+              >
+                <WalletIcon className="text-primary size-8" />
+                <div className="flex-1">
+                  {hasExternalWallet ? (
+                    <>
+                      <Typography as="h1" variant="small">
+                        {getWalletName()}
+                      </Typography>
+                      <Typography variant="muted">
+                        {externalAddress
+                          ? truncateAddress(externalAddress)
+                          : ''}
+                      </Typography>
+                    </>
+                  ) : (
+                    <>
+                      <Typography as="h1" variant="small">
+                        Transfer from wallet
+                      </Typography>
+                      <Typography variant="muted">
+                        Connect an external wallet (e.g., MetaMask) to transfer
+                        assets
+                      </Typography>
+                    </>
+                  )}
+                </div>
+              </Card>
             </div>
-          </Card>
-        </div>
-        {!hasExternalWallet && (
-          <div className="bg-muted/50 rounded-lg p-3">
-            <Typography
-              variant="small"
-              className="text-muted-foreground text-center"
-            >
-              Tip: Connect MetaMask or another wallet to enable transfers
-            </Typography>
-          </div>
-        )}
+            {!hasExternalWallet && (
+              <div className="bg-muted/50 rounded-lg p-3">
+                <Typography
+                  variant="small"
+                  className="text-muted-foreground text-center"
+                >
+                  Tip: Connect MetaMask or another wallet to enable transfers
+                </Typography>
+              </div>
+            )}
+          </>
+        ) : null}
       </div>
     </div>
   );
