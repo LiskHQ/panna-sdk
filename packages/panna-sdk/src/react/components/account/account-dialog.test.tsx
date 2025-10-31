@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { FiatCurrency } from 'src/core';
 import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
-import { BuyFormProps, StepperRefProvider } from '../buy/buy-form';
+import { BuyFormProps, StepperRefProvider } from '../add-funds/buy/buy-form';
 import { SendCollectibleFormProps } from '../collectibles/send-collectible-form';
 import { SendFormProps, StepperContextProvider } from '../send/send-form';
 import { AccountDialog } from './account-dialog';
@@ -16,7 +16,7 @@ jest.mock('../activity/activity-list', () => ({
 jest.mock('../balance/tokens-list', () => ({
   TokensList: () => <div data-testid="tokens-list">Tokens List</div>
 }));
-jest.mock('../buy/buy-form', () => ({
+jest.mock('../add-funds/buy/buy-form', () => ({
   StepperRefProvider: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
