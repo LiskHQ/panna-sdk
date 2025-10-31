@@ -2,6 +2,8 @@ import { isValidAddress } from 'src/core';
 import { ImageType } from 'src/core/util/collectible.types';
 import { z } from 'zod';
 
+const MIN_VALUE = 1;
+
 const tokenInstanceSchema = z.object({
   id: z.string().min(1, 'Token instance ID is required'),
   imageType: z.nativeEnum(ImageType),
@@ -29,14 +31,14 @@ export const sendCollectibleFormSchema = z
     token: tokenSchema,
     recipientAddress: z
       .string()
-      .min(1, 'Recipient address is required')
+      .length(42, 'Recipient address is required')
       .refine(isValidAddress, {
         message: 'Please enter a valid address'
       }),
     amount: z
       .string()
       .min(1, 'Quantity is required')
-      .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      .refine((val) => !isNaN(Number(val)) && Number(val) >= MIN_VALUE, {
         message: 'Quantity must be a number greater than 0'
       })
   })
@@ -44,17 +46,18 @@ export const sendCollectibleFormSchema = z
     const amountNum = Number(data.amount);
     if (data.collectible?.value) {
       if (amountNum > Number(data.collectible.value)) {
+        const MAX_VALUE_OWNED = data.collectible.value;
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Quantity must not be greater than max available',
+          message: `Quantity must not be greater than ${MAX_VALUE_OWNED} (max available)`,
           path: ['amount']
         });
       }
     } else {
-      if (amountNum > 1) {
+      if (amountNum > MIN_VALUE) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'Quantity must not be greater than max available',
+          message: `Quantity must not be greater than ${MIN_VALUE} (max available)`,
           path: ['amount']
         });
       }

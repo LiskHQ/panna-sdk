@@ -17,6 +17,8 @@ type SelectRecipientStepProps = {
   form: UseFormReturn<SendCollectibleFormData>;
 };
 
+const ONLY_DIGITS_REGEX = /^\d+$/;
+
 export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
   const { next } = useDialogStepper();
   const { recipientAddress, collectible, amount } = form.watch();
@@ -75,10 +77,11 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
                   placeholder="Quantity"
                   type="number"
                   min={1}
+                  max={collectible?.value ?? 1}
                   onChange={(e) => {
                     const value = e.target.value;
-                    // Only allow digits to a maximum of 4 characters
-                    if (/^\d{0,4}$/.test(value)) {
+                    // Only allow digits
+                    if (ONLY_DIGITS_REGEX.test(value)) {
                       field.onChange(value);
                     }
                   }}
