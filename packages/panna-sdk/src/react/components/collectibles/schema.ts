@@ -1,4 +1,4 @@
-import { isValidAddress } from 'src/core';
+import { isValidAddress, TokenERC } from 'src/core';
 import { ImageType } from 'src/core/util/collectible.types';
 import { z } from 'zod';
 
@@ -39,12 +39,12 @@ export const sendCollectibleFormSchema = z
       .string()
       .min(1, 'Quantity is required')
       .refine((val) => !isNaN(Number(val)) && Number(val) >= MIN_VALUE, {
-        message: 'Quantity must be a number greater than 0'
+        message: `Quantity must be a number greater than ${MIN_VALUE - 1}`
       })
   })
   .superRefine((data, ctx) => {
     const amountNum = Number(data.amount);
-    if (data.collectible?.value) {
+    if (data.token.type === TokenERC.ERC1155 && data.collectible?.value) {
       if (amountNum > Number(data.collectible.value)) {
         const MAX_VALUE_OWNED = data.collectible.value;
         ctx.addIssue({
@@ -54,6 +54,7 @@ export const sendCollectibleFormSchema = z
         });
       }
     } else {
+      // ERC-721 tokens are unique so their amount can only be one
       if (amountNum > MIN_VALUE) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

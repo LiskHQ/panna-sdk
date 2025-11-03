@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ImageType } from 'src/core';
+import { Dialog } from '../ui/dialog';
 import { useCollectiblesInfo } from './collectibles-provider';
 import { SendCollectibleForm } from './send-collectible-form';
 
@@ -115,13 +116,18 @@ describe('SendCollectibleForm', () => {
     });
 
     const { container } = render(
-      <SendCollectibleForm
-        onStepperChange={mockOnStepperChange}
-        onClose={mockOnClose}
-      />
+      <Dialog>
+        <SendCollectibleForm
+          onStepperChange={mockOnStepperChange}
+          onClose={mockOnClose}
+        />
+      </Dialog>
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(mockOnClose).toHaveBeenCalled();
+    expect(container.firstChild).toHaveTextContent(
+      'No collectible or token selected'
+    );
   });
 
   it('should return null when no active token', () => {
@@ -131,13 +137,18 @@ describe('SendCollectibleForm', () => {
     });
 
     const { container } = render(
-      <SendCollectibleForm
-        onStepperChange={mockOnStepperChange}
-        onClose={mockOnClose}
-      />
+      <Dialog>
+        <SendCollectibleForm
+          onStepperChange={mockOnStepperChange}
+          onClose={mockOnClose}
+        />
+      </Dialog>
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(mockOnClose).toHaveBeenCalled();
+    expect(container.firstChild).toHaveTextContent(
+      'No collectible or token selected'
+    );
   });
 
   it('should return null when both active collectible and token are missing', () => {
@@ -147,13 +158,18 @@ describe('SendCollectibleForm', () => {
     });
 
     const { container } = render(
-      <SendCollectibleForm
-        onStepperChange={mockOnStepperChange}
-        onClose={mockOnClose}
-      />
+      <Dialog>
+        <SendCollectibleForm
+          onStepperChange={mockOnStepperChange}
+          onClose={mockOnClose}
+        />
+      </Dialog>
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(mockOnClose).toHaveBeenCalled();
+    expect(container.firstChild).toHaveTextContent(
+      'No collectible or token selected'
+    );
   });
 
   it('should initialize form with correct default values', () => {

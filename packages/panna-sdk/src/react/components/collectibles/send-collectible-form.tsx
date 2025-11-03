@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { SendErrorStep } from '../send/send-error-step';
 import { StepperContextProvider } from '../send/send-form';
 import { SendSuccessStep } from '../send/send-success-step';
+import { DialogTitle } from '../ui/dialog';
 import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { useCollectiblesInfo } from './collectibles-provider';
@@ -33,7 +34,9 @@ export function SendCollectibleForm({
   });
 
   if (!activeCollectible || !activeToken) {
-    return null;
+    onClose();
+    // Return DialogTitle directly to prevent DialogContent error
+    return <DialogTitle>No collectible or token selected</DialogTitle>;
   }
 
   return (
