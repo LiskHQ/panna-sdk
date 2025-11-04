@@ -78,7 +78,7 @@ const DEV_CONFIG = {
  *
  * @remarks
  * Supported chains:
- * - Lisk mainnet (4202): Uses production API (https://panna-app.lisk.com/v1)
+ * - Lisk Mainnet (1135): Uses production API (https://panna-app.lisk.com/v1)
  * - Lisk Sepolia (4202): Uses staging API (https://stg-panna-app.lisk.com/v1)
  * - Dev mode: Uses localhost (http://localhost:8080/v1) or custom URL
  *
@@ -117,14 +117,14 @@ export function getPannaApiUrl(chainId: string, isDevMode: boolean): string {
     console.warn(
       `Unsupported chain ID: ${chainId}. Panna API URL could not be determined.\n` +
         `Supported chains:\n` +
-        `  - Lisk mainnet: ${lisk.id}\n` +
+        `  - Lisk Mainnet: ${lisk.id}\n` +
         `  - Lisk Sepolia: ${liskSepolia.id}\n` +
         `Tip: Enable dev mode with enableDevMode=true to use localhost.`
     );
 
     throw new Error(
       `Unsupported chain ID: ${chainId}. ` +
-        `Supported chains are Lisk mainnet (${lisk.id}) and Lisk Sepolia (${liskSepolia.id}). ` +
+        `Supported chains are Lisk Mainnet (${lisk.id}) and Lisk Sepolia (${liskSepolia.id}). ` +
         `Enable dev mode with enableDevMode=true to use localhost.`
     );
   }

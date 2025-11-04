@@ -64,7 +64,7 @@ describe('getPannaApiUrl', () => {
         expect.stringContaining('Unsupported chain ID: 999999')
       );
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining(`Lisk mainnet: ${lisk.id}`)
+        expect.stringContaining(`Lisk Mainnet: ${lisk.id}`)
       );
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining(`Lisk Sepolia: ${liskSepolia.id}`)
@@ -87,7 +87,7 @@ describe('getPannaApiUrl', () => {
         fail('Expected function to throw');
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toContain(`Lisk mainnet (${lisk.id})`);
+        expect((error as Error).message).toContain(`Lisk Mainnet (${lisk.id})`);
         expect((error as Error).message).toContain(
           `Lisk Sepolia (${liskSepolia.id})`
         );
