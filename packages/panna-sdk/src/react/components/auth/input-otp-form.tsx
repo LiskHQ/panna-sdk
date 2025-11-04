@@ -54,7 +54,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     }
   });
   const { error: codeFormError } = form.getFieldState('code');
-  const { client, partnerId, chainId } = usePanna();
+  const { client, partnerId, chainId, siweAuth } = usePanna();
   const [resendTimer, resetResendTimer] = useCountdown(45);
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
@@ -106,10 +106,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
       const address = wallet.getAccount()?.address;
       if (address) {
         // Automatically perform SIWE authentication in the background
-        // Pass chainId for consistency with login form
-        await handleSiweAuth(wallet, {
-          chainId: getEnvironmentChain().id as number
-        });
+        await handleSiweAuth(siweAuth, wallet);
 
         reset();
         onClose();
