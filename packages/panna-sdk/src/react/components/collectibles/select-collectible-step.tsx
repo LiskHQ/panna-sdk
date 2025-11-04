@@ -25,9 +25,7 @@ export function SelectCollectibleStep({ form }: SelectCollectibleStepProps) {
           <ImageRenderer instance={collectible} />
         </CardContent>
       </Card>
-      <Typography variant="large">
-        {token.name} #{collectible.id}
-      </Typography>
+      <Typography variant="large">{token.name}</Typography>
       <Button onClick={() => next()}>Send</Button>
     </div>
   );

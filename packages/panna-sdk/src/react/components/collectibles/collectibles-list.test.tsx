@@ -156,4 +156,51 @@ describe('CollectiblesList', () => {
     expect(screen.getByAltText('Collectible Two')).toBeVisible();
     expect(screen.getByTestId('table-pagination')).toBeVisible();
   });
+
+  it('renders collectibles list with badges for ERC-1155 tokens', () => {
+    const mockERC1155CollectiblesData = {
+      collectibles: [
+        {
+          token: { symbol: 'LN', name: 'Lazy NFT', type: 'erc-1155' },
+          numInstancesOwned: 2,
+          instances: [
+            {
+              id: '10',
+              name: 'Lazy Collectible',
+              imageType: ImageType.URL,
+              image: 'ln_10.png',
+              value: '5'
+            },
+            {
+              id: '17',
+              name: 'Lazy Collectible',
+              imageType: ImageType.URL,
+              image: 'ln_17.png',
+              value: '2'
+            }
+          ]
+        }
+      ],
+      metadata: { count: 1 }
+    };
+    (useActiveAccount as jest.Mock).mockReturnValue({ address: '0x123' });
+    (useCollectibles as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: mockERC1155CollectiblesData,
+      isError: false
+    });
+
+    render(<CollectiblesList />);
+    expect(screen.getByText('Lazy NFT')).toBeVisible();
+    expect(screen.getByText('(2)')).toBeVisible();
+    mockERC1155CollectiblesData.collectibles[0].instances.forEach(
+      (instance, index) => {
+        expect(
+          screen.getAllByTestId('collectible-quantity-badge')[index]
+        ).toBeVisible();
+        expect(screen.getByText(instance.value)).toBeVisible();
+      }
+    );
+  });
 });

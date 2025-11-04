@@ -1,4 +1,5 @@
 import { UseFormReturn } from 'react-hook-form';
+import { TokenERC } from 'src/core';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
@@ -12,7 +13,7 @@ type SummaryStepProps = {
 };
 
 export function SummaryStep({ form }: SummaryStepProps) {
-  const { collectible, token, recipientAddress } = form.getValues();
+  const { collectible, token, recipientAddress, amount } = form.getValues();
   const { next } = useDialogStepper();
 
   return (
@@ -36,6 +37,14 @@ export function SummaryStep({ form }: SummaryStepProps) {
           {recipientAddress}
         </Typography>
       </div>
+      {token.type === TokenERC.ERC1155 && (
+        <div className="flex flex-col gap-2">
+          <Typography>Quantity</Typography>
+          <Typography variant="small" className="text-primary mt-0!">
+            {amount}
+          </Typography>
+        </div>
+      )}
       <Button onClick={() => next({ hideBackButton: true })}>Send</Button>
     </div>
   );
