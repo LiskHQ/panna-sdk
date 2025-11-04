@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { ImageType } from 'src/core';
+import { ImageType, TokenERC } from 'src/core';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { SendCollectibleFormData } from './schema';
 import { SelectRecipientStep } from './select-recipient-step';
@@ -53,7 +53,7 @@ describe('SelectRecipientStep', () => {
   const mockToken = {
     name: 'Test Token',
     symbol: 'TT',
-    type: 'erc-721',
+    type: TokenERC.ERC1155,
     address: '0x123',
     icon: null
   };
@@ -84,7 +84,28 @@ describe('SelectRecipientStep', () => {
     return <SelectRecipientStep form={form} />;
   };
 
-  it('should render properly', () => {
+  it('should render ERC-721 collectible display properly', () => {
+    const erc721Token = {
+      ...mockToken,
+      type: TokenERC.ERC721
+    };
+    render(
+      <TestWrapper
+        collectible={{ ...mockCollectible, value: null }}
+        token={erc721Token}
+      />
+    );
+
+    expect(screen.getByText('Send collectible')).toBeInTheDocument();
+    expect(screen.getByText('Send to')).toBeVisible();
+    expect(
+      screen.getByPlaceholderText("Recipient's address")
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /max/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /next/i })).toBeInTheDocument();
+  });
+
+  it('should render ERC-1155 collectible display properly', () => {
     render(<TestWrapper />);
 
     expect(screen.getByText('Send collectible')).toBeInTheDocument();
@@ -113,17 +134,6 @@ describe('SelectRecipientStep', () => {
     expect(nextButton).not.toBeDisabled();
   });
 
-  it('should display default max of 1 when collectible value is null', () => {
-    const collectibleNoValue = {
-      ...mockCollectible,
-      value: null
-    };
-
-    render(<TestWrapper collectible={collectibleNoValue} />);
-
-    expect(screen.getByText(/Max 1 available/i)).toBeVisible();
-  });
-
   it('should handle ERC-1155 collectibles with higher values', () => {
     const erc1155Collectible = {
       ...mockCollectible,
@@ -142,17 +152,6 @@ describe('SelectRecipientStep', () => {
     };
 
     render(<TestWrapper collectible={collectibleValueOne} />);
-
-    expect(screen.getByText(/Max 1 available/i)).toBeVisible();
-  });
-
-  it('should handle collectible with null value', () => {
-    const collectibleNullValue = {
-      ...mockCollectible,
-      value: null
-    };
-
-    render(<TestWrapper collectible={collectibleNullValue} />);
 
     expect(screen.getByText(/Max 1 available/i)).toBeVisible();
   });

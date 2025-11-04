@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { ImageType, TokenInstance } from 'src/core';
+import { ImageType, TokenERC, TokenInstance } from 'src/core';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { SendCollectibleFormData } from './schema';
 import { SummaryStep } from './summary-step';
@@ -38,7 +38,7 @@ describe('SummaryStep', () => {
   const mockToken = {
     name: 'Test Token',
     symbol: 'TT',
-    type: 'erc-721',
+    type: TokenERC.ERC721,
     address: '0x123',
     icon: null
   };
@@ -73,8 +73,32 @@ describe('SummaryStep', () => {
     return <SummaryStep form={form} />;
   };
 
-  it('should render properly', () => {
+  it('should render ERC-721 collectible summary properly', () => {
     render(<TestWrapper />);
+
+    expect(screen.getByText('Summary')).toBeInTheDocument();
+    const image = screen.getByAltText('Test Collectible');
+    expect(image).toBeInTheDocument();
+    expect(image).toHaveAttribute('src', 'test-image.png');
+    expect(screen.getByText(/Test Token #123/i)).toBeVisible();
+    expect(screen.getByText('Send to')).toBeVisible();
+    expect(screen.getByText(mockRecipientAddress)).toBeVisible();
+    expect(screen.getByRole('button', { name: /send/i })).toBeInTheDocument();
+  });
+
+  it('should render ERC-1155 collectible summary properly', () => {
+    const erc1155Collectible = {
+      ...mockCollectible,
+      value: '10'
+    };
+    const erc1155Token = {
+      ...mockToken,
+      type: TokenERC.ERC1155
+    };
+
+    render(
+      <TestWrapper collectible={erc1155Collectible} token={erc1155Token} />
+    );
 
     expect(screen.getByText('Summary')).toBeInTheDocument();
     const image = screen.getByAltText('Test Collectible');
