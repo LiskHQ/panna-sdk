@@ -12,7 +12,7 @@ import {
 } from '../ui/form';
 import { Input } from '../ui/input';
 import { Typography } from '../ui/typography';
-import { SendCollectibleFormData } from './schema';
+import { MIN_ERC1155_VALUE, SendCollectibleFormData } from './schema';
 
 type SelectRecipientStepProps = {
   form: UseFormReturn<SendCollectibleFormData>;
@@ -33,8 +33,7 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
   };
 
   const handleMaxValue = () => {
-    const maxValue = MAX_ERC1155_AMOUNT;
-    form.setValue('amount', maxValue);
+    form.setValue('amount', MAX_ERC1155_AMOUNT);
   };
 
   return (
@@ -79,7 +78,7 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
                     {...field}
                     placeholder="Quantity"
                     type="number"
-                    min={1}
+                    min={MIN_ERC1155_VALUE}
                     max={MAX_ERC1155_AMOUNT}
                     onChange={(e) => {
                       const value = e.target.value;

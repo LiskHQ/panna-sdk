@@ -2,7 +2,7 @@ import { isValidAddress, TokenERC } from 'src/core';
 import { ImageType } from 'src/core/util/collectible.types';
 import { z } from 'zod';
 
-export const MIN_VALUE = 1;
+export const MIN_ERC1155_VALUE = 1;
 const WALLET_ADDRESS_LENGTH = 42;
 
 const tokenInstanceSchema = z.object({
@@ -12,7 +12,7 @@ const tokenInstanceSchema = z.object({
   name: z.string().min(1, 'Token name is required').optional(),
   value: z
     .string()
-    .min(MIN_VALUE, 'Token instance value is required')
+    .min(MIN_ERC1155_VALUE, 'Token instance value is required')
     .nullable()
 });
 
@@ -41,10 +41,13 @@ export const sendCollectibleFormSchema = z
       }),
     amount: z
       .string()
-      .min(1, 'Quantity is required')
-      .refine((val) => !isNaN(Number(val)) && Number(val) >= MIN_VALUE, {
-        message: `Quantity must be a number greater than ${MIN_VALUE - 1}`
-      })
+      .min(MIN_ERC1155_VALUE, 'Quantity is required')
+      .refine(
+        (val) => !isNaN(Number(val)) && Number(val) >= MIN_ERC1155_VALUE,
+        {
+          message: `Quantity must be a number greater than ${MIN_ERC1155_VALUE - 1}`
+        }
+      )
   })
   .superRefine((data, ctx) => {
     const amountNum = Number(data.amount);
@@ -57,12 +60,6 @@ export const sendCollectibleFormSchema = z
           path: ['amount']
         });
       }
-    } else if (data.token.type !== TokenERC.ERC721) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Unsupported token type for sending collectible',
-        path: ['amount']
-      });
     }
   });
 

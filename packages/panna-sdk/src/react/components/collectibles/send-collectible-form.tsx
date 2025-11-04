@@ -9,7 +9,7 @@ import { Form } from '../ui/form';
 import { useCollectiblesInfo } from './collectibles-provider';
 import { ProcessingStep } from './processing-step';
 import {
-  MIN_VALUE,
+  MIN_ERC1155_VALUE,
   SendCollectibleFormData,
   sendCollectibleFormSchema
 } from './schema';
@@ -33,7 +33,7 @@ export function SendCollectibleForm({
       collectible: activeCollectible,
       token: activeToken,
       recipientAddress: '',
-      amount: String(MIN_VALUE)
+      amount: String(MIN_ERC1155_VALUE)
     }
   });
 
