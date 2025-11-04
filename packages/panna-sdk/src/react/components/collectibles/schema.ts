@@ -2,14 +2,18 @@ import { isValidAddress, TokenERC } from 'src/core';
 import { ImageType } from 'src/core/util/collectible.types';
 import { z } from 'zod';
 
-const MIN_VALUE = 1;
+export const MIN_VALUE = 1;
+const WALLET_ADDRESS_LENGTH = 42;
 
 const tokenInstanceSchema = z.object({
   id: z.string().min(1, 'Token instance ID is required'),
   imageType: z.nativeEnum(ImageType),
   image: z.string().nullable(),
   name: z.string().min(1, 'Token name is required').optional(),
-  value: z.string().min(1, 'Token instance value is required').nullable()
+  value: z
+    .string()
+    .min(MIN_VALUE, 'Token instance value is required')
+    .nullable()
 });
 
 const tokenSchema = z.object({
@@ -31,7 +35,7 @@ export const sendCollectibleFormSchema = z
     token: tokenSchema,
     recipientAddress: z
       .string()
-      .length(42, 'Recipient address is required')
+      .length(WALLET_ADDRESS_LENGTH, 'Recipient address is required')
       .refine(isValidAddress, {
         message: 'Please enter a valid address'
       }),
@@ -44,24 +48,21 @@ export const sendCollectibleFormSchema = z
   })
   .superRefine((data, ctx) => {
     const amountNum = Number(data.amount);
-    if (data.token.type === TokenERC.ERC1155 && data.collectible?.value) {
-      if (amountNum > Number(data.collectible.value)) {
-        const MAX_VALUE_OWNED = data.collectible.value;
+    if (data.token.type === TokenERC.ERC1155) {
+      const MAX_VALUE_OWNED = Number(data.collectible.value);
+      if (amountNum > MAX_VALUE_OWNED) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `Quantity must not be greater than ${MAX_VALUE_OWNED} (max available)`,
           path: ['amount']
         });
       }
-    } else {
-      // ERC-721 tokens are unique so their amount can only be one
-      if (amountNum > MIN_VALUE) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Quantity must not be greater than ${MIN_VALUE} (max available)`,
-          path: ['amount']
-        });
-      }
+    } else if (data.token.type !== TokenERC.ERC721) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Unsupported token type for sending collectible',
+        path: ['amount']
+      });
     }
   });
 

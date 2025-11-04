@@ -1,4 +1,5 @@
 import { UseFormReturn } from 'react-hook-form';
+import { TokenERC } from 'src/core';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -21,7 +22,8 @@ const ONLY_DIGITS_REGEX = /^\d+$/;
 
 export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
   const { next } = useDialogStepper();
-  const { recipientAddress, collectible, amount } = form.watch();
+  const { recipientAddress, token, collectible, amount } = form.watch();
+  const MAX_ERC1155_AMOUNT = collectible?.value as string;
 
   const handleSubmit = async () => {
     const isFieldValid = await form.trigger();
@@ -31,7 +33,7 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
   };
 
   const handleMaxValue = () => {
-    const maxValue = collectible?.value ?? '1';
+    const maxValue = MAX_ERC1155_AMOUNT;
     form.setValue('amount', maxValue);
   };
 
@@ -53,48 +55,50 @@ export function SelectRecipientStep({ form }: SelectRecipientStepProps) {
           </FormItem>
         )}
       />
-      <FormField
-        control={form.control}
-        name="amount"
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-2">
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between">
-                <FormLabel>Quantity</FormLabel>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  className="bg-muted hover:bg-border! h-6 p-2"
-                  onClick={() => handleMaxValue()}
-                >
-                  Max
-                </Button>
+      {token.type === TokenERC.ERC1155 && (
+        <FormField
+          control={form.control}
+          name="amount"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between">
+                  <FormLabel>Quantity</FormLabel>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    className="bg-muted hover:bg-border! h-6 p-2"
+                    onClick={() => handleMaxValue()}
+                  >
+                    Max
+                  </Button>
+                </div>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Quantity"
+                    type="number"
+                    min={1}
+                    max={MAX_ERC1155_AMOUNT}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // Only allow digits
+                      if (ONLY_DIGITS_REGEX.test(value)) {
+                        field.onChange(value);
+                      }
+                    }}
+                  />
+                </FormControl>
               </div>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Quantity"
-                  type="number"
-                  min={1}
-                  max={collectible?.value ?? 1}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    // Only allow digits
-                    if (ONLY_DIGITS_REGEX.test(value)) {
-                      field.onChange(value);
-                    }
-                  }}
-                />
-              </FormControl>
-            </div>
-            <Typography variant="muted" className="text-xs">
-              Max {collectible?.value ?? 1} available
-            </Typography>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+              <Typography variant="muted" className="text-xs">
+                Max {MAX_ERC1155_AMOUNT} available
+              </Typography>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
       <Button
         type="button"
         onClick={() => handleSubmit()}

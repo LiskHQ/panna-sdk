@@ -8,7 +8,11 @@ import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { useCollectiblesInfo } from './collectibles-provider';
 import { ProcessingStep } from './processing-step';
-import { SendCollectibleFormData, sendCollectibleFormSchema } from './schema';
+import {
+  MIN_VALUE,
+  SendCollectibleFormData,
+  sendCollectibleFormSchema
+} from './schema';
 import { SelectCollectibleStep } from './select-collectible-step';
 import { SelectRecipientStep } from './select-recipient-step';
 import { SummaryStep } from './summary-step';
@@ -29,7 +33,7 @@ export function SendCollectibleForm({
       collectible: activeCollectible,
       token: activeToken,
       recipientAddress: '',
-      amount: '1'
+      amount: String(MIN_VALUE)
     }
   });
 
