@@ -18,26 +18,25 @@ export const tokenSchema = z.object({
   icon: z.string().optional()
 });
 
-// Buy with fiat quote schema
-export const buyWithFiatQuoteSchema = z.object({
+const quoteDataSchema = z.object({
+  rate: z.number(),
+  crypto_quantity: z.number(),
+  onramp_fee: z.number(),
+  client_fee: z.number().nullable().optional(),
+  gateway_fee: z.number().nullable().optional(),
+  gas_fee: z.number(),
+  total_fiat_amount: z.number(),
+  quote_timestamp: z.string(),
+  quote_validity_mins: z.number()
+});
+
+export const selectedProviderSchema = z.object({
   providerId: z.string().min(1, 'Provider ID is required'),
   providerName: z.string().min(1, 'Provider name is required'),
   providerDescription: z.string().optional(),
   providerLogoUrl: z.string().optional(),
-  price: z.string().min(1, 'Quote price is required'),
-  error: z.string().optional(),
-  prepareResult: z
-    .object({
-      id: z.string(),
-      link: z.string(),
-      currency: z.string(),
-      currencyAmount: z.string(),
-      destinationAmount: z.string(),
-      timestamp: z.number().optional(),
-      expiration: z.number().optional(),
-      intent: z.any().optional()
-    })
-    .optional()
+  sessionUrl: z.string().url('Session URL must be valid'),
+  quote: quoteDataSchema
 });
 
 // Main buy form schema - using optional fields for step-by-step validation
@@ -46,7 +45,7 @@ export const buyFormSchema = z.object({
   token: tokenSchema.optional(),
   fiatAmount: z.number().gt(0, 'Amount must be greater than 0').optional(),
   cryptoAmount: z.number().optional(),
-  provider: buyWithFiatQuoteSchema.optional()
+  provider: selectedProviderSchema.optional()
 });
 
 export type BuyFormData = z.infer<typeof buyFormSchema>;
