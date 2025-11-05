@@ -88,6 +88,10 @@ describe('WalletId', () => {
       expect(getWalletName('ecosystem.test')).toBe('Test Ecosystem Wallet');
     });
 
+    it('should handle edge case of empty ecosystem name', () => {
+      expect(getWalletName('ecosystem.')).toBe('Ecosystem Wallet');
+    });
+
     it('should return all names for all wallet IDs', () => {
       Object.values(WalletId).forEach((id) => {
         const name = getWalletName(id);

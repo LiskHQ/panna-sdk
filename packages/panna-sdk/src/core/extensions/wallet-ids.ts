@@ -135,9 +135,10 @@ export function getWalletName(id: WalletIdValue): string {
 
   if (id.startsWith('ecosystem.')) {
     const [, ecosystem] = id.split('.');
-    const formatted = ecosystem
-      ? ecosystem.charAt(0).toUpperCase() + ecosystem.slice(1)
-      : 'Ecosystem';
+    if (!ecosystem) {
+      return 'Ecosystem Wallet';
+    }
+    const formatted = ecosystem.charAt(0).toUpperCase() + ecosystem.slice(1);
     return `${formatted} Ecosystem Wallet`;
   }
 
