@@ -56,48 +56,37 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
           client
         });
 
-        const walletIdMap: Record<string, WalletIdValue> = {
-          [WalletId.MetaMask]: WalletId.MetaMask,
-          [WalletId.Coinbase]: WalletId.Coinbase,
-          [WalletId.Trust]: WalletId.Trust,
-          [WalletId.Rainbow]: WalletId.Rainbow,
-          [WalletId.Phantom]: WalletId.Phantom,
-          walletConnect: WalletId.WalletConnect,
-          walletconnect: WalletId.WalletConnect
-        };
-
         const externalWalletId = externalWallet.id;
-        const normalizedWalletId = externalWalletId.toLowerCase();
 
-        let resolvedWalletId: WalletIdValue | null = null;
+        // Validate and resolve wallet ID
+        let resolvedWalletId: WalletIdValue;
 
-        if (walletIdMap[externalWalletId]) {
-          resolvedWalletId = walletIdMap[externalWalletId];
-        } else if (walletIdMap[normalizedWalletId]) {
-          resolvedWalletId = walletIdMap[normalizedWalletId];
-        } else if (normalizedWalletId.startsWith('ecosystem.')) {
-          resolvedWalletId = WalletId.WalletConnect;
-        } else if (normalizedWalletId.includes('metamask')) {
-          resolvedWalletId = WalletId.MetaMask;
-        } else if (normalizedWalletId.includes('coinbase')) {
-          resolvedWalletId = WalletId.Coinbase;
-        } else if (normalizedWalletId.includes('trust')) {
-          resolvedWalletId = WalletId.Trust;
-        } else if (normalizedWalletId.includes('rainbow')) {
-          resolvedWalletId = WalletId.Rainbow;
-        } else if (normalizedWalletId.includes('phantom')) {
-          resolvedWalletId = WalletId.Phantom;
-        } else if (normalizedWalletId.includes('walletconnect')) {
-          resolvedWalletId = WalletId.WalletConnect;
-        } else if (isWalletId(externalWalletId)) {
-          resolvedWalletId = externalWalletId as WalletIdValue;
+        if (isWalletId(externalWalletId)) {
+          // Valid wallet ID using proper RDNS or standard identifier
+          resolvedWalletId = externalWalletId;
+        } else {
+          // Fallback for legacy or non-standard wallet IDs
+          const normalizedWalletId = externalWalletId.toLowerCase();
+
+          if (normalizedWalletId.includes('metamask')) {
+            resolvedWalletId = WalletId.MetaMask;
+          } else if (normalizedWalletId.includes('coinbase')) {
+            resolvedWalletId = WalletId.Coinbase;
+          } else if (normalizedWalletId.includes('trust')) {
+            resolvedWalletId = WalletId.Trust;
+          } else if (normalizedWalletId.includes('rainbow')) {
+            resolvedWalletId = WalletId.Rainbow;
+          } else if (normalizedWalletId.includes('phantom')) {
+            resolvedWalletId = WalletId.Phantom;
+          } else if (normalizedWalletId.includes('walletconnect')) {
+            resolvedWalletId = WalletId.WalletConnect;
+          } else {
+            throw new Error('This wallet is not supported.');
+          }
         }
 
-        if (!resolvedWalletId) {
-          throw new Error('This wallet is not supported.');
-        }
-
-        const transferWalletId = normalizedWalletId.startsWith('ecosystem.')
+        // Use WalletConnect for ecosystem wallets
+        const transferWalletId = externalWalletId.startsWith('ecosystem.')
           ? WalletId.WalletConnect
           : resolvedWalletId;
 
