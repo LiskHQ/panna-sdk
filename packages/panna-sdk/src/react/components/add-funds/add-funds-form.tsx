@@ -45,10 +45,16 @@ export function StepperRefProvider({
   return <>{children}</>;
 }
 
-type FlowType = 'none' | 'buy' | 'transfer';
+enum AddFundsFlow {
+  NONE = 'none',
+  BUY = 'buy',
+  TRANSFER = 'transfer'
+}
 
 export function AddFundsForm({ onClose, stepperRef }: AddFundsFormProps) {
-  const [selectedFlow, setSelectedFlow] = useState<FlowType>('none');
+  const [selectedFlow, setSelectedFlow] = useState<AddFundsFlow>(
+    AddFundsFlow.NONE
+  );
 
   // Buy form
   const buyForm = useForm<BuyFormData>({
@@ -93,23 +99,23 @@ export function AddFundsForm({ onClose, stepperRef }: AddFundsFormProps) {
   });
 
   const handleBuySelected = () => {
-    setSelectedFlow('buy');
+    setSelectedFlow(AddFundsFlow.BUY);
   };
 
   const handleTransferSelected = () => {
-    setSelectedFlow('transfer');
+    setSelectedFlow(AddFundsFlow.TRANSFER);
   };
 
   return (
     <>
-      {selectedFlow === 'none' && (
+      {selectedFlow === AddFundsFlow.NONE && (
         <AddFundsEntryStep
           onBuySelected={handleBuySelected}
           onTransferSelected={handleTransferSelected}
         />
       )}
 
-      {selectedFlow === 'buy' && (
+      {selectedFlow === AddFundsFlow.BUY && (
         <Form {...buyForm}>
           <form className="space-y-6">
             <DialogStepper>
@@ -133,7 +139,7 @@ export function AddFundsForm({ onClose, stepperRef }: AddFundsFormProps) {
         </Form>
       )}
 
-      {selectedFlow === 'transfer' && (
+      {selectedFlow === AddFundsFlow.TRANSFER && (
         <Form {...transferForm}>
           <form className="space-y-6">
             <DialogStepper>
