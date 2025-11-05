@@ -1,4 +1,6 @@
 import { BanknoteIcon, WalletIcon } from 'lucide-react';
+import { useMemo } from 'react';
+import { getWalletName, isWalletId, type WalletIdValue } from 'src/core';
 import { useExternalWallet } from '../../hooks';
 import { truncateAddress } from '../../utils/address';
 import { Card } from '../ui/card';
@@ -26,17 +28,27 @@ export function AddFundsEntryStep({
   const shouldRenderTransferSection =
     hasLinkedExternalWallet && !isLinkedExternalWalletLoading;
 
-  const getWalletName = () => {
-    if (!externalWallet) return 'External Wallet';
+  const walletId = externalWallet?.id;
+  const walletIdValue = useMemo<WalletIdValue | null>(() => {
+    if (!walletId || !isWalletId(walletId)) {
+      return null;
+    }
 
-    const walletId = externalWallet.id;
-    if (walletId.includes('metamask')) return 'MetaMask';
-    if (walletId.includes('coinbase')) return 'Coinbase Wallet';
-    if (walletId.includes('walletconnect')) return 'WalletConnect';
-    if (walletId.includes('rainbow')) return 'Rainbow';
+    return walletId;
+  }, [walletId]);
 
-    return 'External Wallet';
-  };
+  const walletDisplayName = useMemo(() => {
+    if (!walletIdValue) {
+      return 'External Wallet';
+    }
+
+    try {
+      return getWalletName(walletIdValue);
+    } catch (error) {
+      console.warn('Unknown wallet ID detected:', walletIdValue, error);
+      return 'External Wallet';
+    }
+  }, [walletIdValue]);
 
   const handleBuyClick = () => {
     onBuySelected();
@@ -89,7 +101,7 @@ export function AddFundsEntryStep({
                   {hasExternalWallet ? (
                     <>
                       <Typography as="h1" variant="small">
-                        {getWalletName()}
+                        {walletDisplayName}
                       </Typography>
                       <Typography variant="muted">
                         {externalAddress
