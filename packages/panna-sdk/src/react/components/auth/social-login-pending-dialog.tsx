@@ -20,7 +20,7 @@ import { AccountDialogFooter } from './auth-flow';
 export function SocialLoginPendingDialog() {
   const { next, goToStep, reset } = useDialogStepper();
   const { onClose } = useDialog();
-  const { client, partnerId, chainId } = usePanna();
+  const { client, partnerId, chainId, siweAuth } = usePanna();
   const initializeGoogleLogin = useRef(true);
 
   const { connect, error: loginError } = useLogin({
@@ -53,7 +53,7 @@ export function SocialLoginPendingDialog() {
 
     if (wallet) {
       // Automatically perform SIWE authentication in the background
-      await handleSiweAuth(wallet, {
+      await handleSiweAuth(siweAuth, wallet, {
         chainId: getEnvironmentChain().id as number
       });
 

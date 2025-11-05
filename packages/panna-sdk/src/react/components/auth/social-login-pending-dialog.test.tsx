@@ -31,6 +31,18 @@ const mockGoToStep = jest.fn();
 const mockReset = jest.fn();
 const mockOnClose = jest.fn();
 
+const mockSiweAuth = {
+  generatePayload: jest.fn(),
+  login: jest.fn(),
+  isLoggedIn: jest.fn(),
+  isTokenExpired: jest.fn(),
+  getUser: jest.fn(),
+  getAuthToken: jest.fn(),
+  getValidAuthToken: jest.fn(),
+  getTokenExpiry: jest.fn(),
+  logout: jest.fn()
+};
+
 describe('SocialLoginPendingDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -42,7 +54,9 @@ describe('SocialLoginPendingDialog', () => {
     (mockUsePanna as jest.Mock).mockReturnValue({
       client: 'mock-client',
       partnerId: 'mock-partner-id',
-      chainId: 1155
+      chainId: 1155,
+      apiService: {},
+      siweAuth: mockSiweAuth
     });
 
     (mockUseDialogStepper as jest.Mock).mockReturnValue({
@@ -100,9 +114,13 @@ describe('SocialLoginPendingDialog', () => {
     );
 
     await waitFor(() => {
-      expect(mockHandleSiweAuth).toHaveBeenCalledWith(mockWallet, {
-        chainId: 1135
-      });
+      expect(mockHandleSiweAuth).toHaveBeenCalledWith(
+        mockSiweAuth,
+        mockWallet,
+        {
+          chainId: 1135
+        }
+      );
     });
 
     await waitFor(() => {

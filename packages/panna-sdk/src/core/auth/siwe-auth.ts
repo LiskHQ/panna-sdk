@@ -1,5 +1,5 @@
 import type { Account } from 'thirdweb/wallets';
-import { pannaApiService } from '../util/api-service';
+import { pannaApiService, PannaApiService } from '../util/api-service';
 import type {
   AuthChallengeRequest,
   AuthChallengeReply,
@@ -43,8 +43,11 @@ export class SiweAuth {
   private userAddress: string | null = null;
   private tokenExpiresAt: number | null = null;
   private lastChallenge: AuthChallengeReply | null = null;
+  private apiService: PannaApiService;
 
-  constructor() {
+  constructor(apiService: PannaApiService) {
+    this.apiService = apiService;
+
     // Load existing auth data from localStorage on initialization
     if (typeof window !== 'undefined') {
       const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
@@ -73,7 +76,7 @@ export class SiweAuth {
     try {
       // Get challenge from Panna API
       const challenge: AuthChallengeReply =
-        await pannaApiService.getAuthChallenge(challengeRequest);
+        await this.apiService.getAuthChallenge(challengeRequest);
 
       // Store the challenge for later use in verification
       this.lastChallenge = challenge;
@@ -151,7 +154,7 @@ export class SiweAuth {
       };
 
       // Verify with Panna API
-      const authResult = await pannaApiService.verifyAuth(verifyRequest);
+      const authResult = await this.apiService.verifyAuth(verifyRequest);
 
       if (authResult.token) {
         // Store auth token and user address
@@ -302,7 +305,7 @@ export class SiweAuth {
 /**
  * Default instance of SIWE auth service
  */
-export const siweAuth = new SiweAuth();
+export const siweAuth = new SiweAuth(pannaApiService);
 
 /**
  * Helper function to generate a SIWE login payload
