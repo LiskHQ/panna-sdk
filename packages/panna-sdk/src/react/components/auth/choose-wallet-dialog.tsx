@@ -1,6 +1,10 @@
-import { useAppKitWallet, Wallet } from '@reown/appkit-wallet-button/react';
 import { ChevronLeftIcon, XIcon } from 'lucide-react';
-import { useDialog } from '@/hooks';
+import { toast } from 'react-toastify';
+import { connect, EcosystemId } from 'src/core';
+import { WalletId } from 'thirdweb/wallets';
+import { useDialog, useLogin, usePanna } from '@/hooks';
+import { getEnvironmentChain } from '@/utils';
+import { handleSiweAuth } from '@/utils/auth';
 import { Button } from '../ui/button';
 import {
   DialogClose,
@@ -13,8 +17,8 @@ import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 
 type WalletOption = {
-  id: Wallet;
-  rdns: string;
+  id: string;
+  rdns: WalletId;
   name: string;
   icon: string;
 };
@@ -54,15 +58,45 @@ const walletOptions: WalletOption[] = [
 
 export default function ChooseWalletDialog() {
   const { onClose } = useDialog();
-  const { prev, reset } = useDialogStepper();
-  const { connect, isReady, isPending } = useAppKitWallet();
+  const { next, prev, reset } = useDialogStepper();
+  const { client, partnerId, chainId } = usePanna();
+  const { connect: connectWallet } = useLogin({
+    client,
+    setWalletAsActive: true,
+    accountAbstraction: {
+      chain: getEnvironmentChain(chainId),
+      sponsorGas: true
+    }
+  });
 
   const handleWalletSelect = async (wallet: WalletOption) => {
     try {
-      await connect(wallet.id);
+      // Wrap with connectWallet during login but without it during linking
+      const userWallet = await connectWallet(
+        async () =>
+          await connect({
+            client,
+            ecosystem: {
+              id: EcosystemId.LISK,
+              partnerId
+            },
+            strategy: 'wallet',
+            walletId: wallet.rdns,
+            chain: getEnvironmentChain(chainId)
+          })
+      );
+
+      if (userWallet) {
+        // Automatically perform SIWE authentication in the background
+        await handleSiweAuth(userWallet, {
+          chainId: Number(chainId)
+        });
+
+        next();
+      }
     } catch (error) {
       console.error('Error connecting wallet:', error);
-      // Optionally, display an error message to the user here
+      toast.error(error instanceof Error ? error.message : (error as string));
     }
   };
 
@@ -100,7 +134,6 @@ export default function ChooseWalletDialog() {
               variant="outline"
               size="lg"
               onClick={() => handleWalletSelect(wallet)}
-              disabled={!isReady || isPending}
               className="flex min-h-14 items-center justify-normal gap-3 rounded-xl bg-[#FFFFFF0D] px-3 py-2"
             >
               <img
