@@ -1,5 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { EcosystemId, getLinkedAccounts, type LinkedAccount } from '../../core';
+import {
+  EcosystemId,
+  getLinkedAccounts,
+  isWalletId,
+  type LinkedAccount
+} from '../../core';
 import {
   DEFAULT_REFETCH_INTERVAL,
   DEFAULT_RETRY_DELAY,
@@ -62,13 +67,10 @@ export function useExternalWallet() {
     retryDelay: DEFAULT_RETRY_DELAY
   });
 
-  // Filter for external wallets (non-inApp wallets)
-  const externalWallet = connectedAccounts.find((wallet) => {
-    const walletId = wallet.id;
-    // Thirdweb inApp wallets have id format 'inApp' or 'embedded'
-    // External wallets have ids like 'io.metamask', 'com.coinbase.wallet', etc.
-    return walletId !== 'inApp' && walletId !== 'embedded';
-  });
+  // Filter for external wallets using the core wallet identifier helper
+  const externalWallet = connectedAccounts.find((wallet) =>
+    isWalletId(wallet.id)
+  );
 
   const linkedExternalWallet = linkedAccounts.find(
     (account) => account.type === 'wallet' && account.details?.address

@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { TokenBalance } from '@/mocks/token-balances';
-import { getSupportedTokens } from '@/utils';
+import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import { useExternalWallet, usePanna, useTokenBalances } from '../../../hooks';
 import { Card } from '../../ui/card';
 import { DialogHeader, DialogTitle } from '../../ui/dialog';
@@ -25,6 +25,16 @@ export function TransferSelectTokenStep({
     TransferFormData['tokenInfo'] | null
   >(null);
   const supportedTokens = getSupportedTokens(chainId);
+  const chainInitial = useMemo(() => {
+    const chain = getEnvironmentChain(chainId);
+    const chainName = chain?.name ?? '';
+
+    if (chainName.length > 0) {
+      return chainName.charAt(0).toUpperCase();
+    }
+
+    return 'N';
+  }, [chainId]);
 
   // Set the external wallet address when component loads
   useEffect(() => {
@@ -128,15 +138,9 @@ export function TransferSelectTokenStep({
                       )}
                     </div>
                     <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
-                      {token.token.icon ? (
-                        <img
-                          src={token.token.icon}
-                          alt="chain"
-                          className="size-3"
-                        />
-                      ) : (
-                        <div className="bg-muted size-2 rounded-full" />
-                      )}
+                      <span className="text-[10px] font-semibold text-white">
+                        {chainInitial}
+                      </span>
                     </div>
                   </div>
 
