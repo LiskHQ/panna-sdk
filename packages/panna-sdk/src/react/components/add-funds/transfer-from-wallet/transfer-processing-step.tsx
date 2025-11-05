@@ -121,7 +121,7 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
 
         const recipientAddress = toAddress as Address;
 
-        const result = await transferBalanceFromExternalWallet({
+        await transferBalanceFromExternalWallet({
           provider,
           walletId: transferWalletId,
           to: recipientAddress,
@@ -132,7 +132,6 @@ export function TransferProcessingStep({ form }: TransferProcessingStepProps) {
           account
         });
 
-        console.log('Transfer successful:', result.transactionHash);
         next();
       } catch (error) {
         const errorMessage =

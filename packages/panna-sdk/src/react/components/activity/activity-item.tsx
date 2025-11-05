@@ -14,10 +14,10 @@ import { tokenIconMap } from '@/mocks/token-balances';
 import { Typography } from '../ui/typography';
 
 const DECIMAL_PLACES = 5;
-const MINUTE_IN_SECONDS = 60;
-const HOUR_IN_SECONDS = 60 * MINUTE_IN_SECONDS;
-const DAY_IN_SECONDS = 24 * HOUR_IN_SECONDS;
-const WEEK_IN_SECONDS = 7 * DAY_IN_SECONDS;
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
+const SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+const SECONDS_PER_WEEK = 7 * SECONDS_PER_DAY;
 
 /**
  * Format timestamp to relative time or absolute date
@@ -29,20 +29,20 @@ function formatTimestamp(timestamp: string): string {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diffInSeconds < MINUTE_IN_SECONDS) {
+  if (diffInSeconds < SECONDS_PER_MINUTE) {
     // Less than a minute ago
     return 'Just now';
-  } else if (diffInSeconds < HOUR_IN_SECONDS) {
+  } else if (diffInSeconds < SECONDS_PER_HOUR) {
     // Less than an hour ago
-    const minutes = Math.floor(diffInSeconds / MINUTE_IN_SECONDS);
+    const minutes = Math.floor(diffInSeconds / SECONDS_PER_MINUTE);
     return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
-  } else if (diffInSeconds < DAY_IN_SECONDS) {
+  } else if (diffInSeconds < SECONDS_PER_DAY) {
     // Less than a day ago
-    const hours = Math.floor(diffInSeconds / HOUR_IN_SECONDS);
+    const hours = Math.floor(diffInSeconds / SECONDS_PER_HOUR);
     return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
-  } else if (diffInSeconds < WEEK_IN_SECONDS) {
+  } else if (diffInSeconds < SECONDS_PER_WEEK) {
     // Less than a week ago
-    const days = Math.floor(diffInSeconds / DAY_IN_SECONDS);
+    const days = Math.floor(diffInSeconds / SECONDS_PER_DAY);
     return `${days} ${days === 1 ? 'day' : 'days'} ago`;
   } else {
     // For older dates, show formatted date
