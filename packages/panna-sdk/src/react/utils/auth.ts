@@ -1,11 +1,6 @@
 import type { Wallet } from 'thirdweb/wallets';
 import type { SmartWalletOptions } from 'thirdweb/wallets';
-import {
-  generateSiwePayload,
-  siweLogin,
-  getValidSiweAuthToken,
-  isSiweTokenExpired
-} from '../../core/auth';
+import { getValidSiweAuthToken, SiweAuth } from '../../core/auth';
 import type { LoginPayload } from '../../core/util/types';
 
 /**
@@ -69,6 +64,7 @@ export function buildSiweMessage(payload: LoginPayload): string {
  * and sends it to the Panna API for verification
  *
  * @param wallet - The connected wallet instance
+ * @param siweAuth - The SiweAuth instance for handling SIWE operations
  * @param options - Optional configuration
  * @param options.chainId - The chain ID to use for signing (optional)
  * @returns Promise<boolean> - Returns true if authentication was successful, false otherwise
@@ -76,13 +72,14 @@ export function buildSiweMessage(payload: LoginPayload): string {
  * @example
  * ```ts
  * // With chain ID (for login form)
- * const success = await handleSiweAuth(wallet, { chainId: 4202 });
+ * const success = await handleSiweAuth(siweAuth, wallet, { chainId: chain.lisk.id });
  *
  * // Without chain ID (for OTP form)
- * const success = await handleSiweAuth(wallet);
+ * const success = await handleSiweAuth(siweAuth, wallet);
  * ```
  */
 export async function handleSiweAuth(
+  siweAuth: SiweAuth,
   wallet: Wallet,
   options?: { chainId?: number }
 ): Promise<boolean> {
@@ -97,31 +94,26 @@ export async function handleSiweAuth(
       return false;
     }
 
-    const payload = await generateSiwePayload({
+    const payload = await siweAuth.generatePayload({
       address: account.address
     });
 
     const siweMessage = buildSiweMessage(payload);
 
     // Try to get ERC-191 compliant ECDSA signature for SIWE
-    let signature;
+    const signMessageParams = { message: siweMessage };
     if (options?.chainId) {
-      signature = await account.signMessage({
-        message: siweMessage,
-        chainId: options.chainId
-      });
-    } else {
-      signature = await account.signMessage({
-        message: siweMessage
-      });
+      Object.assign(signMessageParams, { chainId: options.chainId });
     }
+
+    const signature = await account.signMessage(signMessageParams);
 
     const signedPayload = {
       payload,
       signature
     };
 
-    const isSuccess = await siweLogin({
+    const isSuccess = await siweAuth.login({
       payload: signedPayload.payload,
       signature: signedPayload.signature,
       account,
@@ -153,6 +145,7 @@ export async function handleSiweAuth(
  * Get a valid SIWE auth token with automatic re-authentication
  * If the token is expired and a wallet is provided, automatically re-authenticates
  *
+ * @param siweAuth - The SiweAuth instance to use for authentication
  * @param wallet - Optional wallet instance for re-authentication if token is expired
  * @param options - Optional configuration for re-authentication
  * @returns Promise<string | null> - Valid auth token or null if unavailable/failed
@@ -160,13 +153,14 @@ export async function handleSiweAuth(
  * @example
  * ```ts
  * // Without wallet (just checks if token is valid)
- * const token = await getOrRefreshSiweToken();
+ * const token = await getOrRefreshSiweToken(siweAuth);
  *
  * // With wallet (will re-authenticate if expired)
- * const token = await getOrRefreshSiweToken(wallet, { chainId: 4202 });
+ * const token = await getOrRefreshSiweToken(siweAuth, wallet, { chainId: chain.lisk.id });
  * ```
  */
 export async function getOrRefreshSiweToken(
+  siweAuth: SiweAuth,
   wallet?: Wallet,
   options?: { chainId?: number }
 ): Promise<string | null> {
@@ -179,17 +173,17 @@ export async function getOrRefreshSiweToken(
 
   // If no valid token and we have a wallet, try to (re-)authenticate
   if (wallet) {
-    const isExpired = isSiweTokenExpired();
+    const isExpired = siweAuth.isTokenExpired();
 
     if (isExpired) {
       console.log('SIWE token expired, attempting re-authentication...');
     }
 
-    const reAuthSuccess = await handleSiweAuth(wallet, options);
+    const reAuthSuccess = await handleSiweAuth(siweAuth, wallet, options);
 
     if (reAuthSuccess) {
       // Return the newly generated token
-      return await getValidSiweAuthToken();
+      return siweAuth.getValidAuthToken();
     } else {
       console.warn('SIWE re-authentication failed');
       return null;

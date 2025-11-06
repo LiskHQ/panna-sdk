@@ -3,6 +3,17 @@ import React, { useContext } from 'react';
 import { createPannaClient, type PannaClient } from '../../core';
 import { PannaClientContext, PannaProvider } from './panna-provider';
 
+// Mock panna-api module before any imports
+jest.mock('../utils/panna-api', () => ({
+  getPannaApiUrl: jest.fn((chainId: string, isDevMode: boolean) => {
+    if (isDevMode) return 'http://localhost:8080/v1';
+    if (chainId === '1135') return 'https://panna-app.lisk.com/v1';
+    if (chainId === '4202') return 'https://stg-panna-app.lisk.com/v1';
+    // Return a default URL for test chain IDs
+    return 'https://panna-app.lisk.com/v1';
+  })
+}));
+
 // Mock @tanstack/react-query
 jest.mock('@tanstack/react-query', () => ({
   QueryClient: jest.fn().mockImplementation(() => ({})),

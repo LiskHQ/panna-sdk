@@ -7,6 +7,9 @@ import {
   lisk,
   type PannaClient
 } from '../../core';
+import { SiweAuth } from '../../core/auth/siwe-auth';
+import { PannaApiService } from '../../core/util/api-service';
+import { getPannaApiUrl } from '../utils/panna-api';
 import { AccountEventProvider } from './account-event-provider';
 import { ErrorBoundary } from './error-boundary';
 
@@ -30,18 +33,26 @@ export type PannaProviderProps = {
    * Optional callback when an error is caught
    */
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  /**
+   * Optional developer mode for runtime configuration
+   */
+  enableDevMode?: boolean;
 };
 
 export type PannaContextValue = {
   client: PannaClient;
   partnerId: string;
   chainId?: string;
+  apiService: PannaApiService;
+  siweAuth: SiweAuth;
 };
 
 type InternalPannaContextValue = {
   client: PannaClient | null;
   partnerId: string;
   chainId?: string;
+  apiService: PannaApiService;
+  siweAuth: SiweAuth;
 };
 
 export const PannaClientContext =
@@ -58,17 +69,28 @@ function PannaProviderInternal(props: PannaProviderProps) {
     chainId,
     children,
     queryClient,
-    autoConnectTimeout
+    autoConnectTimeout,
+    enableDevMode
   } = props;
 
   const contextValue = useMemo(() => {
     const client = clientId ? createPannaClient({ clientId }) : null;
+    const effectiveChainId = chainId ?? String(lisk.id);
+
+    // getPannaApiUrl now throws an error for unsupported chains
+    // This will be caught by the ErrorBoundary wrapping this provider
+    const apiUrl = getPannaApiUrl(effectiveChainId, enableDevMode || false);
+    const apiService = new PannaApiService({ baseUrl: apiUrl });
+    const siweAuth = new SiweAuth(apiService);
+
     return {
       client,
       partnerId: partnerId ?? '',
-      chainId: chainId ?? String(lisk.id)
+      chainId: effectiveChainId,
+      apiService,
+      siweAuth
     };
-  }, [clientId, partnerId, chainId]);
+  }, [clientId, partnerId, chainId, enableDevMode]);
 
   // Create a default QueryClient if none provided
   const defaultQueryClient = useMemo(

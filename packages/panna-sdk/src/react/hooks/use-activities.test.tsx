@@ -55,7 +55,8 @@ describe('useActivities', () => {
               currency: DEFAULT_CURRENCY
             }
           },
-          status: 'success'
+          status: 'success',
+          timestamp: '2024-01-01T00:00:00.000000Z'
         }
       ],
       metadata: {
