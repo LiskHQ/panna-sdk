@@ -115,10 +115,10 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
     }
 
     if (walletIdValue === 'walletconnect') {
-      return 'walletConnect' as WalletImageId;
+      return 'walletConnect';
     }
 
-    return walletIdValue as WalletImageId;
+    return walletIdValue;
   }, [walletIdValue]);
 
   const { data: walletImage } = useAccountAvatar(walletImageId);
