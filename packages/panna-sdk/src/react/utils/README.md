@@ -237,7 +237,7 @@ import {
 } from 'panna-sdk';
 import { useEffect, useState } from 'react';
 
-function LocalizedBuyForm() {
+function LocalizedAddFunds() {
   const [currency, setCurrency] = useState('USD');
   const [symbol, setSymbol] = useState('$');
 
@@ -252,7 +252,7 @@ function LocalizedBuyForm() {
 
   return (
     <div>
-      <h2>Buy Crypto</h2>
+      <h2>Add Funds</h2>
       <input placeholder={`Amount in ${symbol}`} />
       <p>Currency: {currency}</p>
     </div>
