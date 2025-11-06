@@ -1,10 +1,12 @@
 import { ChevronLeftIcon, XIcon } from 'lucide-react';
+import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { connect, EcosystemId } from 'src/core';
 import { WalletId } from 'thirdweb/wallets';
 import { useDialog, useLogin, usePanna } from '@/hooks';
 import { getEnvironmentChain } from '@/utils';
 import { handleSiweAuth } from '@/utils/auth';
+import { getErrorMessage } from '@/utils/get-error-message';
 import { Button } from '../ui/button';
 import {
   DialogClose,
@@ -60,7 +62,7 @@ export default function ChooseWalletDialog() {
   const { onClose } = useDialog();
   const { next, prev, reset } = useDialogStepper();
   const { client, partnerId, chainId } = usePanna();
-  const { connect: connectWallet } = useLogin({
+  const { connect: connectWallet, error: loginError } = useLogin({
     client,
     setWalletAsActive: true,
     accountAbstraction: {
@@ -68,6 +70,13 @@ export default function ChooseWalletDialog() {
       sponsorGas: true
     }
   });
+
+  useEffect(() => {
+    if (loginError) {
+      console.error('Error connecting wallet:', getErrorMessage(loginError));
+      toast.error(getErrorMessage(loginError));
+    }
+  }, [loginError]);
 
   const handleWalletSelect = async (wallet: WalletOption) => {
     try {
@@ -95,6 +104,8 @@ export default function ChooseWalletDialog() {
         next();
       }
     } catch (error) {
+      // Catch only triggers when connect is run directly, not when wrapped with connectWallet
+      // Therefore it is only triggered during account linking rather than login
       console.error('Error connecting wallet:', error);
       toast.error(error instanceof Error ? error.message : (error as string));
     }
