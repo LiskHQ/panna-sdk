@@ -1,6 +1,6 @@
 import * as thirdwebWallets from 'thirdweb/wallets';
 import { type Chain } from '../chain/types';
-import { type PannaClient, EcosystemId } from '../client';
+import { EcosystemId, type PannaClient } from '../client';
 import { LoginStrategy, type Account } from './types';
 import {
   connect,
@@ -231,12 +231,8 @@ describe('Wallet Functions - Unit Tests', () => {
 
       it('should connect with MetaMask when available', async () => {
         const mockExternalWallet = { id: 'io.metamask' };
-        const mockConnectedAccount = {
-          address: '0x123',
-          id: 'connected'
-        } as unknown as Account;
         const mockEcosystemWallet = {
-          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+          connect: jest.fn().mockResolvedValue(undefined)
         } as unknown as Account;
 
         (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
@@ -269,17 +265,13 @@ describe('Wallet Functions - Unit Tests', () => {
           chain: mockChain,
           wallet: mockExternalWallet
         });
-        expect(result).toEqual(mockConnectedAccount);
+        expect(result).toEqual(mockEcosystemWallet);
       });
 
       it('should connect with Coinbase Wallet when available', async () => {
         const mockExternalWallet = { id: 'com.coinbase.wallet' };
-        const mockConnectedAccount = {
-          address: '0x456',
-          id: 'coinbase'
-        } as unknown as Account;
         const mockEcosystemWallet = {
-          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+          connect: jest.fn().mockResolvedValue(undefined)
         } as unknown as Account;
 
         (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
@@ -303,17 +295,13 @@ describe('Wallet Functions - Unit Tests', () => {
         expect(thirdwebWallets.injectedProvider).toHaveBeenCalledWith(
           'com.coinbase.wallet'
         );
-        expect(result).toEqual(mockConnectedAccount);
+        expect(result).toEqual(mockEcosystemWallet);
       });
 
       it('should connect with WalletConnect', async () => {
         const mockExternalWallet = { id: 'walletConnect' };
-        const mockConnectedAccount = {
-          address: '0x789',
-          id: 'wc'
-        } as unknown as Account;
         const mockEcosystemWallet = {
-          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+          connect: jest.fn().mockResolvedValue(undefined)
         } as unknown as Account;
 
         (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
@@ -337,14 +325,13 @@ describe('Wallet Functions - Unit Tests', () => {
         expect(thirdwebWallets.createWallet).toHaveBeenCalledWith(
           'walletConnect'
         );
-        expect(result).toEqual(mockConnectedAccount);
+        expect(result).toEqual(mockEcosystemWallet);
       });
 
       it('should check injectedProvider before connecting', async () => {
         const mockExternalWallet = { id: 'io.metamask' };
-        const mockConnectedAccount = { address: '0xabc' } as unknown as Account;
         const mockEcosystemWallet = {
-          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+          connect: jest.fn().mockResolvedValue(undefined)
         } as unknown as Account;
 
         (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
@@ -415,9 +402,8 @@ describe('Wallet Functions - Unit Tests', () => {
 
       it('should pass correct chain parameter', async () => {
         const mockExternalWallet = { id: 'io.metamask' };
-        const mockConnectedAccount = { address: '0xdef' } as unknown as Account;
         const mockEcosystemWallet = {
-          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+          connect: jest.fn().mockResolvedValue(undefined)
         } as unknown as Account;
 
         (thirdwebWallets.injectedProvider as jest.Mock).mockReturnValue(
@@ -447,9 +433,8 @@ describe('Wallet Functions - Unit Tests', () => {
 
       it('should use custom ecosystemId if provided for wallet strategy', async () => {
         const mockExternalWallet = { id: 'io.metamask' };
-        const mockConnectedAccount = { address: '0xghi' } as unknown as Account;
         const mockEcosystemWallet = {
-          connect: jest.fn().mockResolvedValue(mockConnectedAccount)
+          connect: jest.fn().mockResolvedValue(undefined)
         } as unknown as Account;
         const customEcosystem = {
           id: 'ecosystem.custom' as EcosystemId,

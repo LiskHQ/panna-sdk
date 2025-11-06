@@ -132,7 +132,7 @@ export async function connect(params: ConnectParams): Promise<Account> {
       wallet: externalWallet
     } as Parameters<typeof ecoWallet.connect>[0]);
 
-    return ecoWallet as unknown as Account;
+    return ecoWallet as Account;
   } else if (
     params.strategy === LoginStrategy.EMAIL ||
     params.strategy === LoginStrategy.PHONE

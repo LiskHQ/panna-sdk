@@ -45,6 +45,11 @@ describe('LoginForm', () => {
     expect(screen.getByPlaceholderText(/Phone number/i)).toBeInTheDocument();
   });
 
+  it('renders connect wallet button', () => {
+    render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
+    expect(screen.getByText(/Connect a wallet/i)).toBeInTheDocument();
+  });
+
   it('submits with valid email and calls prepareLogin', async () => {
     render(<LoginForm next={nextMock} goToStep={goToStepMock} />);
     fireEvent.change(screen.getByPlaceholderText(/Email address/i), {
