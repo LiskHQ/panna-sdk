@@ -130,7 +130,6 @@ const renderComponent = (options: RenderOptions = {}) => {
         amount: '10',
         fiatAmount: '10',
         cryptoAmount: '0.1',
-        primaryAmountInput: 'fiat',
         ...options.formDefaults
       }
     });

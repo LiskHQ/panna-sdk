@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { getWalletName, isWalletId, type WalletIdValue } from 'src/core';
 import { TokenBalance } from '@/mocks/token-balances';
+import { lskIcon, ethIcon } from '@/react/consts/token-config';
 import { getEnvironmentChain, renderCryptoAmount } from '@/utils';
 import { truncateAddress } from '@/utils/address';
 import {
@@ -70,15 +71,32 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
   const sourceAddress =
     fromAddress || externalWallet?.getAccount()?.address || '';
 
-  const chainInitial = useMemo(() => {
+  const chainDisplay = useMemo(() => {
     const chain = getEnvironmentChain(chainId);
     const chainName = chain?.name ?? '';
+    const normalizedName = chainName.toLowerCase();
 
-    if (chainName.length > 0) {
-      return chainName.charAt(0).toUpperCase();
+    if (normalizedName.includes('lisk')) {
+      return {
+        icon: lskIcon,
+        label: chainName,
+        initial: 'L'
+      } as const;
     }
 
-    return 'N';
+    if (normalizedName.includes('ethereum')) {
+      return {
+        icon: ethIcon,
+        label: chainName,
+        initial: 'E'
+      } as const;
+    }
+
+    return {
+      icon: undefined,
+      label: chainName,
+      initial: chainName.length > 0 ? chainName.charAt(0).toUpperCase() : 'N'
+    } as const;
   }, [chainId]);
 
   const walletId = externalWallet?.id;
@@ -219,7 +237,6 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
   const handleFormSubmit = async () => {
     form.setValue('cryptoAmount', cryptoAmount);
     form.setValue('fiatAmount', fiatAmount);
-    form.setValue('primaryAmountInput', 'fiat');
 
     const isFieldValid = await form.trigger();
     if (isFieldValid) {
@@ -285,9 +302,17 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
                   )}
                 </div>
                 <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
-                  <span className="text-[10px] font-semibold text-white">
-                    {chainInitial}
-                  </span>
+                  {chainDisplay.icon ? (
+                    <img
+                      src={chainDisplay.icon}
+                      alt={`${chainDisplay.label || 'Network'} logo`}
+                      className="size-3"
+                    />
+                  ) : (
+                    <span className="text-[10px] font-semibold text-white">
+                      {chainDisplay.initial}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -353,9 +378,17 @@ export function TransferAmountStep({ form }: TransferAmountStepProps) {
                   )}
                 </div>
                 <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
-                  <span className="text-[10px] font-semibold text-white">
-                    {chainInitial}
-                  </span>
+                  {chainDisplay.icon ? (
+                    <img
+                      src={chainDisplay.icon}
+                      alt={`${chainDisplay.label || 'Network'} logo`}
+                      className="size-3"
+                    />
+                  ) : (
+                    <span className="text-[10px] font-semibold text-white">
+                      {chainDisplay.initial}
+                    </span>
+                  )}
                 </div>
               </div>
 

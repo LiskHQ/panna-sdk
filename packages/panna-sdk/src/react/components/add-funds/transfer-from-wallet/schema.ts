@@ -1,6 +1,8 @@
 import { isValidAddress } from 'src/core';
 import { z } from 'zod';
 
+const ADDRESS_LENGTH = 42;
+
 // Token schema (reused from send schema)
 export const tokenSchema = z.object({
   address: z.string().min(1, 'Token address is required'),
@@ -26,13 +28,13 @@ export const transferFormSchema = z
   .object({
     fromAddress: z
       .string()
-      .min(1, 'Source address is required')
+      .length(ADDRESS_LENGTH, 'Source address is required')
       .refine(isValidAddress, {
         message: 'Please enter a valid source address'
       }),
     toAddress: z
       .string()
-      .min(1, 'Destination address is required')
+      .length(ADDRESS_LENGTH, 'Destination address is required')
       .refine(isValidAddress, {
         message: 'Please enter a valid destination address'
       }),
@@ -52,8 +54,7 @@ export const transferFormSchema = z
         message: 'Amount must be a number greater than 0'
       }),
     fiatAmount: z.string().optional(),
-    cryptoAmount: z.string().optional(),
-    primaryAmountInput: z.union([z.literal('fiat'), z.literal('crypto')])
+    cryptoAmount: z.string().optional()
   })
   .superRefine((data, ctx) => {
     const amountNum = Number(data.amount);

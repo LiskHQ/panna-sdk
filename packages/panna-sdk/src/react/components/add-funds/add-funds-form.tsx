@@ -93,8 +93,7 @@ export function AddFundsForm({ onClose, stepperRef }: AddFundsFormProps) {
       },
       amount: '',
       fiatAmount: '0',
-      cryptoAmount: '0',
-      primaryAmountInput: 'fiat'
+      cryptoAmount: '0'
     }
   });
 
