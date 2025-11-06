@@ -330,7 +330,7 @@ export class PannaApiService {
       throw new Error('Panna API base URL is not configured.');
     }
 
-    const url = `${baseUrl}/api/v1/onramp/quote`;
+    const url = `${baseUrl}/onramp/quote`;
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json'

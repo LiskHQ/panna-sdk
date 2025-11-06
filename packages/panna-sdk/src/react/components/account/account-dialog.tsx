@@ -243,7 +243,6 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 variant="outline"
                 className="flex-1"
                 onClick={() => setActiveView(AccountViewEnum.Buy)}
-                disabled
               >
                 <TagIcon />
                 Buy
