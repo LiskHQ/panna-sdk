@@ -3,11 +3,16 @@ import { useForm } from 'react-hook-form';
 import { SendErrorStep } from '../send/send-error-step';
 import { StepperContextProvider } from '../send/send-form';
 import { SendSuccessStep } from '../send/send-success-step';
+import { DialogTitle } from '../ui/dialog';
 import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Form } from '../ui/form';
 import { useCollectiblesInfo } from './collectibles-provider';
 import { ProcessingStep } from './processing-step';
-import { SendCollectibleFormData, sendCollectibleFormSchema } from './schema';
+import {
+  MIN_ERC1155_VALUE,
+  SendCollectibleFormData,
+  sendCollectibleFormSchema
+} from './schema';
 import { SelectCollectibleStep } from './select-collectible-step';
 import { SelectRecipientStep } from './select-recipient-step';
 import { SummaryStep } from './summary-step';
@@ -27,12 +32,15 @@ export function SendCollectibleForm({
     defaultValues: {
       collectible: activeCollectible,
       token: activeToken,
-      recipientAddress: ''
+      recipientAddress: '',
+      amount: String(MIN_ERC1155_VALUE)
     }
   });
 
   if (!activeCollectible || !activeToken) {
-    return null;
+    onClose();
+    // Return DialogTitle directly to prevent DialogContent error
+    return <DialogTitle>No collectible or token selected</DialogTitle>;
   }
 
   return (

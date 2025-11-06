@@ -32,6 +32,7 @@ export interface Activity {
   transactionID: string;
   amount: TransactionAmount;
   status: string;
+  timestamp: string;
 }
 
 export enum TransactionActivity {

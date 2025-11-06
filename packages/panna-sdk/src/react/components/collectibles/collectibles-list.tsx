@@ -5,14 +5,8 @@ import {
   useReactTable
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
-import { Fragment, useState } from 'react';
-import {
-  Collectible,
-  ImageType,
-  Token,
-  TokenERC,
-  TokenInstance
-} from 'src/core';
+import { useState } from 'react';
+import { ImageType, Token, TokenERC, TokenInstance } from 'src/core';
 import { useActiveAccount, useCollectibles, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
 import {
@@ -27,6 +21,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '../ui/accordion';
+import { Badge } from '../ui/badge';
 import { Card, CardContent } from '../ui/card';
 import { CustomMediaRenderer } from '../ui/custom-media-renderer';
 import { Skeleton } from '../ui/skeleton';
@@ -124,26 +119,6 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
     );
   }
 
-  function renderCollectibleImage(
-    instance: TokenInstance,
-    item: Collectible,
-    instanceKey: string
-  ) {
-    return (
-      <Card key={instanceKey} className="p-0">
-        <CardContent className="p-0">
-          <CollectibleImageRenderer
-            instance={instance}
-            token={item.token}
-            setActiveView={setActiveView}
-            setActiveCollectible={setActiveCollectible}
-            setActiveToken={setActiveToken}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <section>
       {table.getRowModel().rows.map((row, index) => {
@@ -184,29 +159,18 @@ export function CollectiblesList({ className }: CollectiblesListProps) {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="grid grid-cols-2 gap-4">
-                {/* Since ERC-1155 allows owning multiple tokens with the same ID,
-                check instance value to display multiple tokens with the same ID */}
                 {item.instances.map((instance, instanceIndex) => (
-                  <Fragment key={`${instance.id}-${instanceIndex}`}>
-                    {item.token.type === TokenERC.ERC1155 ? (
-                      <>
-                        {Array.from({ length: Number(instance.value) }).map(
-                          (_, valueIndex) =>
-                            renderCollectibleImage(
-                              instance,
-                              item,
-                              `${instance.id}-${valueIndex}`
-                            )
-                        )}
-                      </>
-                    ) : (
-                      renderCollectibleImage(
-                        instance,
-                        item,
-                        String(instanceIndex)
-                      )
-                    )}
-                  </Fragment>
+                  <Card key={instanceIndex} className="p-0">
+                    <CardContent className="p-0">
+                      <CollectibleImageRenderer
+                        instance={instance}
+                        token={item.token}
+                        setActiveView={setActiveView}
+                        setActiveCollectible={setActiveCollectible}
+                        setActiveToken={setActiveToken}
+                      />
+                    </CardContent>
+                  </Card>
                 ))}
               </AccordionContent>
             </AccordionItem>
@@ -296,7 +260,18 @@ function CollectibleImageRenderer({
       onClick={handleClick}
       className="h-full w-full cursor-pointer border-none bg-transparent"
     >
-      <ImageRenderer instance={instance} />
+      <div className="relative">
+        <ImageRenderer instance={instance} />
+        {token.type === TokenERC.ERC1155 && (
+          <Badge
+            className="absolute right-2 bottom-2"
+            variant="secondary"
+            data-testid="collectible-quantity-badge"
+          >
+            {instance.value}
+          </Badge>
+        )}
+      </div>
     </button>
   );
 }

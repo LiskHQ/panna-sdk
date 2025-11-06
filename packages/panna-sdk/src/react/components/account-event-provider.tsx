@@ -9,16 +9,15 @@ import {
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
 import { EcosystemId } from '../../core/client';
-import {
-  type AccountEventPayload,
-  type OnConnectActivityRequest,
-  type DisconnectActivityRequest,
-  type AccountUpdateActivityRequest,
-  type SmartAccountTransform,
-  type SocialAuthData,
-  AccountEventType,
-  pannaApiService
+import type {
+  AccountEventPayload,
+  OnConnectActivityRequest,
+  DisconnectActivityRequest,
+  AccountUpdateActivityRequest,
+  SmartAccountTransform,
+  SocialAuthData
 } from '../../core/util';
+import { AccountEventType } from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import { getOrRefreshSiweToken } from '../utils/auth';
 
@@ -44,7 +43,7 @@ export type AccountEventProviderProps = {
  * Provider component that handles wallet events and sends them to the Panna API
  */
 export function AccountEventProvider({ children }: AccountEventProviderProps) {
-  const { client, partnerId } = usePanna();
+  const { client, partnerId, apiService, siweAuth } = usePanna();
   const previousAddressRef = useRef<string | null>(null);
   const lastKnownChainIdRef = useRef<number | null>(null);
   const account = useActiveAccount();
@@ -111,9 +110,10 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       }
 
       // Try to get valid token with automatic re-authentication if expired
-      const siweToken = await getOrRefreshSiweToken(activeWallet ?? undefined, {
-        chainId
-      });
+      const siweToken = await getOrRefreshSiweToken(
+        siweAuth,
+        activeWallet ?? undefined
+      );
 
       // If no token after re-auth attempt, throw an error since API calls are now mandatory
       if (!siweToken) {
@@ -178,7 +178,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
         throw new Error(`Unsupported event type: ${eventType}`);
       }
 
-      await pannaApiService.sendAccountEvent(address, payload, siweToken);
+      await apiService.sendAccountEvent(address, payload, siweToken);
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
 
