@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
+import { lskIcon, ethIcon } from '@/consts/token-config';
 import { TokenBalance } from '@/mocks/token-balances';
 import { getEnvironmentChain, getSupportedTokens } from '@/utils';
 import { useExternalWallet, usePanna, useTokenBalances } from '../../../hooks';
@@ -25,15 +26,32 @@ export function TransferSelectTokenStep({
     TransferFormData['tokenInfo'] | null
   >(null);
   const supportedTokens = getSupportedTokens(chainId);
-  const chainInitial = useMemo(() => {
+  const chainDisplay = useMemo(() => {
     const chain = getEnvironmentChain(chainId);
     const chainName = chain?.name ?? '';
+    const normalizedName = chainName.toLowerCase();
 
-    if (chainName.length > 0) {
-      return chainName.charAt(0).toUpperCase();
+    if (normalizedName.includes('lisk')) {
+      return {
+        icon: lskIcon,
+        label: chainName,
+        initial: 'L'
+      } as const;
     }
 
-    return 'N';
+    if (normalizedName.includes('ethereum')) {
+      return {
+        icon: ethIcon,
+        label: chainName,
+        initial: 'E'
+      } as const;
+    }
+
+    return {
+      icon: undefined,
+      label: chainName,
+      initial: chainName.length > 0 ? chainName.charAt(0).toUpperCase() : 'N'
+    } as const;
   }, [chainId]);
 
   // Set the external wallet address when component loads
@@ -138,9 +156,17 @@ export function TransferSelectTokenStep({
                       )}
                     </div>
                     <div className="ring-background absolute -right-0.5 -bottom-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 ring-2">
-                      <span className="text-[10px] font-semibold text-white">
-                        {chainInitial}
-                      </span>
+                      {chainDisplay.icon ? (
+                        <img
+                          src={chainDisplay.icon}
+                          alt={`${chainDisplay.label || 'Network'} logo`}
+                          className="size-3"
+                        />
+                      ) : (
+                        <span className="text-[10px] font-semibold text-white">
+                          {chainDisplay.initial}
+                        </span>
+                      )}
                     </div>
                   </div>
 

@@ -2,8 +2,8 @@ import { ChevronDownIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { getWalletName, isWalletId, type WalletIdValue } from 'src/core';
+import { lskIcon, ethIcon } from '@/consts/token-config';
 import { TokenBalance } from '@/mocks/token-balances';
-import { lskIcon, ethIcon } from '@/react/consts/token-config';
 import { getEnvironmentChain, renderCryptoAmount } from '@/utils';
 import { truncateAddress } from '@/utils/address';
 import {
