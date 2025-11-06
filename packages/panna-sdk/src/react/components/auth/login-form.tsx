@@ -38,7 +38,7 @@ const GOOGLE_LOGIN_STEP = 2;
 
 export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema as any),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
       phoneNumber: ''
