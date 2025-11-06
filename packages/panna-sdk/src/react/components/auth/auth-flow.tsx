@@ -13,6 +13,7 @@ import { Typography } from '../ui/typography';
 import ChooseWalletDialog from './choose-wallet-dialog';
 import { ConnectButtonProps } from './connect-button';
 import { InputOTPForm } from './input-otp-form';
+import { LinkWalletSuccessStep } from './link-wallet-success-step';
 import { LoginForm } from './login-form';
 import { SocialLoginErrorDialog } from './social-login-error-dialog';
 import { SocialLoginPendingDialog } from './social-login-pending-dialog';
@@ -31,6 +32,8 @@ export function AuthFlow({ connectDialog }: ConnectButtonProps) {
       <SocialLoginPendingDialog />
       <SocialLoginErrorDialog />
       <ChooseWalletDialog />
+      {/*TODO: Link Wallet Success will only be triggered for wallet linking */}
+      <LinkWalletSuccessStep />
     </DialogStepper>
   );
 }
