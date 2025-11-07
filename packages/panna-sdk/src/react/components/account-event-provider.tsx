@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef
 } from 'react';
+import { LoginStrategy } from 'src/core';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
 import { EcosystemId } from '../../core/client';
@@ -191,15 +192,15 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   const getSocialInfo = () => {
     const emailProfile = userProfiles?.find(
-      (profile) => profile.type === 'email'
+      (profile) => profile.type === LoginStrategy.EMAIL
     );
 
     const googleProfile = userProfiles?.find(
-      (profile) => profile.type === 'google'
+      (profile) => profile.type === LoginStrategy.GOOGLE
     );
 
     const phoneProfile = userProfiles?.find(
-      (profile) => profile.type === 'phone'
+      (profile) => profile.type === LoginStrategy.PHONE
     );
 
     const eoaProfile = userProfiles?.find((profile) => profile.details.address);
@@ -207,22 +208,22 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
     // Return profile data with the actual provider type
     if (emailProfile?.details?.email) {
       return {
-        type: 'email' as const,
+        type: LoginStrategy.EMAIL,
         data: emailProfile.details.email
       };
     } else if (googleProfile?.details?.email) {
       return {
-        type: 'google' as const,
+        type: LoginStrategy.GOOGLE,
         data: googleProfile.details.email
       };
     } else if (phoneProfile?.details?.phone) {
       return {
-        type: 'phone' as const,
+        type: LoginStrategy.PHONE,
         data: phoneProfile.details.phone
       };
     } else if (eoaProfile?.details?.address) {
       return {
-        type: 'wallet' as const,
+        type: LoginStrategy.WALLET,
         data: eoaProfile.details.address
       };
     }
