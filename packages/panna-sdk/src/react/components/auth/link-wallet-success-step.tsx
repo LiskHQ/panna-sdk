@@ -44,7 +44,7 @@ export function LinkWalletSuccessStep() {
           Link another account for added protection. This helps make sure you
           can always get back into your account.
         </Typography>
-        <div className="flex w-full flex-col gap-2">
+        <footer className="flex w-full flex-col gap-2">
           <Button
             variant="outline"
             type="button"
@@ -62,7 +62,7 @@ export function LinkWalletSuccessStep() {
           >
             Continue
           </Button>
-        </div>
+        </footer>
       </div>
     </DialogContent>
   );

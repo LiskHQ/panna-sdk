@@ -191,17 +191,15 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
           </Typography>
           <Separator className="col-span-4" />
         </div>
-        <div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleConnectWallet}
-            className="flex w-full justify-start gap-3"
-          >
-            <WalletIcon />
-            Connect a wallet
-          </Button>
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleConnectWallet}
+          className="flex w-full justify-start gap-3"
+        >
+          <WalletIcon />
+          Connect a wallet
+        </Button>
       </form>
     </Form>
   );

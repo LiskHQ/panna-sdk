@@ -79,7 +79,6 @@ export function ConnectButton({
         draggable
         newestOnTop
         closeButton={false}
-        toastClassName="z-50!"
         className="text-secondary"
       />
     </>
