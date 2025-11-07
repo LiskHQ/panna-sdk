@@ -50,7 +50,9 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   const activeWallet = useActiveWallet();
   const userAddress = account?.address || null;
   const currentChain = activeWallet?.getChain?.();
-  const { data: userProfiles } = useProfiles({ client: client! });
+  const { data: userProfiles, isLoading: isLoadingProfiles } = useProfiles({
+    client: client!
+  });
 
   // Store the chainId whenever it's available so we can use it during disconnect
   useEffect(() => {
@@ -272,7 +274,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   useEffect(() => {
     const previousAddress = previousAddressRef.current;
 
-    if (userAddress && !previousAddress) {
+    if (userAddress && !isLoadingProfiles) {
       // User connected
       handleOnConnect(userAddress);
     } else if (!userAddress && previousAddress) {
@@ -289,7 +291,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
     // Update the reference
     previousAddressRef.current = userAddress;
-  }, [userAddress]);
+  }, [userAddress, isLoadingProfiles]);
 
   const contextValue: AccountEventContextType = {
     sendAccountEvent
