@@ -1,7 +1,6 @@
 import { UseQueryResult } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
-import { act } from 'react';
-import React from 'react';
+import React, { act } from 'react';
 import { SmartAccountOptions } from 'thirdweb/dist/types/wallets/smart/types';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { Account, Profile, SmartWalletOptions, Wallet } from 'thirdweb/wallets';
@@ -396,6 +395,45 @@ describe('AccountEventProvider', () => {
       });
     });
 
+    it('should detect wallet from user profiles', async () => {
+      jest.clearAllMocks();
+
+      const eoaOnlyProfiles = [
+        {
+          type: 'wallet',
+          details: { address: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e' }
+        }
+      ];
+
+      mockUseProfiles.mockReturnValue({
+        data: eoaOnlyProfiles
+      } as unknown as UseQueryResult<Profile[]>);
+
+      render(
+        <AccountEventProvider>
+          <TestConsumer />
+        </AccountEventProvider>
+      );
+
+      const button = screen.getByTestId('trigger-event');
+      await act(async () => {
+        button.click();
+      });
+
+      await waitFor(() => {
+        expect(mockSendAccountEvent).toHaveBeenCalled();
+        const firstCall = mockSendAccountEvent.mock.calls[0];
+        expect(firstCall[1]).toEqual(
+          expect.objectContaining({
+            social: {
+              type: 'wallet',
+              data: '0x742d35Cc6635C0532925a3b8D42f3C2544a3F97e'
+            }
+          })
+        );
+      });
+    });
+
     it('should use fallback when no social info available', async () => {
       // Clear previous calls and setup empty profiles
       jest.clearAllMocks();
@@ -744,6 +782,9 @@ describe('AccountEventProvider', () => {
       jest.clearAllMocks();
 
       mockUseActiveAccount.mockReturnValue(null as unknown as Account);
+      mockUseProfiles.mockReturnValue({
+        isLoading: false
+      } as unknown as UseQueryResult<Profile[]>);
 
       const { rerender } = render(
         <AccountEventProvider>

@@ -1,23 +1,23 @@
 import {
   createContext,
-  useEffect,
   ReactNode,
   use,
-  useRef,
-  useMemo
+  useEffect,
+  useMemo,
+  useRef
 } from 'react';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
 import { EcosystemId } from '../../core/client';
-import type {
-  AccountEventPayload,
-  OnConnectActivityRequest,
-  DisconnectActivityRequest,
-  AccountUpdateActivityRequest,
-  SmartAccountTransform,
-  SocialAuthData
+import {
+  type AccountEventPayload,
+  type AccountUpdateActivityRequest,
+  type DisconnectActivityRequest,
+  type OnConnectActivityRequest,
+  type SmartAccountTransform,
+  type SocialAuthData,
+  AccountEventType
 } from '../../core/util';
-import { AccountEventType } from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import { getOrRefreshSiweToken } from '../utils/auth';
 
@@ -202,6 +202,8 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       (profile) => profile.type === 'phone'
     );
 
+    const eoaProfile = userProfiles?.find((profile) => profile.details.address);
+
     // Return profile data with the actual provider type
     if (emailProfile?.details?.email) {
       return {
@@ -217,6 +219,11 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       return {
         type: 'phone' as const,
         data: phoneProfile.details.phone
+      };
+    } else if (eoaProfile?.details?.address) {
+      return {
+        type: 'wallet' as const,
+        data: eoaProfile.details.address
       };
     }
 
@@ -274,7 +281,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   useEffect(() => {
     const previousAddress = previousAddressRef.current;
 
-    if (userAddress && !isLoadingProfiles) {
+    if (userAddress && !previousAddress && !isLoadingProfiles) {
       // User connected
       handleOnConnect(userAddress);
     } else if (!userAddress && previousAddress) {

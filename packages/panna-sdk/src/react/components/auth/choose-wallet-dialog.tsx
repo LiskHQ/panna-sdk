@@ -61,7 +61,7 @@ const walletOptions: WalletOption[] = [
 export default function ChooseWalletDialog() {
   const { onClose } = useDialog();
   const { next, prev, reset } = useDialogStepper();
-  const { client, partnerId, chainId } = usePanna();
+  const { client, partnerId, chainId, siweAuth } = usePanna();
   const { connect: connectWallet, error: loginError } = useLogin({
     client,
     setWalletAsActive: true,
@@ -97,7 +97,7 @@ export default function ChooseWalletDialog() {
 
       if (userWallet) {
         // Automatically perform SIWE authentication in the background
-        await handleSiweAuth(userWallet, {
+        await handleSiweAuth(siweAuth, userWallet, {
           chainId: Number(chainId)
         });
 
