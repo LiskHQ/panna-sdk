@@ -297,8 +297,11 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       handleAccountChanged(userAddress);
     }
 
-    // Update the reference
-    previousAddressRef.current = userAddress;
+    // Only update the reference when profiles have finished loading
+    // This prevents the ref from being updated prematurely during page reload
+    if (!isLoadingProfiles) {
+      previousAddressRef.current = userAddress;
+    }
   }, [userAddress, isLoadingProfiles]);
 
   const contextValue: AccountEventContextType = {

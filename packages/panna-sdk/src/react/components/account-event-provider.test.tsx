@@ -815,6 +815,47 @@ describe('AccountEventProvider', () => {
       });
     });
 
+    it('should trigger onConnect on page reload when address is present and profiles finish loading', async () => {
+      jest.clearAllMocks();
+
+      mockUseActiveAccount.mockReturnValue(mockAccount as unknown as Account);
+      mockUseProfiles.mockReturnValue({
+        data: mockUserProfiles,
+        isLoading: true
+      } as unknown as UseQueryResult<Profile[]>);
+
+      const { rerender } = render(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      expect(mockSendAccountEvent).not.toHaveBeenCalled();
+
+      jest.clearAllMocks();
+
+      mockUseProfiles.mockReturnValue({
+        data: mockUserProfiles,
+        isLoading: false
+      } as unknown as UseQueryResult<Profile[]>);
+
+      rerender(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      await waitFor(() => {
+        expect(mockSendAccountEvent).toHaveBeenCalledWith(
+          mockAccount.address,
+          expect.objectContaining({
+            eventType: 'onConnect'
+          }),
+          'mock-jwt-token'
+        );
+      });
+    });
+
     it('should trigger disconnect when user address changes from address to null', async () => {
       // Start with connected account
       mockUseActiveAccount.mockReturnValue(mockAccount as unknown as Account);
@@ -881,6 +922,53 @@ describe('AccountEventProvider', () => {
           expect.objectContaining({
             eventType: AccountEventType.ACCOUNT_UPDATE,
             updateType: 'account_change'
+          }),
+          'mock-jwt-token'
+        );
+      });
+    });
+
+    it('should trigger onConnect on page reload when address is present and profiles finish loading', async () => {
+      // Clear previous calls
+      jest.clearAllMocks();
+
+      // Simulate page reload: account is already connected, profiles are loading
+      mockUseActiveAccount.mockReturnValue(mockAccount as unknown as Account);
+      mockUseProfiles.mockReturnValue({
+        data: mockUserProfiles,
+        isLoading: true
+      } as unknown as UseQueryResult<Profile[]>);
+
+      const { rerender } = render(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      // At this point, handleOnConnect should NOT have been called yet
+      expect(mockSendAccountEvent).not.toHaveBeenCalled();
+
+      // Clear mocks to isolate the onConnect event
+      jest.clearAllMocks();
+
+      // Simulate profiles finishing loading
+      mockUseProfiles.mockReturnValue({
+        data: mockUserProfiles,
+        isLoading: false
+      } as unknown as UseQueryResult<Profile[]>);
+
+      rerender(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      // Now handleOnConnect should be called
+      await waitFor(() => {
+        expect(mockSendAccountEvent).toHaveBeenCalledWith(
+          mockAccount.address,
+          expect.objectContaining({
+            eventType: 'onConnect'
           }),
           'mock-jwt-token'
         );
