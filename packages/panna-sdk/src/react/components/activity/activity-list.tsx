@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-table';
 import { CircleAlertIcon } from 'lucide-react';
 import { useState } from 'react';
+import { Activity } from 'src/core';
 import { useActiveAccount } from 'thirdweb/react';
 import { useActivities, usePanna } from '@/hooks';
 import { cn, getEnvironmentChain } from '@/utils';
@@ -16,6 +17,38 @@ import { ActivityItem } from './activity-item';
 
 const DEFAULT_LIMIT = 10;
 const DEFAULT_OFFSET = 0;
+
+/**
+ * Format a timestamp to "DD MMM, YYYY" format (e.g., "9 Oct, 2025")
+ */
+export function getDateKey(timestamp: string): string {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC'
+  });
+}
+
+/**
+ * Group activities by date
+ */
+export function groupActivitiesByDate(
+  activities: Activity[]
+): Map<string, Activity[]> {
+  const grouped = new Map<string, Activity[]>();
+
+  activities.forEach((activity) => {
+    const dateKey = getDateKey(activity.timestamp);
+    if (!grouped.has(dateKey)) {
+      grouped.set(dateKey, []);
+    }
+    grouped.get(dateKey)!.push(activity);
+  });
+
+  return grouped;
+}
 
 type ActivityListProps = {
   className?: string;
