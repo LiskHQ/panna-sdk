@@ -78,9 +78,9 @@ export enum WalletId {
 }
 
 /**
- * Type representing all possible wallet identifier values
+ * All supported wallet identifier values, including dynamic ecosystem wallets.
  */
-export type WalletIdValue = `${WalletId}`;
+export type WalletIdValue = `${WalletId}` | `ecosystem.${string}`;
 
 /**
  * Helper function to check if a string is a valid WalletId
@@ -98,6 +98,10 @@ export type WalletIdValue = `${WalletId}`;
  * ```
  */
 export function isWalletId(id: string): id is WalletIdValue {
+  if (id.startsWith('ecosystem.')) {
+    return true;
+  }
+
   return Object.values(WalletId).includes(id as WalletId);
 }
 
@@ -115,7 +119,7 @@ export function isWalletId(id: string): id is WalletIdValue {
  * console.log(name); // "MetaMask"
  * ```
  */
-export function getWalletName(id: WalletId): string {
+export function getWalletName(id: WalletIdValue): string {
   const names: Partial<Record<WalletId, string>> = {
     [WalletId.MetaMask]: 'MetaMask',
     [WalletId.Coinbase]: 'Coinbase Wallet',
@@ -125,9 +129,18 @@ export function getWalletName(id: WalletId): string {
     [WalletId.WalletConnect]: 'WalletConnect'
   };
 
-  const name = names[id];
-  if (!name) {
-    throw new Error(`Unknown wallet ID: ${id}`);
+  if (id in names) {
+    return names[id as WalletId] as string;
   }
-  return name;
+
+  if (id.startsWith('ecosystem.')) {
+    const [, ecosystem] = id.split('.');
+    if (!ecosystem) {
+      return 'Ecosystem Wallet';
+    }
+    const formatted = ecosystem.charAt(0).toUpperCase() + ecosystem.slice(1);
+    return `${formatted} Ecosystem Wallet`;
+  }
+
+  throw new Error(`Unknown wallet ID: ${id}`);
 }

@@ -26,7 +26,8 @@ export function getDateKey(timestamp: string): string {
   return date.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'UTC'
   });
 }
 
@@ -137,28 +138,12 @@ export function ActivityList({ className }: ActivityListProps) {
     );
   }
 
-  const groupedActivities = groupActivitiesByDate(activitiesData);
-
   return (
     <section className="flex flex-col gap-6">
       {activitiesData.length > 0 ? (
-        Array.from(groupedActivities.entries()).map(([dateKey, activities]) => {
-          return (
-            <div key={dateKey} className="flex flex-col gap-4">
-              <Typography variant="muted" className="text-sm">
-                {dateKey}
-              </Typography>
-              <div className="flex flex-col gap-6">
-                {activities.map((activity) => (
-                  <ActivityItem
-                    key={activity.transactionID}
-                    activity={activity}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })
+        activitiesData.map((activity) => (
+          <ActivityItem key={activity.transactionID} activity={activity} />
+        ))
       ) : (
         <Typography variant="muted" className="text-center">
           No activities on this page

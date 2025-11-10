@@ -1,22 +1,18 @@
 import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { liskSepolia } from 'src/core';
+import { extractNumericPrice } from 'src/core/util/utils';
 import { useActiveAccount } from 'thirdweb/react';
-import { liskSepolia } from '../../../core';
-import { extractNumericPrice } from '../../../core/util/utils';
-import {
-  useBuyWithFiatQuotes,
-  usePanna,
-  useSupportedTokens
-} from '../../hooks';
-import type { BuyWithFiatQuote } from '../../types/buy-with-fiat-quote.types';
-import { getEnvironmentChain } from '../../utils';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { DialogHeader, DialogTitle } from '../ui/dialog';
-import { useDialogStepper } from '../ui/dialog-stepper';
-import { FormControl, FormField, FormItem, FormMessage } from '../ui/form';
-import { Typography } from '../ui/typography';
+import { useBuyWithFiatQuotes, usePanna, useSupportedTokens } from '@/hooks';
+import type { BuyWithFiatQuote } from '@/types/buy-with-fiat-quote.types';
+import { getEnvironmentChain } from '@/utils';
+import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
+import { DialogHeader, DialogTitle } from '../../ui/dialog';
+import { useDialogStepper } from '../../ui/dialog-stepper';
+import { FormControl, FormField, FormItem, FormMessage } from '../../ui/form';
+import { Typography } from '../../ui/typography';
 import type { BuyFormData } from './schema';
 
 type SelectBuyProviderStepProps = {

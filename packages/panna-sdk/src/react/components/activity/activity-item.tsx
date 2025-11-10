@@ -14,6 +14,45 @@ import { tokenIconMap } from '@/mocks/token-balances';
 import { Typography } from '../ui/typography';
 
 const DECIMAL_PLACES = 5;
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 60 * SECONDS_PER_MINUTE;
+const SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
+const SECONDS_PER_WEEK = 7 * SECONDS_PER_DAY;
+
+/**
+ * Format timestamp to relative time or absolute date
+ * @param timestamp ISO timestamp string
+ * @returns Formatted time string
+ */
+function formatTimestamp(timestamp: string): string {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < SECONDS_PER_MINUTE) {
+    // Less than a minute ago
+    return 'Just now';
+  } else if (diffInSeconds < SECONDS_PER_HOUR) {
+    // Less than an hour ago
+    const minutes = Math.floor(diffInSeconds / SECONDS_PER_MINUTE);
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+  } else if (diffInSeconds < SECONDS_PER_DAY) {
+    // Less than a day ago
+    const hours = Math.floor(diffInSeconds / SECONDS_PER_HOUR);
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+  } else if (diffInSeconds < SECONDS_PER_WEEK) {
+    // Less than a week ago
+    const days = Math.floor(diffInSeconds / SECONDS_PER_DAY);
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+  } else {
+    // For older dates, show formatted date
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+}
 
 type ActivityItemProps = {
   activity: Activity;
@@ -224,6 +263,9 @@ export function ActivityItem({ activity }: ActivityItemProps) {
         <div className="flex flex-col">
           <Typography variant="small">{activity.activityType}</Typography>
           {renderActivitySymbol(activity)}
+          <Typography variant="muted" className="text-xs">
+            {formatTimestamp(activity.timestamp)}
+          </Typography>
         </div>
       </header>
       <div className="flex flex-col justify-center text-right">

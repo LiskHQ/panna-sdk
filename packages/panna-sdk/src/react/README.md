@@ -37,7 +37,7 @@ pnpm add panna-sdk
 
 Pre-built React components for authentication, transactions, and account management.
 
-**Key Components:** PannaProvider, ConnectButton, AccountDialog, BuyForm, UI primitives
+**Key Components:** PannaProvider, ConnectButton, AccountDialog, AddFundsForm, UI primitives
 
 ```tsx
 import { PannaProvider, ConnectButton } from 'panna-sdk';
@@ -158,18 +158,15 @@ function Balances({ address }: { address: string }) {
 }
 ```
 
-### Buy Crypto
+### Add Funds
 
 ```tsx
-import { BuyForm } from 'panna-sdk';
+import { AddFundsForm } from 'panna-sdk';
 
-function BuyPage() {
-  return (
-    <BuyForm
-      onSuccess={(result) => console.log('Success:', result)}
-      onError={(error) => console.error('Error:', error)}
-    />
-  );
+function AddFundsPage({ onClose }: { onClose: () => void }) {
+  const stepperRef = useRef(null);
+
+  return <AddFundsForm onClose={onClose} stepperRef={stepperRef} />;
 }
 ```
 

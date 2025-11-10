@@ -77,20 +77,17 @@ function AccountButton() {
 }
 ```
 
-### BuyForm
+### AddFundsForm
 
-Multi-step fiat-to-crypto purchase form.
+Multi-step fiat-to-crypto purchase or wallet transfer flow.
 
 ```tsx
-import { BuyForm } from 'panna-sdk';
+import { AddFundsForm } from 'panna-sdk';
 
-function BuyCrypto() {
-  return (
-    <BuyForm
-      onSuccess={(result) => console.log('Success:', result)}
-      onError={(error) => console.error('Error:', error)}
-    />
-  );
+function AddFundsDialog({ onClose }: { onClose: () => void }) {
+  const stepperRef = useRef(null);
+
+  return <AddFundsForm onClose={onClose} stepperRef={stepperRef} />;
 }
 ```
 
@@ -131,7 +128,7 @@ function App() {
 
 ### Transaction (`components/buy/`, `components/send/`)
 
-- **BuyForm** - Fiat-to-crypto purchase
+- **AddFundsForm** - Fiat-to-crypto purchase and external transfer flow
 - **SendForm** - Token transfer form
 - **SendCollectibleForm** - Collectible transfer form
 

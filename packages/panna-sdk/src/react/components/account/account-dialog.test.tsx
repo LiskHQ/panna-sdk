@@ -2,7 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { FiatCurrency } from 'src/core';
 import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
-import { BuyFormProps, StepperRefProvider } from '../buy/buy-form';
+import {
+  AddFundsFormProps,
+  StepperRefProvider
+} from '../add-funds/add-funds-form';
 import { SendCollectibleFormProps } from '../collectibles/send-collectible-form';
 import { SendFormProps, StepperContextProvider } from '../send/send-form';
 import { AccountDialog } from './account-dialog';
@@ -16,14 +19,14 @@ jest.mock('../activity/activity-list', () => ({
 jest.mock('../balance/tokens-list', () => ({
   TokensList: () => <div data-testid="tokens-list">Tokens List</div>
 }));
-jest.mock('../buy/buy-form', () => ({
+jest.mock('../add-funds/add-funds-form', () => ({
   StepperRefProvider: ({ children }: { children: React.ReactNode }) => (
     <div>{children}</div>
   ),
-  BuyForm: ({ onClose, stepperRef }: BuyFormProps) => (
-    <div data-testid="buy-form">
+  AddFundsForm: ({ onClose, stepperRef }: AddFundsFormProps) => (
+    <div data-testid="add-funds-form">
       <StepperRefProvider stepperRef={stepperRef}>
-        <button onClick={onClose}>Close Buy</button>
+        <button onClick={onClose}>Close Add Funds</button>
       </StepperRefProvider>
     </div>
   )
@@ -157,13 +160,13 @@ describe('AccountDialog', () => {
     expect(screen.getByTestId('send-form')).toBeInTheDocument();
   });
 
-  it('buy button is disabled', () => {
+  it('navigates to add funds form when add funds button is clicked', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
     fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
 
-    const buyButton = screen.getByRole('button', { name: /buy/i });
-    expect(buyButton).toBeDisabled();
+    const addFundsButton = screen.getByRole('button', { name: /add funds/i });
+    expect(addFundsButton).toBeInTheDocument();
   });
 
   it('closes send form and returns to main view', () => {

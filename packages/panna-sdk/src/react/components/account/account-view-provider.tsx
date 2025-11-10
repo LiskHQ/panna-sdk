@@ -4,7 +4,7 @@ import { type StringValues } from '../../../core/util/types';
 export enum AccountViewEnum {
   Main = 'main',
   Settings = 'settings',
-  Buy = 'buy',
+  AddFunds = 'add-funds',
   Send = 'send',
   CollectibleDetails = 'collectible-details'
 }

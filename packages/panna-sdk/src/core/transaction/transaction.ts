@@ -548,6 +548,7 @@ export async function transferBalanceFromExternalWallet(
   const {
     provider,
     walletId,
+    account: preconnectedAccount,
     to,
     amount,
     client,
@@ -573,12 +574,16 @@ export async function transferBalanceFromExternalWallet(
   }
 
   try {
-    // Convert EIP1193 provider to a wallet, then connect to get an account
-    const wallet = fromEIP1193Provider({
-      provider,
-      walletId: walletId as WalletId
-    });
-    const account = await wallet.connect({ client, chain });
+    const account = preconnectedAccount
+      ? preconnectedAccount
+      : await fromEIP1193Provider({
+          provider,
+          walletId: walletId as WalletId
+        }).connect({ client, chain });
+
+    if (!account) {
+      throw new Error('Failed to connect to wallet, no accounts available');
+    }
 
     let transaction: PrepareTransactionResult | PrepareContractCallResult;
 

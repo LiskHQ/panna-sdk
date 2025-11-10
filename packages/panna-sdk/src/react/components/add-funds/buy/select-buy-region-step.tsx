@@ -2,13 +2,9 @@ import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_COUNTRY_CODE } from 'src/core';
-import type { Country } from '../../types/country.types';
-import {
-  COUNTRIES_SORTED,
-  getCountryByCode,
-  detectUserCountry
-} from '../../utils';
-import { Button } from '../ui/button';
+import type { Country } from '@/types/country.types';
+import { COUNTRIES_SORTED, getCountryByCode, detectUserCountry } from '@/utils';
+import { Button } from '../../ui/button';
 import {
   Command,
   CommandEmpty,
@@ -16,18 +12,18 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from '../ui/command';
-import { DialogHeader, DialogTitle } from '../ui/dialog';
-import { useDialogStepper } from '../ui/dialog-stepper';
+} from '../../ui/command';
+import { DialogHeader, DialogTitle } from '../../ui/dialog';
+import { useDialogStepper } from '../../ui/dialog-stepper';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage
-} from '../ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Typography } from '../ui/typography';
+} from '../../ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
+import { Typography } from '../../ui/typography';
 import type { BuyFormData } from './schema';
 
 type SelectBuyRegionStepProps = {
