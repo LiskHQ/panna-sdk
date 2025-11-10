@@ -340,16 +340,7 @@ export class PannaApiService {
       headers.Authorization = `Bearer ${authToken}`;
     }
 
-    console.info('PannaApiService:getOnrampQuote - requesting quote', {
-      tokenSymbol: request.tokenSymbol,
-      network: request.network,
-      fiatAmount: request.fiatAmount,
-      fiatCurrency: request.fiatCurrency,
-      hasAuthToken: Boolean(authToken)
-    });
-
     if (isMockMode) {
-      console.info('PannaApiService:getOnrampQuote - returning mock quote');
       const mockQuote: QuoteData = {
         rate: 1,
         crypto_quantity: request.fiatAmount,
@@ -392,7 +383,6 @@ export class PannaApiService {
         );
       }
 
-      console.info('PannaApiService:getOnrampQuote - received quote');
       return payload.data;
     } catch (error) {
       console.error('Failed to fetch onramp quote from Panna API:', error);
