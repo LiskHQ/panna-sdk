@@ -23,3 +23,6 @@ export type {
   GetTokenFiatPricesParams,
   ProviderInfo
 } from './types';
+
+// Export onramp.money specific functionality
+export * from './onramp-money';
