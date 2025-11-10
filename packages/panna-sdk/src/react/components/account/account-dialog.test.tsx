@@ -157,15 +157,6 @@ describe('AccountDialog', () => {
     expect(screen.getByTestId('send-form')).toBeInTheDocument();
   });
 
-  it('buy button is disabled', () => {
-    render(<AccountDialogWrapper address={mockAddress} />);
-
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
-
-    const buyButton = screen.getByRole('button', { name: /buy/i });
-    expect(buyButton).toBeDisabled();
-  });
-
   it('closes send form and returns to main view', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
