@@ -26,6 +26,7 @@ import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Separator } from '../ui/separator';
 import { Typography } from '../ui/typography';
+import { STEP_GOOGLE_LOGIN, STEP_WALLET_LOGIN } from './auth-flow';
 import { formSchema } from './schema';
 
 type LoginFormProps = {
@@ -33,8 +34,6 @@ type LoginFormProps = {
   goToStep: DialogStepperContextValue['goToStep'];
 };
 // Add country code flag selector to phone input
-
-const GOOGLE_LOGIN_STEP = 2;
 
 export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -95,7 +94,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
   }
 
   const handleConnectWallet = async () => {
-    goToStep(4);
+    goToStep(STEP_WALLET_LOGIN);
   };
 
   return (
@@ -104,7 +103,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
         <Button
           type="button"
           className="flex gap-3"
-          onClick={() => goToStep(GOOGLE_LOGIN_STEP)}
+          onClick={() => goToStep(STEP_GOOGLE_LOGIN)}
           data-testid="google-login-button"
         >
           <GoogleIcon />

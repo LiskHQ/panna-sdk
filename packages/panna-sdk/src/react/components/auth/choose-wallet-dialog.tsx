@@ -1,12 +1,6 @@
 import { ChevronLeftIcon, XIcon } from 'lucide-react';
-import { useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { connect, EcosystemId } from 'src/core';
 import { WalletId } from 'thirdweb/wallets';
-import { useDialog, useLogin, usePanna } from '@/hooks';
-import { getEnvironmentChain } from '@/utils';
-import { handleSiweAuth } from '@/utils/auth';
-import { getErrorMessage } from '@/utils/get-error-message';
+import { useDialog } from '@/hooks';
 import { Button } from '../ui/button';
 import {
   DialogClose,
@@ -17,8 +11,9 @@ import {
 } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
+import { STEP_LOGIN_FORM } from './auth-flow';
 
-type WalletOption = {
+export type WalletOption = {
   id: string;
   rdns: WalletId;
   name: string;
@@ -60,55 +55,10 @@ const walletOptions: WalletOption[] = [
 
 export default function ChooseWalletDialog() {
   const { onClose } = useDialog();
-  const { next, prev, reset } = useDialogStepper();
-  const { client, partnerId, chainId, siweAuth } = usePanna();
-  const { connect: connectWallet, error: loginError } = useLogin({
-    client,
-    setWalletAsActive: true,
-    accountAbstraction: {
-      chain: getEnvironmentChain(chainId),
-      sponsorGas: true
-    }
-  });
-
-  useEffect(() => {
-    if (loginError) {
-      console.error('Error connecting wallet:', getErrorMessage(loginError));
-      toast.error(getErrorMessage(loginError));
-    }
-  }, [loginError]);
+  const { next, goToStep, reset } = useDialogStepper();
 
   const handleWalletSelect = async (wallet: WalletOption) => {
-    try {
-      // Wrap with connectWallet during login but without it during linking
-      const userWallet = await connectWallet(
-        async () =>
-          await connect({
-            client,
-            ecosystem: {
-              id: EcosystemId.LISK,
-              partnerId
-            },
-            strategy: 'wallet',
-            walletId: wallet.rdns,
-            chain: getEnvironmentChain(chainId)
-          })
-      );
-
-      if (userWallet) {
-        // Automatically perform SIWE authentication in the background
-        await handleSiweAuth(siweAuth, userWallet, {
-          chainId: Number(chainId)
-        });
-
-        next();
-      }
-    } catch (error) {
-      // Catch only triggers when connect is run directly, not when wrapped with connectWallet
-      // Therefore it is only triggered during account linking rather than login
-      console.error('Error connecting wallet:', error);
-      toast.error(error instanceof Error ? error.message : (error as string));
-    }
+    next({ wallet });
   };
 
   const handleClose = () => {
@@ -124,7 +74,7 @@ export default function ChooseWalletDialog() {
           <DialogTitle className="flex justify-between">
             <ChevronLeftIcon
               className="text-muted-foreground hover:text-primary left-4"
-              onClick={() => prev()}
+              onClick={() => goToStep(STEP_LOGIN_FORM)}
             />
             <DialogClose>
               <XIcon

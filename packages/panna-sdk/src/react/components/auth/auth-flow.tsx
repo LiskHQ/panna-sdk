@@ -17,6 +17,11 @@ import { LinkWalletSuccessStep } from './link-wallet-success-step';
 import { LoginForm } from './login-form';
 import { SocialLoginErrorDialog } from './social-login-error-dialog';
 import { SocialLoginPendingDialog } from './social-login-pending-dialog';
+import WalletConfirmationDialog from './wallet-confirmation-dialog';
+
+export const STEP_LOGIN_FORM = 0;
+export const STEP_GOOGLE_LOGIN = 2;
+export const STEP_WALLET_LOGIN = 4;
 
 export function AuthFlow({ connectDialog }: ConnectButtonProps) {
   return (
@@ -32,6 +37,7 @@ export function AuthFlow({ connectDialog }: ConnectButtonProps) {
       <SocialLoginPendingDialog />
       <SocialLoginErrorDialog />
       <ChooseWalletDialog />
+      <WalletConfirmationDialog />
       {/*TODO: Link Wallet Success will only be triggered for wallet linking */}
       <LinkWalletSuccessStep />
     </DialogStepper>
