@@ -10,7 +10,7 @@ import {
 } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
-import { STEP_GOOGLE_LOGIN } from './auth-flow';
+import { STEP_LOGIN_FORM } from './auth-flow';
 
 export function LinkWalletSuccessStep() {
   const { reset, goToStep } = useDialogStepper();
@@ -50,7 +50,7 @@ export function LinkWalletSuccessStep() {
             variant="outline"
             type="button"
             className="flex w-full justify-center gap-2"
-            onClick={() => goToStep(STEP_GOOGLE_LOGIN)}
+            onClick={() => goToStep(STEP_LOGIN_FORM)}
           >
             <PlusIcon />
             <Typography className="mt-0!">Link another account</Typography>
