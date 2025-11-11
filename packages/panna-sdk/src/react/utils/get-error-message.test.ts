@@ -31,10 +31,16 @@ describe('getErrorMessage', () => {
     expect(result).toBe('undefined');
   });
 
-  it('should return string representation when error is an object', () => {
-    const error = { code: 500, message: 'Internal error' };
+  it('should return string representation when error is an object without message property', () => {
+    const error = { code: 500, error: 'Internal error' };
     const result = getErrorMessage(error);
     expect(result).toBe('[object Object]');
+  });
+
+  it('should return string representation when error is an object with message property', () => {
+    const error = { code: 500, message: 'Internal error' };
+    const result = getErrorMessage(error);
+    expect(result).toBe('Internal error');
   });
 
   it('should return string representation when error is an array', () => {

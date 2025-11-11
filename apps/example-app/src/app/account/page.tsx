@@ -1,6 +1,7 @@
 'use client';
 
 import { LogOut, User } from 'lucide-react';
+import { LoginStrategy } from 'panna-sdk/core';
 import {
   getEnvironmentChain,
   useAccountBalance,
@@ -49,14 +50,11 @@ export default function AccountPage() {
   // Extract email and phone from profiles
   const emailProfile = userProfiles?.find(
     (profile) =>
-      profile.type === 'email' ||
-      profile.type === 'google' ||
-      profile.type === 'discord' ||
-      profile.type === 'apple' ||
-      profile.type === 'facebook'
+      profile.type === LoginStrategy.EMAIL ||
+      profile.type === LoginStrategy.GOOGLE
   );
   const phoneProfile = userProfiles?.find(
-    (profile) => profile.type === 'phone'
+    (profile) => profile.type === LoginStrategy.PHONE
   );
 
   const userEmail = emailProfile?.details?.email;
