@@ -15,7 +15,7 @@ import {
 } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
-import { AccountDialogFooter } from './auth-flow';
+import { AccountDialogFooter, STEP_LOGIN_FORM } from './auth-flow';
 
 export function SocialLoginPendingDialog() {
   const { next, goToStep, reset } = useDialogStepper();
@@ -86,7 +86,7 @@ export function SocialLoginPendingDialog() {
             <ChevronLeftIcon
               className="text-muted-foreground hover:text-primary left-4"
               data-testid="back-icon"
-              onClick={() => goToStep(0)}
+              onClick={() => goToStep(STEP_LOGIN_FORM)}
             />
             <DialogClose>
               <XIcon

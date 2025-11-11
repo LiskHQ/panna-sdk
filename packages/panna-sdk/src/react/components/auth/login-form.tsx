@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
+import { MailIcon, MoveRightIcon, PhoneIcon, WalletIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -11,7 +11,7 @@ import {
   PhonePrepareParams,
   prepareLogin
 } from 'src/core';
-import { z } from 'zod';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -24,6 +24,9 @@ import { Input } from '@/components/ui/input';
 import { usePanna } from '@/hooks/use-panna';
 import { GoogleIcon } from '../icons/google';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
+import { Separator } from '../ui/separator';
+import { Typography } from '../ui/typography';
+import { STEP_GOOGLE_LOGIN, STEP_WALLET_LOGIN } from './auth-flow';
 import { formSchema } from './schema';
 
 type LoginFormProps = {
@@ -31,8 +34,6 @@ type LoginFormProps = {
   goToStep: DialogStepperContextValue['goToStep'];
 };
 // Add country code flag selector to phone input
-
-const GOOGLE_LOGIN_STEP = 2;
 
 export function LoginForm({ next, goToStep }: LoginFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -92,13 +93,17 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
     }
   }
 
+  const handleConnectWallet = async () => {
+    goToStep(STEP_WALLET_LOGIN);
+  };
+
   return (
     <Form {...form}>
       <form className="flex flex-col gap-4">
         <Button
           type="button"
           className="flex gap-3"
-          onClick={() => goToStep(GOOGLE_LOGIN_STEP)}
+          onClick={() => goToStep(STEP_GOOGLE_LOGIN)}
           data-testid="google-login-button"
         >
           <GoogleIcon />
@@ -178,6 +183,22 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
             </FormItem>
           )}
         />
+        <div className="grid grid-cols-9 items-center gap-4">
+          <Separator className="col-span-4" />
+          <Typography variant="muted" className="text-center">
+            or
+          </Typography>
+          <Separator className="col-span-4" />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleConnectWallet}
+          className="flex w-full justify-start gap-3"
+        >
+          <WalletIcon />
+          Connect a wallet
+        </Button>
       </form>
     </Form>
   );

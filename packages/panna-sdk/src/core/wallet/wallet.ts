@@ -125,14 +125,14 @@ export async function connect(params: ConnectParams): Promise<Account> {
       walletParams.walletId as Parameters<typeof createWallet>[0]
     );
 
-    const account = await ecoWallet.connect({
+    await ecoWallet.connect({
       client: walletParams.client,
       strategy: LoginStrategy.WALLET,
       chain: walletParams.chain,
       wallet: externalWallet
     } as Parameters<typeof ecoWallet.connect>[0]);
 
-    return account as unknown as Account;
+    return ecoWallet as Account;
   } else if (
     params.strategy === LoginStrategy.EMAIL ||
     params.strategy === LoginStrategy.PHONE

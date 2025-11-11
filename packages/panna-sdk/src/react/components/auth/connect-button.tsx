@@ -1,3 +1,4 @@
+import { ToastContainer } from 'react-toastify';
 import { useActiveAccount } from '@/hooks';
 import { AccountDialog } from '../account/account-dialog';
 import { AccountViewProvider } from '../account/account-view-provider';
@@ -72,6 +73,14 @@ export function ConnectButton({
           connectDialog={connectDialog}
         />
       )}
+      <ToastContainer
+        position="bottom-right"
+        hideProgressBar
+        draggable
+        newestOnTop
+        closeButton={false}
+        className="text-secondary"
+      />
     </>
   );
 }

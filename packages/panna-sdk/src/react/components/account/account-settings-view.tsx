@@ -1,4 +1,5 @@
 import { MailIcon, PhoneIcon } from 'lucide-react';
+import { LoginStrategy } from 'src/core/wallet/types';
 import { useActiveWallet, useLogout, useUserProfiles } from '@/hooks';
 import { siweLogout } from '../../../core/auth';
 import { usePanna } from '../../hooks';
@@ -34,15 +35,12 @@ export function AccountSettingsView() {
   // Extract email and phone from profiles
   const emailProfile = userProfiles?.find(
     (profile) =>
-      profile.type === 'email' ||
-      profile.type === 'google' ||
-      profile.type === 'discord' ||
-      profile.type === 'apple' ||
-      profile.type === 'facebook'
+      profile.type === LoginStrategy.EMAIL ||
+      profile.type === LoginStrategy.GOOGLE
   );
 
   const phoneProfile = userProfiles?.find(
-    (profile) => profile.type === 'phone'
+    (profile) => profile.type === LoginStrategy.PHONE
   );
 
   const renderData = () => {

@@ -1,23 +1,24 @@
 import {
   createContext,
-  useEffect,
   ReactNode,
   use,
-  useRef,
-  useMemo
+  useEffect,
+  useMemo,
+  useRef
 } from 'react';
+import { LoginStrategy } from 'src/core';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { SmartWalletOptions } from 'thirdweb/wallets';
 import { EcosystemId } from '../../core/client';
-import type {
-  AccountEventPayload,
-  OnConnectActivityRequest,
-  DisconnectActivityRequest,
-  AccountUpdateActivityRequest,
-  SmartAccountTransform,
-  SocialAuthData
+import {
+  type AccountEventPayload,
+  type AccountUpdateActivityRequest,
+  type DisconnectActivityRequest,
+  type OnConnectActivityRequest,
+  type SmartAccountTransform,
+  type SocialAuthData,
+  AccountEventType
 } from '../../core/util';
-import { AccountEventType } from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import { getOrRefreshSiweToken } from '../utils/auth';
 
@@ -50,7 +51,9 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   const activeWallet = useActiveWallet();
   const userAddress = account?.address || null;
   const currentChain = activeWallet?.getChain?.();
-  const { data: userProfiles } = useProfiles({ client: client! });
+  const { data: userProfiles, isLoading: isLoadingProfiles } = useProfiles({
+    client: client!
+  });
 
   // Store the chainId whenever it's available so we can use it during disconnect
   useEffect(() => {
@@ -189,32 +192,39 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
   const getSocialInfo = () => {
     const emailProfile = userProfiles?.find(
-      (profile) => profile.type === 'email'
+      (profile) => profile.type === LoginStrategy.EMAIL
     );
 
     const googleProfile = userProfiles?.find(
-      (profile) => profile.type === 'google'
+      (profile) => profile.type === LoginStrategy.GOOGLE
     );
 
     const phoneProfile = userProfiles?.find(
-      (profile) => profile.type === 'phone'
+      (profile) => profile.type === LoginStrategy.PHONE
     );
+
+    const eoaProfile = userProfiles?.find((profile) => profile.details.address);
 
     // Return profile data with the actual provider type
     if (emailProfile?.details?.email) {
       return {
-        type: 'email' as const,
+        type: LoginStrategy.EMAIL,
         data: emailProfile.details.email
       };
     } else if (googleProfile?.details?.email) {
       return {
-        type: 'google' as const,
+        type: LoginStrategy.GOOGLE,
         data: googleProfile.details.email
       };
     } else if (phoneProfile?.details?.phone) {
       return {
-        type: 'phone' as const,
+        type: LoginStrategy.PHONE,
         data: phoneProfile.details.phone
+      };
+    } else if (eoaProfile?.details?.address) {
+      return {
+        type: LoginStrategy.WALLET,
+        data: eoaProfile.details.address
       };
     }
 
@@ -272,7 +282,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   useEffect(() => {
     const previousAddress = previousAddressRef.current;
 
-    if (userAddress && !previousAddress) {
+    if (userAddress && !previousAddress && !isLoadingProfiles) {
       // User connected
       handleOnConnect(userAddress);
     } else if (!userAddress && previousAddress) {
@@ -287,9 +297,12 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
       handleAccountChanged(userAddress);
     }
 
-    // Update the reference
-    previousAddressRef.current = userAddress;
-  }, [userAddress]);
+    // Only update the reference when profiles have finished loading
+    // This prevents the ref from being updated prematurely during page reload
+    if (!isLoadingProfiles) {
+      previousAddressRef.current = userAddress;
+    }
+  }, [userAddress, isLoadingProfiles]);
 
   const contextValue: AccountEventContextType = {
     sendAccountEvent
