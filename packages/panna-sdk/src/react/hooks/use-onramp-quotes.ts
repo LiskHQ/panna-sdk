@@ -1,5 +1,5 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { getValidSiweAuthToken } from '../../core/auth';
 import { pannaApiService } from '../../core/util/api-service';
 import type { QuoteData } from '../types/onramp-quote.types';
@@ -41,6 +41,22 @@ export function useOnrampQuotes(
   params: UseOnrampQuotesParams
 ): UseQueryResult<QuoteData, Error> {
   const { tokenSymbol, network, fiatAmount, fiatCurrency } = params;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check authentication status before enabling the query
+  useEffect(() => {
+    let mounted = true;
+
+    getValidSiweAuthToken().then((token) => {
+      if (mounted) {
+        setIsAuthenticated(Boolean(token));
+      }
+    });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const hasValidParams = useMemo(() => {
     return (
@@ -72,7 +88,7 @@ export function useOnrampQuotes(
         authToken
       );
     },
-    enabled: hasValidParams,
+    enabled: hasValidParams && isAuthenticated,
     staleTime: FIFTEEN_MINUTES_MS,
     gcTime: FIFTEEN_MINUTES_MS,
     retry: (failureCount, error) => {

@@ -1182,4 +1182,328 @@ describe('PannaApiService', () => {
       });
     });
   });
+
+  describe('getOnrampQuote', () => {
+    const mockQuoteRequest = {
+      tokenSymbol: 'USDC',
+      network: 'lisk',
+      fiatAmount: 100,
+      fiatCurrency: 'USD'
+    };
+
+    describe('mock mode', () => {
+      it('should return mock quote data', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: true
+        });
+
+        const quote = await service.getOnrampQuote(mockQuoteRequest);
+
+        expect(quote).toEqual({
+          rate: 1,
+          crypto_quantity: mockQuoteRequest.fiatAmount,
+          onramp_fee: 0,
+          client_fee: 0,
+          gateway_fee: 0,
+          gas_fee: 0,
+          total_fiat_amount: mockQuoteRequest.fiatAmount,
+          quote_timestamp: expect.any(String),
+          quote_validity_mins: 15
+        });
+      });
+
+      it('should return mock quote with correct fiat amount', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: true
+        });
+
+        const customRequest = { ...mockQuoteRequest, fiatAmount: 250 };
+        const quote = await service.getOnrampQuote(customRequest);
+
+        expect(quote.crypto_quantity).toBe(250);
+        expect(quote.total_fiat_amount).toBe(250);
+      });
+
+      it('should ignore authToken in mock mode', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: true
+        });
+
+        const quote = await service.getOnrampQuote(
+          mockQuoteRequest,
+          'mock-auth-token'
+        );
+
+        expect(quote).toBeDefined();
+        expect(quote.rate).toBe(1);
+      });
+    });
+
+    describe('real mode', () => {
+      beforeEach(() => {
+        (fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          json: async () => ({
+            success: true,
+            data: {
+              rate: 0.98,
+              crypto_quantity: 98,
+              onramp_fee: 2.5,
+              client_fee: 0.5,
+              gateway_fee: 1.0,
+              gas_fee: 0.5,
+              total_fiat_amount: 100,
+              quote_timestamp: '2024-01-01T10:00:00Z',
+              quote_validity_mins: 15
+            }
+          }),
+          text: async () => ''
+        });
+      });
+
+      it('should make correct fetch request', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await service.getOnrampQuote(mockQuoteRequest);
+
+        expect(fetch).toHaveBeenCalledWith(
+          'https://stg-panna-app.lisk.com/v1/onramp/quote',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              token_symbol: mockQuoteRequest.tokenSymbol,
+              network: mockQuoteRequest.network,
+              fiat_amount: mockQuoteRequest.fiatAmount,
+              fiat_currency: mockQuoteRequest.fiatCurrency
+            })
+          }
+        );
+      });
+
+      it('should include Authorization header when authToken provided', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+        const authToken = 'test-token-123';
+
+        await service.getOnrampQuote(mockQuoteRequest, authToken);
+
+        expect(fetch).toHaveBeenCalledWith(
+          'https://stg-panna-app.lisk.com/v1/onramp/quote',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+              token_symbol: mockQuoteRequest.tokenSymbol,
+              network: mockQuoteRequest.network,
+              fiat_amount: mockQuoteRequest.fiatAmount,
+              fiat_currency: mockQuoteRequest.fiatCurrency
+            })
+          }
+        );
+      });
+
+      it('should return quote data from successful response', async () => {
+        const mockQuoteData = {
+          rate: 0.98,
+          crypto_quantity: 98,
+          onramp_fee: 2.5,
+          client_fee: 0.5,
+          gateway_fee: 1.0,
+          gas_fee: 0.5,
+          total_fiat_amount: 100,
+          quote_timestamp: '2024-01-01T10:00:00Z',
+          quote_validity_mins: 15
+        };
+
+        (fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          json: async () => ({
+            success: true,
+            data: mockQuoteData
+          }),
+          text: async () => ''
+        });
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        const quote = await service.getOnrampQuote(mockQuoteRequest);
+
+        expect(quote).toEqual(mockQuoteData);
+      });
+
+      it('should handle different token symbols and networks', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        const customRequest = {
+          tokenSymbol: 'ETH',
+          network: 'ethereum',
+          fiatAmount: 500,
+          fiatCurrency: 'EUR'
+        };
+
+        await service.getOnrampQuote(customRequest);
+
+        expect(fetch).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            body: JSON.stringify({
+              token_symbol: 'ETH',
+              network: 'ethereum',
+              fiat_amount: 500,
+              fiat_currency: 'EUR'
+            })
+          })
+        );
+      });
+    });
+
+    describe('error handling', () => {
+      it('should throw error when baseUrl is not configured', async () => {
+        const service = new PannaApiService({
+          baseUrl: undefined,
+          isMockMode: false
+        });
+
+        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+          'Panna API base URL is not configured.'
+        );
+      });
+
+      it('should throw error when fetch fails', async () => {
+        (fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+          'Network error'
+        );
+      });
+
+      it('should throw error when response is not ok', async () => {
+        (fetch as jest.Mock).mockResolvedValue({
+          ok: false,
+          status: 400,
+          statusText: 'Bad Request',
+          text: async () => 'Invalid request parameters'
+        });
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+          'Panna API onramp quote failed: 400 Bad Request - Invalid request parameters'
+        );
+      });
+
+      it('should throw error for 401 Unauthorized', async () => {
+        (fetch as jest.Mock).mockResolvedValue({
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized',
+          text: async () => 'Invalid authentication token'
+        });
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'invalid-token')
+        ).rejects.toThrow('Panna API onramp quote failed: 401 Unauthorized');
+      });
+
+      it('should throw error for 500 Internal Server Error', async () => {
+        (fetch as jest.Mock).mockResolvedValue({
+          ok: false,
+          status: 500,
+          statusText: 'Internal Server Error',
+          text: async () => 'Server error occurred'
+        });
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+          'Panna API onramp quote failed: 500 Internal Server Error'
+        );
+      });
+
+      it('should throw error when response success is false', async () => {
+        (fetch as jest.Mock).mockResolvedValue({
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          json: async () => ({
+            success: false,
+            error: 'Quote generation failed'
+          }),
+          text: async () => ''
+        });
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+          'Panna API onramp quote response marked as unsuccessful.'
+        );
+      });
+
+      it('should log error and re-throw', async () => {
+        const consoleErrorSpy = jest
+          .spyOn(console, 'error')
+          .mockImplementation();
+        (fetch as jest.Mock).mockRejectedValue(new Error('Test error'));
+
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          isMockMode: false
+        });
+
+        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+          'Test error'
+        );
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Failed to fetch onramp quote from Panna API:',
+          expect.any(Error)
+        );
+
+        consoleErrorSpy.mockRestore();
+      });
+    });
+  });
 });
