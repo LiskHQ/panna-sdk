@@ -5,7 +5,7 @@ import { DEFAULT_CURRENCY } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
 import { useOnrampQuotes, useCreateOnrampSession, usePanna } from '../../hooks';
 import type { QuoteData } from '../../types/onramp-quote.types';
-import { getEnvironmentChain } from '../../utils';
+import { getEnvironmentChain, getOnrampNetworkName } from '../../utils';
 import { Badge } from '../ui/badge';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -24,6 +24,10 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
 
   const { token, country, fiatAmount } = form.watch();
   const currentChain = getEnvironmentChain(chainId);
+  const onrampNetwork = useMemo(
+    () => getOnrampNetworkName(currentChain.id),
+    [currentChain.id]
+  );
 
   const {
     mutateAsync: createSession,
@@ -48,7 +52,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     error: quoteError
   } = useOnrampQuotes({
     tokenSymbol: token?.symbol || '',
-    network: currentChain.name?.toLowerCase() || 'lisk',
+    network: onrampNetwork,
     fiatAmount: fiatAmount || 0,
     fiatCurrency: DEFAULT_CURRENCY
   });
@@ -73,7 +77,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     try {
       const session = await createSession({
         tokenSymbol: token.symbol,
-        network: currentChain.name?.toLowerCase() || 'lisk',
+        network: onrampNetwork,
         fiatAmount,
         fiatCurrency: DEFAULT_CURRENCY,
         quoteData
