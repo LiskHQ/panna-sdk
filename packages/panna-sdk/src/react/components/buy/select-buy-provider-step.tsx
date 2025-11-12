@@ -25,8 +25,11 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { token, country, fiatAmount } = form.watch();
   const currentChain = getEnvironmentChain(chainId);
 
-  const { mutateAsync: createSession, isPending: isCreatingSession } =
-    useCreateOnrampSession();
+  const {
+    mutateAsync: createSession,
+    isPending: isCreatingSession,
+    error: createSessionError
+  } = useCreateOnrampSession();
 
   // Get available providers for the country
   const availableProviders = useMemo(() => {
@@ -60,16 +63,28 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     // Prevent multiple simultaneous session creation attempts
     if (isCreatingSession) return;
 
-    try {
-      const session = await createSession({ quote: quoteData });
+    if (!token?.symbol || typeof fiatAmount !== 'number' || fiatAmount <= 0) {
+      console.warn(
+        'Cannot create onramp session without a valid token symbol and fiat amount.'
+      );
+      return;
+    }
 
-      // Store provider and session in form
+    try {
+      const session = await createSession({
+        tokenSymbol: token.symbol,
+        network: currentChain.name?.toLowerCase() || 'lisk',
+        fiatAmount,
+        fiatCurrency: DEFAULT_CURRENCY,
+        quoteData
+      });
+
       form.setValue('provider', {
         providerId,
         providerName,
         providerDescription,
         providerLogoUrl,
-        sessionUrl: session.url,
+        sessionUrl: session.redirect_url,
         quote: quoteData
       });
 
@@ -109,56 +124,65 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
             <Typography variant="muted">No quote available</Typography>
           </div>
         ) : (
-          availableProviders.map((provider) => (
-            <button
-              key={provider.id}
-              type="button"
-              className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${form.watch('provider')?.providerId === provider.id ? 'ring-primary ring-2' : ''}`}
-              onClick={() =>
-                handleProviderSelect(
-                  provider.id,
-                  provider.displayName,
-                  provider.description,
-                  provider.logoUrl,
-                  quote
-                )
-              }
-              disabled={isCreatingSession}
-            >
-              <div className="flex items-center gap-3">
-                {provider.logoUrl && (
-                  <img
-                    src={provider.logoUrl}
-                    alt={provider.displayName}
-                    className="size-8 rounded-full"
-                  />
-                )}
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <Typography variant="small">
-                      {provider.displayName}
-                    </Typography>
-                    <Badge variant="default">{BEST_PRICE_LABEL}</Badge>
+          <>
+            {createSessionError && (
+              <div className="border-destructive/50 bg-destructive/10 flex items-center justify-center rounded-md border px-4 py-3">
+                <Typography variant="muted">
+                  Failed to create onramp session. Please try again.
+                </Typography>
+              </div>
+            )}
+            {availableProviders.map((provider) => (
+              <button
+                key={provider.id}
+                type="button"
+                className={`bg-accent/20 hover:bg-accent/30 flex items-center justify-between gap-3 rounded-md border p-4 text-left transition-colors ${form.watch('provider')?.providerId === provider.id ? 'ring-primary ring-2' : ''}`}
+                onClick={() =>
+                  handleProviderSelect(
+                    provider.id,
+                    provider.displayName,
+                    provider.description,
+                    provider.logoUrl,
+                    quote
+                  )
+                }
+                disabled={isCreatingSession}
+              >
+                <div className="flex items-center gap-3">
+                  {provider.logoUrl && (
+                    <img
+                      src={provider.logoUrl}
+                      alt={provider.displayName}
+                      className="size-8 rounded-full"
+                    />
+                  )}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <Typography variant="small">
+                        {provider.displayName}
+                      </Typography>
+                      <Badge variant="default">{BEST_PRICE_LABEL}</Badge>
+                    </div>
+                    {provider.description && (
+                      <Typography variant="muted">
+                        {provider.description}
+                      </Typography>
+                    )}
                   </div>
-                  {provider.description && (
-                    <Typography variant="muted">
-                      {provider.description}
+                </div>
+                <div className="text-right">
+                  <Typography variant="small">
+                    ${quote.total_fiat_amount.toFixed(2)}
+                  </Typography>
+                  {token?.symbol && (
+                    <Typography variant="muted" className="text-xs">
+                      {quote.crypto_quantity.toFixed(6)} {token.symbol}
                     </Typography>
                   )}
                 </div>
-              </div>
-              <div className="text-right">
-                <Typography variant="small">
-                  ${quote.total_fiat_amount.toFixed(2)}
-                </Typography>
-                {token?.symbol && (
-                  <Typography variant="muted" className="text-xs">
-                    {quote.crypto_quantity.toFixed(6)} {token.symbol}
-                  </Typography>
-                )}
-              </div>
-            </button>
-          ))
+              </button>
+            ))}
+          </>
         )}
       </div>
     </div>

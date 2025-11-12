@@ -15,7 +15,10 @@ import {
   type AuthVerifyRequest,
   type OnrampQuoteRequest,
   type OnrampQuoteResponse,
-  type QuoteData
+  type OnrampSessionRequest,
+  type OnrampSessionResponse,
+  type QuoteData,
+  type SessionData
 } from './types';
 
 export type PannaApiConfig = {
@@ -394,6 +397,124 @@ export class PannaApiService {
       return payload.data;
     } catch (error) {
       console.error('Failed to fetch onramp quote from Panna API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create an onramp session for fiat-to-crypto purchase
+   * @param request - The onramp session creation payload
+   * @param authToken - JWT authentication token
+   * @returns Promise resolving to the session data
+   */
+  public async createOnrampSession(
+    request: OnrampSessionRequest,
+    authToken?: string
+  ): Promise<SessionData> {
+    const { baseUrl, isMockMode } = this.config;
+
+    if (!baseUrl) {
+      throw new Error('Panna API base URL is not configured.');
+    }
+
+    if (!authToken) {
+      throw new Error(
+        'Authentication token is required to create an onramp session.'
+      );
+    }
+
+    const url = `${baseUrl}/onramp/session`;
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`
+    };
+
+    const {
+      walletAddress,
+      tokenSymbol,
+      network,
+      fiatAmount,
+      fiatCurrency,
+      redirectUrl,
+      quoteData
+    } = request;
+
+    const requestPayload = {
+      wallet_address: walletAddress,
+      token_symbol: tokenSymbol,
+      network,
+      fiat_amount: fiatAmount,
+      fiat_currency: fiatCurrency,
+      ...(redirectUrl && { redirect_url: redirectUrl }),
+      ...(quoteData && {
+        quote_data: {
+          rate: quoteData.rate,
+          crypto_quantity: quoteData.crypto_quantity,
+          ...(quoteData.onramp_fee !== undefined && {
+            onramp_fee: quoteData.onramp_fee
+          }),
+          ...(quoteData.client_fee !== undefined && {
+            client_fee: quoteData.client_fee
+          }),
+          ...(quoteData.gateway_fee !== undefined && {
+            gateway_fee: quoteData.gateway_fee
+          }),
+          ...(quoteData.gas_fee !== undefined && {
+            gas_fee: quoteData.gas_fee
+          }),
+          ...(quoteData.quote_timestamp && {
+            quote_timestamp: quoteData.quote_timestamp
+          })
+        }
+      })
+    };
+
+    console.debug('Panna API request: POST /onramp/session', {
+      url,
+      payload: requestPayload
+    });
+
+    if (isMockMode) {
+      const mockSession: SessionData = {
+        session_id: 'c59309e4-3647-49a8-bf32-beab50923a27',
+        redirect_url: 'https://sandbox.onramp.money/session/mock',
+        expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+        ...(quoteData && { quote_data: quoteData })
+      };
+
+      console.info('Panna API mock response: /onramp/session', mockSession);
+
+      return mockSession;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestPayload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Panna API onramp session failed: ${response.status} ${response.statusText} - ${errorText}`
+        );
+      }
+
+      const payload = (await response.json()) as OnrampSessionResponse;
+
+      if (!payload.success) {
+        throw new Error(
+          'Panna API onramp session response marked as unsuccessful.'
+        );
+      }
+
+      console.info('Panna API response: /onramp/session', payload.data);
+
+      return payload.data;
+    } catch (error) {
+      console.error('Failed to create onramp session with Panna API:', error);
       throw error;
     }
   }

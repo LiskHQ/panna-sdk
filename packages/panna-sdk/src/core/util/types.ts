@@ -97,6 +97,28 @@ export type OnrampQuoteResponse = {
   data: QuoteData;
 };
 
+export type OnrampSessionRequest = {
+  walletAddress: string;
+  tokenSymbol: string;
+  network: string;
+  fiatAmount: number;
+  fiatCurrency: string;
+  redirectUrl?: string;
+  quoteData?: QuoteData;
+};
+
+export type SessionData = {
+  session_id: string;
+  redirect_url: string;
+  expires_at: string;
+  quote_data?: QuoteData;
+};
+
+export type OnrampSessionResponse = {
+  success: boolean;
+  data: SessionData;
+};
+
 // Supported fiat currencies
 export enum FiatCurrency {
   USD = 'USD',
