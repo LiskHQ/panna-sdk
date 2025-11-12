@@ -79,7 +79,7 @@ export function useOnrampSessionStatus(
       return await getSessionStatus({
         sessionId,
         client,
-        authToken: authToken || undefined
+        authToken: authToken ?? undefined
       });
     },
     staleTime: DEFAULT_STALE_TIME,
@@ -98,6 +98,7 @@ export function useOnrampSessionStatus(
     },
     retry: createDefaultRetryFn(!!client, hasValidSessionId),
     retryDelay: DEFAULT_RETRY_DELAY,
+    enabled: hasValidSessionId && !!client,
     ...options
   });
 }

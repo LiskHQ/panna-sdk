@@ -96,7 +96,6 @@ export async function getSessionStatus(
       'Content-Type': 'application/json'
     };
 
-    // Add Authorization header if authToken is provided
     if (authToken) {
       headers.Authorization = `Bearer ${authToken}`;
     }
@@ -112,9 +111,15 @@ export async function getSessionStatus(
       );
     }
 
-    const result = (await response.json()) as SessionStatusResult;
-    return result;
+    const result = await response.json();
+
+    if (!result.session_id || !result.status) {
+      throw new Error('Invalid response format from API');
+    }
+
+    return result as SessionStatusResult;
   } catch (error) {
+    console.error('Error fetching session status:', error);
     throw new Error(
       `Failed to get onramp.money session status for ${sessionId}: ${
         error instanceof Error ? error.message : 'Unknown error'
