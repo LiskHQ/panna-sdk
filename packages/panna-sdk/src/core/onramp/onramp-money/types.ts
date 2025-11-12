@@ -1,5 +1,3 @@
-import type { PannaClient } from '../../client';
-
 export enum OnrampMoneySessionStatusEnum {
   Created = 'created',
   Pending = 'pending',
@@ -80,6 +78,5 @@ export type SessionStatusResponse = {
  */
 export interface GetSessionStatusParams {
   sessionId: string;
-  client: PannaClient;
   authToken?: string;
 }

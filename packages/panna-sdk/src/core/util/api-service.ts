@@ -1,9 +1,17 @@
 import {
+  GetSessionStatusParams,
+  mockSessionStatusCompleted,
+  mockSessionStatusCreated,
+  mockSessionStatusPending,
+  SessionStatusResponse,
+  SessionStatusResult
+} from '../onramp';
+import {
   type AccountEventPayload,
-  type AuthChallengeRequest,
   type AuthChallengeReply,
-  type AuthVerifyRequest,
-  type AuthVerifyReply
+  type AuthChallengeRequest,
+  type AuthVerifyReply,
+  type AuthVerifyRequest
 } from './types';
 
 export type PannaApiConfig = {
@@ -225,6 +233,79 @@ export class PannaApiService {
     } catch (error) {
       console.error('Failed to verify auth with Panna API:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Retrieves the status of an onramp.money session
+   *
+   * This function polls the onramp.money API to get the current status of a fiat-to-crypto
+   * onramp session. The status includes transaction details, amounts, and any error messages.
+   *
+   * @param params - Parameters for retrieving the session status
+   * @param params.sessionId - The onramp.money session identifier
+   * @param params.authToken - Optional JWT token for authentication
+   * @returns Promise resolving to the session status with all transaction details
+   * @throws Error if the session ID is invalid or network request fails
+   */
+  public async getSessionStatus(
+    params: GetSessionStatusParams
+  ): Promise<SessionStatusResult> {
+    const { baseUrl, isMockMode } = this.config;
+    const { sessionId, authToken } = params;
+
+    if (!sessionId) {
+      throw new Error('Session ID is required');
+    }
+
+    if (isMockMode) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (sessionId.includes('created')) {
+        return mockSessionStatusCreated;
+      } else if (sessionId.includes('pending')) {
+        return mockSessionStatusPending;
+      } else {
+        return mockSessionStatusCompleted;
+      }
+    }
+
+    try {
+      const url = `${baseUrl}/api/v1/onramp/session/${sessionId}`;
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+
+      if (authToken) {
+        headers.Authorization = `Bearer ${authToken}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to get session status: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const result: SessionStatusResponse = await response.json();
+
+      if (!result.success || !result.data.session_id || !result.data.status) {
+        throw new Error('Invalid response format from API');
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching session status:', error);
+      throw new Error(
+        `Failed to get onramp.money session status for ${sessionId}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
     }
   }
 }

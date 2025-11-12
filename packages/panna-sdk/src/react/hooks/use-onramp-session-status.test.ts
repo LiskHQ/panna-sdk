@@ -3,12 +3,12 @@ import { getValidSiweAuthToken } from 'src/core/auth';
 import {
   CompletedSessionStatus,
   FailedSessionStatus,
-  getSessionStatus,
   mockSessionStatusCompleted,
   mockSessionStatusCreated,
   mockSessionStatusFailed,
   mockSessionStatusPending
 } from 'src/core/onramp/onramp-money';
+import { pannaApiService } from 'src/core/util/api-service';
 import { createQueryClientWrapper } from '../utils/test-utils';
 import { useOnrampSessionStatus } from './use-onramp-session-status';
 
@@ -23,13 +23,11 @@ jest.mock('./use-panna', () => ({
 jest.mock('src/core/auth', () => ({
   getValidSiweAuthToken: jest.fn()
 }));
-
-jest.mock('src/core/onramp/onramp-money', () => {
-  return {
-    ...jest.requireActual('src/core/onramp/onramp-money'),
+jest.mock('src/core/util/api-service', () => ({
+  pannaApiService: {
     getSessionStatus: jest.fn()
-  };
-});
+  }
+}));
 
 describe('useOnrampSessionStatus', () => {
   beforeEach(() => {
@@ -38,7 +36,7 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('returns loading state initially', () => {
-    (getSessionStatus as jest.Mock).mockImplementation(
+    (pannaApiService.getSessionStatus as jest.Mock).mockImplementation(
       () => new Promise(() => {})
     );
 
@@ -52,7 +50,7 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('returns session status data when fetch succeeds', async () => {
-    (getSessionStatus as jest.Mock).mockResolvedValue(
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
       mockSessionStatusCompleted
     );
 
@@ -72,7 +70,9 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('calls getSessionStatus with correct parameters', async () => {
-    (getSessionStatus as jest.Mock).mockResolvedValue(mockSessionStatusCreated);
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
+      mockSessionStatusCreated
+    );
 
     const sessionId = 'test-session-456';
     const { result } = renderHook(() => useOnrampSessionStatus({ sessionId }), {
@@ -81,16 +81,17 @@ describe('useOnrampSessionStatus', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(getSessionStatus).toHaveBeenCalledWith({
+    expect(pannaApiService.getSessionStatus).toHaveBeenCalledWith({
       sessionId,
-      client: { clientId: 'test-client-id' },
       authToken: 'mock-jwt-token'
     });
   });
 
   it('handles auth token being null', async () => {
     (getValidSiweAuthToken as jest.Mock).mockResolvedValue(null);
-    (getSessionStatus as jest.Mock).mockResolvedValue(mockSessionStatusCreated);
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
+      mockSessionStatusCreated
+    );
 
     const sessionId = 'test-session-789';
     const { result } = renderHook(() => useOnrampSessionStatus({ sessionId }), {
@@ -99,15 +100,14 @@ describe('useOnrampSessionStatus', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(getSessionStatus).toHaveBeenCalledWith({
+    expect(pannaApiService.getSessionStatus).toHaveBeenCalledWith({
       sessionId,
-      client: { clientId: 'test-client-id' },
       authToken: undefined
     });
   });
 
   it('sets error state when fetch fails', async () => {
-    (getSessionStatus as jest.Mock).mockRejectedValue(
+    (pannaApiService.getSessionStatus as jest.Mock).mockRejectedValue(
       new Error('Failed to fetch session status')
     );
 
@@ -136,7 +136,9 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('polls every 5 seconds for pending status', async () => {
-    (getSessionStatus as jest.Mock).mockResolvedValue(mockSessionStatusPending);
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
+      mockSessionStatusPending
+    );
 
     const { result } = renderHook(
       () => useOnrampSessionStatus({ sessionId: 'test-session-pending' }),
@@ -149,7 +151,7 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('stops polling for completed status', async () => {
-    (getSessionStatus as jest.Mock).mockResolvedValue(
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
       mockSessionStatusCompleted
     );
 
@@ -164,7 +166,9 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('stops polling for failed status', async () => {
-    (getSessionStatus as jest.Mock).mockResolvedValue(mockSessionStatusFailed);
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
+      mockSessionStatusFailed
+    );
 
     const { result } = renderHook(
       () => useOnrampSessionStatus({ sessionId: 'test-session-failed' }),
@@ -181,13 +185,15 @@ describe('useOnrampSessionStatus', () => {
 
   it('allows manual refetch', async () => {
     let callCount = 0;
-    (getSessionStatus as jest.Mock).mockImplementation(async () => {
-      callCount++;
-      if (callCount === 1) {
-        return mockSessionStatusPending;
+    (pannaApiService.getSessionStatus as jest.Mock).mockImplementation(
+      async () => {
+        callCount++;
+        if (callCount === 1) {
+          return mockSessionStatusPending;
+        }
+        return mockSessionStatusCompleted;
       }
-      return mockSessionStatusCompleted;
-    });
+    );
 
     const { result } = renderHook(
       () => useOnrampSessionStatus({ sessionId: 'test-session-refetch' }),
@@ -203,7 +209,9 @@ describe('useOnrampSessionStatus', () => {
   });
 
   it('includes sessionId in query key for caching', async () => {
-    (getSessionStatus as jest.Mock).mockResolvedValue(mockSessionStatusCreated);
+    (pannaApiService.getSessionStatus as jest.Mock).mockResolvedValue(
+      mockSessionStatusCreated
+    );
 
     const sessionId1 = 'session-1';
     const sessionId2 = 'session-2';
@@ -221,10 +229,10 @@ describe('useOnrampSessionStatus', () => {
     await waitFor(() => expect(result1.current.isSuccess).toBe(true));
     await waitFor(() => expect(result2.current.isSuccess).toBe(true));
 
-    expect(getSessionStatus).toHaveBeenCalledWith(
+    expect(pannaApiService.getSessionStatus).toHaveBeenCalledWith(
       expect.objectContaining({ sessionId: sessionId1 })
     );
-    expect(getSessionStatus).toHaveBeenCalledWith(
+    expect(pannaApiService.getSessionStatus).toHaveBeenCalledWith(
       expect.objectContaining({ sessionId: sessionId2 })
     );
   });

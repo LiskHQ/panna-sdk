@@ -1,9 +1,7 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { getValidSiweAuthToken } from 'src/core/auth';
-import {
-  getSessionStatus,
-  type SessionStatusResult
-} from 'src/core/onramp/onramp-money';
+import { type SessionStatusResult } from 'src/core/onramp/onramp-money';
+import { pannaApiService } from 'src/core/util/api-service';
 import {
   createDefaultRetryFn,
   DEFAULT_RETRY_DELAY,
@@ -76,9 +74,8 @@ export function useOnrampSessionStatus(
 
       const authToken = await getValidSiweAuthToken();
 
-      return await getSessionStatus({
+      return pannaApiService.getSessionStatus({
         sessionId,
-        client,
         authToken: authToken ?? undefined
       });
     },
