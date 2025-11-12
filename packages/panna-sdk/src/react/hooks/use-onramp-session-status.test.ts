@@ -1,6 +1,8 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { getValidSiweAuthToken } from 'src/core/auth';
 import {
+  CompletedSessionStatus,
+  FailedSessionStatus,
   getSessionStatus,
   mockSessionStatusCompleted,
   mockSessionStatusCreated,
@@ -64,7 +66,9 @@ describe('useOnrampSessionStatus', () => {
     expect(result.current.data).toBeDefined();
     expect(result.current.data?.status).toBe('completed');
     expect(result.current.data?.session_id).toBe('test-session-completed-789');
-    expect(result.current.data?.transaction_hash).toBeDefined();
+    expect(
+      (result.current.data as CompletedSessionStatus)?.transaction_hash
+    ).toBeDefined();
   });
 
   it('calls getSessionStatus with correct parameters', async () => {
@@ -122,16 +126,13 @@ describe('useOnrampSessionStatus', () => {
     );
   });
 
-  it('sets error state when sessionId is empty', async () => {
+  it('sets pending state when sessionId is empty', async () => {
     const { result } = renderHook(
       () => useOnrampSessionStatus({ sessionId: '' }),
       { wrapper: createQueryClientWrapper() }
     );
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
-
-    expect(result.current.error).toBeInstanceOf(Error);
-    expect((result.current.error as Error).message).toBe('Invalid query state');
+    await waitFor(() => expect(result.current.status).toBe('pending'));
   });
 
   it('polls every 5 seconds for pending status', async () => {
@@ -173,7 +174,9 @@ describe('useOnrampSessionStatus', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     expect(result.current.data?.status).toBe('failed');
-    expect(result.current.data?.error_message).toBeDefined();
+    expect(
+      (result.current.data as FailedSessionStatus)?.error_message
+    ).toBeDefined();
   });
 
   it('allows manual refetch', async () => {

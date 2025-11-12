@@ -3,7 +3,11 @@ import {
   mockSessionStatusCreated,
   mockSessionStatusPending
 } from './mocks';
-import type { GetSessionStatusParams, SessionStatusResult } from './types';
+import type {
+  GetSessionStatusParams,
+  SessionStatusResponse,
+  SessionStatusResult
+} from './types';
 
 const PANNA_API_URL = process.env.PANNA_API_URL || 'https://api.panna.dev';
 const IS_MOCK_MODE = process.env.MOCK_PANNA_API === 'true';
@@ -76,10 +80,8 @@ export async function getSessionStatus(
 
   // Mock mode for testing
   if (IS_MOCK_MODE) {
-    // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Return mock data based on session ID pattern for testing
     if (sessionId.includes('created')) {
       return mockSessionStatusCreated;
     } else if (sessionId.includes('pending')) {
@@ -111,13 +113,13 @@ export async function getSessionStatus(
       );
     }
 
-    const result = await response.json();
+    const result = (await response.json()) as SessionStatusResponse;
 
-    if (!result.session_id || !result.status) {
+    if (!result.success || !result.data.session_id || !result.data.status) {
       throw new Error('Invalid response format from API');
     }
 
-    return result as SessionStatusResult;
+    return result.data;
   } catch (error) {
     console.error('Error fetching session status:', error);
     throw new Error(

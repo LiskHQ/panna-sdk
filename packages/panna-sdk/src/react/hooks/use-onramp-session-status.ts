@@ -83,17 +83,15 @@ export function useOnrampSessionStatus(
       });
     },
     staleTime: DEFAULT_STALE_TIME,
-    // Poll every 5 seconds for non-terminal statuses
+    // Poll every 5 seconds for created/pending statuses
     refetchInterval: (query) => {
       const data = query.state.data;
-      // Stop polling if status is terminal
       if (
         data?.status &&
         ['completed', 'failed', 'cancelled', 'expired'].includes(data.status)
       ) {
         return false;
       }
-      // Poll every 5 seconds for created/pending statuses
       return 5000;
     },
     retry: createDefaultRetryFn(!!client, hasValidSessionId),
