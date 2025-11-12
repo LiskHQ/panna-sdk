@@ -1,7 +1,7 @@
 import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { DEFAULT_CURRENCY } from 'src/core';
+import { DEFAULT_CURRENCY } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
 import { useOnrampQuotes, useCreateOnrampSession, usePanna } from '../../hooks';
 import type { QuoteData } from '../../types/onramp-quote.types';
@@ -15,6 +15,8 @@ import type { BuyFormData } from './schema';
 type SelectBuyProviderStepProps = {
   form: UseFormReturn<BuyFormData>;
 };
+
+const BEST_PRICE_LABEL = 'Best price';
 
 export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { next } = useDialogStepper();
@@ -55,6 +57,9 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     providerLogoUrl: string | undefined,
     quoteData: QuoteData
   ) => {
+    // Prevent multiple simultaneous session creation attempts
+    if (isCreatingSession) return;
+
     try {
       const session = await createSession({ quote: quoteData });
 
@@ -133,7 +138,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                     <Typography variant="small">
                       {provider.displayName}
                     </Typography>
-                    <Badge variant="default">Best price</Badge>
+                    <Badge variant="default">{BEST_PRICE_LABEL}</Badge>
                   </div>
                   {provider.description && (
                     <Typography variant="muted">

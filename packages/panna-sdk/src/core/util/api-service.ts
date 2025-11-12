@@ -35,6 +35,23 @@ const MOCK_JWT_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTU2NDUzMjUsInN1YiI6IjB4N2UwYmNjNzhlMzE3ZmEyOGY3M2E0NDU2N2Q4NTRiMDgxMDA0NjIyZCJ9.6_tOR5eayoQWTR2-4rsQmlX30I4acFtXaIdPCnd3pTc';
 
 /**
+ * Creates mock quote data for testing/development purposes
+ * @param fiatAmount - The fiat amount to create mock quote for
+ * @returns Mock quote data
+ */
+const createMockQuoteData = (fiatAmount: number): QuoteData => ({
+  rate: 1,
+  crypto_quantity: fiatAmount,
+  onramp_fee: 0,
+  client_fee: 0,
+  gateway_fee: 0,
+  gas_fee: 0,
+  total_fiat_amount: fiatAmount,
+  quote_timestamp: new Date().toISOString(),
+  quote_validity_mins: 15
+});
+
+/**
  * API service for sending account events to the Panna app.
  */
 export class PannaApiService {
@@ -341,19 +358,7 @@ export class PannaApiService {
     }
 
     if (isMockMode) {
-      const mockQuote: QuoteData = {
-        rate: 1,
-        crypto_quantity: request.fiatAmount,
-        onramp_fee: 0,
-        client_fee: 0,
-        gateway_fee: 0,
-        gas_fee: 0,
-        total_fiat_amount: request.fiatAmount,
-        quote_timestamp: new Date().toISOString(),
-        quote_validity_mins: 15
-      };
-
-      return mockQuote;
+      return createMockQuoteData(request.fiatAmount);
     }
 
     try {
