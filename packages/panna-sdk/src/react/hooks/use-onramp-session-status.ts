@@ -19,6 +19,8 @@ type UseOnrampSessionStatusParams = {
   sessionId: string;
 };
 
+const POLLING_INTERVAL_MS = 5000;
+
 /**
  * Hook to retrieve and poll onramp session status
  *
@@ -92,7 +94,7 @@ export function useOnrampSessionStatus(
           OnrampMoneySessionStatusEnum.Pending
         ].includes(data.status)
       ) {
-        return 5000;
+        return POLLING_INTERVAL_MS;
       }
       return false;
     },
