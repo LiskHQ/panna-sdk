@@ -3,6 +3,7 @@ import {
   mockSessionStatusCompleted,
   mockSessionStatusCreated,
   mockSessionStatusPending,
+  OnrampMoneySessionStatusEnum,
   SessionStatusResponse,
   SessionStatusResult
 } from '../onramp';
@@ -239,12 +240,12 @@ export class PannaApiService {
   /**
    * Retrieves the status of an onramp.money session
    *
-   * This function polls the onramp.money API to get the current status of a fiat-to-crypto
+   * This function requests the Panna API to get the current status of a fiat-to-crypto
    * onramp session. The status includes transaction details, amounts, and any error messages.
    *
    * @param params - Parameters for retrieving the session status
    * @param params.sessionId - The onramp.money session identifier
-   * @param params.authToken - Optional JWT token for authentication
+   * @param params.authToken - JWT token for authentication
    * @returns Promise resolving to the session status with all transaction details
    * @throws Error if the session ID is invalid or network request fails
    */
@@ -261,9 +262,9 @@ export class PannaApiService {
     if (isMockMode) {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (sessionId.includes('created')) {
+      if (sessionId.includes(OnrampMoneySessionStatusEnum.Created)) {
         return mockSessionStatusCreated;
-      } else if (sessionId.includes('pending')) {
+      } else if (sessionId.includes(OnrampMoneySessionStatusEnum.Pending)) {
         return mockSessionStatusPending;
       } else {
         return mockSessionStatusCompleted;
@@ -271,15 +272,16 @@ export class PannaApiService {
     }
 
     try {
-      const url = `${baseUrl}/api/v1/onramp/session/${sessionId}`;
-
-      const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-      };
+      const url = `${baseUrl}/v1/onramp/session/${sessionId}`;
 
       if (authToken) {
-        headers.Authorization = `Bearer ${authToken}`;
+        throw new Error('Auth token is required to fetch session status');
       }
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${authToken}`
+      };
 
       const response = await fetch(url, {
         method: 'GET',

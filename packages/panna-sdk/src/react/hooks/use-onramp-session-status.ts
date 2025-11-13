@@ -1,6 +1,9 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { getValidSiweAuthToken } from 'src/core/auth';
-import { type SessionStatusResult } from 'src/core/onramp/onramp-money';
+import {
+  OnrampMoneySessionStatusEnum,
+  type SessionStatusResult
+} from 'src/core/onramp/onramp-money';
 import { pannaApiService } from 'src/core/util/api-service';
 import {
   createDefaultRetryFn,
@@ -17,7 +20,7 @@ type UseOnrampSessionStatusParams = {
 };
 
 /**
- * Hook to retrieve and poll onramp.money session status
+ * Hook to retrieve and poll onramp session status
  *
  * This hook automatically polls the session status every 5 seconds when the status
  * is non-terminal (created or pending). Polling stops when the session reaches a
@@ -80,16 +83,18 @@ export function useOnrampSessionStatus(
       });
     },
     staleTime: DEFAULT_STALE_TIME,
-    // Poll every 5 seconds for created/pending statuses
     refetchInterval: (query) => {
       const data = query.state.data;
       if (
         data?.status &&
-        ['completed', 'failed', 'cancelled', 'expired'].includes(data.status)
+        ![
+          OnrampMoneySessionStatusEnum.Created,
+          OnrampMoneySessionStatusEnum.Pending
+        ].includes(data.status)
       ) {
-        return false;
+        return 5000;
       }
-      return 5000;
+      return false;
     },
     retry: createDefaultRetryFn(!!client, hasValidSessionId),
     retryDelay: DEFAULT_RETRY_DELAY,

@@ -10,27 +10,21 @@ export enum OnrampMoneySessionStatusEnum {
 /**
  * Status of an onramp.money session
  */
-export type OnrampMoneySessionStatus =
-  | OnrampMoneySessionStatusEnum.Created
-  | OnrampMoneySessionStatusEnum.Pending
-  | OnrampMoneySessionStatusEnum.Completed
-  | OnrampMoneySessionStatusEnum.Failed
-  | OnrampMoneySessionStatusEnum.Cancelled
-  | OnrampMoneySessionStatusEnum.Expired;
+export type OnrampMoneySessionStatus = `${OnrampMoneySessionStatusEnum}`;
 
 /**
  * Result structure for onramp.money session status
  */
 interface BaseSessionStatus {
   session_id: string;
-  // transaction_id?: string;
+  status: OnrampMoneySessionStatus;
 }
 
-interface CreatedSessionStatus extends BaseSessionStatus {
+export interface CreatedSessionStatus extends BaseSessionStatus {
   status: OnrampMoneySessionStatusEnum.Created;
 }
 
-interface PendingSessionStatus extends BaseSessionStatus {
+export interface PendingSessionStatus extends BaseSessionStatus {
   status: OnrampMoneySessionStatusEnum.Pending;
   quoted_crypto_amount?: number;
   quoted_rate?: number;
@@ -50,11 +44,11 @@ export interface FailedSessionStatus extends BaseSessionStatus {
   error_message: string;
 }
 
-interface CancelledSessionStatus extends BaseSessionStatus {
+export interface CancelledSessionStatus extends BaseSessionStatus {
   status: OnrampMoneySessionStatusEnum.Cancelled;
 }
 
-interface ExpiredSessionStatus extends BaseSessionStatus {
+export interface ExpiredSessionStatus extends BaseSessionStatus {
   status: OnrampMoneySessionStatusEnum.Expired;
   quoted_crypto_amount?: number;
   quoted_rate?: number;
