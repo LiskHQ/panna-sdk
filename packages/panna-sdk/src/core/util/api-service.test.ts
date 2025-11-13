@@ -4,10 +4,10 @@ import {
   type PannaApiConfig
 } from './api-service';
 import {
+  AccountEventType,
   type AccountUpdateActivityRequest,
   type DisconnectActivityRequest,
-  type OnConnectActivityRequest,
-  AccountEventType
+  type OnConnectActivityRequest
 } from './types';
 
 // Mock fetch globally
@@ -102,7 +102,7 @@ describe('PannaApiService', () => {
     describe('mock mode', () => {
       it('should return mock response for onConnect event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -126,7 +126,7 @@ describe('PannaApiService', () => {
 
       it('should return mock response for disconnect event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -142,7 +142,7 @@ describe('PannaApiService', () => {
 
       it('should return mock response for accountUpdate event', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -158,7 +158,7 @@ describe('PannaApiService', () => {
 
       it('should ignore authToken in mock mode', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -322,7 +322,7 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
@@ -431,7 +431,7 @@ describe('PannaApiService', () => {
     describe('mock mode', () => {
       it('should return mock created status for sessionId containing "created"', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -449,7 +449,7 @@ describe('PannaApiService', () => {
 
       it('should return mock pending status for sessionId containing "pending"', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -467,7 +467,7 @@ describe('PannaApiService', () => {
 
       it('should return mock completed status for other sessionIds', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -485,7 +485,7 @@ describe('PannaApiService', () => {
 
       it('should include delay in mock mode', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -500,7 +500,7 @@ describe('PannaApiService', () => {
 
       it('should ignore authToken in mock mode', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: true
         });
 
@@ -533,30 +533,30 @@ describe('PannaApiService', () => {
         });
       });
 
-      it('should make correct fetch request', async () => {
+      // it('should make correct fetch request', async () => {
+      //   const service = new PannaApiService({
+      //     baseUrl: 'https://stg-panna-app.lisk.com',
+      //     isMockMode: false
+      //   });
+
+      //   await service.getSessionStatus({
+      //     sessionId: 'session-123'
+      //   });
+
+      //   expect(fetch).toHaveBeenCalledWith(
+      //     'https://stg-panna-app.lisk.com/onramp/session/session-123',
+      //     {
+      //       method: 'GET',
+      //       headers: {
+      //         'Content-Type': 'application/json'
+      //       }
+      //     }
+      //   );
+      // });
+
+      it('should make correct fetch request including Authorization header when authToken provided', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
-          isMockMode: false
-        });
-
-        await service.getSessionStatus({
-          sessionId: 'session-123'
-        });
-
-        expect(fetch).toHaveBeenCalledWith(
-          'https://stg-panna-app.lisk.com/v1/api/v1/onramp/session/session-123',
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-      });
-
-      it('should include Authorization header when authToken provided', async () => {
-        const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
         const authToken = 'test-jwt-token';
@@ -567,7 +567,7 @@ describe('PannaApiService', () => {
         });
 
         expect(fetch).toHaveBeenCalledWith(
-          expect.any(String),
+          'https://stg-panna-app.lisk.com/v1/onramp/session/session-123',
           expect.objectContaining({
             headers: {
               'Content-Type': 'application/json',
@@ -597,12 +597,13 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         const result = await service.getSessionStatus({
-          sessionId: 'session-456'
+          sessionId: 'session-456',
+          authToken: 'test-token'
         });
 
         expect(result).toEqual(mockData);
@@ -615,11 +616,12 @@ describe('PannaApiService', () => {
         });
 
         await service.getSessionStatus({
-          sessionId: 'custom-session'
+          sessionId: 'custom-session',
+          authToken: 'test-token'
         });
 
         expect(fetch).toHaveBeenCalledWith(
-          'https://custom.api.com/api/v1/onramp/session/custom-session',
+          'https://custom.api.com/v1/onramp/session/custom-session',
           expect.any(Object)
         );
       });
@@ -628,28 +630,44 @@ describe('PannaApiService', () => {
     describe('validation', () => {
       it('should throw error when sessionId is empty', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: ''
+            sessionId: '',
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Session ID is required');
       });
 
       it('should throw error when sessionId is null', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: null as unknown as string
+            sessionId: null as unknown as string,
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Session ID is required');
+      });
+
+      it('should throw error when authToken is null', async () => {
+        const service = new PannaApiService({
+          baseUrl: 'https://stg-panna-app.lisk.com',
+          isMockMode: false
+        });
+
+        await expect(
+          service.getSessionStatus({
+            sessionId: 'session-123',
+            authToken: null as unknown as string
+          })
+        ).rejects.toThrow('Auth token is required to fetch session status');
       });
     });
 
@@ -658,13 +676,14 @@ describe('PannaApiService', () => {
         (fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'session-123'
+            sessionId: 'session-123',
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Failed to get onramp.money session status');
       });
@@ -677,13 +696,14 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'non-existent'
+            sessionId: 'non-existent',
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Failed to get session status: 404 Not Found');
       });
@@ -698,13 +718,14 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'session-123'
+            sessionId: 'session-123',
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Invalid response format from API');
       });
@@ -720,13 +741,14 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'session-123'
+            sessionId: 'session-123',
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Invalid response format from API');
       });
@@ -742,13 +764,14 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'session-123'
+            sessionId: 'session-123',
+            authToken: 'test-token'
           })
         ).rejects.toThrow('Invalid response format from API');
       });
@@ -760,7 +783,7 @@ describe('PannaApiService', () => {
         (fetch as jest.Mock).mockRejectedValue(new Error('Test error'));
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
@@ -768,7 +791,8 @@ describe('PannaApiService', () => {
 
         await expect(
           service.getSessionStatus({
-            sessionId
+            sessionId,
+            authToken: 'test-token'
           })
         ).rejects.toThrow(
           `Failed to get onramp.money session status for ${sessionId}`
@@ -790,13 +814,14 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'session-123'
+            sessionId: 'session-123',
+            authToken: 'invalid-token'
           })
         ).rejects.toThrow('Failed to get session status: 401 Unauthorized');
       });
@@ -809,13 +834,14 @@ describe('PannaApiService', () => {
         });
 
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com/v1',
+          baseUrl: 'https://stg-panna-app.lisk.com',
           isMockMode: false
         });
 
         await expect(
           service.getSessionStatus({
-            sessionId: 'session-123'
+            sessionId: 'session-123',
+            authToken: 'test-token'
           })
         ).rejects.toThrow(
           'Failed to get session status: 500 Internal Server Error'

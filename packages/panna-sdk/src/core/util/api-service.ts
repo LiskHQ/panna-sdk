@@ -274,7 +274,7 @@ export class PannaApiService {
     try {
       const url = `${baseUrl}/v1/onramp/session/${sessionId}`;
 
-      if (authToken) {
+      if (!authToken) {
         throw new Error('Auth token is required to fetch session status');
       }
 
