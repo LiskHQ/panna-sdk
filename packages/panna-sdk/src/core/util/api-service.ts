@@ -271,12 +271,12 @@ export class PannaApiService {
       }
     }
 
+    if (!authToken) {
+      throw new Error('Auth token is required to fetch session status');
+    }
+
     try {
       const url = `${baseUrl}/v1/onramp/session/${sessionId}`;
-
-      if (!authToken) {
-        throw new Error('Auth token is required to fetch session status');
-      }
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',

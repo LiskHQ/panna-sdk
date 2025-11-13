@@ -533,27 +533,6 @@ describe('PannaApiService', () => {
         });
       });
 
-      // it('should make correct fetch request', async () => {
-      //   const service = new PannaApiService({
-      //     baseUrl: 'https://stg-panna-app.lisk.com',
-      //     isMockMode: false
-      //   });
-
-      //   await service.getSessionStatus({
-      //     sessionId: 'session-123'
-      //   });
-
-      //   expect(fetch).toHaveBeenCalledWith(
-      //     'https://stg-panna-app.lisk.com/onramp/session/session-123',
-      //     {
-      //       method: 'GET',
-      //       headers: {
-      //         'Content-Type': 'application/json'
-      //       }
-      //     }
-      //   );
-      // });
-
       it('should make correct fetch request including Authorization header when authToken provided', async () => {
         const service = new PannaApiService({
           baseUrl: 'https://stg-panna-app.lisk.com',

@@ -89,7 +89,7 @@ export function useOnrampSessionStatus(
       const data = query.state.data;
       if (
         data?.status &&
-        ![
+        [
           OnrampMoneySessionStatusEnum.Created,
           OnrampMoneySessionStatusEnum.Pending
         ].includes(data.status)
