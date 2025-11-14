@@ -339,7 +339,7 @@ export class PannaApiService {
    */
   public async getOnrampQuote(
     request: OnrampQuoteRequest,
-    authToken?: string
+    authToken: string
   ): Promise<QuoteData> {
     const { baseUrl, isMockMode } = this.config;
 
@@ -349,13 +349,16 @@ export class PannaApiService {
 
     const url = `${baseUrl}/onramp/quote`;
 
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json'
-    };
-
-    if (authToken) {
-      headers.Authorization = `Bearer ${authToken}`;
+    if (!authToken) {
+      throw new Error(
+        'Authentication token is required to fetch onramp quotes.'
+      );
     }
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`
+    };
 
     if (isMockMode) {
       return createMockQuoteData(request.fiatAmount);
