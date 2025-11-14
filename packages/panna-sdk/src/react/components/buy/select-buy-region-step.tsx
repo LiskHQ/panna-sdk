@@ -2,7 +2,6 @@ import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_COUNTRY_CODE } from 'src/core';
-import { useOnrampSessionStatus } from '@/index';
 import type { Country } from '../../types/country.types';
 import {
   COUNTRIES_SORTED,
@@ -58,11 +57,6 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
       }
     }
   }, [form]);
-
-  const { data } = useOnrampSessionStatus({
-    sessionId: '123'
-  });
-  console.log({ data });
 
   return (
     <div className="flex flex-col gap-6">
