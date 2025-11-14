@@ -14,7 +14,7 @@ import { TokensList } from '../balance/tokens-list';
 import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
 import { SendCollectibleForm } from '../collectibles/send-collectible-form';
-import { SendForm } from '../send/send-form';
+import { SendDialogStepperData, SendForm } from '../send/send-form';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -53,9 +53,9 @@ export function AccountDialog({ address }: AccountDialogProps) {
   );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
-    useState<DialogStepperContextValue | null>(null);
+    useState<DialogStepperContextValue<SendDialogStepperData> | null>(null);
   const [sendCollectibleStepperContext, setSendCollectibleStepperContext] =
-    useState<DialogStepperContextValue | null>(null);
+    useState<DialogStepperContextValue<SendDialogStepperData> | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({

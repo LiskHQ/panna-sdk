@@ -1,7 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { SendErrorStep } from '../send/send-error-step';
-import { StepperContextProvider } from '../send/send-form';
+import {
+  SendDialogStepperData,
+  StepperContextProvider
+} from '../send/send-form';
 import { SendSuccessStep } from '../send/send-success-step';
 import { DialogTitle } from '../ui/dialog';
 import { DialogStepper, DialogStepperContextValue } from '../ui/dialog-stepper';
@@ -18,7 +21,9 @@ import { SelectRecipientStep } from './select-recipient-step';
 import { SummaryStep } from './summary-step';
 
 export type SendCollectibleFormProps = {
-  onStepperChange: (stepper: DialogStepperContextValue | null) => void;
+  onStepperChange: (
+    stepper: DialogStepperContextValue<SendDialogStepperData> | null
+  ) => void;
   onClose: () => void;
 };
 
