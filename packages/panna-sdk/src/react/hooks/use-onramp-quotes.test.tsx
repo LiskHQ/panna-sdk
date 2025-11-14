@@ -117,7 +117,6 @@ describe('useOnrampQuotes', () => {
       { wrapper: createQueryClientWrapper() }
     );
 
-    // Wait for the API to be called
     await waitFor(() => {
       expect(mockedGetOnrampQuote).toHaveBeenCalled();
     });
@@ -147,10 +146,8 @@ describe('useOnrampQuotes', () => {
       { wrapper: createQueryClientWrapper() }
     );
 
-    // Wait a bit to ensure the query has tried to execute
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Should not call the API when there's no auth token
     expect(mockedGetOnrampQuote).not.toHaveBeenCalled();
   });
 
@@ -215,7 +212,6 @@ describe('useOnrampQuotes', () => {
       return Promise.reject(new Error('Network error'));
     });
 
-    // Create a custom query client with retry enabled for this specific test
     const createRetryWrapper = () => {
       const queryClient = new QueryClient({
         defaultOptions: { queries: { retry: 3, retryDelay: 0 } }
@@ -242,7 +238,6 @@ describe('useOnrampQuotes', () => {
       timeout: 3000
     });
 
-    // Initial attempt + 3 retries = 4 total attempts
     expect(attemptCount).toBe(4);
   });
 
@@ -264,12 +259,10 @@ describe('useOnrampQuotes', () => {
 
     expect(mockedGetOnrampQuote).toHaveBeenCalledTimes(1);
 
-    // Rerender with same params - should use cache
     rerender();
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    // Should still be only 1 call due to caching
     expect(mockedGetOnrampQuote).toHaveBeenCalledTimes(1);
     expect(result.current.data).toEqual(mockQuote);
   });
