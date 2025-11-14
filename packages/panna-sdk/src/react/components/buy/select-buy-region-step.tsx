@@ -5,8 +5,8 @@ import { DEFAULT_COUNTRY_CODE } from 'src/core';
 import type { Country } from '../../types/country.types';
 import {
   COUNTRIES_SORTED,
-  getCountryByCode,
-  detectUserCountry
+  detectUserCountry,
+  getCountryByCode
 } from '../../utils';
 import { Button } from '../ui/button';
 import {
