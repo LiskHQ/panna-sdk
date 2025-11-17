@@ -52,6 +52,8 @@ jobs:
           file: Dockerfile
           push: false
           platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           build-args: |
             "NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }}"
             "NEXT_PUBLIC_PARTNER_ID=${{ secrets.NEXT_PUBLIC_PARTNER_ID }}"
