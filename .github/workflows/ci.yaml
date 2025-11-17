@@ -37,3 +37,21 @@ jobs:
 
       - name: ✅ Run Tests
         run: pnpm --filter panna-sdk test
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build the Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          platforms: linux/amd64
+          build-args: |
+            "NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }}"
+            "NEXT_PUBLIC_PARTNER_ID=${{ secrets.NEXT_PUBLIC_PARTNER_ID }}"
