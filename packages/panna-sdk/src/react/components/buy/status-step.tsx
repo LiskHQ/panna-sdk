@@ -16,6 +16,10 @@ export function StatusStep() {
     return <ErrorStatus />;
   }
 
+  if (stepData.status === OnrampMoneySessionStatusEnum.Expired) {
+    return <ExpiredStatus />;
+  }
+
   return <SuccessStatus />;
 }
 
@@ -39,13 +43,20 @@ function SuccessStatus() {
           <Typography variant="muted">Your purchase is complete.</Typography>
         </div>
       </div>
-      <Button
-        variant="secondary"
-        className="bg-muted w-full"
-        onClick={handleClose}
-      >
-        Close
-      </Button>
+      <div className="flex w-full flex-col gap-4 text-center">
+        <a
+          href="http://blockscout.lisk.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Typography variant="small" className="underline">
+            View on explorer
+          </Typography>
+        </a>
+        <Button type="button" className="w-full" onClick={handleClose}>
+          Close
+        </Button>
+      </div>
     </div>
   );
 }
@@ -59,13 +70,35 @@ function ErrorStatus() {
 
   return (
     <div className="flex flex-col items-center justify-center gap-6">
-      <Typography variant="h4">Error</Typography>
+      <Typography variant="h4">Transaction failed</Typography>
       <CircleXIcon className="h-20 w-20 stroke-[#FF6366]" />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Something went wrong</Typography>
         <Typography variant="muted">No funds were moved</Typography>
       </div>
-      <Button className="w-full" onClick={handleRetry}>
+      <Button type="button" className="w-full" onClick={handleRetry}>
+        Try again
+      </Button>
+    </div>
+  );
+}
+
+function ExpiredStatus() {
+  const { prev } = useDialogStepper();
+
+  const handleRetry = () => {
+    prev();
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-6">
+      <Typography variant="h4">Transaction failed</Typography>
+      <CircleXIcon className="h-20 w-20 stroke-[#FF6366]" />
+      <div className="flex flex-col items-center gap-2">
+        <Typography variant="large">Session expired</Typography>
+        <Typography variant="muted">No funds were moved</Typography>
+      </div>
+      <Button type="button" className="w-full" onClick={handleRetry}>
         Try again
       </Button>
     </div>
