@@ -12,7 +12,10 @@ import {
   type AuthChallengeReply,
   type AuthChallengeRequest,
   type AuthVerifyReply,
-  type AuthVerifyRequest
+  type AuthVerifyRequest,
+  type OnrampQuoteRequest,
+  type OnrampQuoteResponse,
+  type QuoteData
 } from './types';
 
 export type PannaApiConfig = {
@@ -30,6 +33,23 @@ const DEFAULT_CONFIG: PannaApiConfig = {
  */
 const MOCK_JWT_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTU2NDUzMjUsInN1YiI6IjB4N2UwYmNjNzhlMzE3ZmEyOGY3M2E0NDU2N2Q4NTRiMDgxMDA0NjIyZCJ9.6_tOR5eayoQWTR2-4rsQmlX30I4acFtXaIdPCnd3pTc';
+
+/**
+ * Creates mock quote data for testing/development purposes
+ * @param fiatAmount - The fiat amount to create mock quote for
+ * @returns Mock quote data
+ */
+const createMockQuoteData = (fiatAmount: number): QuoteData => ({
+  rate: 1,
+  crypto_quantity: fiatAmount,
+  onramp_fee: 0,
+  client_fee: 0,
+  gateway_fee: 0,
+  gas_fee: 0,
+  total_fiat_amount: fiatAmount,
+  quote_timestamp: new Date().toISOString(),
+  quote_validity_mins: 15
+});
 
 /**
  * API service for sending account events to the Panna app.
@@ -308,6 +328,73 @@ export class PannaApiService {
           error instanceof Error ? error.message : 'Unknown error'
         }`
       );
+    }
+  }
+
+  /**
+   * Fetch fiat-to-crypto onramp quote data
+   * @param request - The onramp quote request payload
+   * @param authToken - JWT authentication token
+   * @returns Promise resolving to the quote data
+   */
+  public async getOnrampQuote(
+    request: OnrampQuoteRequest,
+    authToken: string
+  ): Promise<QuoteData> {
+    const { baseUrl, isMockMode } = this.config;
+
+    if (!baseUrl) {
+      throw new Error('Panna API base URL is not configured.');
+    }
+
+    const url = `${baseUrl}/onramp/quote`;
+
+    if (!authToken) {
+      throw new Error(
+        'Authentication token is required to fetch onramp quotes.'
+      );
+    }
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`
+    };
+
+    if (isMockMode) {
+      return createMockQuoteData(request.fiatAmount);
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          token_symbol: request.tokenSymbol,
+          network: request.network,
+          fiat_amount: request.fiatAmount,
+          fiat_currency: request.fiatCurrency
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Panna API onramp quote failed: ${response.status} ${response.statusText} - ${errorText}`
+        );
+      }
+
+      const payload = (await response.json()) as OnrampQuoteResponse;
+
+      if (!payload.success) {
+        throw new Error(
+          'Panna API onramp quote response marked as unsuccessful.'
+        );
+      }
+
+      return payload.data;
+    } catch (error) {
+      console.error('Failed to fetch onramp quote from Panna API:', error);
+      throw error;
     }
   }
 }

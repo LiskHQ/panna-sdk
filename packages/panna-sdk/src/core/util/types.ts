@@ -73,6 +73,30 @@ export const AccountEventType = {
 export type AccountEventTypeValue =
   (typeof AccountEventType)[keyof typeof AccountEventType];
 
+export type OnrampQuoteRequest = {
+  tokenSymbol: string;
+  network: string;
+  fiatAmount: number;
+  fiatCurrency: string;
+};
+
+export type QuoteData = {
+  rate: number;
+  crypto_quantity: number;
+  onramp_fee: number;
+  client_fee?: number;
+  gateway_fee?: number;
+  gas_fee: number;
+  total_fiat_amount: number;
+  quote_timestamp: string;
+  quote_validity_mins: number;
+};
+
+export type OnrampQuoteResponse = {
+  success: boolean;
+  data: QuoteData;
+};
+
 // Supported fiat currencies
 export enum FiatCurrency {
   USD = 'USD',

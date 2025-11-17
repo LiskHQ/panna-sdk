@@ -29,7 +29,8 @@ export { useActivities } from './use-activities';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
 export { useSupportedTokens } from './use-supported-tokens';
-export { useBuyWithFiatQuotes } from './use-buy-with-fiat-quotes';
+export { useOnrampQuotes } from './use-onramp-quotes';
+export { useCreateOnrampSession } from './use-create-onramp-session';
 export { useDialog } from './use-dialog';
 export {
   DEFAULT_STALE_TIME,
