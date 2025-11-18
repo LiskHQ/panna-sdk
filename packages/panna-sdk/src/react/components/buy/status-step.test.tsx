@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { OnrampMoneySessionStatusEnum } from 'src/core';
-import { useDialog } from '@/hooks';
+import { useDialog, usePanna } from '@/hooks';
 import { Dialog } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { StatusStep } from './status-step';
@@ -16,6 +16,7 @@ describe('StatusStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useDialog as jest.Mock).mockReturnValue({ onClose: mockOnClose });
+    (usePanna as jest.Mock).mockReturnValue({ chainId: '1135' });
   });
 
   describe('SuccessStatus', () => {
@@ -51,6 +52,48 @@ describe('StatusStep', () => {
       fireEvent.click(closeButton);
       expect(mockReset).toHaveBeenCalledTimes(1);
       expect(mockOnClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders explorer link with correct URL for mainnet', () => {
+      (usePanna as jest.Mock).mockReturnValue({ chainId: '1135' }); // lisk.id
+
+      render(
+        <Dialog open>
+          <StatusStep />
+        </Dialog>
+      );
+
+      const explorerLink = screen.getByRole('link', {
+        name: /view on explorer/i
+      });
+      expect(explorerLink).toBeInTheDocument();
+      expect(explorerLink).toHaveAttribute(
+        'href',
+        'https://blockscout.lisk.com'
+      );
+      expect(explorerLink).toHaveAttribute('target', '_blank');
+      expect(explorerLink).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    it('renders explorer link with correct URL for testnet', () => {
+      (usePanna as jest.Mock).mockReturnValue({ chainId: '4202' }); // Different from lisk.id
+
+      render(
+        <Dialog open>
+          <StatusStep />
+        </Dialog>
+      );
+
+      const explorerLink = screen.getByRole('link', {
+        name: /view on explorer/i
+      });
+      expect(explorerLink).toBeInTheDocument();
+      expect(explorerLink).toHaveAttribute(
+        'href',
+        'https://sepolia-blockscout.lisk.com'
+      );
+      expect(explorerLink).toHaveAttribute('target', '_blank');
+      expect(explorerLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
   });
 

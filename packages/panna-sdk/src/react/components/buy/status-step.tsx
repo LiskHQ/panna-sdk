@@ -1,9 +1,10 @@
 import { CheckIcon, CircleXIcon, ClockIcon } from 'lucide-react';
 import {
+  lisk,
   OnrampMoneySessionStatus,
   OnrampMoneySessionStatusEnum
 } from 'src/core';
-import { useDialog } from '@/hooks';
+import { useDialog, usePanna } from '@/hooks';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -21,11 +22,11 @@ import { Typography } from '../ui/typography';
 export function StatusStep() {
   const { stepData } = useDialogStepper<{ status: OnrampMoneySessionStatus }>();
 
-  if (stepData.status === OnrampMoneySessionStatusEnum.Failed) {
+  if (stepData?.status === OnrampMoneySessionStatusEnum.Failed) {
     return <ErrorStatus />;
   }
 
-  if (stepData.status === OnrampMoneySessionStatusEnum.Expired) {
+  if (stepData?.status === OnrampMoneySessionStatusEnum.Expired) {
     return <ExpiredStatus />;
   }
 
@@ -35,6 +36,7 @@ export function StatusStep() {
 function SuccessStatus() {
   const { onClose } = useDialog();
   const { reset } = useDialogStepper();
+  const { chainId } = usePanna();
 
   const handleClose = () => {
     reset();
@@ -54,7 +56,11 @@ function SuccessStatus() {
       </div>
       <div className="flex w-full flex-col gap-4 text-center">
         <a
-          href="https://blockscout.lisk.com"
+          href={
+            chainId !== String(lisk.id)
+              ? 'https://sepolia-blockscout.lisk.com'
+              : 'https://blockscout.lisk.com'
+          }
           target="_blank"
           rel="noopener noreferrer"
         >
