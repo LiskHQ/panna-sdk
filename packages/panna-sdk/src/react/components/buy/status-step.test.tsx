@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { OnrampMoneySessionStatusEnum } from 'src/core';
 import { useDialog } from '@/hooks';
 import { Dialog } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -20,7 +21,7 @@ describe('StatusStep', () => {
   describe('SuccessStatus', () => {
     beforeEach(() => {
       (useDialogStepper as jest.Mock).mockReturnValue({
-        stepData: { status: 'completed' },
+        stepData: { status: OnrampMoneySessionStatusEnum.Completed },
         reset: mockReset
       });
     });
@@ -56,7 +57,7 @@ describe('StatusStep', () => {
   describe('ErrorStatus', () => {
     beforeEach(() => {
       (useDialogStepper as jest.Mock).mockReturnValue({
-        stepData: { status: 'failed' },
+        stepData: { status: OnrampMoneySessionStatusEnum.Failed },
         prev: mockPrev
       });
     });
@@ -90,7 +91,7 @@ describe('StatusStep', () => {
   describe('ExpiredStatus', () => {
     beforeEach(() => {
       (useDialogStepper as jest.Mock).mockReturnValue({
-        stepData: { status: 'expired' },
+        stepData: { status: OnrampMoneySessionStatusEnum.Expired },
         prev: mockPrev
       });
     });

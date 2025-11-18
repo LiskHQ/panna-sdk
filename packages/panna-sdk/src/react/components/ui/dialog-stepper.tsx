@@ -97,9 +97,7 @@ const DialogStepperContext = createContext<
 export function useDialogStepper<TData = Record<string, unknown>>() {
   const context = useContext(DialogStepperContext);
   if (!context) {
-    throw new Error(
-      'useDialogStepperContext must be used within a DialogStepperProvider'
-    );
+    throw new Error('useDialogStepper must be used within a DialogStepper');
   }
   return context as DialogStepperContextValue<TData>;
 }

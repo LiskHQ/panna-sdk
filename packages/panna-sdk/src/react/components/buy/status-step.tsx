@@ -38,14 +38,14 @@ function SuccessStatus() {
         <DialogTitle>Success</DialogTitle>
       </DialogHeader>
       <div className="flex flex-col items-center gap-3">
-        <CheckIcon size={80} className="stroke-1" />
+        <CheckIcon size={80} className="stroke-1" aria-label="Success" />
         <div className="space-y-2 text-center">
           <Typography variant="muted">Your purchase is complete.</Typography>
         </div>
       </div>
       <div className="flex w-full flex-col gap-4 text-center">
         <a
-          href="http://blockscout.lisk.com"
+          href="https://blockscout.lisk.com"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -71,7 +71,10 @@ function ErrorStatus() {
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       <Typography variant="h4">Transaction failed</Typography>
-      <CircleXIcon className="h-20 w-20 stroke-[#FF6366] stroke-1" />
+      <CircleXIcon
+        className="h-20 w-20 stroke-[#FF6366] stroke-1"
+        aria-label="Transaction failed"
+      />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Something went wrong</Typography>
         <Typography variant="muted">No funds were moved</Typography>
@@ -93,7 +96,10 @@ function ExpiredStatus() {
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       <Typography variant="h4">Transaction failed</Typography>
-      <ClockIcon className="h-20 w-20 stroke-[#FF6366] stroke-1" />
+      <ClockIcon
+        className="h-20 w-20 stroke-[#FF6366] stroke-1"
+        aria-label="Session expired"
+      />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Session expired</Typography>
         <Typography variant="muted">No funds were moved</Typography>
