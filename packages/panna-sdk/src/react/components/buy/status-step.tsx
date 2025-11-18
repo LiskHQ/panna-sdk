@@ -1,4 +1,4 @@
-import { CheckIcon, CircleXIcon } from 'lucide-react';
+import { CheckIcon, CircleXIcon, ClockIcon } from 'lucide-react';
 import {
   OnrampMoneySessionStatus,
   OnrampMoneySessionStatusEnum
@@ -38,7 +38,7 @@ function SuccessStatus() {
         <DialogTitle>Success</DialogTitle>
       </DialogHeader>
       <div className="flex flex-col items-center gap-3">
-        <CheckIcon size={80} />
+        <CheckIcon size={80} className="stroke-1" />
         <div className="space-y-2 text-center">
           <Typography variant="muted">Your purchase is complete.</Typography>
         </div>
@@ -71,7 +71,7 @@ function ErrorStatus() {
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       <Typography variant="h4">Transaction failed</Typography>
-      <CircleXIcon className="h-20 w-20 stroke-[#FF6366]" />
+      <CircleXIcon className="h-20 w-20 stroke-[#FF6366] stroke-1" />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Something went wrong</Typography>
         <Typography variant="muted">No funds were moved</Typography>
@@ -93,7 +93,7 @@ function ExpiredStatus() {
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       <Typography variant="h4">Transaction failed</Typography>
-      <CircleXIcon className="h-20 w-20 stroke-[#FF6366]" />
+      <ClockIcon className="h-20 w-20 stroke-[#FF6366] stroke-1" />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Session expired</Typography>
         <Typography variant="muted">No funds were moved</Typography>
