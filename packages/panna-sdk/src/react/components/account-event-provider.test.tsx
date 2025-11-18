@@ -148,7 +148,8 @@ const mockSiweAuth = {
 const mockPannaContext = {
   client: { clientId: 'test-client' },
   partnerId: '123e4567-e89b-12d3-a456-426614174000',
-  apiService: mockApiService,
+  chainId: '4202',
+  pannaApiService: mockApiService,
   siweAuth: mockSiweAuth
 };
 
