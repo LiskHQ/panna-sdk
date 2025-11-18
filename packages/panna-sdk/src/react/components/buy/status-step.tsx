@@ -9,6 +9,15 @@ import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
 
+/**
+ * Handles the different final onramp status steps:
+ * - Success
+ * - Error
+ * - Cancelled
+ * - Expired
+ * Created and pending states are handled in the processing step
+ */
+// TODO: Add Cancelled status component when design is ready
 export function StatusStep() {
   const { stepData } = useDialogStepper<{ status: OnrampMoneySessionStatus }>();
 
