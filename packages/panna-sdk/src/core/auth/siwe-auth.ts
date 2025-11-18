@@ -1,5 +1,5 @@
 import type { Account } from 'thirdweb/wallets';
-import { pannaApiService, PannaApiService } from '../util/api-service';
+import { PannaApiService } from '../util/api-service';
 import type {
   AuthChallengeRequest,
   AuthChallengeReply,
@@ -43,10 +43,10 @@ export class SiweAuth {
   private userAddress: string | null = null;
   private tokenExpiresAt: number | null = null;
   private lastChallenge: AuthChallengeReply | null = null;
-  private apiService: PannaApiService;
+  private pannaApiService: PannaApiService;
 
-  constructor(apiService: PannaApiService) {
-    this.apiService = apiService;
+  constructor(pannaApiService: PannaApiService) {
+    this.pannaApiService = pannaApiService;
 
     // Load existing auth data from localStorage on initialization
     if (typeof window !== 'undefined') {
@@ -76,7 +76,7 @@ export class SiweAuth {
     try {
       // Get challenge from Panna API
       const challenge: AuthChallengeReply =
-        await this.apiService.getAuthChallenge(challengeRequest);
+        await this.pannaApiService.getAuthChallenge(challengeRequest);
 
       // Store the challenge for later use in verification
       this.lastChallenge = challenge;
@@ -154,7 +154,7 @@ export class SiweAuth {
       };
 
       // Verify with Panna API
-      const authResult = await this.apiService.verifyAuth(verifyRequest);
+      const authResult = await this.pannaApiService.verifyAuth(verifyRequest);
 
       if (authResult.token) {
         // Store auth token and user address
@@ -300,75 +300,4 @@ export class SiweAuth {
       localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
     }
   }
-}
-
-/**
- * Default instance of SIWE auth service
- */
-export const siweAuth = new SiweAuth(pannaApiService);
-
-/**
- * Helper function to generate a SIWE login payload
- * Compatible with thirdweb's auth flow
- */
-export async function generateSiwePayload(
-  params: GeneratePayloadParams
-): Promise<LoginPayload> {
-  return siweAuth.generatePayload(params);
-}
-
-/**
- * Helper function to login a user with SIWE
- * Compatible with thirdweb's auth flow
- */
-export async function siweLogin(params: LoginParams): Promise<boolean> {
-  return siweAuth.login(params);
-}
-
-/**
- * Helper function to check if user is logged in with SIWE
- * Compatible with thirdweb's auth flow
- */
-export function isSiweLoggedIn(): boolean {
-  return siweAuth.isLoggedIn();
-}
-
-/**
- * Helper function to get current SIWE user
- * Compatible with thirdweb's auth flow
- */
-export function getSiweUser(): string | null {
-  return siweAuth.getUser();
-}
-
-/**
- * Helper function to get current SIWE auth token
- * Compatible with thirdweb's auth flow
- * Note: This does not check expiry
- */
-export async function getSiweAuthToken(): Promise<string | null> {
-  return siweAuth.getAuthToken();
-}
-
-/**
- * Helper function to get a valid (non-expired) SIWE auth token
- * Returns null if token is expired or not available
- */
-export async function getValidSiweAuthToken(): Promise<string | null> {
-  return siweAuth.getValidAuthToken();
-}
-
-/**
- * Helper function to check if the current SIWE auth token is expired
- */
-export function isSiweTokenExpired(): boolean {
-  return siweAuth.isTokenExpired();
-}
-
-/**
- * Helper function to logout SIWE user
- * Compatible with thirdweb's auth flow
- */
-export function siweLogout(): void {
-  return siweAuth.logout();
 }

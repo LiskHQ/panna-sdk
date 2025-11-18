@@ -43,7 +43,7 @@ export type AccountEventProviderProps = {
  * Provider component that handles wallet events and sends them to the Panna API
  */
 export function AccountEventProvider({ children }: AccountEventProviderProps) {
-  const { client, partnerId, apiService, siweAuth } = usePanna();
+  const { client, partnerId, pannaApiService, siweAuth } = usePanna();
   const previousAddressRef = useRef<string | null>(null);
   const lastKnownChainIdRef = useRef<number | null>(null);
   const account = useActiveAccount();
@@ -178,7 +178,7 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
         throw new Error(`Unsupported event type: ${eventType}`);
       }
 
-      await apiService.sendAccountEvent(address, payload, siweToken);
+      await pannaApiService.sendAccountEvent(address, payload, siweToken);
     } catch (error) {
       console.error(`Failed to send ${eventType} event:`, error);
 

@@ -59,7 +59,7 @@ describe('Auth Utilities', () => {
       client: {} as unknown as PannaClient,
       partnerId: 'test-partner',
       chainId: '4202',
-      apiService: {} as unknown as PannaApiService,
+      pannaApiService: {} as unknown as PannaApiService,
       siweAuth: mockSiweAuth as unknown as SiweAuth
     });
   });

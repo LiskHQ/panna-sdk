@@ -1,6 +1,5 @@
 import { MailIcon, PhoneIcon } from 'lucide-react';
 import { useActiveWallet, useLogout, useUserProfiles } from '@/hooks';
-import { siweLogout } from '../../../core/auth';
 import { usePanna } from '../../hooks';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
@@ -8,7 +7,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
 export function AccountSettingsView() {
-  const { client } = usePanna();
+  const { client, siweAuth } = usePanna();
   const activeWallet = useActiveWallet();
   const { disconnect } = useLogout();
   const {
@@ -27,7 +26,7 @@ export function AccountSettingsView() {
       console.error('Error during logout:', error);
     } finally {
       // Always clear SIWE authentication data, even if disconnect fails
-      await siweLogout();
+      await siweAuth.logout();
     }
   };
 

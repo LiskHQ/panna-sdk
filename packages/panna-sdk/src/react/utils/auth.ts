@@ -1,6 +1,6 @@
 import type { Wallet } from 'thirdweb/wallets';
 import type { SmartWalletOptions } from 'thirdweb/wallets';
-import { getValidSiweAuthToken, SiweAuth } from '../../core/auth';
+import { SiweAuth } from '../../core/auth';
 import type { LoginPayload } from '../../core/util/types';
 
 /**
@@ -165,7 +165,7 @@ export async function getOrRefreshSiweToken(
   options?: { chainId?: number }
 ): Promise<string | null> {
   // First check if we have a valid (non-expired) token
-  const validToken = await getValidSiweAuthToken();
+  const validToken = await siweAuth.getValidAuthToken();
 
   if (validToken) {
     return validToken;
