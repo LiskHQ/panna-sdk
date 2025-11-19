@@ -1198,7 +1198,10 @@ describe('PannaApiService', () => {
           isMockMode: true
         });
 
-        const quote = await service.getOnrampQuote(mockQuoteRequest);
+        const quote = await service.getOnrampQuote(
+          mockQuoteRequest,
+          'test-auth-token'
+        );
 
         expect(quote).toEqual({
           rate: 1,
@@ -1220,7 +1223,10 @@ describe('PannaApiService', () => {
         });
 
         const customRequest = { ...mockQuoteRequest, fiatAmount: 250 };
-        const quote = await service.getOnrampQuote(customRequest);
+        const quote = await service.getOnrampQuote(
+          customRequest,
+          'test-auth-token'
+        );
 
         expect(quote.crypto_quantity).toBe(250);
         expect(quote.total_fiat_amount).toBe(250);
@@ -1272,14 +1278,15 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await service.getOnrampQuote(mockQuoteRequest);
+        await service.getOnrampQuote(mockQuoteRequest, 'test-auth-token');
 
         expect(fetch).toHaveBeenCalledWith(
           'https://stg-panna-app.lisk.com/v1/onramp/quote',
           {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer test-auth-token'
             },
             body: JSON.stringify({
               token_symbol: mockQuoteRequest.tokenSymbol,
@@ -1347,7 +1354,10 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        const quote = await service.getOnrampQuote(mockQuoteRequest);
+        const quote = await service.getOnrampQuote(
+          mockQuoteRequest,
+          'test-auth-token'
+        );
 
         expect(quote).toEqual(mockQuoteData);
       });
@@ -1365,7 +1375,7 @@ describe('PannaApiService', () => {
           fiatCurrency: 'EUR'
         };
 
-        await service.getOnrampQuote(customRequest);
+        await service.getOnrampQuote(customRequest, 'test-auth-token');
 
         expect(fetch).toHaveBeenCalledWith(
           expect.any(String),
@@ -1388,9 +1398,9 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
-          'Panna API base URL is not configured.'
-        );
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'test-auth-token')
+        ).rejects.toThrow('Panna API base URL is not configured.');
       });
 
       it('should throw error when fetch fails', async () => {
@@ -1401,9 +1411,9 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
-          'Network error'
-        );
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'test-auth-token')
+        ).rejects.toThrow('Network error');
       });
 
       it('should throw error when response is not ok', async () => {
@@ -1419,7 +1429,9 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'test-auth-token')
+        ).rejects.toThrow(
           'Panna API onramp quote failed: 400 Bad Request - Invalid request parameters'
         );
       });
@@ -1455,7 +1467,9 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'test-auth-token')
+        ).rejects.toThrow(
           'Panna API onramp quote failed: 500 Internal Server Error'
         );
       });
@@ -1477,7 +1491,9 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'test-auth-token')
+        ).rejects.toThrow(
           'Panna API onramp quote response marked as unsuccessful.'
         );
       });
@@ -1493,9 +1509,9 @@ describe('PannaApiService', () => {
           isMockMode: false
         });
 
-        await expect(service.getOnrampQuote(mockQuoteRequest)).rejects.toThrow(
-          'Test error'
-        );
+        await expect(
+          service.getOnrampQuote(mockQuoteRequest, 'test-auth-token')
+        ).rejects.toThrow('Test error');
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           'Failed to fetch onramp quote from Panna API:',
