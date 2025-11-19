@@ -13,6 +13,7 @@ import { SelectBuyProviderStep } from './select-buy-provider-step';
 import { SelectBuyRegionStep } from './select-buy-region-step';
 import { SelectBuyTokenStep } from './select-buy-token-step';
 import { SpecifyBuyAmountStep } from './specify-buy-amount-step';
+import { StatusStep } from './status-step';
 
 export type BuyFormProps = {
   onClose: () => void;
@@ -66,6 +67,9 @@ export function BuyForm({ onClose, stepperRef }: BuyFormProps) {
           </StepperRefProvider>
           <StepperRefProvider stepperRef={stepperRef}>
             <ProcessingBuyStep onClose={onClose} form={form} />
+          </StepperRefProvider>
+          <StepperRefProvider stepperRef={stepperRef}>
+            <StatusStep />
           </StepperRefProvider>
         </DialogStepper>
       </form>

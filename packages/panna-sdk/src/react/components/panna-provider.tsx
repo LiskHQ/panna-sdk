@@ -43,7 +43,7 @@ export type PannaContextValue = {
   client: PannaClient;
   partnerId: string;
   chainId?: string;
-  apiService: PannaApiService;
+  pannaApiService: PannaApiService;
   siweAuth: SiweAuth;
 };
 
@@ -51,7 +51,7 @@ type InternalPannaContextValue = {
   client: PannaClient | null;
   partnerId: string;
   chainId?: string;
-  apiService: PannaApiService;
+  pannaApiService: PannaApiService;
   siweAuth: SiweAuth;
 };
 
@@ -79,15 +79,18 @@ function PannaProviderInternal(props: PannaProviderProps) {
 
     // getPannaApiUrl now throws an error for unsupported chains
     // This will be caught by the ErrorBoundary wrapping this provider
-    const apiUrl = getPannaApiUrl(effectiveChainId, enableDevMode || false);
-    const apiService = new PannaApiService({ baseUrl: apiUrl });
-    const siweAuth = new SiweAuth(apiService);
+    const pannaApiUrl = getPannaApiUrl(
+      effectiveChainId,
+      enableDevMode || false
+    );
+    const pannaApiService = new PannaApiService({ baseUrl: pannaApiUrl });
+    const siweAuth = new SiweAuth(pannaApiService);
 
     return {
       client,
       partnerId: partnerId ?? '',
       chainId: effectiveChainId,
-      apiService,
+      pannaApiService,
       siweAuth
     };
   }, [clientId, partnerId, chainId, enableDevMode]);

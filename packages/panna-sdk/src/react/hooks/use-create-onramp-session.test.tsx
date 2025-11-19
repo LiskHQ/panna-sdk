@@ -56,7 +56,7 @@ describe('useCreateOnrampSession', () => {
       client: {} as PannaClient,
       partnerId: 'partner-id',
       chainId: '1',
-      apiService: mockApiService as unknown as PannaApiService,
+      pannaApiService: mockApiService as unknown as PannaApiService,
       siweAuth: mockSiweAuth as unknown as SiweAuth
     };
 

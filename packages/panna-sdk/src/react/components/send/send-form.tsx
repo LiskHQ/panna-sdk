@@ -14,8 +14,14 @@ import { SendSelectTokenStep } from './send-select-token-step';
 import { SendSuccessStep } from './send-success-step';
 import { SendSummaryStep } from './send-summary-step';
 
+export type SendDialogStepperData = {
+  hideBackButton: boolean;
+};
+
 export type SendFormProps = {
-  onStepperChange: (stepper: DialogStepperContextValue | null) => void;
+  onStepperChange: (
+    stepper: DialogStepperContextValue<SendDialogStepperData> | null
+  ) => void;
   onClose: () => void;
 };
 
@@ -23,11 +29,10 @@ export function StepperContextProvider({
   onStepperChange,
   children
 }: {
-  onStepperChange: (stepper: DialogStepperContextValue | null) => void;
+  onStepperChange: SendFormProps['onStepperChange'];
   children: React.ReactNode;
 }) {
-  const stepperContext = useDialogStepper();
-
+  const stepperContext = useDialogStepper<SendDialogStepperData>();
   useEffect(() => {
     onStepperChange(stepperContext);
   }, []);

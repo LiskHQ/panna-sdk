@@ -50,7 +50,7 @@ export function useCreateOnrampSession(): UseMutationResult<
   Error,
   CreateSessionParams
 > {
-  const { apiService, siweAuth } = usePanna();
+  const { pannaApiService, siweAuth } = usePanna();
 
   return useMutation<SessionData, Error, CreateSessionParams>({
     mutationFn: async (params) => {
@@ -72,7 +72,7 @@ export function useCreateOnrampSession(): UseMutationResult<
 
       console.debug('Creating onramp session with params:', params);
 
-      const sessionData = await apiService.createOnrampSession(
+      const sessionData = await pannaApiService.createOnrampSession(
         {
           walletAddress,
           tokenSymbol: params.tokenSymbol,

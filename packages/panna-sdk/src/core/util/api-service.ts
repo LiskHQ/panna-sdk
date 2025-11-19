@@ -519,8 +519,3 @@ export class PannaApiService {
     }
   }
 }
-
-/**
- * Default instance of the Panna API service
- */
-export const pannaApiService = new PannaApiService();
