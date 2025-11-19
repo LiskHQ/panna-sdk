@@ -1,10 +1,8 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { getValidSiweAuthToken } from 'src/core/auth';
 import {
   OnrampMoneySessionStatusEnum,
   type SessionStatusResult
 } from 'src/core/onramp/onramp-money';
-import { pannaApiService } from 'src/core/util/api-service';
 import {
   createDefaultRetryFn,
   DEFAULT_RETRY_DELAY,
@@ -67,7 +65,7 @@ export function useOnrampSessionStatus(
   { sessionId }: UseOnrampSessionStatusParams,
   options?: Omit<UseQueryOptions<SessionStatusResult>, 'queryKey' | 'queryFn'>
 ) {
-  const { client } = usePanna();
+  const { client, pannaApiService, siweAuth } = usePanna();
   const hasValidSessionId = !!sessionId;
 
   return useQuery({
@@ -77,7 +75,7 @@ export function useOnrampSessionStatus(
         throw new Error('Invalid query state');
       }
 
-      const authToken = await getValidSiweAuthToken();
+      const authToken = await siweAuth.getValidAuthToken();
 
       return pannaApiService.getSessionStatus({
         sessionId,

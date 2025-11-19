@@ -1,8 +1,4 @@
-import {
-  PannaApiService,
-  pannaApiService,
-  type PannaApiConfig
-} from './api-service';
+import { PannaApiService, type PannaApiConfig } from './api-service';
 import {
   AccountEventType,
   type AccountUpdateActivityRequest,
@@ -389,41 +385,6 @@ describe('PannaApiService', () => {
 
         consoleErrorSpy.mockRestore();
       });
-    });
-  });
-
-  describe('default instance', () => {
-    it('should export a default instance', () => {
-      expect(pannaApiService).toBeInstanceOf(PannaApiService);
-    });
-
-    it('should be ready to use without configuration', async () => {
-      const service = new PannaApiService({ isMockMode: true });
-
-      const testPayload: OnConnectActivityRequest = {
-        eventType: AccountEventType.ON_CONNECT,
-        timestamp: '2024-01-01T10:00:00Z',
-        ecosystemId: 'ecosystem.lisk',
-        partnerId: '123e4567-e89b-12d3-a456-426614174000',
-        chainId: 4202,
-        smartAccount: {
-          chain: 'lisk-sepolia',
-          factoryAddress: '0x4be0ddfebca9a5a4a617dee4dece99e7c862dceb',
-          entrypointAddress: '0x0000000071727De22E5E9d8BAf0edAc6f37da032',
-          sponsorGas: true
-        },
-        social: {
-          type: 'email',
-          data: 'test@example.com'
-        }
-      };
-
-      const response = await service.sendAccountEvent(
-        '0x1234567890123456789012345678901234567890',
-        testPayload
-      );
-
-      expect(response.status).toBe(201);
     });
   });
 

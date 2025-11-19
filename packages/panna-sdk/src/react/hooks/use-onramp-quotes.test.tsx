@@ -1,29 +1,37 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { getValidSiweAuthToken } from '../../core/auth';
-import { pannaApiService } from '../../core/util/api-service';
+import { SiweAuth } from '../../core/auth';
+import { PannaClient } from '../../core/client';
+import { PannaApiService } from '../../core/util/api-service';
+import { usePanna } from '../hooks/use-panna';
 import type { QuoteData } from '../types/onramp-quote.types';
 import { createQueryClientWrapper } from '../utils/test-utils';
 import { useOnrampQuotes } from './use-onramp-quotes';
 
-jest.mock('../../core/util/api-service', () => ({
-  pannaApiService: {
-    getOnrampQuote: jest.fn()
-  }
+jest.mock('../hooks/use-panna', () => ({
+  usePanna: jest.fn()
 }));
 
-jest.mock('../../core/auth', () => ({
-  getValidSiweAuthToken: jest.fn()
-}));
+const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
+
+const mockPannaApiService = {
+  getOnrampQuote: jest.fn()
+};
+
+const mockSiweAuth = {
+  getValidAuthToken: jest.fn()
+};
 
 const mockedGetOnrampQuote =
-  pannaApiService.getOnrampQuote as jest.MockedFunction<
-    typeof pannaApiService.getOnrampQuote
+  mockPannaApiService.getOnrampQuote as jest.MockedFunction<
+    typeof mockPannaApiService.getOnrampQuote
   >;
 
-const mockedGetValidSiweAuthToken =
-  getValidSiweAuthToken as jest.MockedFunction<typeof getValidSiweAuthToken>;
+const mockedGetValidAuthToken =
+  mockSiweAuth.getValidAuthToken as jest.MockedFunction<
+    typeof mockSiweAuth.getValidAuthToken
+  >;
 
 const mockQuote: QuoteData = {
   rate: 0.9985,
@@ -40,7 +48,14 @@ const mockQuote: QuoteData = {
 describe('useOnrampQuotes', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedGetValidSiweAuthToken.mockResolvedValue('mock-token');
+    mockedGetValidAuthToken.mockResolvedValue('mock-token');
+    mockUsePanna.mockReturnValue({
+      client: {} as PannaClient,
+      partnerId: 'test-partner',
+      chainId: '4202',
+      pannaApiService: mockPannaApiService as unknown as PannaApiService,
+      siweAuth: mockSiweAuth as unknown as SiweAuth
+    });
   });
 
   it('returns quote data when all parameters are valid', async () => {
@@ -133,7 +148,7 @@ describe('useOnrampQuotes', () => {
   });
 
   it('requires authentication token', async () => {
-    mockedGetValidSiweAuthToken.mockResolvedValue(null);
+    mockedGetValidAuthToken.mockResolvedValue(null);
 
     renderHook(
       () =>

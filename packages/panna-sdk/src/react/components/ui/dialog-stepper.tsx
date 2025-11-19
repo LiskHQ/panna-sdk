@@ -13,12 +13,12 @@ type DialogStepperProps = {
   children: ReactElement[];
 };
 
-export type DialogStepperContextValue = {
-  next: (data?: Record<string, unknown>) => void;
-  prev: (data?: Record<string, unknown>) => void;
+export type DialogStepperContextValue<TData = Record<string, unknown>> = {
+  next: (data?: TData) => void;
+  prev: (data?: TData) => void;
   reset: () => void;
-  stepData: Record<string, unknown>;
-  goToStep: (step: number, data?: Record<string, unknown>) => void;
+  stepData: TData;
+  goToStep: (step: number, data?: TData) => void;
   currentStep: number;
   lastStep: number;
   canGoBack: boolean;
@@ -31,18 +31,27 @@ export function DialogStepper({ children }: DialogStepperProps) {
   const [step, setStep] = useState(0);
   const [stepData, setStepData] = useState({});
 
-  const next = useCallback((data?: Record<string, unknown>) => {
-    setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
-    setStep((prev) => prev + 1);
-  }, []);
+  const next = useCallback(
+    (data?: Parameters<DialogStepperContextValue['next']>[0]) => {
+      setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
+      setStep((prev) => prev + 1);
+    },
+    []
+  );
 
-  const prev = useCallback((data?: Record<string, unknown>) => {
-    setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
-    setStep((prev) => Math.max(0, prev - 1));
-  }, []);
+  const prev = useCallback(
+    (data?: Parameters<DialogStepperContextValue['prev']>[0]) => {
+      setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
+      setStep((prev) => Math.max(0, prev - 1));
+    },
+    []
+  );
 
   const goToStep = useCallback(
-    (step: number, data?: Record<string, unknown>) => {
+    (
+      step: number,
+      data?: Parameters<DialogStepperContextValue['goToStep']>[1]
+    ) => {
       setStepData((prevData) => ({ ...prevData, ...(data || {}) }));
       setStep(step);
     },
@@ -85,12 +94,10 @@ const DialogStepperContext = createContext<
   DialogStepperContextValue | undefined
 >(undefined);
 
-export function useDialogStepper() {
+export function useDialogStepper<TData = Record<string, unknown>>() {
   const context = useContext(DialogStepperContext);
   if (!context) {
-    throw new Error(
-      'useDialogStepperContext must be used within a DialogStepperProvider'
-    );
+    throw new Error('useDialogStepper must be used within a DialogStepper');
   }
-  return context;
+  return context as DialogStepperContextValue<TData>;
 }

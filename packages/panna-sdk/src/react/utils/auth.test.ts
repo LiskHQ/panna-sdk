@@ -1,5 +1,5 @@
 import { Wallet } from 'thirdweb/wallets';
-import { getValidSiweAuthToken, SiweAuth } from '../../core/auth';
+import { SiweAuth } from '../../core/auth';
 import { PannaClient } from '../../core/client';
 import { PannaApiService } from '../../core/util/api-service';
 import { usePanna } from '../hooks/use-panna';
@@ -11,7 +11,6 @@ import {
 
 // Mock the core auth functions
 jest.mock('../../core/auth', () => ({
-  getValidSiweAuthToken: jest.fn(),
   SiweAuth: jest.fn()
 }));
 
@@ -21,9 +20,6 @@ jest.mock('../hooks/use-panna', () => ({
 }));
 
 const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
-const mockGetValidSiweAuthToken = getValidSiweAuthToken as jest.MockedFunction<
-  typeof getValidSiweAuthToken
->;
 
 // Create mock SiweAuth instance
 const mockSiweAuth = {
@@ -51,15 +47,12 @@ describe('Auth Utilities', () => {
     mockSiweAuth.isTokenExpired.mockReset().mockClear();
     mockSiweAuth.getValidAuthToken.mockReset().mockClear();
 
-    // Reset mockGetValidSiweAuthToken
-    mockGetValidSiweAuthToken.mockReset().mockClear();
-
     // Setup usePanna mock to return siweAuth
     mockUsePanna.mockReturnValue({
       client: {} as unknown as PannaClient,
       partnerId: 'test-partner',
       chainId: '4202',
-      apiService: {} as unknown as PannaApiService,
+      pannaApiService: {} as unknown as PannaApiService,
       siweAuth: mockSiweAuth as unknown as SiweAuth
     });
   });
@@ -369,7 +362,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
     } as unknown as Wallet;
 
     it('should return valid token immediately if available', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue('valid-token-123');
+      mockSiweAuth.getValidAuthToken.mockResolvedValue('valid-token-123');
 
       const result = await getOrRefreshSiweToken(
         mockSiweAuth as unknown as SiweAuth,
@@ -381,11 +374,10 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should attempt re-authentication when no valid token and wallet provided', async () => {
-      mockGetValidSiweAuthToken
+      mockSiweAuth.getValidAuthToken
         .mockResolvedValueOnce(null) // First call - no valid token
         .mockResolvedValueOnce('new-token-456'); // After re-auth
 
-      mockSiweAuth.getValidAuthToken.mockReturnValueOnce('new-token-456'); // Mock for successful re-auth
       mockSiweAuth.isTokenExpired.mockReturnValue(true);
 
       mockSiweAuth.generatePayload.mockResolvedValue({
@@ -414,9 +406,10 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should return null when re-authentication fails', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue(null);
+      mockSiweAuth.getValidAuthToken
+        .mockResolvedValueOnce(null) // No valid token initially
+        .mockResolvedValueOnce(null); // Still no token after failed re-auth
       mockSiweAuth.isTokenExpired.mockReturnValue(true);
-      mockSiweAuth.getValidAuthToken.mockReturnValue(null); // Mock for failed re-auth
 
       mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
@@ -443,7 +436,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should return null when no wallet provided and no valid token', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue(null);
+      mockSiweAuth.getValidAuthToken.mockResolvedValue(null);
 
       const result = await getOrRefreshSiweToken(
         mockSiweAuth as unknown as SiweAuth
@@ -454,11 +447,10 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should not log expired message when token is missing (not expired)', async () => {
-      mockGetValidSiweAuthToken
+      mockSiweAuth.getValidAuthToken
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce('new-token');
 
-      mockSiweAuth.getValidAuthToken.mockReturnValueOnce('new-token'); // Mock for successful re-auth
       mockSiweAuth.isTokenExpired.mockReturnValue(false);
 
       mockSiweAuth.generatePayload.mockResolvedValue({
@@ -485,9 +477,10 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should handle missing account in wallet during re-auth', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue(null);
+      mockSiweAuth.getValidAuthToken
+        .mockResolvedValueOnce(null) // No valid token initially
+        .mockResolvedValueOnce(null); // Still no token after failed re-auth
       mockSiweAuth.isTokenExpired.mockReturnValue(true);
-      mockSiweAuth.getValidAuthToken.mockReturnValue(null); // Mock for failed re-auth
 
       const walletNoAccount = {
         getAccount: jest.fn().mockReturnValue(null),
