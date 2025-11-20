@@ -463,15 +463,9 @@ export class PannaApiService {
         quote_data: {
           rate: quoteData.rate,
           crypto_quantity: quoteData.crypto_quantity,
-          ...(quoteData.onramp_fee !== undefined && {
-            onramp_fee: quoteData.onramp_fee
-          }),
-          ...(quoteData.gas_fee !== undefined && {
-            gas_fee: quoteData.gas_fee
-          }),
-          ...(quoteData.quote_timestamp && {
-            quote_timestamp: quoteData.quote_timestamp
-          })
+          onramp_fee: quoteData.onramp_fee,
+          gas_fee: quoteData.gas_fee,
+          quote_timestamp: quoteData.quote_timestamp
         }
       })
     };
