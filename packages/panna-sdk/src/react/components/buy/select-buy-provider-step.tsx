@@ -1,7 +1,7 @@
 import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { DEFAULT_COUNTRY_CODE } from '../../../core';
+import { DEFAULT_CHAIN, DEFAULT_COUNTRY_CODE } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
 import { useOnrampQuotes, useCreateOnrampSession, usePanna } from '../../hooks';
 import type { QuoteData } from '../../types/onramp-quote.types';
@@ -36,7 +36,8 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   } = useCreateOnrampSession();
 
   const currentChain = getEnvironmentChain(chainId);
-  const onrampNetwork = currentChain.name.toLowerCase();
+  const networkName = currentChain?.name ?? DEFAULT_CHAIN?.name ?? 'lisk';
+  const onrampNetwork = networkName.toLowerCase();
   const currencyCode = getCurrencyForCountry(
     country?.code ?? DEFAULT_COUNTRY_CODE
   );

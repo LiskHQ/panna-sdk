@@ -398,7 +398,7 @@ export class PannaApiService {
         );
       }
 
-      const payload = (await response.json()) as OnrampQuoteResponse;
+      const payload: OnrampQuoteResponse = await response.json();
 
       if (!payload.success) {
         throw new Error(
