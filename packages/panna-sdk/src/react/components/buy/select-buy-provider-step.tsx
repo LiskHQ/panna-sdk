@@ -10,7 +10,6 @@ import {
   getCurrencySymbolForCountry,
   getEnvironmentChain
 } from '../../utils';
-import { Badge } from '../ui/badge';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -20,7 +19,6 @@ type SelectBuyProviderStepProps = {
   form: UseFormReturn<BuyFormData>;
 };
 
-const BEST_PRICE_LABEL = 'Best price';
 const FIAT_AMOUNT_FIXED_DIGITS = 2;
 const CRYPTO_AMOUNT_FIXED_DIGITS = 6;
 
@@ -110,8 +108,6 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     }
   };
 
-  const bestPriceProviderId = availableProviders[0]?.id;
-
   return (
     <div className="flex flex-col gap-6">
       <DialogHeader className="items-center gap-0">
@@ -179,9 +175,6 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                       <Typography variant="small">
                         {provider.displayName}
                       </Typography>
-                      {provider.id === bestPriceProviderId && (
-                        <Badge variant="default">{BEST_PRICE_LABEL}</Badge>
-                      )}
                     </div>
                     {provider.description && (
                       <Typography variant="muted">
