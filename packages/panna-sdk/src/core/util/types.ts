@@ -84,8 +84,6 @@ export type QuoteData = {
   rate: number;
   crypto_quantity: number;
   onramp_fee: number;
-  client_fee?: number;
-  gateway_fee?: number;
   gas_fee: number;
   total_fiat_amount: number;
   quote_timestamp: string;
@@ -95,6 +93,27 @@ export type QuoteData = {
 export type OnrampQuoteResponse = {
   success: boolean;
   data: QuoteData;
+};
+
+export type OnrampSessionRequest = {
+  walletAddress: string;
+  tokenSymbol: string;
+  network: string;
+  fiatAmount: number;
+  fiatCurrency: string;
+  redirectUrl?: string;
+  quoteData?: QuoteData;
+};
+
+export type SessionData = {
+  session_id: string;
+  redirect_url: string;
+  expires_at: string;
+};
+
+export type OnrampSessionResponse = {
+  success: boolean;
+  data: SessionData;
 };
 
 // Supported fiat currencies
