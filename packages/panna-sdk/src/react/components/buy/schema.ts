@@ -22,8 +22,6 @@ const quoteDataSchema = z.object({
   rate: z.number(),
   crypto_quantity: z.number(),
   onramp_fee: z.number(),
-  client_fee: z.number().nullable().optional(),
-  gateway_fee: z.number().nullable().optional(),
   gas_fee: z.number(),
   total_fiat_amount: z.number(),
   quote_timestamp: z.string(),
@@ -35,7 +33,7 @@ export const selectedProviderSchema = z.object({
   providerName: z.string().min(1, 'Provider name is required'),
   providerDescription: z.string().optional(),
   providerLogoUrl: z.string().optional(),
-  sessionUrl: z.string().url('Session URL must be valid'),
+  redirectUrl: z.string().url('Redirect URL must be valid'),
   quote: quoteDataSchema
 });
 

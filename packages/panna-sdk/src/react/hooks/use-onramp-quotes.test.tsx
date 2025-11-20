@@ -37,8 +37,6 @@ const mockQuote: QuoteData = {
   rate: 0.9985,
   crypto_quantity: 97.73,
   onramp_fee: 0.5,
-  client_fee: 0,
-  gateway_fee: 0,
   gas_fee: 2.27,
   total_fiat_amount: 102.27,
   quote_timestamp: '2025-01-15T12:00:00Z',

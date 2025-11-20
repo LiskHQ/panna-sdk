@@ -23,6 +23,14 @@ function isValidParams(params: CreateSessionParams): boolean {
   );
 }
 
+function ensureValidSessionData(session: SessionData): SessionData {
+  if (!session.session_id || !session.redirect_url || !session.expires_at) {
+    throw new Error('Invalid session data received from Panna API.');
+  }
+
+  return session;
+}
+
 /**
  * Hook to create an onramp session backed by the Panna API.
  *
@@ -87,7 +95,7 @@ export function useCreateOnrampSession(): UseMutationResult<
 
       console.info('Onramp session created successfully:', sessionData);
 
-      return sessionData;
+      return ensureValidSessionData(sessionData);
     }
   });
 }

@@ -46,13 +46,25 @@ const createMockQuoteData = (fiatAmount: number): QuoteData => ({
   rate: 1,
   crypto_quantity: fiatAmount,
   onramp_fee: 0,
-  client_fee: 0,
-  gateway_fee: 0,
   gas_fee: 0,
   total_fiat_amount: fiatAmount,
   quote_timestamp: new Date().toISOString(),
   quote_validity_mins: 15
 });
+
+const isValidSessionData = (
+  data: Partial<SessionData> | undefined
+): data is SessionData => {
+  return Boolean(
+    data &&
+      typeof data.session_id === 'string' &&
+      data.session_id &&
+      typeof data.redirect_url === 'string' &&
+      data.redirect_url &&
+      typeof data.expires_at === 'string' &&
+      data.expires_at
+  );
+};
 
 /**
  * API service for sending account events to the Panna app.
@@ -409,7 +421,7 @@ export class PannaApiService {
    */
   public async createOnrampSession(
     request: OnrampSessionRequest,
-    authToken?: string
+    authToken: string
   ): Promise<SessionData> {
     const { baseUrl, isMockMode } = this.config;
 
@@ -454,12 +466,6 @@ export class PannaApiService {
           ...(quoteData.onramp_fee !== undefined && {
             onramp_fee: quoteData.onramp_fee
           }),
-          ...(quoteData.client_fee !== undefined && {
-            client_fee: quoteData.client_fee
-          }),
-          ...(quoteData.gateway_fee !== undefined && {
-            gateway_fee: quoteData.gateway_fee
-          }),
           ...(quoteData.gas_fee !== undefined && {
             gas_fee: quoteData.gas_fee
           }),
@@ -478,9 +484,8 @@ export class PannaApiService {
     if (isMockMode) {
       const mockSession: SessionData = {
         session_id: 'c59309e4-3647-49a8-bf32-beab50923a27',
-        redirect_url: 'https://sandbox.onramp.money/session/mock',
-        expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-        ...(quoteData && { quote_data: quoteData })
+        redirect_url: 'https://sandbox.onramp.money/main/buy/?appId=mock',
+        expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
       };
 
       console.info('Panna API mock response: /onramp/session', mockSession);
@@ -507,6 +512,12 @@ export class PannaApiService {
       if (!payload.success) {
         throw new Error(
           'Panna API onramp session response marked as unsuccessful.'
+        );
+      }
+
+      if (!isValidSessionData(payload.data)) {
+        throw new Error(
+          'Panna API onramp session response is missing required data.'
         );
       }
 

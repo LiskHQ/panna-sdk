@@ -18,7 +18,7 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
   const [redirected, setRedirected] = useState(false);
 
   const selectedProvider = formData.provider;
-  const purchaseUrl = selectedProvider?.sessionUrl;
+  const purchaseUrl = selectedProvider?.redirectUrl;
 
   useEffect(() => {
     if (purchaseUrl && !redirected) {

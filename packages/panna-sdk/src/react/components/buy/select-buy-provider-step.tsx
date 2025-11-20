@@ -1,11 +1,15 @@
 import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { DEFAULT_CURRENCY } from '../../../core';
+import { DEFAULT_COUNTRY_CODE } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
-import { ONRAMP_NETWORK } from '../../consts';
-import { useOnrampQuotes, useCreateOnrampSession } from '../../hooks';
+import { useOnrampQuotes, useCreateOnrampSession, usePanna } from '../../hooks';
 import type { QuoteData } from '../../types/onramp-quote.types';
+import {
+  getCurrencyForCountry,
+  getCurrencySymbolForCountry,
+  getEnvironmentChain
+} from '../../utils';
 import { Badge } from '../ui/badge';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -17,9 +21,12 @@ type SelectBuyProviderStepProps = {
 };
 
 const BEST_PRICE_LABEL = 'Best price';
+const FIAT_AMOUNT_FIXED_DIGITS = 2;
+const CRYPTO_AMOUNT_FIXED_DIGITS = 6;
 
 export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { next } = useDialogStepper();
+  const { chainId } = usePanna();
 
   const { token, country, fiatAmount } = form.watch();
   const {
@@ -27,6 +34,15 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     isPending: isCreatingSession,
     error: createSessionError
   } = useCreateOnrampSession();
+
+  const currentChain = getEnvironmentChain(chainId);
+  const onrampNetwork = currentChain.name.toLowerCase();
+  const currencyCode = getCurrencyForCountry(
+    country?.code ?? DEFAULT_COUNTRY_CODE
+  );
+  const currencySymbol = getCurrencySymbolForCountry(
+    country?.code ?? DEFAULT_COUNTRY_CODE
+  );
 
   // Get available providers for the country
   const availableProviders = useMemo(() => {
@@ -45,9 +61,9 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     error: quoteError
   } = useOnrampQuotes({
     tokenSymbol: token?.symbol || '',
-    network: ONRAMP_NETWORK,
+    network: onrampNetwork,
     fiatAmount: fiatAmount || 0,
-    fiatCurrency: DEFAULT_CURRENCY
+    fiatCurrency: currencyCode
   });
 
   const handleProviderSelect = async (
@@ -60,6 +76,8 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     // Prevent multiple simultaneous session creation attempts
     if (isCreatingSession) return;
 
+    // Token should always be defined after the previous step, but keep a guard to
+    // prevent runtime errors if the form state resets or the user navigates mid-flow.
     if (!token?.symbol || typeof fiatAmount !== 'number' || fiatAmount <= 0) {
       console.warn(
         'Cannot create onramp session without a valid token symbol and fiat amount.'
@@ -70,9 +88,9 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     try {
       const session = await createSession({
         tokenSymbol: token.symbol,
-        network: ONRAMP_NETWORK,
+        network: onrampNetwork,
         fiatAmount,
-        fiatCurrency: DEFAULT_CURRENCY,
+        fiatCurrency: currencyCode,
         quoteData
       });
 
@@ -81,7 +99,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
         providerName,
         providerDescription,
         providerLogoUrl,
-        sessionUrl: session.redirect_url,
+        redirectUrl: session.redirect_url,
         quote: quoteData
       });
 
@@ -90,6 +108,8 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
       console.error('Failed to create onramp session:', error);
     }
   };
+
+  const bestPriceProviderId = availableProviders[0]?.id;
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,7 +178,9 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                       <Typography variant="small">
                         {provider.displayName}
                       </Typography>
-                      <Badge variant="default">{BEST_PRICE_LABEL}</Badge>
+                      {provider.id === bestPriceProviderId && (
+                        <Badge variant="default">{BEST_PRICE_LABEL}</Badge>
+                      )}
                     </div>
                     {provider.description && (
                       <Typography variant="muted">
@@ -169,11 +191,15 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                 </div>
                 <div className="text-right">
                   <Typography variant="small">
-                    ${quote.total_fiat_amount.toFixed(2)}
+                    {currencySymbol}
+                    {quote.total_fiat_amount.toFixed(FIAT_AMOUNT_FIXED_DIGITS)}
                   </Typography>
                   {token?.symbol && (
                     <Typography variant="muted" className="text-xs">
-                      {quote.crypto_quantity.toFixed(6)} {token.symbol}
+                      {quote.crypto_quantity.toFixed(
+                        CRYPTO_AMOUNT_FIXED_DIGITS
+                      )}{' '}
+                      {token.symbol}
                     </Typography>
                   )}
                 </div>

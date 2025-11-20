@@ -26,8 +26,6 @@ const mockQuote: QuoteData = {
   rate: 0.9985,
   crypto_quantity: 97.73,
   onramp_fee: 0.5,
-  client_fee: 0,
-  gateway_fee: 0,
   gas_fee: 2.27,
   total_fiat_amount: 102.27,
   quote_timestamp: '2025-01-15T12:00:00Z',
@@ -37,8 +35,7 @@ const mockQuote: QuoteData = {
 const mockSession: SessionData = {
   session_id: 'c59309e4-3647-49a8-bf32-beab50923a27',
   redirect_url: 'https://sandbox.onramp.money/main/buy/?appId=mock',
-  expires_at: '2025-01-15T12:30:00Z',
-  quote_data: mockQuote
+  expires_at: '2025-01-15T12:30:00Z'
 };
 
 const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
@@ -98,8 +95,9 @@ describe('useCreateOnrampSession', () => {
 
   it('creates an onramp session without quote data', async () => {
     const sessionWithoutQuote: SessionData = {
-      ...mockSession,
-      quote_data: undefined
+      session_id: 'a7a5e3b4-8e4b-4c2b-92af-4c694df1cda1',
+      redirect_url: 'https://sandbox.onramp.money/main/buy/?appId=another',
+      expires_at: '2025-01-15T12:45:00Z'
     };
 
     mockApiService.createOnrampSession.mockResolvedValue(sessionWithoutQuote);
@@ -154,6 +152,28 @@ describe('useCreateOnrampSession', () => {
     ).rejects.toThrow('API request failed');
 
     await waitFor(() => expect(result.current.error).toBe(apiError));
+  });
+
+  it('throws when API returns invalid session data', async () => {
+    mockApiService.createOnrampSession.mockResolvedValue({
+      session_id: '',
+      redirect_url: '',
+      expires_at: ''
+    } as SessionData);
+
+    const { result } = renderHook(() => useCreateOnrampSession(), {
+      wrapper: createQueryClientWrapper()
+    });
+
+    await expect(
+      result.current.mutateAsync({
+        tokenSymbol: 'USDC',
+        network: 'lisk',
+        fiatAmount: 100,
+        fiatCurrency: 'USD',
+        quoteData: mockQuote
+      })
+    ).rejects.toThrow('Invalid session data received from Panna API.');
   });
 
   it('throws when authentication token is missing', async () => {

@@ -84,8 +84,6 @@ export type QuoteData = {
   rate: number;
   crypto_quantity: number;
   onramp_fee: number;
-  client_fee?: number;
-  gateway_fee?: number;
   gas_fee: number;
   total_fiat_amount: number;
   quote_timestamp: string;
@@ -111,7 +109,6 @@ export type SessionData = {
   session_id: string;
   redirect_url: string;
   expires_at: string;
-  quote_data?: QuoteData;
 };
 
 export type OnrampSessionResponse = {

@@ -1,8 +1,12 @@
 import { useMemo, useEffect } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { DEFAULT_CURRENCY } from 'src/core';
+import { DEFAULT_COUNTRY_CODE } from 'src/core';
 import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
-import { getEnvironmentChain } from '../../utils';
+import {
+  getEnvironmentChain,
+  getCurrencyForCountry,
+  getCurrencySymbol
+} from '../../utils';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -20,6 +24,11 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   const { next } = useDialogStepper();
   const token = form.watch('token');
   const fiatAmount = form.watch('fiatAmount');
+  const country = form.watch('country');
+  const currencyCode = getCurrencyForCountry(
+    country?.code ?? DEFAULT_COUNTRY_CODE
+  );
+  const currencySymbol = getCurrencySymbol(currencyCode);
 
   const { data: supportedTokens = [] } = useSupportedTokens();
   const chain = getEnvironmentChain();
@@ -46,7 +55,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
       tokenAddress,
       tokenSymbol: token?.symbol,
       fiatAmount: fiatAmount || 0,
-      currency: DEFAULT_CURRENCY
+      currency: currencyCode
     },
     { enabled: !!fiatAmount && fiatAmount > 0 }
   );
@@ -80,7 +89,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
                       variant="h2"
                       className="text-muted-foreground pb-0"
                     >
-                      $
+                      {currencySymbol}
                     </Typography>
                     <input
                       type="text"
@@ -128,7 +137,8 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
             }
             onClick={() => form.setValue('fiatAmount', value)}
           >
-            ${value}
+            {currencySymbol}
+            {value}
           </Button>
         ))}
       </div>
