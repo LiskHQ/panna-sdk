@@ -8,7 +8,7 @@ export function useLogout() {
 
   function disconnect(wallet: Wallet<WalletId>): void {
     disconnectWallet(wallet);
-    siweAuth.logout();
+    setTimeout(() => siweAuth.logout(), 2000);
   }
 
   return {
