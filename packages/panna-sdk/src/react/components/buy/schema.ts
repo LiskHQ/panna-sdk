@@ -33,7 +33,7 @@ export const selectedProviderSchema = z.object({
   providerName: z.string().min(1, 'Provider name is required'),
   providerDescription: z.string().optional(),
   providerLogoUrl: z.string().optional(),
-  redirectUrl: z.string().url('Redirect URL must be valid'),
+  redirectUrl: z.string().url('Redirect URL must be valid').optional(),
   quote: quoteDataSchema
 });
 
