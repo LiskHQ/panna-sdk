@@ -43,8 +43,8 @@ describe('SiweAuth', () => {
     });
 
     mockCookies.get.mockReturnValue(undefined);
-    mockCookies.set.mockImplementation(() => {});
-    mockCookies.remove.mockImplementation(() => {});
+    mockCookies.set.mockClear();
+    mockCookies.remove.mockClear();
 
     mockPannaApiService = {
       getAuthChallenge: jest.fn(),
@@ -844,6 +844,88 @@ describe('SiweAuth', () => {
       });
 
       expect(siweAuth.isTokenExpired()).toBe(false);
+    });
+
+    it('should use custom token expiry buffer when configured', async () => {
+      // Create auth with custom 30 second buffer
+      const authWithCustomBuffer = new SiweAuth(mockPannaApiService, {
+        tokenExpiryBufferSecs: 30
+      });
+
+      // Token expires in 45 seconds
+      const expiryTime = Math.floor(Date.now() / 1000) + 45;
+
+      const mockChallenge: AuthChallengeReply = {
+        domain: mockDomain,
+        address: mockAddress,
+        uri: mockUri,
+        version: '1',
+        chainId: mockChainId,
+        nonce: mockNonce,
+        issuedAt: mockIssuedAt
+      };
+
+      mockPannaApiService.getAuthChallenge.mockResolvedValue(mockChallenge);
+      await authWithCustomBuffer.generatePayload({ address: mockAddress });
+
+      const mockAuthResult: AuthVerifyReply = {
+        address: mockAddress,
+        token: mockToken,
+        expiresAt: expiryTime
+      };
+
+      mockPannaApiService.verifyAuth.mockResolvedValue(mockAuthResult);
+
+      const mockAccount = { address: mockAddress } as Account;
+      await authWithCustomBuffer.login({
+        payload: mockChallenge,
+        signature: '0xabcdef',
+        account: mockAccount
+      });
+
+      // With 30 second buffer, token expiring in 45 seconds should still be valid
+      expect(authWithCustomBuffer.isTokenExpired()).toBe(false);
+    });
+
+    it('should allow zero buffer for no expiry padding', async () => {
+      // Create auth with no buffer
+      const authWithNoBuffer = new SiweAuth(mockPannaApiService, {
+        tokenExpiryBufferSecs: 0
+      });
+
+      // Token expires in 5 seconds
+      const expiryTime = Math.floor(Date.now() / 1000) + 5;
+
+      const mockChallenge: AuthChallengeReply = {
+        domain: mockDomain,
+        address: mockAddress,
+        uri: mockUri,
+        version: '1',
+        chainId: mockChainId,
+        nonce: mockNonce,
+        issuedAt: mockIssuedAt
+      };
+
+      mockPannaApiService.getAuthChallenge.mockResolvedValue(mockChallenge);
+      await authWithNoBuffer.generatePayload({ address: mockAddress });
+
+      const mockAuthResult: AuthVerifyReply = {
+        address: mockAddress,
+        token: mockToken,
+        expiresAt: expiryTime
+      };
+
+      mockPannaApiService.verifyAuth.mockResolvedValue(mockAuthResult);
+
+      const mockAccount = { address: mockAddress } as Account;
+      await authWithNoBuffer.login({
+        payload: mockChallenge,
+        signature: '0xabcdef',
+        account: mockAccount
+      });
+
+      // With no buffer, token expiring in 5 seconds should still be valid
+      expect(authWithNoBuffer.isTokenExpired()).toBe(false);
     });
   });
 

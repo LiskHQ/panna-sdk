@@ -8,6 +8,8 @@ import type {
   LoginPayload
 } from '../util/types';
 
+const defaultTokenExpiryBufferSecs = 60;
+
 /**
  * Cookie keys for SIWE authentication
  */
@@ -36,6 +38,18 @@ export type LoginParams = {
 };
 
 /**
+ * Configuration options for SiweAuth
+ */
+export type SiweAuthOptions = {
+  /**
+   * Buffer time in seconds before token expiry to consider token as expired.
+   * This ensures tokens are refreshed before they actually expire.
+   * @default 60
+   */
+  tokenExpiryBufferSecs?: number;
+};
+
+/**
  * SIWE authentication service for Panna
  * Implements the Sign-In with Ethereum flow using Panna API
  */
@@ -46,13 +60,18 @@ export class SiweAuth {
   private lastChallenge: AuthChallengeReply | null = null;
   private pannaApiService: PannaApiService;
   private cookies: Cookies;
+  private tokenExpiryBufferSecs: number;
 
-  constructor(pannaApiService: PannaApiService) {
+  constructor(pannaApiService: PannaApiService, options: SiweAuthOptions = {}) {
+    this.tokenExpiryBufferSecs =
+      options.tokenExpiryBufferSecs ?? defaultTokenExpiryBufferSecs;
     this.pannaApiService = pannaApiService;
+    // Cookie configuration for auth token storage
+    // Using sameSite: 'strict' for CSRF protection, and secure: true to require HTTPS.
     this.cookies = new Cookies(null, {
       path: '/',
       secure: true,
-      httpOnly: true
+      sameSite: 'strict'
     });
 
     // Load existing auth data from cookies on initialization
@@ -244,11 +263,10 @@ export class SiweAuth {
       return true;
     }
 
-    // expiresIn is a Unix timestamp in seconds
+    // expiresAt is a Unix timestamp in seconds
+    // Use configured buffer time to refresh tokens before they actually expire
     const now = Math.floor(Date.now() / 1000);
-    const bufferTime = 60; // Add 60 second buffer to refresh before actual expiry
-
-    return now >= this.tokenExpiresAt - bufferTime;
+    return now >= this.tokenExpiresAt - this.tokenExpiryBufferSecs;
   }
 
   /**
