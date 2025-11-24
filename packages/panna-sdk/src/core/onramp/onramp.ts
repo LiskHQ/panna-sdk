@@ -194,10 +194,14 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
     throw new Error(`Invalid country code: ${countryCode}`);
   }
 
-  const providers = new Set<ProviderId>([
-    ...(COUNTRY_PROVIDER_MAP[normalizedCountryCode] || []),
-    'onramp-money'
-  ]);
+  const mappedProviders = COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
+
+  if (mappedProviders.length === 0) {
+    return [];
+  }
+
+  const providers = new Set<ProviderId>(mappedProviders);
+  providers.add('onramp-money');
 
   return Array.from(providers).map((provider) => PROVIDERS[provider]);
 }

@@ -312,6 +312,13 @@ describe('getOnrampProviders', () => {
       description: 'Card, Apple Pay or bank transfer',
       websiteUrl: 'https://www.stripe.com',
       logoUrl: 'https://www.stripe.com/favicon.ico'
+    },
+    {
+      id: 'onramp-money',
+      displayName: 'Onramp Money',
+      description: 'Fiat to crypto via Onramp Money',
+      websiteUrl: 'https://onramp.money',
+      logoUrl: 'https://onramp.money/favicon.ico'
     }
   ];
   const expectedResultForSA = [
@@ -328,6 +335,13 @@ describe('getOnrampProviders', () => {
       description: 'Card, Apple Pay or bank transfer',
       websiteUrl: 'https://www.stripe.com',
       logoUrl: 'https://www.stripe.com/favicon.ico'
+    },
+    {
+      id: 'onramp-money',
+      displayName: 'Onramp Money',
+      description: 'Fiat to crypto via Onramp Money',
+      websiteUrl: 'https://onramp.money',
+      logoUrl: 'https://onramp.money/favicon.ico'
     }
   ];
 
