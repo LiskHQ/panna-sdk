@@ -8,7 +8,6 @@ import type {
   OnrampIntent,
   OnrampPrepareParams,
   OnrampPrepareResult,
-  OnrampProvider,
   OnrampStatusParams,
   OnrampStatusResult,
   ProviderId,

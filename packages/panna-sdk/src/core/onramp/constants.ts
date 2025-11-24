@@ -1,17 +1,5 @@
 import { OnrampProvider, ProviderId, ProviderInfo } from './types';
 
-const BASE_PROVIDER_IDS = {
-  transak: 'transak',
-  coinbase: 'coinbase',
-  stripe: 'stripe'
-} as const satisfies Record<OnrampProvider, OnrampProvider>;
-
-const {
-  transak: TRANSAK,
-  coinbase: COINBASE,
-  stripe: STRIPE
-} = BASE_PROVIDER_IDS;
-
 // Provider metadata
 export const PROVIDERS = {
   coinbase: {
