@@ -1,7 +1,6 @@
 export {
   // Connection Management hooks
   useConnect as useLogin,
-  useDisconnect as useLogout,
   useAutoConnect as useAutoLogin,
   useConnectedWallets as useConnectedAccounts,
   useActiveAccount,
@@ -25,6 +24,7 @@ export {
 } from 'thirdweb/react';
 
 export { usePanna } from './use-panna';
+export { useLogout } from './use-logout';
 export { useActivities } from './use-activities';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
