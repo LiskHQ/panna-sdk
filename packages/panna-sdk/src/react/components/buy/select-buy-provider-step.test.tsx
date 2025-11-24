@@ -40,12 +40,17 @@ const mockQuote: QuoteData = {
   gas_fee: 2.27,
   total_fiat_amount: 102.27,
   quote_timestamp: '2024-05-01T12:00:00Z',
-  quote_validity_mins: 15
+  quote_validity_mins: 15,
+  provider_id: 'onramp-money'
 };
 
 let formRef: UseFormReturn<BuyFormData> | null = null;
 
-const TestWrapper = () => {
+const TestWrapper = ({
+  defaultValues
+}: {
+  defaultValues?: Partial<BuyFormData>;
+}) => {
   const form = useForm<BuyFormData>({
     defaultValues: {
       country: { code: 'US', name: 'United States', flag: '🇺🇸' },
@@ -55,7 +60,8 @@ const TestWrapper = () => {
         name: 'USD Coin'
       },
       fiatAmount: 100,
-      cryptoAmount: 97.73
+      cryptoAmount: 97.73,
+      ...defaultValues
     }
   });
 
@@ -123,5 +129,110 @@ describe('SelectBuyProviderStep', () => {
     render(<TestWrapper />);
 
     expect(screen.getByText('Loading quotes...')).toBeInTheDocument();
+  });
+
+  it('shows error message when quote fetching fails', () => {
+    mockUseOnrampQuotes.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('Network issue')
+    });
+
+    render(<TestWrapper />);
+
+    expect(
+      screen.getByText('Failed to load quotes. Please try again.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows message when no providers are available', () => {
+    mockGetOnrampProviders.mockReturnValue([]);
+
+    render(<TestWrapper />);
+
+    expect(
+      screen.getByText('No providers available for this country')
+    ).toBeInTheDocument();
+  });
+
+  it('shows message when no quote data is returned', () => {
+    mockUseOnrampQuotes.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null
+    });
+
+    render(<TestWrapper />);
+
+    expect(screen.getByText('No quote available')).toBeInTheDocument();
+  });
+
+  it('only renders providers that have quote data available', () => {
+    mockGetOnrampProviders.mockReturnValue([
+      {
+        id: 'onramp-money',
+        displayName: 'Onramp Money',
+        description: 'Fast fiat onramp',
+        logoUrl: 'https://onramp.money/logo.png'
+      },
+      {
+        id: 'transak',
+        displayName: 'Transak',
+        description: 'Other provider',
+        logoUrl: 'https://transak.com/logo.png'
+      }
+    ]);
+
+    render(<TestWrapper />);
+
+    expect(
+      screen.getAllByRole('button', { name: /onramp money/i })
+    ).toHaveLength(1);
+    expect(screen.queryByText('Transak')).not.toBeInTheDocument();
+  });
+
+  it('applies selection styles when provider already chosen', () => {
+    render(
+      <TestWrapper
+        defaultValues={{
+          provider: {
+            providerId: 'onramp-money',
+            providerName: 'Onramp Money',
+            providerDescription: 'Fast fiat onramp',
+            providerLogoUrl: 'https://onramp.money/logo.png',
+            quote: mockQuote
+          }
+        }}
+      />
+    );
+
+    const providerButton = screen.getByRole('button', {
+      name: /onramp money/i
+    });
+
+    expect(providerButton.className).toContain('ring-primary');
+  });
+
+  it('omits crypto amount display when token symbol is missing', () => {
+    render(
+      <TestWrapper
+        defaultValues={{
+          token: undefined
+        }}
+      />
+    );
+
+    expect(screen.queryByText(/USDC/i)).not.toBeInTheDocument();
+  });
+
+  it('calls quote hook with expected parameters', () => {
+    render(<TestWrapper />);
+
+    expect(mockUseOnrampQuotes).toHaveBeenCalledWith({
+      tokenSymbol: 'USDC',
+      network: 'lisk',
+      fiatAmount: 100,
+      fiatCurrency: 'USD'
+    });
   });
 });

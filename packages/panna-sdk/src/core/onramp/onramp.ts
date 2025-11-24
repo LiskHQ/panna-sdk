@@ -11,6 +11,7 @@ import type {
   OnrampProvider,
   OnrampStatusParams,
   OnrampStatusResult,
+  ProviderId,
   ProviderInfo
 } from './types';
 
@@ -194,9 +195,12 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
     throw new Error(`Invalid country code: ${countryCode}`);
   }
 
-  const providers: OnrampProvider[] =
-    COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
-  return providers.map((provider) => PROVIDERS[provider]);
+  const providers = new Set<ProviderId>([
+    ...(COUNTRY_PROVIDER_MAP[normalizedCountryCode] || []),
+    'onramp-money'
+  ]);
+
+  return Array.from(providers).map((provider) => PROVIDERS[provider]);
 }
 
 /**

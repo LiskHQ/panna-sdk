@@ -59,6 +59,60 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     fiatCurrency: currencyCode
   });
 
+  const providerFromQuote = useMemo(() => {
+    if (!quote) {
+      return null;
+    }
+
+    const providerId = quote.provider_id ?? 'onramp-money';
+    const matchedProvider = availableProviders.find(
+      (provider) => provider.id === providerId
+    );
+
+    return matchedProvider ?? null;
+  }, [availableProviders, quote]);
+
+  const providersToDisplay = providerFromQuote
+    ? [providerFromQuote]
+    : availableProviders;
+
+  const providerQuoteMap = useMemo(() => {
+    if (!quote) {
+      return new Map<string, QuoteData>();
+    }
+
+    const providerId =
+      providerFromQuote?.id ??
+      (providersToDisplay.length === 1 ? providersToDisplay[0]?.id : undefined);
+
+    if (!providerId) {
+      return new Map<string, QuoteData>();
+    }
+
+    return new Map<string, QuoteData>([[providerId, quote]]);
+  }, [providerFromQuote?.id, providersToDisplay, quote]);
+
+  const providersWithQuotes = useMemo(() => {
+    return providersToDisplay
+      .map((provider) => {
+        const providerQuote = providerQuoteMap.get(provider.id);
+
+        if (!providerQuote) {
+          return null;
+        }
+
+        return { provider, quote: providerQuote };
+      })
+      .filter(
+        (
+          entry
+        ): entry is {
+          provider: (typeof providersToDisplay)[number];
+          quote: QuoteData;
+        } => entry !== null
+      );
+  }, [providerQuoteMap, providersToDisplay]);
+
   const handleProviderSelect = (
     providerId: string,
     providerName: string,
@@ -98,19 +152,19 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
               Failed to load quotes. Please try again.
             </Typography>
           </div>
-        ) : availableProviders.length === 0 ? (
+        ) : providersToDisplay.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <Typography variant="muted">
               No providers available for this country
             </Typography>
           </div>
-        ) : !quote ? (
+        ) : providersWithQuotes.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <Typography variant="muted">No quote available</Typography>
           </div>
         ) : (
           <>
-            {availableProviders.map((provider) => (
+            {providersWithQuotes.map(({ provider, quote: providerQuote }) => (
               <button
                 key={provider.id}
                 type="button"
@@ -121,7 +175,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                     provider.displayName,
                     provider.description,
                     provider.logoUrl,
-                    quote
+                    providerQuote
                   )
                 }
                 disabled={isLoading}
@@ -150,11 +204,13 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                 <div className="text-right">
                   <Typography variant="small">
                     {currencySymbol}
-                    {quote.total_fiat_amount.toFixed(FIAT_AMOUNT_FIXED_DIGITS)}
+                    {providerQuote.total_fiat_amount.toFixed(
+                      FIAT_AMOUNT_FIXED_DIGITS
+                    )}
                   </Typography>
                   {token?.symbol && (
                     <Typography variant="muted" className="text-xs">
-                      {quote.crypto_quantity.toFixed(
+                      {providerQuote.crypto_quantity.toFixed(
                         CRYPTO_AMOUNT_FIXED_DIGITS
                       )}{' '}
                       {token.symbol}

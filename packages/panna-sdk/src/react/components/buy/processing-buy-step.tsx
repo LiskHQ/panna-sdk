@@ -10,6 +10,7 @@ import {
   useOnrampSessionStatus,
   usePanna
 } from '@/hooks';
+import { getErrorMessage } from '@/utils/get-error-message';
 import { DEFAULT_CHAIN, DEFAULT_COUNTRY_CODE } from '../../../core';
 import type { QuoteData } from '../../types/onramp-quote.types';
 import { getCurrencyForCountry, getEnvironmentChain } from '../../utils';
@@ -56,6 +57,7 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
   const token = form.watch('token');
   const fiatAmount = form.watch('fiatAmount');
   const country = form.watch('country');
+  const countryCode = country?.code;
 
   const quote = provider?.quote as QuoteData | undefined;
 
@@ -63,7 +65,7 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
   const networkName = currentChain?.name ?? DEFAULT_CHAIN?.name ?? 'lisk';
   const onrampNetwork = networkName.toLowerCase();
   const currencyCode = getCurrencyForCountry(
-    country?.code ?? DEFAULT_COUNTRY_CODE
+    countryCode ?? DEFAULT_COUNTRY_CODE
   );
 
   const hasRequiredFormValues =
@@ -71,7 +73,8 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
     !!token?.symbol &&
     typeof fiatAmount === 'number' &&
     fiatAmount > 0 &&
-    !!quote;
+    !!quote &&
+    !!countryCode;
 
   const { mutateAsync: createSession, isPending: isCreatingSession } =
     useCreateOnrampSession();
@@ -158,12 +161,14 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
         shouldTouch: false
       });
     } catch (error) {
+      const fallbackMessage =
+        getErrorMessage(error) || 'Failed to create onramp session.';
       const normalizedError =
-        error instanceof Error
-          ? error
-          : new Error('Failed to create onramp session.');
-      console.error('Failed to create onramp session:', normalizedError);
+        error instanceof Error ? error : new Error(fallbackMessage);
+
       setCreationError(normalizedError);
+
+      throw normalizedError;
     }
   }, [
     createSession,
@@ -186,7 +191,9 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
     }
 
     creationAttemptedRef.current = true;
-    void handleCreateSession();
+    handleCreateSession().catch((error) => {
+      console.error('Failed to create onramp session:', getErrorMessage(error));
+    });
   }, [
     handleCreateSession,
     hasRequiredFormValues,
@@ -225,7 +232,9 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
 
   const handleRetryCreation = () => {
     setCreationError(null);
-    void handleCreateSession();
+    handleCreateSession().catch((error) => {
+      console.error('Failed to create onramp session:', getErrorMessage(error));
+    });
   };
 
   const handleRetryStatus = () => {

@@ -47,7 +47,8 @@ const mockQuote: QuoteData = {
   gas_fee: 2.27,
   total_fiat_amount: 102.27,
   quote_timestamp: '2024-05-01T12:00:00Z',
-  quote_validity_mins: 15
+  quote_validity_mins: 15,
+  provider_id: 'onramp-money'
 };
 
 const baseSession: SessionStatusResult = {
@@ -60,31 +61,45 @@ const baseSession: SessionStatusResult = {
   completed_at: new Date().toISOString()
 };
 
-const TestWrapper = () => {
+const defaultFormValues: BuyFormData = {
+  country: { code: 'US', name: 'United States', flag: '🇺🇸' },
+  token: {
+    address: '0x123',
+    symbol: 'USDC',
+    name: 'USD Coin'
+  },
+  fiatAmount: 100,
+  cryptoAmount: 97.73,
+  provider: {
+    providerId: 'onramp-money',
+    providerName: 'Onramp Money',
+    providerDescription: 'Fast fiat onramp',
+    providerLogoUrl: 'https://onramp.money/logo.png',
+    quote: mockQuote
+  }
+};
+
+const TestWrapper = ({
+  defaultValues,
+  onClose = noop
+}: {
+  defaultValues?: Partial<BuyFormData>;
+  onClose?: () => void;
+}) => {
   const form = useForm<BuyFormData>({
     defaultValues: {
-      country: { code: 'US', name: 'United States', flag: '🇺🇸' },
-      token: {
-        address: '0x123',
-        symbol: 'USDC',
-        name: 'USD Coin'
-      },
-      fiatAmount: 100,
-      cryptoAmount: 97.73,
-      provider: {
-        providerId: 'onramp-money',
-        providerName: 'Onramp Money',
-        providerDescription: 'Fast fiat onramp',
-        providerLogoUrl: 'https://onramp.money/logo.png',
-        quote: mockQuote
-      }
+      ...defaultFormValues,
+      ...defaultValues
     }
   });
 
-  return <ProcessingBuyStep onClose={noop} form={form} />;
+  return <ProcessingBuyStep onClose={onClose} form={form} />;
 };
 
-const renderComponent = () => render(<TestWrapper />);
+const renderComponent = (options?: {
+  defaultValues?: Partial<BuyFormData>;
+  onClose?: () => void;
+}) => render(<TestWrapper {...options} />);
 
 describe('ProcessingBuyStep', () => {
   const user = userEvent.setup();
@@ -115,17 +130,18 @@ describe('ProcessingBuyStep', () => {
       mutateAsync: mockMutateAsync,
       isPending: false
     });
-    mockUseOnrampSessionStatus.mockImplementation(({ sessionId }) =>
-      sessionId
-        ? {
-            ...sessionStatusResponse,
-            data: {
-              ...baseSession,
-              session_id: sessionId,
-              status: OnrampMoneySessionStatusEnum.Created
+    mockUseOnrampSessionStatus.mockImplementation(
+      ({ sessionId }: { sessionId: string }) =>
+        sessionId
+          ? {
+              ...sessionStatusResponse,
+              data: {
+                ...baseSession,
+                session_id: sessionId,
+                status: OnrampMoneySessionStatusEnum.Created
+              }
             }
-          }
-        : sessionStatusResponse
+          : sessionStatusResponse
     );
     mockUseDialogStepper.mockReturnValue({
       next: mockNext,
@@ -203,6 +219,232 @@ describe('ProcessingBuyStep', () => {
     await user.click(screen.getByRole('button', { name: /try again/i }));
 
     expect(mockMutateAsync).toHaveBeenCalledTimes(2);
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to create onramp session:',
+      'Create failed'
+    );
+
     consoleErrorSpy.mockRestore();
+  });
+
+  it.each([
+    [
+      'missing provider',
+      () => ({
+        provider: undefined
+      })
+    ],
+    [
+      'missing token symbol',
+      () => ({
+        token: {
+          ...defaultFormValues.token!,
+          symbol: ''
+        }
+      })
+    ],
+    [
+      'zero fiat amount',
+      () => ({
+        fiatAmount: 0
+      })
+    ],
+    [
+      'negative fiat amount',
+      () => ({
+        fiatAmount: -50
+      })
+    ],
+    [
+      'missing quote',
+      () => ({
+        provider: {
+          ...defaultFormValues.provider!,
+          quote: undefined as unknown as QuoteData
+        }
+      })
+    ],
+    [
+      'missing country',
+      () => ({
+        country: undefined
+      })
+    ]
+  ])(
+    'shows missing purchase information UI when %s',
+    async (_, getOverrides) => {
+      renderComponent({
+        defaultValues: getOverrides()
+      });
+
+      expect(
+        screen.getByText(
+          'Missing purchase information. Please go back and select a payment provider again.'
+        )
+      ).toBeInTheDocument();
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+    }
+  );
+
+  it('allows navigation via Go back and Close actions when data is missing', async () => {
+    const onClose = jest.fn();
+
+    renderComponent({
+      defaultValues: { provider: undefined },
+      onClose
+    });
+
+    await user.click(screen.getByRole('button', { name: /go back/i }));
+    expect(mockPrev).toHaveBeenCalledTimes(1);
+
+    await user.click(screen.getByRole('button', { name: /^close$/i }));
+    expect(mockReset).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    OnrampMoneySessionStatusEnum.Failed,
+    OnrampMoneySessionStatusEnum.Cancelled,
+    OnrampMoneySessionStatusEnum.Expired
+  ])('navigates to terminal step when status is %s', async (status) => {
+    mockUseOnrampSessionStatus.mockImplementation(({ sessionId }) =>
+      sessionId
+        ? {
+            ...sessionStatusResponse,
+            data: {
+              ...baseSession,
+              session_id: sessionId,
+              status
+            }
+          }
+        : sessionStatusResponse
+    );
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(mockNext).toHaveBeenCalledWith({
+        status,
+        session: expect.objectContaining({
+          status
+        })
+      });
+    });
+
+    expect(mockNext).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows creating session label while session is being created', () => {
+    mockMutateAsync.mockImplementation(() => new Promise(() => {}));
+
+    const { unmount } = renderComponent();
+
+    expect(screen.getByText('Creating payment session...')).toBeInTheDocument();
+
+    unmount();
+  });
+
+  it.each([
+    [OnrampMoneySessionStatusEnum.Created, 'Waiting for payment provider...'],
+    [OnrampMoneySessionStatusEnum.Pending, 'Payment in progress...']
+  ])('updates status label for %s', async (status, expectedLabel) => {
+    mockUseOnrampSessionStatus.mockImplementation(({ sessionId }) =>
+      sessionId
+        ? {
+            ...sessionStatusResponse,
+            data: {
+              ...baseSession,
+              session_id: sessionId,
+              status
+            }
+          }
+        : sessionStatusResponse
+    );
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+    });
+  });
+
+  it('displays polling error messaging and allows retrying status check', async () => {
+    const refetch = jest.fn();
+    mockUseOnrampSessionStatus.mockImplementation(({ sessionId }) =>
+      sessionId
+        ? {
+            ...sessionStatusResponse,
+            data: {
+              ...baseSession,
+              session_id: sessionId,
+              status: OnrampMoneySessionStatusEnum.Created
+            },
+            error: new Error('Status failed'),
+            refetch
+          }
+        : sessionStatusResponse
+    );
+
+    renderComponent();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'Unable to fetch the latest status. Please retry below.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    const retryButton = screen.getByRole('button', {
+      name: /retry status check/i
+    });
+
+    await user.click(retryButton);
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables retry button while status polling is in progress', async () => {
+    const refetch = jest.fn();
+    mockUseOnrampSessionStatus.mockImplementation(({ sessionId }) =>
+      sessionId
+        ? {
+            ...sessionStatusResponse,
+            data: {
+              ...baseSession,
+              session_id: sessionId,
+              status: OnrampMoneySessionStatusEnum.Created
+            },
+            error: new Error('Status failed'),
+            refetch,
+            isFetching: true
+          }
+        : sessionStatusResponse
+    );
+
+    renderComponent();
+
+    const retryButton = await screen.findByRole('button', {
+      name: /retry status check/i
+    });
+
+    expect(retryButton).toBeDisabled();
+  });
+
+  it('renders manual provider open action with provider name', async () => {
+    renderComponent();
+
+    const openButton = await screen.findByRole('button', {
+      name: /open onramp money/i
+    });
+
+    await user.click(openButton);
+
+    expect(window.open).toHaveBeenLastCalledWith(
+      'https://onramp.money/session',
+      '_blank',
+      'noopener,noreferrer'
+    );
   });
 });

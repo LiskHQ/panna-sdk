@@ -88,6 +88,11 @@ export type QuoteData = {
   total_fiat_amount: number;
   quote_timestamp: string;
   quote_validity_mins: number;
+  provider_id?: string;
+  provider_name?: string;
+  provider_description?: string;
+  provider_logo_url?: string;
+  provider_redirect_url?: string;
 };
 
 export type OnrampQuoteResponse = {
