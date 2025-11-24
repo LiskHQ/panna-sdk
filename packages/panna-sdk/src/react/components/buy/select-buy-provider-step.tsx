@@ -1,6 +1,7 @@
 import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { PROVIDERS } from 'src/core/onramp/constants';
 import { DEFAULT_CHAIN, DEFAULT_COUNTRY_CODE } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
 import { useOnrampQuotes, usePanna } from '../../hooks';
@@ -64,7 +65,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
       return null;
     }
 
-    const providerId = quote.provider_id ?? 'onramp-money';
+    const providerId = quote.provider_id ?? PROVIDERS.onrampmoney.id;
     const matchedProvider = availableProviders.find(
       (provider) => provider.id === providerId
     );

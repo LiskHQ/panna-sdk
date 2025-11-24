@@ -41,7 +41,7 @@ const mockQuote: QuoteData = {
   total_fiat_amount: 102.27,
   quote_timestamp: '2024-05-01T12:00:00Z',
   quote_validity_mins: 15,
-  provider_id: 'onramp-money'
+  provider_id: 'onrampmoney'
 };
 
 let formRef: UseFormReturn<BuyFormData> | null = null;
@@ -85,7 +85,7 @@ describe('SelectBuyProviderStep', () => {
     });
     mockGetOnrampProviders.mockReturnValue([
       {
-        id: 'onramp-money',
+        id: 'onrampmoney',
         displayName: 'Onramp Money',
         description: 'Fast fiat onramp',
         logoUrl: 'https://onramp.money/logo.png'
@@ -111,7 +111,7 @@ describe('SelectBuyProviderStep', () => {
     const provider = formRef?.getValues('provider');
 
     expect(provider).toEqual({
-      providerId: 'onramp-money',
+      providerId: 'onrampmoney',
       providerName: 'Onramp Money',
       providerDescription: 'Fast fiat onramp',
       providerLogoUrl: 'https://onramp.money/logo.png',
@@ -170,7 +170,7 @@ describe('SelectBuyProviderStep', () => {
   it('only renders providers that have quote data available', () => {
     mockGetOnrampProviders.mockReturnValue([
       {
-        id: 'onramp-money',
+        id: 'onrampmoney',
         displayName: 'Onramp Money',
         description: 'Fast fiat onramp',
         logoUrl: 'https://onramp.money/logo.png'
@@ -196,7 +196,7 @@ describe('SelectBuyProviderStep', () => {
       <TestWrapper
         defaultValues={{
           provider: {
-            providerId: 'onramp-money',
+            providerId: 'onrampmoney',
             providerName: 'Onramp Money',
             providerDescription: 'Fast fiat onramp',
             providerLogoUrl: 'https://onramp.money/logo.png',

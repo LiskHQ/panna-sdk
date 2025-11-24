@@ -48,7 +48,7 @@ const mockQuote: QuoteData = {
   total_fiat_amount: 102.27,
   quote_timestamp: '2024-05-01T12:00:00Z',
   quote_validity_mins: 15,
-  provider_id: 'onramp-money'
+  provider_id: 'onrampmoney'
 };
 
 const baseSession: SessionStatusResult = {
@@ -71,7 +71,7 @@ const defaultFormValues: BuyFormData = {
   fiatAmount: 100,
   cryptoAmount: 97.73,
   provider: {
-    providerId: 'onramp-money',
+    providerId: 'onrampmoney',
     providerName: 'Onramp Money',
     providerDescription: 'Fast fiat onramp',
     providerLogoUrl: 'https://onramp.money/logo.png',
@@ -221,7 +221,7 @@ describe('ProcessingBuyStep', () => {
     expect(mockMutateAsync).toHaveBeenCalledTimes(2);
     expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Failed to create onramp session:',
+      'Failed to create onramp session: ',
       'Create failed'
     );
 

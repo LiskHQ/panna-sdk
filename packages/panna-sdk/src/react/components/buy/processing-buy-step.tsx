@@ -192,7 +192,10 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
 
     creationAttemptedRef.current = true;
     handleCreateSession().catch((error) => {
-      console.error('Failed to create onramp session:', getErrorMessage(error));
+      console.error(
+        'Failed to create onramp session: ',
+        getErrorMessage(error)
+      );
     });
   }, [
     handleCreateSession,
@@ -233,7 +236,10 @@ export function ProcessingBuyStep({ onClose, form }: ProcessingBuyStepProps) {
   const handleRetryCreation = () => {
     setCreationError(null);
     handleCreateSession().catch((error) => {
-      console.error('Failed to create onramp session:', getErrorMessage(error));
+      console.error(
+        'Failed to create onramp session: ',
+        getErrorMessage(error)
+      );
     });
   };
 

@@ -23,12 +23,12 @@ export const PROVIDERS = {
     websiteUrl: 'https://www.transak.com',
     logoUrl: 'https://www.transak.com/favicon.png'
   },
-  'onramp-money': {
-    id: 'onramp-money',
+  onrampmoney: {
+    id: 'onrampmoney',
     displayName: 'Onramp Money',
     description: 'Fiat to crypto via Onramp Money',
     websiteUrl: 'https://onramp.money',
-    logoUrl: 'https://onramp.money/favicon.ico'
+    logoUrl: 'https://onramp.money/assets/favicon.png'
   }
 } as const satisfies Record<ProviderId, ProviderInfo>;
 

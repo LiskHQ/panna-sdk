@@ -314,11 +314,11 @@ describe('getOnrampProviders', () => {
       logoUrl: 'https://www.stripe.com/favicon.ico'
     },
     {
-      id: 'onramp-money',
+      id: 'onrampmoney',
       displayName: 'Onramp Money',
       description: 'Fiat to crypto via Onramp Money',
       websiteUrl: 'https://onramp.money',
-      logoUrl: 'https://onramp.money/favicon.ico'
+      logoUrl: 'https://onramp.money/assets/favicon.png'
     }
   ];
   const expectedResultForSA = [
@@ -337,11 +337,11 @@ describe('getOnrampProviders', () => {
       logoUrl: 'https://www.stripe.com/favicon.ico'
     },
     {
-      id: 'onramp-money',
+      id: 'onrampmoney',
       displayName: 'Onramp Money',
       description: 'Fiat to crypto via Onramp Money',
       websiteUrl: 'https://onramp.money',
-      logoUrl: 'https://onramp.money/favicon.ico'
+      logoUrl: 'https://onramp.money/assets/favicon.png'
     }
   ];
 

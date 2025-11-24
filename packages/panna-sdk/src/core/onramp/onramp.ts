@@ -201,7 +201,7 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
   }
 
   const providers = new Set<ProviderId>(mappedProviders);
-  providers.add('onramp-money');
+  providers.add(PROVIDERS.onrampmoney.id);
 
   return Array.from(providers).map((provider) => PROVIDERS[provider]);
 }
