@@ -36,7 +36,7 @@ const liskSepoliaTokens = tokenConfig[4202];
 
 Tokens for Lisk mainnet (chain ID: 1135).
 
-**Includes:** LSK, ETH, USDT, USDC.e, vpLSK
+**Includes:** LSK, ETH, USDT, USDC.e
 
 ```tsx
 import { liskTokenConfig } from 'panna-sdk';

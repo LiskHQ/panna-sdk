@@ -34,12 +34,6 @@ export const liskTokenConfig: SupportedTokens = {
       name: 'Bridged USDC (Lisk)',
       symbol: 'USDC.e',
       icon: usdcIcon
-    },
-    {
-      address: '0x2eE6Eca46d2406454708a1C80356a6E63b57D404',
-      name: 'Lisk Voting Power',
-      symbol: 'vpLSK',
-      icon: lskIcon
     }
   ]
 };
