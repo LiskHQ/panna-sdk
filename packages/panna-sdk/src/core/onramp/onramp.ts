@@ -196,11 +196,10 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
 
   const mappedProviders = COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
 
-  if (mappedProviders.length === 0) {
-    return [];
-  }
-
   const providers = new Set<ProviderId>(mappedProviders);
+
+  // Explicitly add Onramp.money
+  // TODO: In future restrict by https://docs.onramp.money/onramp/supported-assets-and-fiat/fiat-currencies
   providers.add(PROVIDERS.onrampmoney.id);
 
   return Array.from(providers).map((provider) => PROVIDERS[provider]);
