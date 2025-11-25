@@ -1,7 +1,7 @@
-import { OnrampProvider, ProviderInfo } from './types';
+import { OnrampProvider, ProviderId, ProviderInfo } from './types';
 
 // Provider metadata
-export const PROVIDERS: Record<OnrampProvider, ProviderInfo> = {
+export const PROVIDERS = {
   coinbase: {
     id: 'coinbase',
     displayName: 'Coinbase',
@@ -22,8 +22,15 @@ export const PROVIDERS: Record<OnrampProvider, ProviderInfo> = {
     description: 'Card, Apple Pay or bank transfer',
     websiteUrl: 'https://www.transak.com',
     logoUrl: 'https://www.transak.com/favicon.png'
+  },
+  onrampmoney: {
+    id: 'onrampmoney',
+    displayName: 'Onramp Money',
+    description: 'Fiat to crypto via Onramp Money',
+    websiteUrl: 'https://onramp.money',
+    logoUrl: 'https://onramp.money/assets/favicon.png'
   }
-};
+} as const satisfies Record<ProviderId, ProviderInfo>;
 
 // Note: This function can be replaced with API call to fetch real time data
 // Dictionary of countries and their available onramp providers

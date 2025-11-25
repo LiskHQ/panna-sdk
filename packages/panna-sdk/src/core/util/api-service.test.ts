@@ -496,7 +496,7 @@ describe('PannaApiService', () => {
 
       it('should make correct fetch request including Authorization header when authToken provided', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://stg-panna-app.lisk.com',
+          baseUrl: 'https://stg-panna-app.lisk.com/v1',
           isMockMode: false
         });
         const authToken = 'test-jwt-token';
@@ -551,7 +551,7 @@ describe('PannaApiService', () => {
 
       it('should construct correct URL with baseUrl', async () => {
         const service = new PannaApiService({
-          baseUrl: 'https://custom.api.com',
+          baseUrl: 'https://custom.api.com/v1',
           isMockMode: false
         });
 

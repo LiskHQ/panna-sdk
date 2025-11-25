@@ -311,7 +311,7 @@ export class PannaApiService {
     }
 
     try {
-      const url = `${baseUrl}/v1/onramp/session/${sessionId}`;
+      const url = `${baseUrl}/onramp/session/${sessionId}`;
 
       const headers: HeadersInit = {
         'Content-Type': 'application/json',

@@ -8,9 +8,9 @@ import type {
   OnrampIntent,
   OnrampPrepareParams,
   OnrampPrepareResult,
-  OnrampProvider,
   OnrampStatusParams,
   OnrampStatusResult,
+  ProviderId,
   ProviderInfo
 } from './types';
 
@@ -194,9 +194,15 @@ export function getOnrampProviders(countryCode: string): ProviderInfo[] {
     throw new Error(`Invalid country code: ${countryCode}`);
   }
 
-  const providers: OnrampProvider[] =
-    COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
-  return providers.map((provider) => PROVIDERS[provider]);
+  const mappedProviders = COUNTRY_PROVIDER_MAP[normalizedCountryCode] || [];
+
+  const providers = new Set<ProviderId>(mappedProviders);
+
+  // Explicitly add Onramp.money
+  // TODO: In future restrict by https://docs.onramp.money/onramp/supported-assets-and-fiat/fiat-currencies
+  providers.add(PROVIDERS.onrampmoney.id);
+
+  return Array.from(providers).map((provider) => PROVIDERS[provider]);
 }
 
 /**

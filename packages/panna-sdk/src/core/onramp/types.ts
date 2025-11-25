@@ -83,8 +83,10 @@ export interface OnrampPrepareResult {
 
 export type OnrampProvider = 'coinbase' | 'stripe' | 'transak'; // Add more in future
 
+export type ProviderId = OnrampProvider | 'onrampmoney';
+
 export interface ProviderInfo {
-  id: OnrampProvider;
+  id: ProviderId;
   displayName: string;
   description?: string;
   logoUrl?: string;

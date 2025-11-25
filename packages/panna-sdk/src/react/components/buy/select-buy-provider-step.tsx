@@ -1,9 +1,10 @@
 import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
+import { PROVIDERS } from 'src/core/onramp/constants';
 import { DEFAULT_CHAIN, DEFAULT_COUNTRY_CODE } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
-import { useOnrampQuotes, useCreateOnrampSession, usePanna } from '../../hooks';
+import { useOnrampQuotes, usePanna } from '../../hooks';
 import type { QuoteData } from '../../types/onramp-quote.types';
 import {
   getCurrencyForCountry,
@@ -27,12 +28,6 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { chainId } = usePanna();
 
   const { token, country, fiatAmount } = form.watch();
-  const {
-    mutateAsync: createSession,
-    isPending: isCreatingSession,
-    error: createSessionError
-  } = useCreateOnrampSession();
-
   const currentChain = getEnvironmentChain(chainId);
   const networkName = currentChain?.name ?? DEFAULT_CHAIN?.name ?? 'lisk';
   const onrampNetwork = networkName.toLowerCase();
@@ -65,47 +60,80 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
     fiatCurrency: currencyCode
   });
 
-  const handleProviderSelect = async (
+  const providerFromQuote = useMemo(() => {
+    if (!quote) {
+      return null;
+    }
+
+    const providerId = quote.provider_id ?? PROVIDERS.onrampmoney.id;
+    const matchedProvider = availableProviders.find(
+      (provider) => provider.id === providerId
+    );
+
+    return matchedProvider ?? null;
+  }, [availableProviders, quote]);
+
+  const providersToDisplay = providerFromQuote
+    ? [providerFromQuote]
+    : availableProviders;
+
+  const providerQuoteMap = useMemo(() => {
+    if (!quote) {
+      return new Map<string, QuoteData>();
+    }
+
+    const providerId =
+      providerFromQuote?.id ??
+      (providersToDisplay.length === 1 ? providersToDisplay[0]?.id : undefined);
+
+    if (!providerId) {
+      return new Map<string, QuoteData>();
+    }
+
+    return new Map<string, QuoteData>([[providerId, quote]]);
+  }, [providerFromQuote?.id, providersToDisplay, quote]);
+
+  const providersWithQuotes = useMemo(() => {
+    return providersToDisplay
+      .map((provider) => {
+        const providerQuote = providerQuoteMap.get(provider.id);
+
+        if (!providerQuote) {
+          return null;
+        }
+
+        return { provider, quote: providerQuote };
+      })
+      .filter(
+        (
+          entry
+        ): entry is {
+          provider: (typeof providersToDisplay)[number];
+          quote: QuoteData;
+        } => entry !== null
+      );
+  }, [providerQuoteMap, providersToDisplay]);
+
+  const handleProviderSelect = (
     providerId: string,
     providerName: string,
     providerDescription: string | undefined,
     providerLogoUrl: string | undefined,
     quoteData: QuoteData
   ) => {
-    // Prevent multiple simultaneous session creation attempts
-    if (isCreatingSession) return;
-
-    // Token should always be defined after the previous step, but keep a guard to
-    // prevent runtime errors if the form state resets or the user navigates mid-flow.
-    if (!token?.symbol || typeof fiatAmount !== 'number' || fiatAmount <= 0) {
-      console.warn(
-        'Cannot create onramp session without a valid token symbol and fiat amount.'
-      );
+    if (!quoteData) {
       return;
     }
 
-    try {
-      const session = await createSession({
-        tokenSymbol: token.symbol,
-        network: onrampNetwork,
-        fiatAmount,
-        fiatCurrency: currencyCode,
-        quoteData
-      });
+    form.setValue('provider', {
+      providerId,
+      providerName,
+      providerDescription,
+      providerLogoUrl,
+      quote: quoteData
+    });
 
-      form.setValue('provider', {
-        providerId,
-        providerName,
-        providerDescription,
-        providerLogoUrl,
-        redirectUrl: session.redirect_url,
-        quote: quoteData
-      });
-
-      next();
-    } catch (error) {
-      console.error('Failed to create onramp session:', error);
-    }
+    next();
   };
 
   return (
@@ -114,12 +142,10 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
         <DialogTitle>Select payment provider</DialogTitle>
       </DialogHeader>
       <div className="flex flex-col gap-4">
-        {isLoading || isCreatingSession ? (
+        {isLoading ? (
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <Loader2Icon size={48} className="animate-spin" />
-            <Typography variant="muted">
-              {isCreatingSession ? 'Creating session...' : 'Loading quotes...'}
-            </Typography>
+            <Typography variant="muted">Loading quotes...</Typography>
           </div>
         ) : quoteError ? (
           <div className="flex items-center justify-center py-8">
@@ -127,26 +153,19 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
               Failed to load quotes. Please try again.
             </Typography>
           </div>
-        ) : availableProviders.length === 0 ? (
+        ) : providersToDisplay.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <Typography variant="muted">
               No providers available for this country
             </Typography>
           </div>
-        ) : !quote ? (
+        ) : providersWithQuotes.length === 0 ? (
           <div className="flex items-center justify-center py-8">
             <Typography variant="muted">No quote available</Typography>
           </div>
         ) : (
           <>
-            {createSessionError && (
-              <div className="border-destructive/50 bg-destructive/10 flex items-center justify-center rounded-md border px-4 py-3">
-                <Typography variant="muted">
-                  Failed to create onramp session. Please try again.
-                </Typography>
-              </div>
-            )}
-            {availableProviders.map((provider) => (
+            {providersWithQuotes.map(({ provider, quote: providerQuote }) => (
               <button
                 key={provider.id}
                 type="button"
@@ -157,10 +176,10 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                     provider.displayName,
                     provider.description,
                     provider.logoUrl,
-                    quote
+                    providerQuote
                   )
                 }
-                disabled={isCreatingSession}
+                disabled={isLoading}
               >
                 <div className="flex items-center gap-3">
                   {provider.logoUrl && (
@@ -186,11 +205,13 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
                 <div className="text-right">
                   <Typography variant="small">
                     {currencySymbol}
-                    {quote.total_fiat_amount.toFixed(FIAT_AMOUNT_FIXED_DIGITS)}
+                    {providerQuote.total_fiat_amount.toFixed(
+                      FIAT_AMOUNT_FIXED_DIGITS
+                    )}
                   </Typography>
                   {token?.symbol && (
                     <Typography variant="muted" className="text-xs">
-                      {quote.crypto_quantity.toFixed(
+                      {providerQuote.crypto_quantity.toFixed(
                         CRYPTO_AMOUNT_FIXED_DIGITS
                       )}{' '}
                       {token.symbol}

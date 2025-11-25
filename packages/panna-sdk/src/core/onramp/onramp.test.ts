@@ -312,6 +312,13 @@ describe('getOnrampProviders', () => {
       description: 'Card, Apple Pay or bank transfer',
       websiteUrl: 'https://www.stripe.com',
       logoUrl: 'https://www.stripe.com/favicon.ico'
+    },
+    {
+      id: 'onrampmoney',
+      displayName: 'Onramp Money',
+      description: 'Fiat to crypto via Onramp Money',
+      websiteUrl: 'https://onramp.money',
+      logoUrl: 'https://onramp.money/assets/favicon.png'
     }
   ];
   const expectedResultForSA = [
@@ -328,6 +335,13 @@ describe('getOnrampProviders', () => {
       description: 'Card, Apple Pay or bank transfer',
       websiteUrl: 'https://www.stripe.com',
       logoUrl: 'https://www.stripe.com/favicon.ico'
+    },
+    {
+      id: 'onrampmoney',
+      displayName: 'Onramp Money',
+      description: 'Fiat to crypto via Onramp Money',
+      websiteUrl: 'https://onramp.money',
+      logoUrl: 'https://onramp.money/assets/favicon.png'
     }
   ];
 
@@ -351,9 +365,17 @@ describe('getOnrampProviders', () => {
     expect(result).toEqual(expectedResultForSA);
   });
 
-  it('should return an empty array for unsupported countries', async () => {
+  it('should return only onrampmoney for unsupported countries', async () => {
     const result = await getOnrampProviders('aQ');
-    expect(result).toEqual([]);
+    expect(result).toEqual([
+      {
+        id: 'onrampmoney',
+        displayName: 'Onramp Money',
+        description: 'Fiat to crypto via Onramp Money',
+        websiteUrl: 'https://onramp.money',
+        logoUrl: 'https://onramp.money/assets/favicon.png'
+      }
+    ]);
   });
 
   it('should throw an error for invalid country codes', async () => {
