@@ -1,6 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { useDialog, useLogin, usePanna } from '@/hooks';
-import { handleSiweAuth } from '@/utils/auth';
 import { getErrorMessage } from '@/utils/get-error-message';
 import { Dialog } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -8,7 +7,6 @@ import { SocialLoginPendingDialog } from './social-login-pending-dialog';
 
 jest.mock('@/hooks');
 jest.mock('../ui/dialog-stepper');
-jest.mock('@/utils/auth');
 jest.mock('@/utils/get-error-message');
 jest.mock('thirdweb/wallets');
 
@@ -17,9 +15,6 @@ const mockUseLogin = useLogin as jest.MockedFunction<typeof useLogin>;
 const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
 const mockUseDialogStepper = useDialogStepper as jest.MockedFunction<
   typeof useDialogStepper
->;
-const mockHandleSiweAuth = handleSiweAuth as jest.MockedFunction<
-  typeof handleSiweAuth
 >;
 const mockGetErrorMessage = getErrorMessage as jest.MockedFunction<
   typeof getErrorMessage
@@ -30,18 +25,6 @@ const mockNext = jest.fn();
 const mockGoToStep = jest.fn();
 const mockReset = jest.fn();
 const mockOnClose = jest.fn();
-
-const mockSiweAuth = {
-  generatePayload: jest.fn(),
-  login: jest.fn(),
-  isLoggedIn: jest.fn(),
-  isTokenExpired: jest.fn(),
-  getUser: jest.fn(),
-  getAuthToken: jest.fn(),
-  getValidAuthToken: jest.fn(),
-  getTokenExpiry: jest.fn(),
-  logout: jest.fn()
-};
 
 describe('SocialLoginPendingDialog', () => {
   beforeEach(() => {
@@ -55,8 +38,7 @@ describe('SocialLoginPendingDialog', () => {
       client: 'mock-client',
       partnerId: 'mock-partner-id',
       chainId: 1155,
-      apiService: {},
-      siweAuth: mockSiweAuth
+      apiService: {}
     });
 
     (mockUseDialogStepper as jest.Mock).mockReturnValue({
@@ -102,10 +84,9 @@ describe('SocialLoginPendingDialog', () => {
     });
   });
 
-  it('handles successful Google login and SIWE auth', async () => {
+  it('handles successful Google login and closes dialog', async () => {
     const mockWallet = { address: '0x123' };
     mockConnect.mockResolvedValue(mockWallet);
-    mockHandleSiweAuth.mockResolvedValue(true);
 
     render(
       <Dialog open>
@@ -114,13 +95,7 @@ describe('SocialLoginPendingDialog', () => {
     );
 
     await waitFor(() => {
-      expect(mockHandleSiweAuth).toHaveBeenCalledWith(
-        mockSiweAuth,
-        mockWallet,
-        {
-          chainId: 1135
-        }
-      );
+      expect(mockConnect).toHaveBeenCalled();
     });
 
     await waitFor(() => {
@@ -207,7 +182,6 @@ describe('SocialLoginPendingDialog', () => {
       expect(mockConnect).toHaveBeenCalled();
     });
 
-    expect(mockHandleSiweAuth).not.toHaveBeenCalled();
     expect(mockOnClose).not.toHaveBeenCalled();
   });
 });

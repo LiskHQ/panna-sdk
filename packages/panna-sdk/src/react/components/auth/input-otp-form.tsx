@@ -26,7 +26,6 @@ import { useLogin, usePanna } from '@/hooks';
 import { useCountdown } from '@/hooks/use-countdown';
 import { getErrorMessage } from '@/utils/get-error-message';
 import { getEnvironmentChain } from '../../utils';
-import { handleSiweAuth } from '../../utils/auth';
 import { Button } from '../ui/button';
 import { DialogStepperContextValue } from '../ui/dialog-stepper';
 import { Typography } from '../ui/typography';
@@ -54,7 +53,7 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     }
   });
   const { error: codeFormError } = form.getFieldState('code');
-  const { client, partnerId, chainId, siweAuth } = usePanna();
+  const { client, partnerId, chainId } = usePanna();
   const [resendTimer, resetResendTimer] = useCountdown(45);
   const formattedTime =
     resendTimer > 0 ? `0:${String(resendTimer).padStart(2, '0')}` : '';
@@ -103,17 +102,8 @@ export function InputOTPForm({ data, reset, onClose }: InputOTPFormProps) {
     });
 
     if (wallet) {
-      const address = wallet.getAccount()?.address;
-      if (address) {
-        // Automatically perform SIWE authentication in the background
-        // Pass chainId for consistency with login form
-        await handleSiweAuth(siweAuth, wallet, {
-          chainId: getEnvironmentChain().id as number
-        });
-
-        reset();
-        onClose();
-      }
+      reset();
+      onClose();
     }
   };
 

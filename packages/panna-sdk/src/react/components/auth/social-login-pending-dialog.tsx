@@ -4,7 +4,6 @@ import { EcosystemId } from 'src/core';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { useDialog, useLogin, usePanna } from '@/hooks';
 import { getEnvironmentChain } from '@/utils';
-import { handleSiweAuth } from '@/utils/auth';
 import { getErrorMessage } from '@/utils/get-error-message';
 import {
   DialogClose,
@@ -20,7 +19,7 @@ import { AccountDialogFooter } from './auth-flow';
 export function SocialLoginPendingDialog() {
   const { next, goToStep, reset } = useDialogStepper();
   const { onClose } = useDialog();
-  const { client, partnerId, chainId, siweAuth } = usePanna();
+  const { client, partnerId, chainId } = usePanna();
   const initializeGoogleLogin = useRef(true);
 
   const { connect, error: loginError } = useLogin({
@@ -52,11 +51,6 @@ export function SocialLoginPendingDialog() {
     });
 
     if (wallet) {
-      // Automatically perform SIWE authentication in the background
-      await handleSiweAuth(siweAuth, wallet, {
-        chainId: getEnvironmentChain().id as number
-      });
-
       onClose?.();
     }
   };
