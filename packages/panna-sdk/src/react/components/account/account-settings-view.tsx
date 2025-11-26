@@ -7,7 +7,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
 export function AccountSettingsView() {
-  const { client, siweAuth } = usePanna();
+  const { client } = usePanna();
   const activeWallet = useActiveWallet();
   const { disconnect } = useLogout();
   const {
@@ -24,9 +24,6 @@ export function AccountSettingsView() {
       }
     } catch (error) {
       console.error('Error during logout:', error);
-    } finally {
-      // Always clear SIWE authentication data, even if disconnect fails
-      await siweAuth.logout();
     }
   };
 
