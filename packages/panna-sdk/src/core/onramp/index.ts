@@ -1,27 +1,8 @@
 // Export functions
-export {
-  onRampStatus,
-  getOnrampProviders,
-  getTokenFiatPrices,
-  onRampPrepare
-} from './onramp';
+export { getOnrampProviders, getTokenFiatPrices } from './onramp';
 
 // Export types
-export type {
-  OnrampStatus,
-  OnrampTransaction,
-  OnrampPurchaseData,
-  OnrampStatusParams,
-  OnrampStatusResult,
-  OnrampCreatedResult,
-  OnrampPendingResult,
-  OnrampCompletedResult,
-  OnrampPrepareResult,
-  OnrampIntent,
-  OnrampPrepareParams,
-  OnrampProvider,
-  GetTokenFiatPricesParams,
-  ProviderInfo
-} from './types';
+export type { GetTokenFiatPricesParams, ProviderInfo } from './types';
 
 export * from './onramp-money';
+export * from './thirdweb';
