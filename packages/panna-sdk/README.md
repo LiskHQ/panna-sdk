@@ -308,7 +308,9 @@ For detailed component documentation, see [Buy Components README](./src/react/co
 
 ---
 
-## Onramp React Hooks
+## UI Hooks
+
+### Onramp React Hooks
 
 The SDK provides specialized hooks for managing onramp operations:
 

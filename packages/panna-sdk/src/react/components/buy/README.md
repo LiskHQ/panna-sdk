@@ -16,7 +16,6 @@ Pre-built React components for implementing fiat-to-crypto purchases. These comp
     - [ProcessingBuyStep](#processingbuystep)
     - [StatusStep](#statusstep)
   - [Form Schema](#form-schema)
-  - [TypeScript Interfaces](#typescript-interfaces)
   - [Usage Examples](#usage-examples)
     - [Basic Usage](#basic-usage)
     - [With Dialog](#with-dialog)
