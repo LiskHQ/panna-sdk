@@ -227,6 +227,109 @@ const countryCode = await detectCountry();
 const provider = getBestProvider(countryCode);
 ```
 
+### Error Handling
+
+#### Handling Onramp Errors
+
+```ts
+import { onramp } from 'panna-sdk/core';
+
+async function buyTokensWithErrorHandling(
+  client: PannaClient,
+  userAddress: string,
+  amount: string
+) {
+  try {
+    const session = await onramp.onRampPrepare({
+      client,
+      chainId: 1135,
+      tokenAddress: NATIVE_TOKEN_ADDRESS,
+      receiver: userAddress,
+      amount,
+      onRampProvider: 'stripe',
+      country: 'US'
+    });
+
+    return { success: true, session };
+  } catch (error) {
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('Invalid country code')) {
+        return { success: false, error: 'Country not supported' };
+      }
+      if (error.message.includes('provider')) {
+        return { success: false, error: 'Payment provider unavailable' };
+      }
+    }
+    return { success: false, error: 'Failed to create session' };
+  }
+}
+```
+
+#### Status Polling with Error Handling
+
+```ts
+import { onramp } from 'panna-sdk/core';
+
+type PollResult =
+  | { status: 'completed'; transactions: OnrampTransaction[] }
+  | { status: 'failed'; error: string }
+  | { status: 'timeout' };
+
+async function pollUntilComplete(
+  sessionId: string,
+  client: PannaClient,
+  maxAttempts = 60 // 3 minutes at 3-second intervals
+): Promise<PollResult> {
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    try {
+      const result = await onramp.onRampStatus({ id: sessionId, client });
+
+      if (result.status === 'COMPLETED') {
+        return { status: 'completed', transactions: result.transactions };
+      }
+
+      if (result.status === 'FAILED') {
+        return { status: 'failed', error: 'Payment failed' };
+      }
+
+      // Still pending, wait and retry
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      attempts++;
+    } catch (error) {
+      console.error('Status check failed:', error);
+      attempts++;
+    }
+  }
+
+  return { status: 'timeout' };
+}
+```
+
+### Supported Countries
+
+The SDK includes a comprehensive country-provider mapping. Use `getOnrampProviders()` to get available providers:
+
+```ts
+import { onramp } from 'panna-sdk/core';
+
+// Get providers for a country
+const providers = onramp.getOnrampProviders('US');
+// Returns: ['transak', 'coinbase', 'stripe', 'onrampmoney']
+
+const providersDE = onramp.getOnrampProviders('DE');
+// Returns: ['transak', 'coinbase', 'stripe', 'onrampmoney']
+
+// Invalid country throws error
+try {
+  onramp.getOnrampProviders('XX');
+} catch (error) {
+  console.error('Invalid country code');
+}
+```
+
 ## Next Steps
 
 - Explore [Client Module](../client/README.md) for SDK initialization and configuration

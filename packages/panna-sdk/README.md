@@ -20,14 +20,19 @@ Panna SDK is a developer-first toolkit for building seamless, user-friendly dece
       - [Key Functions](#key-functions-1)
     - [Wallet management](#wallet-management)
       - [Key Functions](#key-functions-2)
+    - [Onramp (Fiat-to-Crypto)](#onramp-fiat-to-crypto)
+      - [Key Functions](#key-functions-3)
   - [UI Components](#ui-components)
     - [Purpose](#purpose)
     - [Structure](#structure)
     - [Usage](#usage)
+    - [Buy/Onramp Components](#buyonramp-components)
+  - [Onramp React Hooks](#onramp-react-hooks)
   - [Examples](#examples)
     - [Using a UI Component](#using-a-ui-component)
     - [Authenticating a User](#authenticating-a-user)
     - [Linking an account](#linking-an-account)
+    - [Buying Crypto with Fiat](#buying-crypto-with-fiat)
   - [Best Practices](#best-practices)
   - [FAQ](#faq)
   - [Support](#support)
@@ -189,6 +194,29 @@ Wallet management utilities provide tools for user authentication, allowing user
 - `linkAccount`: Connects a new profile to the current user.
 - `unlinkAccount`: Disconnects an existing profile from the current user.
 
+### Onramp (Fiat-to-Crypto)
+
+The onramp module enables fiat-to-crypto conversions through multiple payment providers. It handles the complete purchase flow from session preparation to payment confirmation.
+
+#### Key Functions
+
+- `getOnrampProviders`: Returns available payment providers for a given country.
+- `getTokenFiatPrices`: Fetches current fiat prices for tokens.
+
+Currently the Onramping does not support using the `onRampPrepare` and `onRampStatus` methods, so only use the `getOnrampProviders` and `getTokenFiatPrices` methods.
+
+```ts
+import { onramp } from 'panna-sdk/core';
+
+// Get onramp providers for a country
+const providers = await onramp.getOnrampProviders('DE');
+// [
+//  { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
+//  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
+//  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
+// ]
+```
+
 ---
 
 ## UI Components
@@ -248,6 +276,77 @@ const MyApp = () => <ConnectButton />;
 - Use `panna-sdk/core` for backend code, CLI tools, or non-React frameworks
 - Use `panna-sdk/react` in React applications
 
+### Buy/Onramp Components
+
+The SDK includes pre-built React components for implementing fiat-to-crypto purchases:
+
+| Component               | Description                                   |
+| ----------------------- | --------------------------------------------- |
+| `BuyForm`               | Complete multi-step wizard for buying crypto  |
+| `SelectBuyRegionStep`   | Country/region selection with auto-detection  |
+| `SelectBuyTokenStep`    | Token selection with search functionality     |
+| `SpecifyBuyAmountStep`  | Fiat amount input with real-time conversion   |
+| `SelectBuyProviderStep` | Payment provider selection with quote display |
+| `ProcessingBuyStep`     | Session creation and payment processing       |
+| `StatusStep`            | Final status display (success/error/expired)  |
+
+```tsx
+import { BuyForm } from 'panna-sdk/react';
+
+function BuyDialog({ onClose }) {
+  const stepperRef = useRef(null);
+
+  return (
+    <Dialog>
+      <BuyForm onClose={onClose} stepperRef={stepperRef} />
+    </Dialog>
+  );
+}
+```
+
+For detailed component documentation, see [Buy Components README](./src/react/components/buy/README.md).
+
+---
+
+## Onramp React Hooks
+
+The SDK provides specialized hooks for managing onramp operations:
+
+| Hook                     | Description                                     |
+| ------------------------ | ----------------------------------------------- |
+| `useOnrampQuotes`        | Fetch real-time quotes for fiat-to-crypto rates |
+| `useCreateOnrampSession` | Create payment sessions with providers          |
+| `useOnrampSessionStatus` | Poll session status with automatic retry        |
+| `useFiatToCrypto`        | Convert fiat amounts to crypto in real-time     |
+
+```tsx
+import {
+  useOnrampQuotes,
+  useCreateOnrampSession,
+  useOnrampSessionStatus
+} from 'panna-sdk/react';
+
+function BuyWithQuotes() {
+  // Fetch quotes
+  const { data: quote } = useOnrampQuotes({
+    tokenSymbol: 'USDC',
+    network: 'lisk',
+    fiatAmount: 100,
+    fiatCurrency: 'USD'
+  });
+
+  // Create session mutation
+  const { mutateAsync: createSession } = useCreateOnrampSession();
+
+  // Poll session status
+  const { data: status } = useOnrampSessionStatus({
+    sessionId: 'session-id'
+  });
+}
+```
+
+For detailed hooks documentation, see [Hooks README](./src/react/hooks/README.md).
+
 ---
 
 ## Examples
@@ -304,6 +403,81 @@ const result = await transaction.sendTransaction({
   account,
   transaction: tx
 });
+```
+
+### Buying Crypto with Fiat
+
+Complete example of implementing a fiat-to-crypto purchase flow:
+
+```tsx
+import {
+  useOnrampQuotes,
+  useCreateOnrampSession,
+  useOnrampSessionStatus,
+  useSupportedTokens
+} from 'panna-sdk/react';
+import { useState } from 'react';
+
+function BuyTokens() {
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
+  // Get available tokens
+  const { data: tokens } = useSupportedTokens();
+
+  // Fetch quote for purchase
+  const { data: quote, isLoading: quoteLoading } = useOnrampQuotes({
+    tokenSymbol: 'USDC',
+    network: 'lisk',
+    fiatAmount: 100,
+    fiatCurrency: 'USD'
+  });
+
+  // Create session mutation
+  const { mutateAsync: createSession, isPending } = useCreateOnrampSession();
+
+  // Poll session status (only when we have a session)
+  const { data: status } = useOnrampSessionStatus(
+    { sessionId: sessionId || '' },
+    { enabled: !!sessionId }
+  );
+
+  async function handleBuy() {
+    try {
+      const session = await createSession({
+        tokenSymbol: 'USDC',
+        network: 'lisk',
+        fiatAmount: 100,
+        fiatCurrency: 'USD',
+        quoteData: quote
+      });
+
+      setSessionId(session.session_id);
+
+      // Redirect to payment provider
+      window.location.href = session.redirect_url;
+    } catch (error) {
+      console.error('Failed to create session:', error);
+    }
+  }
+
+  return (
+    <div>
+      {quote && (
+        <div>
+          <p>Rate: {quote.rate}</p>
+          <p>You'll receive: {quote.crypto_quantity} USDC</p>
+          <p>Fee: ${quote.onramp_fee}</p>
+        </div>
+      )}
+
+      <button onClick={handleBuy} disabled={isPending || quoteLoading}>
+        {isPending ? 'Processing...' : 'Buy $100 USDC'}
+      </button>
+
+      {status && <p>Status: {status.status}</p>}
+    </div>
+  );
+}
 ```
 
 ---
