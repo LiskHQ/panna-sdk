@@ -57,7 +57,7 @@ describe('SelectBuyRegionStep country search filtering', () => {
     const result = filterCountries('usa');
 
     expect(result.some((c) => c.name === 'United States')).toBe(false);
-    // Should be empty or only contain countries with "usa" substring
+    // Should be empty (no countries contain "usa" as a substring)
     expect(result.length).toBe(0);
   });
 
