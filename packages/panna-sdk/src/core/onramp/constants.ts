@@ -1,4 +1,5 @@
-import { OnrampProvider, ProviderId, ProviderInfo } from './types';
+import { OnrampProvider } from './thirdweb/types';
+import { ProviderId, ProviderInfo } from './types';
 
 // Provider metadata
 export const PROVIDERS = {

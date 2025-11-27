@@ -3,6 +3,16 @@ import { liskSepolia } from '../chain';
 import type { PannaClient } from '../client';
 import { getOnrampProviders, getTokenFiatPrices } from './onramp';
 
+jest.mock('thirdweb', () => ({
+  Bridge: {
+    Onramp: {
+      status: jest.fn(),
+      prepare: jest.fn()
+    },
+    tokens: jest.fn()
+  }
+}));
+
 describe('getOnrampProviders', () => {
   const expectedResultForDeAndUs = [
     {
