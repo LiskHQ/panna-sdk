@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_COUNTRY_CODE } from 'src/core';
 import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
@@ -78,7 +78,18 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
         control={form.control}
         name="fiatAmount"
         render={({ field }) => {
-          const amountString = field.value?.toString() || '';
+          const [inputValue, setInputValue] = useState(
+            field.value?.toString() || ''
+          );
+          const [isFocused, setIsFocused] = useState(false);
+
+          // Sync from form value when input is not focused
+          // This handles: preset buttons, normalization on blur
+          useEffect(() => {
+            if (!isFocused) {
+              setInputValue(field.value?.toString() || '');
+            }
+          }, [field.value, isFocused]);
 
           return (
             <FormItem className="flex flex-col items-center gap-2">
@@ -95,20 +106,26 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
                       type="text"
                       inputMode="decimal"
                       placeholder="0"
-                      value={amountString}
+                      value={inputValue}
+                      onFocus={() => setIsFocused(true)}
+                      onBlur={() => setIsFocused(false)}
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === '' || DECIMAL_NUMBER_REGEX.test(value)) {
-                          const numericValue = parseFloat(value);
-                          if (!isNaN(numericValue)) {
-                            field.onChange(numericValue);
-                          } else if (value === '') {
+                          setInputValue(value);
+
+                          if (value === '' || value === '.') {
                             field.onChange(undefined);
+                          } else {
+                            const numericValue = parseFloat(value);
+                            if (!isNaN(numericValue)) {
+                              field.onChange(numericValue);
+                            }
                           }
                         }
                       }}
                       className="w-fit max-w-[8ch] border-none bg-transparent text-center text-3xl font-bold outline-none"
-                      size={Math.max(1, (amountString || '0').length)}
+                      size={Math.max(1, (inputValue || '0').length)}
                     />
                   </div>
                   <Typography variant="muted">
