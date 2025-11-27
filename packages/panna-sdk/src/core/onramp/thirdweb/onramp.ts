@@ -119,6 +119,7 @@ export async function onRampPrepare(
     tokenAddress,
     receiver,
     amount,
+    country,
     purchaseData,
     onRampProvider
   } = params;
@@ -133,9 +134,9 @@ export async function onRampPrepare(
       receiver,
       amount: BigInt(amount),
       purchaseData,
-      country: 'US'
+      country
     });
-    let intent: OnrampIntent | undefined = result.intent
+    const intent: OnrampIntent | undefined = result.intent
       ? {
           amount: result.intent.amount || '0',
           chainId: result.intent.chainId,

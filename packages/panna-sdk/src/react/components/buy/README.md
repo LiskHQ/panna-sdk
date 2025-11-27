@@ -1,4 +1,4 @@
-p# Buy/Onramp Components
+# Buy/Onramp Components
 
 Pre-built React components for implementing fiat-to-crypto purchases. These components provide a complete multi-step wizard for users to buy cryptocurrency using fiat currency.
 

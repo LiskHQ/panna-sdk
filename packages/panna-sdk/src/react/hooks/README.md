@@ -459,15 +459,11 @@ function CompleteBuyFlow() {
   const [amount, setAmount] = useState(100);
   const [sessionId, setSessionId] = useState<string | null>(null);
 
-  // Get available tokens
-  const { data: tokens } = useSupportedTokens();
-
   // Fetch quote when amount changes
   const {
     data: quote,
     isLoading: quoteLoading,
-    error: quoteError,
-    isError: isQuoteError,
+    error: quoteError
   } = useOnrampQuotes({
     tokenSymbol: 'USDC',
     network: 'lisk',
@@ -522,8 +518,6 @@ function CompleteBuyFlow() {
     return <div>Please connect your wallet first</div>;
   }
 
-
-
   return (
     <div>
       {step === 'select' && (
@@ -563,7 +557,12 @@ function CompleteBuyFlow() {
             {creating ? 'Creating session...' : 'Confirm & Pay'}
           </button>
           <button onClick={() => setStep('select')}>Back</button>
-          {sessionError && (<p>Error: {sessionError.message}</p><button onClick={() => refetchQuote()}>Retry</button>)}
+          {sessionError && (
+            <>
+              <p>Error: {sessionError.message}</p>
+              <button onClick={() => handleConfirm()}>Retry</button>
+            </>
+          )}
         </div>
       )}
 
@@ -575,7 +574,7 @@ function CompleteBuyFlow() {
             <p>Payment received, processing on-chain...</p>
           )}
           {status?.status === 'failed' && (
-            <p>Payment failed: {(status).error_message}</p>
+            <p>Payment failed: {status.error_message}</p>
           )}
         </div>
       )}
@@ -583,8 +582,8 @@ function CompleteBuyFlow() {
       {step === 'complete' && (
         <div>
           <h2>Purchase Complete!</h2>
-          <p>Transaction: {(status)?.transaction_hash}</p>
-          <p>Amount received: {(status)?.actual_crypto_amount} USDC</p>
+          <p>Transaction: {status?.transaction_hash}</p>
+          <p>Amount received: {status?.actual_crypto_amount} USDC</p>
           <button onClick={() => setStep('select')}>Buy More</button>
         </div>
       )}

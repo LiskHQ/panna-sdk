@@ -5,4 +5,3 @@ export { getOnrampProviders, getTokenFiatPrices } from './onramp';
 export type { GetTokenFiatPricesParams, ProviderInfo } from './types';
 
 export * from './onramp-money';
-export * from './thirdweb';

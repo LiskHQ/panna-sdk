@@ -317,10 +317,20 @@ import { onramp } from 'panna-sdk/core';
 
 // Get providers for a country
 const providers = onramp.getOnrampProviders('US');
-// Returns: ['transak', 'coinbase', 'stripe', 'onrampmoney']
+// Returns: [
+// { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
+//  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
+//  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
+//  { id: 'onrampmoney', displayName: 'Coinbase', websiteUrl: 'https://www.onramp.money' }
+// ]
 
 const providersDE = onramp.getOnrampProviders('DE');
-// Returns: ['transak', 'coinbase', 'stripe', 'onrampmoney']
+// Returns: [
+// { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
+//  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
+//  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
+//  { id: 'onrampmoney', displayName: 'Coinbase', websiteUrl: 'https://www.onramp.money' }
+// ]
 
 // Invalid country throws error
 try {
