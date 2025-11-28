@@ -48,7 +48,8 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   const {
     data: cryptoConversion,
     isLoading,
-    isError
+    isError,
+    error
   } = useFiatToCrypto(
     {
       chain,
@@ -115,7 +116,9 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
                     {isLoading
                       ? 'Loading...'
                       : isError
-                        ? 'Error'
+                        ? error?.message?.includes('Price not available')
+                          ? 'Amount shown on next step'
+                          : 'Error'
                         : cryptoConversion?.amount
                           ? `≈ ${cryptoConversion.amount.toFixed(6)} ${token?.symbol}`
                           : `0 ${token?.symbol}`}
