@@ -90,7 +90,7 @@ export async function onRampStatus(
  * @param params.receiver - The address of the receiver of the token
  * @param params.amount - The amount of the token being purchased
  * @param params.purchaseData - Additional data to be stored with the onramp session
- * @param params.onramp - The onramp provider to use
+ * @param params.onRampProvider - The onramp provider to use
  * @returns Promise resolving to the onramp session identifier
  * @throws Error if the onramp session cannot be prepared
  *
