@@ -1,6 +1,7 @@
 import { MailIcon, PhoneIcon } from 'lucide-react';
 import { useActiveWallet, useLogout, useUserProfiles } from '@/hooks';
 import { usePanna } from '../../hooks';
+import { GoogleIcon } from '../icons/google';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Skeleton } from '../ui/skeleton';
@@ -27,18 +28,18 @@ export function AccountSettingsView() {
     }
   };
 
-  // Extract email and phone from profiles
+  console.log({ userProfiles });
+  // Extract email, phone and social from profiles
   const emailProfile = userProfiles?.find(
-    (profile) =>
-      profile.type === 'email' ||
-      profile.type === 'google' ||
-      profile.type === 'discord' ||
-      profile.type === 'apple' ||
-      profile.type === 'facebook'
+    (profile) => profile.type === 'email'
   );
 
   const phoneProfile = userProfiles?.find(
     (profile) => profile.type === 'phone'
+  );
+
+  const socialProfile = userProfiles?.find(
+    (profile) => profile.type === 'google'
   );
 
   const renderData = () => {
@@ -61,8 +62,9 @@ export function AccountSettingsView() {
 
     const userEmail = emailProfile?.details?.email;
     const userPhone = phoneProfile?.details?.phone;
+    const socialEmail = socialProfile?.details?.email;
 
-    if (!userEmail && !userPhone) {
+    if (!userEmail && !userPhone && !socialEmail) {
       return (
         <Typography as="span" variant="small" className="text-muted-foreground">
           No contact information available
@@ -85,6 +87,14 @@ export function AccountSettingsView() {
             <PhoneIcon size={16} />
             <Typography as="span" variant="small">
               {userPhone}
+            </Typography>
+          </div>
+        )}
+        {socialEmail && (
+          <div className="flex items-center gap-3">
+            <GoogleIcon size={16} />
+            <Typography as="span" variant="small">
+              {socialEmail}
             </Typography>
           </div>
         )}
