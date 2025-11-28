@@ -204,7 +204,7 @@ The onramp module enables fiat-to-crypto conversions through multiple payment pr
 - `getOnrampProviders`: Returns available payment providers for a given country.
 - `getTokenFiatPrices`: Fetches current fiat prices for tokens.
 
-Currently the Onramping does not support using the `onRampPrepare` and `onRampStatus` methods, so only use the `getOnrampProviders` and `getTokenFiatPrices` methods.
+The `onRampPrepare` and `onRampStatus` methods are internal and not part of the public API. Please use the `getOnrampProviders` and `getTokenFiatPrices` methods for onramping functionality.
 
 ```ts
 import { onramp } from 'panna-sdk/core';
@@ -214,7 +214,8 @@ const providers = await onramp.getOnrampProviders('DE');
 // [
 //  { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
 //  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
-//  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
+//  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' },
+//  { id: 'onrampmoney', displayName: 'Onramp.Money', websiteUrl: 'https://www.onramp.money' }
 // ]
 ```
 

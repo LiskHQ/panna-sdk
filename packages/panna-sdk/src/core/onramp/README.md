@@ -229,6 +229,10 @@ const provider = getBestProvider(countryCode);
 
 ### Error Handling
 
+> **Note:**  
+> The internal method `onramp.onRampPrepare` is not exported from the main module and should not be used directly.  
+> Please use the public API methods documented above for error handling and session management.
+
 #### Handling Onramp Errors
 
 ```ts
@@ -321,7 +325,7 @@ const providers = onramp.getOnrampProviders('US');
 // { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
 //  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
 //  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
-//  { id: 'onrampmoney', displayName: 'Coinbase', websiteUrl: 'https://www.onramp.money' }
+//  { id: 'onrampmoney', displayName: 'Onramp.Money', websiteUrl: 'https://www.onramp.money' }
 // ]
 
 const providersDE = onramp.getOnrampProviders('DE');
@@ -329,7 +333,7 @@ const providersDE = onramp.getOnrampProviders('DE');
 // { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
 //  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },
 //  { id: 'coinbase', displayName: 'Coinbase', websiteUrl: 'https://www.coinbase.com' }
-//  { id: 'onrampmoney', displayName: 'Coinbase', websiteUrl: 'https://www.onramp.money' }
+//  { id: 'onrampmoney', displayName: 'Onramp.Money', websiteUrl: 'https://www.onramp.money' }
 // ]
 
 // Invalid country throws error

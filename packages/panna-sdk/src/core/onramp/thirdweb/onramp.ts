@@ -125,7 +125,7 @@ export async function onRampPrepare(
   } = params;
 
   try {
-    // TODO: incase of providers outside thirdweb, we need to handle the result differently
+    // TODO: In case of providers outside thirdweb, we need to handle the result differently
     const result = await Bridge.Onramp.prepare({
       client,
       chainId: chainId || lisk.id,
