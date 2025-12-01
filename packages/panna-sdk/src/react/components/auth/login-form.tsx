@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MailIcon, MoveRightIcon, PhoneIcon } from 'lucide-react';
+import { ArrowRightIcon, MailIcon, PhoneIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -113,7 +113,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                 <Input
                   {...field}
                   placeholder="Email address"
-                  className="focus-within:[&_button]:bg-primary"
+                  className="focus-within:[&_button]:bg-primary focus-within:[&_button_svg]:stroke-card"
                   startAdornment={
                     !focusState.email && (
                       <MailIcon className="h-5 w-5" color="#FAFAFA" />
@@ -121,12 +121,12 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                   }
                   endAdornment={
                     <Button
-                      className="hover:bg-primary/90! bg-transparent"
+                      className="hover:bg-primary/90! hover:[&_svg]:stroke-card my-1 mr-1 h-6 bg-transparent p-1!"
                       onClick={() => handleFormSubmit('email')}
                       type="button"
                       data-testid="email-submit-button"
                     >
-                      <MoveRightIcon className="text-neutral-400" />
+                      <ArrowRightIcon className="text-neutral-400" />
                     </Button>
                   }
                   onFocus={() => {
@@ -150,7 +150,7 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                 <Input
                   {...field}
                   placeholder="Phone number"
-                  className="focus-within:[&_button]:bg-primary"
+                  className="focus-within:[&_button]:bg-primary focus-within:[&_button_svg]:stroke-card"
                   startAdornment={
                     !focusState.phone && (
                       <PhoneIcon className="h-5 w-5" color="#FAFAFA" />
@@ -158,12 +158,12 @@ export function LoginForm({ next, goToStep }: LoginFormProps) {
                   }
                   endAdornment={
                     <Button
-                      className="hover:bg-primary/90! bg-transparent"
+                      className="hover:bg-primary/90! hover:[&_svg]:stroke-card my-1 mr-1 h-6 bg-transparent p-1!"
                       onClick={() => handleFormSubmit('phoneNumber')}
                       type="button"
                       data-testid="phone-submit-button"
                     >
-                      <MoveRightIcon className="text-neutral-400" />
+                      <ArrowRightIcon className="text-neutral-400" />
                     </Button>
                   }
                   onFocus={() => {
