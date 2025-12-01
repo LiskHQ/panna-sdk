@@ -37,7 +37,7 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Sent')).toBeInTheDocument();
     expect(screen.getByText('ETH')).toBeInTheDocument();
-    expect(screen.getByText('1.00000 ETH')).toBeInTheDocument();
+    expect(screen.getByText('1.000000 ETH')).toBeInTheDocument();
     expect(screen.getByText('$3000.50')).toBeInTheDocument();
   });
 
@@ -69,7 +69,7 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Received')).toBeInTheDocument();
     expect(screen.getByText('USDC')).toBeInTheDocument();
-    expect(screen.getByText('1.00000 USDC')).toBeInTheDocument();
+    expect(screen.getByText('1.000000 USDC')).toBeInTheDocument();
     expect(screen.getByText('$1.00')).toBeInTheDocument();
   });
 

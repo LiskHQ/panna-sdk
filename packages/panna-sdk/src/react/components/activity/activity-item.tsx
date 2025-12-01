@@ -9,11 +9,10 @@ import {
   TransactionActivity,
   TransactionAmount
 } from 'src/core';
+import { CRYPTO_AMOUNT_FIXED_DIGITS, FIAT_AMOUNT_FIXED_DIGITS } from '@/consts';
 import { tokenIconMap } from '@/mocks/token-balances';
 import { getCurrencySymbol } from '@/utils/countries';
 import { Typography } from '../ui/typography';
-
-const DECIMAL_PLACES = 5;
 
 type ActivityItemProps = {
   activity: Activity;
@@ -174,7 +173,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
-          ).toFixed(DECIMAL_PLACES)}{' '}
+          ).toFixed(CRYPTO_AMOUNT_FIXED_DIGITS)}{' '}
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
@@ -184,7 +183,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
-          ).toFixed(DECIMAL_PLACES)}{' '}
+          ).toFixed(CRYPTO_AMOUNT_FIXED_DIGITS)}{' '}
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
@@ -208,9 +207,9 @@ function renderActivityFiatValue(activity: Activity) {
   }
 
   return (
-    <Typography variant="muted">
+    <Typography variant="small">
       {getCurrencySymbol(amount.fiatValue.currency)}
-      {amount.fiatValue.amount.toFixed(2)}
+      {amount.fiatValue.amount.toFixed(FIAT_AMOUNT_FIXED_DIGITS)}
     </Typography>
   );
 }

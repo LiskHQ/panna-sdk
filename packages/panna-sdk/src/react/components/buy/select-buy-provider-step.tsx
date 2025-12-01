@@ -2,6 +2,7 @@ import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { PROVIDERS } from 'src/core/onramp/constants';
+import { CRYPTO_AMOUNT_FIXED_DIGITS, FIAT_AMOUNT_FIXED_DIGITS } from '@/consts';
 import { DEFAULT_CHAIN, DEFAULT_COUNTRY_CODE } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
 import { useOnrampQuotes, usePanna } from '../../hooks';
@@ -19,9 +20,6 @@ import type { BuyFormData } from './schema';
 type SelectBuyProviderStepProps = {
   form: UseFormReturn<BuyFormData>;
 };
-
-const FIAT_AMOUNT_FIXED_DIGITS = 2;
-const CRYPTO_AMOUNT_FIXED_DIGITS = 6;
 
 export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   const { next } = useDialogStepper();
