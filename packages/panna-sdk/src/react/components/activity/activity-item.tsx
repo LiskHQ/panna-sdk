@@ -1,4 +1,4 @@
-import { ArrowDownIcon, SendIcon, StarIcon, RepeatIcon } from 'lucide-react';
+import { ArrowDownIcon, RepeatIcon, SendIcon, StarIcon } from 'lucide-react';
 import {
   Activity,
   ERC1155Amount,
@@ -170,7 +170,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
   switch (activity.amount.type) {
     case TokenERC.ETH:
       return (
-        <Typography variant="small">
+        <Typography variant="muted">
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
@@ -180,7 +180,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
       );
     case TokenERC.ERC20:
       return (
-        <Typography variant="small">
+        <Typography variant="muted">
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
@@ -189,9 +189,8 @@ function renderActivityNameOrSymbol(activity: Activity) {
         </Typography>
       );
     case TokenERC.ERC721:
-      return <Typography variant="small">1 Collectible</Typography>;
     case TokenERC.ERC1155:
-      return <Typography variant="small">1 Collectible</Typography>;
+      return <Typography variant="muted">Collectible</Typography>;
     default:
       console.warn(
         `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
@@ -205,7 +204,7 @@ function renderActivityFiatValue(activity: Activity) {
   const amount = activity.amount as EtherAmount | ERC20Amount | ERC1155Amount;
 
   if (!amount.fiatValue) {
-    return <Typography variant="muted">-</Typography>;
+    return <Typography variant="small">Free</Typography>;
   }
 
   return (
@@ -227,10 +226,10 @@ export function ActivityItem({ activity }: ActivityItemProps) {
         </div>
       </header>
       <div className="flex flex-col justify-center text-right">
+        {renderActivityFiatValue(activity)}
         <Typography variant="small">
           {renderActivityNameOrSymbol(activity)}
         </Typography>
-        {renderActivityFiatValue(activity)}
       </div>
     </section>
   );

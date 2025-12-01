@@ -96,11 +96,11 @@ function TokenItem({ token }: TokenItemProps) {
       </div>
       <div className="flex flex-col justify-center text-right">
         <Typography variant="small">
-          {Number(token.tokenBalance.displayValue).toFixed(6)}
-        </Typography>
-        <Typography variant="muted">
           {getCurrencySymbol(token.fiatBalance.currency)}
           {Number(Math.floor(token.fiatBalance.amount * 100) / 100).toFixed(2)}
+        </Typography>
+        <Typography variant="muted">
+          {Number(token.tokenBalance.displayValue).toFixed(6)}
         </Typography>
       </div>
     </div>
