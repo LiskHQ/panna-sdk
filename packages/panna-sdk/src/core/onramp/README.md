@@ -229,14 +229,10 @@ const provider = getBestProvider(countryCode);
 
 ### Error Handling
 
-> **Note:**  
-> The internal method `onramp.onRampPrepare` is not exported from the main module and should not be used directly.  
-> Please use the public API methods documented above for error handling and session management.
-
 #### Handling Onramp Errors
 
 ```ts
-import { onramp } from 'panna-sdk/core';
+import { onramp, lisk, NATIVE_TOKEN_ADDRESS } from 'panna-sdk/core';
 
 async function buyTokensWithErrorHandling(
   client: PannaClient,
@@ -246,7 +242,7 @@ async function buyTokensWithErrorHandling(
   try {
     const session = await onramp.onRampPrepare({
       client,
-      chainId: 1135,
+      chainId: lisk.id,
       tokenAddress: NATIVE_TOKEN_ADDRESS,
       receiver: userAddress,
       amount,
