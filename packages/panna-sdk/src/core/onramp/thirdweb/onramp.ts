@@ -107,7 +107,7 @@ export async function onRampStatus(
  *   receiver: userWalletAddress,
  *   amount: '100',
  *   purchaseData: { sessionId: '123' },
- *   onrampProvider: 'stripe'
+ *   onRampProvider: 'stripe'
  * });
  * ```
  */

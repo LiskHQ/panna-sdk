@@ -121,7 +121,7 @@ const { data: collectibles } = useCollectibles({ address: '0x...' });
 Fetch real-time onramp quotes for fiat-to-crypto purchases. Returns exchange rates, fees, and estimated crypto quantity.
 
 ```tsx
-import { useOnrampQuotes } from 'panna-sdk/react';
+import { useOnrampQuotes } from 'panna-sdk';
 
 const {
   data: quote,
@@ -167,7 +167,7 @@ const {
 Create an onramp payment session. Returns session data with redirect URL for the payment provider.
 
 ```tsx
-import { useCreateOnrampSession } from 'panna-sdk/react';
+import { useCreateOnrampSession } from 'panna-sdk';
 
 const {
   mutateAsync: createSession,
@@ -212,7 +212,7 @@ async function handleBuy() {
 Poll the status of an onramp session. Automatically polls every 5 seconds for non-terminal states (`completed`, `failed`, `cancelled`, `expired`).
 
 ```tsx
-import { useOnrampSessionStatus } from 'panna-sdk/react';
+import { useOnrampSessionStatus } from 'panna-sdk';
 
 function OnrampStatus({ sessionId }: { sessionId: string }) {
   const { data, isLoading, error, refetch } = useOnrampSessionStatus({
@@ -267,7 +267,7 @@ function OnrampStatus({ sessionId }: { sessionId: string }) {
 Convert fiat amounts to crypto amounts in real-time using current token prices.
 
 ```tsx
-import { useFiatToCrypto } from 'panna-sdk/react';
+import { useFiatToCrypto } from 'panna-sdk';
 
 const { data, isLoading } = useFiatToCrypto({
   tokenAddress: '0x...',
@@ -283,7 +283,7 @@ const { data, isLoading } = useFiatToCrypto({
 Fetch onramp quotes using the older interface.
 
 ```tsx
-import { useBuyWithFiatQuotes } from 'panna-sdk/react';
+import { useBuyWithFiatQuotes } from 'panna-sdk';
 
 const { data: quotes } = useBuyWithFiatQuotes({
   fromCurrencySymbol: 'USD',
@@ -448,8 +448,8 @@ import {
   useOnrampSessionStatus,
   useSupportedTokens,
   useActiveAccount,
-  OnrampMoneySessionStatusEnum
-} from 'panna-sdk/react';
+  FailedSessionStatus
+} from 'panna-sdk';
 import { useState, useEffect } from 'react';
 
 type BuyStep = 'select' | 'confirm' | 'processing' | 'complete';
@@ -508,7 +508,7 @@ function CompleteBuyFlow() {
       setStep('processing');
 
       // Open payment in new window (or redirect)
-      window.open(session.redirect_url, '_blank');
+      window.open(session.redirect_url, '_blank', 'noopener,noreferrer');
     } catch (err) {
       // Error is captured in sessionError
       console.error('Session creation failed:', err);
@@ -576,8 +576,7 @@ function CompleteBuyFlow() {
           )}
           {status?.status === 'failed' && (
             <p>
-              Payment failed:{' '}
-              {(status as OnrampMoneySessionStatusEnum.Failed).error_message}
+              Payment failed: {(status as FailedSessionStatus).error_message}
             </p>
           )}
         </div>
