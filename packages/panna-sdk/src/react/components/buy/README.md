@@ -311,11 +311,11 @@ function BuyWithStepperAccess() {
   }
 
   function goToPreviousStep() {
-    stepperRef.current?.previous();
+    stepperRef.current?.prev();
   }
 
   function goToStep(index: number) {
-    stepperRef.current?.goTo(index);
+    stepperRef.current?.goToStep(index);
   }
 
   return (

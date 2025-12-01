@@ -89,6 +89,7 @@ export async function onRampStatus(
  * @param params.tokenAddress - The address of the token being purchased
  * @param params.receiver - The address of the receiver of the token
  * @param params.amount - The amount of the token being purchased
+ * @param params.country - The country code for the onramp provider
  * @param params.purchaseData - Additional data to be stored with the onramp session
  * @param params.onRampProvider - The onramp provider to use
  * @returns Promise resolving to the onramp session identifier
@@ -106,7 +107,7 @@ export async function onRampStatus(
  *   receiver: userWalletAddress,
  *   amount: '100',
  *   purchaseData: { sessionId: '123' },
- *   onramp: 'stripe'
+ *   onrampProvider: 'stripe'
  * });
  * ```
  */

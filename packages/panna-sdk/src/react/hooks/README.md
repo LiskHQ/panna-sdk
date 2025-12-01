@@ -447,7 +447,8 @@ import {
   useCreateOnrampSession,
   useOnrampSessionStatus,
   useSupportedTokens,
-  useActiveAccount
+  useActiveAccount,
+  OnrampMoneySessionStatusEnum
 } from 'panna-sdk/react';
 import { useState, useEffect } from 'react';
 
@@ -574,7 +575,10 @@ function CompleteBuyFlow() {
             <p>Payment received, processing on-chain...</p>
           )}
           {status?.status === 'failed' && (
-            <p>Payment failed: {status.error_message}</p>
+            <p>
+              Payment failed:{' '}
+              {(status as OnrampMoneySessionStatusEnum.Failed).error_message}
+            </p>
           )}
         </div>
       )}

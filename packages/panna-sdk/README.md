@@ -210,7 +210,7 @@ The `onRampPrepare` and `onRampStatus` methods are internal and not part of the 
 import { onramp } from 'panna-sdk/core';
 
 // Get onramp providers for a country
-const providers = await onramp.getOnrampProviders('DE');
+const providers = onramp.getOnrampProviders('DE');
 // [
 //  { id: 'transak', displayName: 'Transak', websiteUrl: 'https://www.transak.com' },
 //  { id: 'stripe', displayName: 'Stripe', websiteUrl: 'https://www.stripe.com' },

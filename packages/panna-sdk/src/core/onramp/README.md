@@ -273,7 +273,7 @@ async function buyTokensWithErrorHandling(
 #### Status Polling with Error Handling
 
 ```ts
-import { onramp } from 'panna-sdk/core';
+import { onramp, OnrampTransaction } from 'panna-sdk/core';
 
 type PollResult =
   | { status: 'completed'; transactions: OnrampTransaction[] }
