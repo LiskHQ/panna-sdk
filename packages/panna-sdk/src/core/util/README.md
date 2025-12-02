@@ -230,7 +230,9 @@ function formatTransactionHistory(activities: Activity[]) {
 
 ### Activity Fiat Values
 
-Activities can include fiat values for token amounts when prices are available. Use the `currency` parameter to specify FiatCurrency.USD, FiatCurrency.EUR, or FiatCurrency.GBP (defaults to FiatCurrency.USD). The `fiatValue` property is optional and only present when token prices exist for the given token.
+Activities can include fiat values for token amounts when prices are available. Use the `currency` parameter to specify any of the 46 supported fiat currencies (defaults to FiatCurrency.USD). The `fiatValue` property is optional and only present when token prices exist for the given token.
+
+**Supported Currencies (46 total):** AED, ARS, AUD, BOB, BRL, BWP, CAD, CDF, CLP, COP, CRC, EGP, EUR, GBP, GHS, GTQ, IDR, INR, JPY, KES, KRW, LKR, MWK, MXN, MYR, NGN, NZD, PEN, PHP, PLN, PYG, RWF, SGD, THB, TRY, TWD, TZS, UGX, USD, UYU, VES, VND, XAF, XOF, ZAR, ZMW
 
 ```ts
 import { util } from 'panna-sdk';
@@ -239,7 +241,7 @@ import { util } from 'panna-sdk';
 const activities = await util.getActivitiesByAddress({
   client,
   address: userAddress,
-  currency: util.FiatCurrency.USD // Optional: FiatCurrency.USD | FiatCurrency.EUR | FiatCurrency.GBP (default: FiatCurrency.USD)
+  currency: util.FiatCurrency.USD // Optional: any of 46 supported currencies (default: FiatCurrency.USD)
 });
 
 // Access fiat values (available for ETH, ERC-20, and ERC-1155 tokens)

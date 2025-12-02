@@ -123,13 +123,52 @@ export type OnrampSessionResponse = {
 
 // Supported fiat currencies
 export enum FiatCurrency {
-  USD = 'USD',
-  EUR = 'EUR',
-  GBP = 'GBP',
-  CAD = 'CAD',
-  AUD = 'AUD',
-  JPY = 'JPY',
-  NZD = 'NZD'
+  AED = 'AED', // Arab Emirates Dirham
+  ARS = 'ARS', // Argentine Peso
+  AUD = 'AUD', // Australian Dollar
+  BOB = 'BOB', // Bolivian Boliviano
+  BRL = 'BRL', // Brazilian Real
+  BWP = 'BWP', // Botswana Pula
+  CAD = 'CAD', // Canadian Dollar
+  CDF = 'CDF', // Congolese Franc
+  CLP = 'CLP', // Chilean Peso
+  COP = 'COP', // Colombian Peso
+  CRC = 'CRC', // Costa Rican Colón
+  EGP = 'EGP', // Egyptian Pound
+  EUR = 'EUR', // Euro
+  GBP = 'GBP', // Great Britain Pounds
+  GHS = 'GHS', // Ghanian Cedi
+  GTQ = 'GTQ', // Guatemalan Quetzal
+  IDR = 'IDR', // Indonesian Rupiah
+  INR = 'INR', // Indian Rupee
+  JPY = 'JPY', // Japanese Yen
+  KES = 'KES', // Kenya Shillings
+  KRW = 'KRW', // South Korean Won
+  LKR = 'LKR', // Sri Lankan Rupee
+  MWK = 'MWK', // Malawian Kwacha
+  MXN = 'MXN', // Mexican Peso
+  MYR = 'MYR', // Malaysian Ringgit
+  NGN = 'NGN', // Nigerian Naira
+  NZD = 'NZD', // New Zealand Dollar
+  PEN = 'PEN', // Peruvian Sol
+  PHP = 'PHP', // Philippine Peso
+  PLN = 'PLN', // Polish Zloty
+  PYG = 'PYG', // Paraguayan Guarani
+  RWF = 'RWF', // Rwandan Franc
+  SGD = 'SGD', // Singapore Dollar
+  THB = 'THB', // Thai Baht
+  TRY = 'TRY', // Turkish Lira
+  TWD = 'TWD', // New Taiwan Dollar
+  TZS = 'TZS', // Tanzanian Shilling
+  UGX = 'UGX', // Ugandan Shilling
+  USD = 'USD', // United States Dollar
+  UYU = 'UYU', // Uruguayan Peso
+  VES = 'VES', // Venezuelan Bolívar Soberano
+  VND = 'VND', // Vietnamese Dong
+  XAF = 'XAF', // Central African CFA Franc
+  XOF = 'XOF', // West African CFA Franc
+  ZAR = 'ZAR', // South African Rand
+  ZMW = 'ZMW' // Zambian Kwacha
 }
 
 // Parameters for getting fiat price

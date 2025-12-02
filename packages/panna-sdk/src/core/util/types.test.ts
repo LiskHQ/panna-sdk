@@ -102,23 +102,42 @@ describe('Utils Types', () => {
   });
 
   describe('FiatCurrency', () => {
+    it('should have 46 supported currencies', () => {
+      const allCurrencies = Object.values(FiatCurrency);
+      expect(allCurrencies).toHaveLength(46);
+    });
+
     it('should accept all valid fiat currencies', () => {
-      const validCurrencies: FiatCurrency[] = [
+      const sampleCurrencies: FiatCurrency[] = [
         DEFAULT_CURRENCY,
+        FiatCurrency.AED,
+        FiatCurrency.ARS,
+        FiatCurrency.AUD,
+        FiatCurrency.BRL,
+        FiatCurrency.CAD,
+        FiatCurrency.CLP,
         FiatCurrency.EUR,
         FiatCurrency.GBP,
-        FiatCurrency.CAD,
-        FiatCurrency.AUD,
+        FiatCurrency.INR,
         FiatCurrency.JPY,
-        FiatCurrency.NZD
+        FiatCurrency.KRW,
+        FiatCurrency.MXN,
+        FiatCurrency.NGN,
+        FiatCurrency.NZD,
+        FiatCurrency.PHP,
+        FiatCurrency.SGD,
+        FiatCurrency.THB,
+        FiatCurrency.TRY,
+        FiatCurrency.TWD,
+        FiatCurrency.VND,
+        FiatCurrency.XAF,
+        FiatCurrency.ZAR
       ];
 
-      validCurrencies.forEach((currency) => {
+      sampleCurrencies.forEach((currency) => {
         const testCurrency: FiatCurrency = currency;
         expect(testCurrency).toBe(currency);
       });
-
-      expect(validCurrencies).toHaveLength(7);
     });
   });
 

@@ -26,12 +26,52 @@ jest.mock('currency-symbol-map', () => ({
   __esModule: true,
   default: jest.fn((currency: string) => {
     const symbols: Record<string, string> = {
-      USD: '$',
-      GBP: '£',
-      EUR: '€',
-      CAD: '$',
+      AED: 'د.إ',
+      ARS: '$',
       AUD: '$',
-      JPY: '¥'
+      BOB: 'Bs.',
+      BRL: 'R$',
+      BWP: 'P',
+      CAD: '$',
+      CDF: 'Fr',
+      CLP: '$',
+      COP: '$',
+      CRC: '₡',
+      EGP: 'ج.م',
+      EUR: '€',
+      GBP: '£',
+      GHS: '₵',
+      GTQ: 'Q',
+      IDR: 'Rp',
+      INR: '₹',
+      JPY: '¥',
+      KES: 'Sh',
+      KRW: '₩',
+      LKR: 'Rs',
+      MWK: 'MK',
+      MXN: '$',
+      MYR: 'RM',
+      NGN: '₦',
+      NZD: '$',
+      PEN: 'S/',
+      PHP: '₱',
+      PLN: 'zł',
+      PYG: '₲',
+      RWF: 'Fr',
+      SGD: 'S$',
+      THB: '฿',
+      TRY: '₺',
+      TWD: 'NT$',
+      TZS: 'Sh',
+      UGX: 'Sh',
+      USD: '$',
+      UYU: '$',
+      VES: 'Bs.S',
+      VND: '₫',
+      XAF: 'Fr',
+      XOF: 'Fr',
+      ZAR: 'R',
+      ZMW: 'ZK'
     };
     return symbols[currency];
   })
@@ -294,6 +334,26 @@ describe('Countries Utility Functions', () => {
         { currency: FiatCurrency.GBP, expected: '£' },
         { currency: FiatCurrency.EUR, expected: '€' },
         { currency: FiatCurrency.JPY, expected: '¥' }
+      ];
+
+      testCases.forEach(({ currency, expected }) => {
+        const result = getCurrencySymbol(currency);
+        expect(result).toBe(expected);
+      });
+    });
+
+    it('should return correct symbols for new ISO 4217 currencies', () => {
+      const testCases = [
+        { currency: FiatCurrency.INR, expected: '₹' },
+        { currency: FiatCurrency.BRL, expected: 'R$' },
+        { currency: FiatCurrency.AED, expected: 'د.إ' },
+        { currency: FiatCurrency.MXN, expected: '$' },
+        { currency: FiatCurrency.ZAR, expected: 'R' },
+        { currency: FiatCurrency.THB, expected: '฿' },
+        { currency: FiatCurrency.SGD, expected: 'S$' },
+        { currency: FiatCurrency.KRW, expected: '₩' },
+        { currency: FiatCurrency.PHP, expected: '₱' },
+        { currency: FiatCurrency.TRY, expected: '₺' }
       ];
 
       testCases.forEach(({ currency, expected }) => {

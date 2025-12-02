@@ -9,8 +9,8 @@ import {
   TransactionActivity,
   TransactionAmount
 } from 'src/core';
-import { currencyMap } from '@/consts/currencies';
 import { tokenIconMap } from '@/mocks/token-balances';
+import { getCurrencySymbol } from '@/utils/countries';
 import { Typography } from '../ui/typography';
 
 const DECIMAL_PLACES = 5;
@@ -210,7 +210,7 @@ function renderActivityFiatValue(activity: Activity) {
 
   return (
     <Typography variant="muted">
-      {currencyMap[amount.fiatValue.currency]}
+      {getCurrencySymbol(amount.fiatValue.currency)}
       {amount.fiatValue.amount.toFixed(2)}
     </Typography>
   );
