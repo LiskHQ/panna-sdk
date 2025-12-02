@@ -37,6 +37,10 @@ export type PannaProviderProps = {
    * Optional developer mode for runtime configuration
    */
   enableDevMode?: boolean;
+  /**
+   * Optional endpoint URL for Panna API - requires enableDevMode enabled
+   */
+  pannaApiUrl?: string;
 };
 
 export type PannaContextValue = {
@@ -70,7 +74,8 @@ function PannaProviderInternal(props: PannaProviderProps) {
     children,
     queryClient,
     autoConnectTimeout,
-    enableDevMode
+    enableDevMode,
+    pannaApiUrl: pannaApiUrlOverride
   } = props;
 
   const contextValue = useMemo(() => {
@@ -81,7 +86,8 @@ function PannaProviderInternal(props: PannaProviderProps) {
     // This will be caught by the ErrorBoundary wrapping this provider
     const pannaApiUrl = getPannaApiUrl(
       effectiveChainId,
-      enableDevMode || false
+      enableDevMode || false,
+      pannaApiUrlOverride
     );
     const pannaApiService = new PannaApiService({ baseUrl: pannaApiUrl });
     const siweAuth = new SiweAuth(pannaApiService);
@@ -93,7 +99,7 @@ function PannaProviderInternal(props: PannaProviderProps) {
       pannaApiService,
       siweAuth
     };
-  }, [clientId, partnerId, chainId, enableDevMode]);
+  }, [clientId, partnerId, chainId, enableDevMode, pannaApiUrlOverride]);
 
   // Create a default QueryClient if none provided
   const defaultQueryClient = useMemo(

@@ -11,6 +11,7 @@ export function Providers(props: { children: React.ReactNode }) {
       partnerId={process.env.NEXT_PUBLIC_PARTNER_ID}
       chainId={process.env.NEXT_PUBLIC_CHAIN_ID || String(chain.lisk.id)}
       enableDevMode={process.env.NEXT_PUBLIC_ENABLE_DEV_MODE === 'true'}
+      pannaApiUrl={process.env.NEXT_PUBLIC_PANNA_API_URL}
     >
       <SidebarProvider>{props.children}</SidebarProvider>
     </PannaProvider>
