@@ -120,7 +120,8 @@ export function getPannaApiUrl(
   // Development mode takes precedence
   if (isDevMode) {
     if (pannaApiUrlOverride) {
-      return `${pannaApiUrlOverride}/${PANNA_API_VERSION}`;
+      const normalizedPannaUrl = pannaApiUrlOverride.replace(/\/+$/, '');
+      return `${normalizedPannaUrl}/${PANNA_API_VERSION}`;
     }
 
     const baseUrl = getBaseUrl(DEV_CONFIG.env, DEV_CONFIG.envVar);

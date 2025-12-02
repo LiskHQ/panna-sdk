@@ -82,18 +82,42 @@ describe('getPannaApiUrl', () => {
       expect(url).toBe('http://localhost:8080/v1');
     });
 
-    it('should handle URL override with trailing slash', () => {
+    it('should normalize URL override with trailing slash', () => {
       const url = getPannaApiUrl(
         String(lisk.id),
         true,
         'https://custom-api.example.com/'
       );
-      // Should append version, resulting in double slash (caller's responsibility to format correctly)
-      expect(url).toBe('https://custom-api.example.com//v1');
+      // Trailing slash should be stripped before appending version
+      expect(url).toBe('https://custom-api.example.com/v1');
+    });
+
+    it('should normalize URL override with multiple trailing slashes', () => {
+      const url = getPannaApiUrl(
+        String(lisk.id),
+        true,
+        'https://custom-api.example.com///'
+      );
+      // All trailing slashes should be stripped
+      expect(url).toBe('https://custom-api.example.com/v1');
+    });
+
+    it('should not modify URL override without trailing slash', () => {
+      const url = getPannaApiUrl(
+        String(lisk.id),
+        true,
+        'https://custom-api.example.com'
+      );
+      expect(url).toBe('https://custom-api.example.com/v1');
     });
 
     it('should handle URL override without protocol', () => {
       const url = getPannaApiUrl(String(lisk.id), true, 'localhost:3000');
+      expect(url).toBe('localhost:3000/v1');
+    });
+
+    it('should handle URL override without protocol with trailing slash', () => {
+      const url = getPannaApiUrl(String(lisk.id), true, 'localhost:3000/');
       expect(url).toBe('localhost:3000/v1');
     });
   });
