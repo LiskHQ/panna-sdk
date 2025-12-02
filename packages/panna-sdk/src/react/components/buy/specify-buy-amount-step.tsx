@@ -1,6 +1,6 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { DEFAULT_COUNTRY_CODE } from 'src/core';
+import { DEFAULT_COUNTRY_CODE, type FiatCurrency } from 'src/core';
 import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
 import {
   getEnvironmentChain,
@@ -33,6 +33,18 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   const { data: supportedTokens = [] } = useSupportedTokens();
   const chain = getEnvironmentChain();
 
+  // Input state for decimal handling
+  const [inputValue, setInputValue] = useState(fiatAmount?.toString() || '');
+  const [isFocused, setIsFocused] = useState(false);
+
+  // Sync from form value when input is not focused
+  // This handles: preset buttons, normalization on blur
+  useEffect(() => {
+    if (!isFocused) {
+      setInputValue(fiatAmount?.toString() || '');
+    }
+  }, [fiatAmount, isFocused]);
+
   const tokenAddress = useMemo(() => {
     if (!token?.address) {
       return undefined;
@@ -56,7 +68,7 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
       tokenAddress,
       tokenSymbol: token?.symbol,
       fiatAmount: fiatAmount || 0,
-      currency: currencyCode
+      currency: currencyCode as FiatCurrency
     },
     { enabled: !!fiatAmount && fiatAmount > 0 }
   );
@@ -70,6 +82,27 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
     }
   }, [cryptoConversion?.amount, form]);
 
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    fieldOnChange: (value: number | undefined) => void
+  ) => {
+    const value = e.target.value;
+    if (value === '' || DECIMAL_NUMBER_REGEX.test(value)) {
+      setInputValue(value);
+
+      if (value === '') {
+        fieldOnChange(undefined);
+      } else if (value !== '.') {
+        // Only update form value if it's not a lone '.' (preserve previous value)
+        const numericValue = parseFloat(value);
+        if (!isNaN(numericValue)) {
+          fieldOnChange(numericValue);
+        }
+      }
+      // If value is '.', do not update form value (preserve previous)
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-6">
       <DialogHeader className="items-center gap-0">
@@ -78,57 +111,45 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
       <FormField
         control={form.control}
         name="fiatAmount"
-        render={({ field }) => {
-          const amountString = field.value?.toString() || '';
-
-          return (
-            <FormItem className="flex flex-col items-center gap-2">
-              <FormControl>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex items-center gap-1">
-                    <Typography
-                      variant="h2"
-                      className="text-muted-foreground pb-0"
-                    >
-                      {currencySymbol}
-                    </Typography>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="0"
-                      value={amountString}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '' || DECIMAL_NUMBER_REGEX.test(value)) {
-                          const numericValue = parseFloat(value);
-                          if (!isNaN(numericValue)) {
-                            field.onChange(numericValue);
-                          } else if (value === '') {
-                            field.onChange(undefined);
-                          }
-                        }
-                      }}
-                      className="w-fit max-w-[8ch] border-none bg-transparent text-center text-3xl font-bold outline-none"
-                      size={Math.max(1, (amountString || '0').length)}
-                    />
-                  </div>
-                  <Typography variant="muted">
-                    {isLoading
-                      ? 'Loading...'
-                      : isError
-                        ? error?.message?.includes('Price not available')
-                          ? 'Amount shown on next step'
-                          : 'Error'
-                        : cryptoConversion?.amount
-                          ? `≈ ${cryptoConversion.amount.toFixed(6)} ${token?.symbol}`
-                          : `0 ${token?.symbol}`}
+        render={({ field }) => (
+          <FormItem className="flex flex-col items-center gap-2">
+            <FormControl>
+              <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Typography
+                    variant="h2"
+                    className="text-muted-foreground pb-0"
+                  >
+                    {currencySymbol}
                   </Typography>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    placeholder="0"
+                    value={inputValue}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
+                    onChange={(e) => handleInputChange(e, field.onChange)}
+                    className="w-fit max-w-[8ch] border-none bg-transparent text-center text-3xl font-bold outline-none"
+                    size={Math.max(1, (inputValue || '0').length)}
+                  />
                 </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          );
-        }}
+                <Typography variant="muted">
+                  {isLoading
+                    ? 'Loading...'
+                    : isError
+                      ? error?.message?.includes('Price not available')
+                        ? 'Amount shown on next step'
+                        : 'Error'
+                      : cryptoConversion?.amount
+                        ? `≈ ${cryptoConversion.amount.toFixed(6)} ${token?.symbol}`
+                        : `0 ${token?.symbol}`}
+                </Typography>
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
       <div className="flex gap-3">
         {[25, 50, 100].map((value) => (
