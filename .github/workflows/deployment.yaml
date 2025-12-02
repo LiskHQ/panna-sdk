@@ -47,6 +47,8 @@ jobs:
             "NEXT_PUBLIC_CLIENT_ID=${{ secrets.NEXT_PUBLIC_CLIENT_ID }}"
             "NEXT_PUBLIC_PARTNER_ID=${{ secrets.NEXT_PUBLIC_PARTNER_ID }}"
             "NEXT_PUBLIC_CHAIN_ID=${{ vars.NEXT_PUBLIC_CHAIN_ID }}"
+            "NEXT_PUBLIC_ENABLE_DEV_MODE=${{ vars.NEXT_PUBLIC_ENABLE_DEV_MODE }}"
+            "NEXT_PUBLIC_PANNA_API_URL=${{ vars.NEXT_PUBLIC_PANNA_API_URL }}"
 
       - name: Download task definition
         run: |
