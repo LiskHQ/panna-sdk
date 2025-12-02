@@ -5,13 +5,18 @@ import { PannaClientContext, PannaProvider } from './panna-provider';
 
 // Mock panna-api module before any imports
 jest.mock('../utils/panna-api', () => ({
-  getPannaApiUrl: jest.fn((chainId: string, isDevMode: boolean) => {
-    if (isDevMode) return 'http://localhost:8080/v1';
-    if (chainId === '1135') return 'https://panna-app.lisk.com/v1';
-    if (chainId === '4202') return 'https://stg-panna-app.lisk.com/v1';
-    // Return a default URL for test chain IDs
-    return 'https://panna-app.lisk.com/v1';
-  })
+  getPannaApiUrl: jest.fn(
+    (chainId: string, isDevMode: boolean, pannaApiUrlOverride?: string) => {
+      if (isDevMode && pannaApiUrlOverride) {
+        return `${pannaApiUrlOverride}/v1`;
+      }
+      if (isDevMode) return 'http://localhost:8080/v1';
+      if (chainId === '1135') return 'https://panna-app.lisk.com/v1';
+      if (chainId === '4202') return 'https://stg-panna-app.lisk.com/v1';
+      // Return a default URL for test chain IDs
+      return 'https://panna-app.lisk.com/v1';
+    }
+  )
 }));
 
 // Mock @tanstack/react-query
@@ -468,6 +473,110 @@ describe('PannaProvider', () => {
 
       expect(screen.getByTestId('test-child')).toBeInTheDocument();
       expect(screen.queryByText('Error occurred')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('pannaApiUrl prop', () => {
+    it('should pass pannaApiUrl to getPannaApiUrl when enableDevMode is true', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      // Import the mocked function to verify it was called with correct args
+      const { getPannaApiUrl } = jest.requireMock('../utils/panna-api');
+
+      render(
+        <PannaProvider
+          clientId="test-client-id"
+          enableDevMode={true}
+          pannaApiUrl="https://custom-api.example.com"
+        >
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      expect(getPannaApiUrl).toHaveBeenCalledWith(
+        '1135',
+        true,
+        'https://custom-api.example.com'
+      );
+    });
+
+    it('should pass pannaApiUrl even when enableDevMode is false', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      const { getPannaApiUrl } = jest.requireMock('../utils/panna-api');
+
+      render(
+        <PannaProvider
+          clientId="test-client-id"
+          enableDevMode={false}
+          pannaApiUrl="https://custom-api.example.com"
+        >
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      // pannaApiUrl is passed to getPannaApiUrl but will be ignored when dev mode is false
+      expect(getPannaApiUrl).toHaveBeenCalledWith(
+        '1135',
+        false,
+        'https://custom-api.example.com'
+      );
+    });
+
+    it('should pass undefined when pannaApiUrl is not provided', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      const { getPannaApiUrl } = jest.requireMock('../utils/panna-api');
+
+      render(
+        <PannaProvider clientId="test-client-id" enableDevMode={true}>
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      expect(getPannaApiUrl).toHaveBeenCalledWith('1135', true, undefined);
+    });
+
+    it('should update API URL when pannaApiUrl prop changes', () => {
+      const mockClient = { id: 'test-client' } as unknown as PannaClient;
+      mockCreatePannaClient.mockReturnValue(mockClient);
+
+      const { getPannaApiUrl } = jest.requireMock('../utils/panna-api');
+
+      const { rerender } = render(
+        <PannaProvider
+          clientId="test-client-id"
+          enableDevMode={true}
+          pannaApiUrl="https://api-v1.example.com"
+        >
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      expect(getPannaApiUrl).toHaveBeenLastCalledWith(
+        '1135',
+        true,
+        'https://api-v1.example.com'
+      );
+
+      rerender(
+        <PannaProvider
+          clientId="test-client-id"
+          enableDevMode={true}
+          pannaApiUrl="https://api-v2.example.com"
+        >
+          <TestConsumer />
+        </PannaProvider>
+      );
+
+      expect(getPannaApiUrl).toHaveBeenLastCalledWith(
+        '1135',
+        true,
+        'https://api-v2.example.com'
+      );
     });
   });
 

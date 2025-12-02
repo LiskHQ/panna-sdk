@@ -44,6 +44,60 @@ describe('getPannaApiUrl', () => {
     });
   });
 
+  describe('Custom API URL override', () => {
+    it('should use custom URL override when provided in dev mode', () => {
+      const url = getPannaApiUrl(
+        String(lisk.id),
+        true,
+        'https://custom-api.example.com'
+      );
+      expect(url).toBe('https://custom-api.example.com/v1');
+    });
+
+    it('should use custom URL override for any chain ID in dev mode', () => {
+      const url = getPannaApiUrl(
+        '999999',
+        true,
+        'https://custom-api.example.com'
+      );
+      expect(url).toBe('https://custom-api.example.com/v1');
+    });
+
+    it('should ignore custom URL override when not in dev mode', () => {
+      const url = getPannaApiUrl(
+        String(lisk.id),
+        false,
+        'https://custom-api.example.com'
+      );
+      expect(url).toBe('https://panna-app.lisk.com/v1');
+    });
+
+    it('should use localhost URL in dev mode when override is undefined', () => {
+      const url = getPannaApiUrl(String(lisk.id), true, undefined);
+      expect(url).toBe('http://localhost:8080/v1');
+    });
+
+    it('should use localhost URL in dev mode when override is empty string', () => {
+      const url = getPannaApiUrl(String(lisk.id), true, '');
+      expect(url).toBe('http://localhost:8080/v1');
+    });
+
+    it('should handle URL override with trailing slash', () => {
+      const url = getPannaApiUrl(
+        String(lisk.id),
+        true,
+        'https://custom-api.example.com/'
+      );
+      // Should append version, resulting in double slash (caller's responsibility to format correctly)
+      expect(url).toBe('https://custom-api.example.com//v1');
+    });
+
+    it('should handle URL override without protocol', () => {
+      const url = getPannaApiUrl(String(lisk.id), true, 'localhost:3000');
+      expect(url).toBe('localhost:3000/v1');
+    });
+  });
+
   describe('Unsupported chains', () => {
     it('should throw error for unsupported chain ID', () => {
       expect(() => getPannaApiUrl('999999', false)).toThrow(

@@ -73,6 +73,7 @@ const DEV_CONFIG = {
  *
  * @param chainId - The blockchain chain ID as a string
  * @param isDevMode - Whether development mode is enabled (uses localhost or custom dev URL)
+ * @param pannaApiUrlOverride - Optional custom API URL to use when dev mode is enabled
  * @returns The complete Panna API URL with version path
  * @throws {Error} If the chain ID is not supported and no dev mode is enabled
  *
@@ -87,6 +88,11 @@ const DEV_CONFIG = {
  * - `PANNA_API_URL_SEPOLIA`: Override sepolia API URL
  * - `PANNA_API_URL_DEV`: Override development API URL
  *
+ * URL override priority (when isDevMode is true):
+ * 1. `pannaApiUrlOverride` parameter (highest priority)
+ * 2. `PANNA_API_URL_DEV` environment variable
+ * 3. Default localhost URL (http://localhost:8080)
+ *
  * @example
  * ```ts
  * // Get mainnet URL
@@ -97,14 +103,26 @@ const DEV_CONFIG = {
  * const devUrl = getPannaApiUrl(String(lisk.id), true);
  * // Returns: 'http://localhost:8080/v1'
  *
+ * // Use custom API URL in dev mode
+ * const customUrl = getPannaApiUrl(String(lisk.id), true, 'https://custom-api.example.com');
+ * // Returns: 'https://custom-api.example.com/v1'
+ *
  * // Unsupported chain throws error
  * const invalid = getPannaApiUrl('999999', false);
  * // Throws: Error with supported chains message
  * ```
  */
-export function getPannaApiUrl(chainId: string, isDevMode: boolean): string {
+export function getPannaApiUrl(
+  chainId: string,
+  isDevMode: boolean,
+  pannaApiUrlOverride?: string
+): string {
   // Development mode takes precedence
   if (isDevMode) {
+    if (pannaApiUrlOverride) {
+      return `${pannaApiUrlOverride}/${PANNA_API_VERSION}`;
+    }
+
     const baseUrl = getBaseUrl(DEV_CONFIG.env, DEV_CONFIG.envVar);
     return `${baseUrl}/${PANNA_API_VERSION}`;
   }
