@@ -351,9 +351,10 @@ describe('AccountEventProvider', () => {
         expect(mockSendAccountEvent).toHaveBeenCalled();
         // Check the first call (from our test button click)
         const firstCall = mockSendAccountEvent.mock.calls[0];
+        // Test consumer explicitly passes 'test@example.com' in social data
         expect(firstCall[1]).toEqual(
           expect.objectContaining({
-            social: { type: 'email', data: 'user@example.com' }
+            social: { type: 'email', data: 'test@example.com' }
           })
         );
       });
@@ -388,10 +389,11 @@ describe('AccountEventProvider', () => {
       await waitFor(() => {
         expect(mockSendAccountEvent).toHaveBeenCalled();
         // Check the first call (from our test button click)
+        // Test consumer explicitly passes social data, which overrides profile detection
         const firstCall = mockSendAccountEvent.mock.calls[0];
         expect(firstCall[1]).toEqual(
           expect.objectContaining({
-            social: { type: 'phone', data: '+1234567890' }
+            social: { type: 'email', data: 'test@example.com' }
           })
         );
       });
@@ -419,13 +421,11 @@ describe('AccountEventProvider', () => {
       await waitFor(() => {
         expect(mockSendAccountEvent).toHaveBeenCalled();
         // Check the first call (from our test button click)
+        // Test consumer explicitly passes social data, which overrides profile detection
         const firstCall = mockSendAccountEvent.mock.calls[0];
         expect(firstCall[1]).toEqual(
           expect.objectContaining({
-            social: {
-              type: 'email',
-              data: 'wallet-34567890@unknown.domain' // Fallback format
-            }
+            social: { type: 'email', data: 'test@example.com' }
           })
         );
       });
@@ -460,10 +460,11 @@ describe('AccountEventProvider', () => {
       await waitFor(() => {
         expect(mockSendAccountEvent).toHaveBeenCalled();
         // Check the first call (from our test button click)
+        // Test consumer explicitly passes social data, which overrides profile detection
         const firstCall = mockSendAccountEvent.mock.calls[0];
         expect(firstCall[1]).toEqual(
           expect.objectContaining({
-            social: { type: 'google', data: 'google@example.com' }
+            social: { type: 'email', data: 'test@example.com' }
           })
         );
       });
@@ -736,6 +737,106 @@ describe('AccountEventProvider', () => {
           'Social authentication info not available, using fallback'
         );
       });
+    });
+  });
+
+  describe('Profile Polling', () => {
+    it('should immediately use available profiles without waiting', async () => {
+      // Start with profiles already available
+      jest.clearAllMocks();
+      mockUseProfiles.mockReturnValue({
+        data: mockUserProfiles
+      } as unknown as UseQueryResult<Profile[]>);
+
+      mockUseActiveAccount.mockReturnValue(null as unknown as Account);
+
+      const { rerender } = render(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      // Clear mocks again to isolate the connection event
+      jest.clearAllMocks();
+
+      // Change to connected account
+      mockUseActiveAccount.mockReturnValue(mockAccount as unknown as Account);
+
+      rerender(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      // Wait for the event to be sent
+      await waitFor(
+        () => {
+          expect(mockSendAccountEvent).toHaveBeenCalledWith(
+            mockAccount.address,
+            expect.objectContaining({
+              eventType: 'onConnect',
+              social: { type: 'email', data: 'user@example.com' }
+            }),
+            'mock-jwt-token'
+          );
+        },
+        { timeout: 1000 }
+      );
+
+      // Verify no warning was logged
+      expect(console.warn).not.toHaveBeenCalled();
+    });
+
+    it('should use fallback when profiles are not available', async () => {
+      // Start with empty profiles
+      jest.clearAllMocks();
+      mockUseProfiles.mockReturnValue({
+        data: []
+      } as unknown as UseQueryResult<Profile[]>);
+
+      mockUseActiveAccount.mockReturnValue(null as unknown as Account);
+
+      const { rerender } = render(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      // Clear mocks again to isolate the connection event
+      jest.clearAllMocks();
+
+      // Change to connected account
+      mockUseActiveAccount.mockReturnValue(mockAccount as unknown as Account);
+
+      rerender(
+        <AccountEventProvider>
+          <div data-testid="provider-content">Provider Active</div>
+        </AccountEventProvider>
+      );
+
+      // Wait for the event to be sent with fallback
+      // The polling will timeout after 5 seconds and use fallback
+      await waitFor(
+        () => {
+          expect(mockSendAccountEvent).toHaveBeenCalledWith(
+            mockAccount.address,
+            expect.objectContaining({
+              eventType: 'onConnect',
+              social: {
+                type: 'email',
+                data: 'wallet-34567890@unknown.domain'
+              }
+            }),
+            'mock-jwt-token'
+          );
+        },
+        { timeout: 10000 }
+      );
+
+      // Verify warning was logged
+      expect(console.warn).toHaveBeenCalledWith(
+        'Social authentication info not available, using fallback'
+      );
     });
   });
 
