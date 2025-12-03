@@ -113,7 +113,7 @@ describe('StatusStep', () => {
       );
       expect(screen.getByText('Transaction failed')).toBeInTheDocument();
       expect(screen.getByText('Something went wrong')).toBeInTheDocument();
-      expect(screen.getByText('No funds were moved')).toBeInTheDocument();
+      expect(screen.getByText('No funds were moved.')).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: /try again/i })
       ).toBeInTheDocument();
@@ -147,7 +147,40 @@ describe('StatusStep', () => {
       );
       expect(screen.getByText('Transaction failed')).toBeInTheDocument();
       expect(screen.getByText('Session expired')).toBeInTheDocument();
-      expect(screen.getByText('No funds were moved')).toBeInTheDocument();
+      expect(screen.getByText('No funds were moved.')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /try again/i })
+      ).toBeInTheDocument();
+    });
+
+    it('calls prev when try again button is clicked', () => {
+      render(
+        <Dialog open>
+          <StatusStep />
+        </Dialog>
+      );
+      const retryButton = screen.getByRole('button', { name: /try again/i });
+      fireEvent.click(retryButton);
+      expect(mockPrev).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('CancelledStatus', () => {
+    beforeEach(() => {
+      (useDialogStepper as jest.Mock).mockReturnValue({
+        stepData: { status: OnrampMoneySessionStatusEnum.Cancelled },
+        prev: mockPrev
+      });
+    });
+
+    it('renders cancelled status correctly', () => {
+      render(
+        <Dialog open>
+          <StatusStep />
+        </Dialog>
+      );
+      expect(screen.getByText('Transaction cancelled')).toBeInTheDocument();
+      expect(screen.getByText('No funds were moved.')).toBeInTheDocument();
       expect(
         screen.getByRole('button', { name: /try again/i })
       ).toBeInTheDocument();

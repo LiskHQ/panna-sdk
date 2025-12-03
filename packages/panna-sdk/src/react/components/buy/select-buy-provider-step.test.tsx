@@ -128,7 +128,7 @@ describe('SelectBuyProviderStep', () => {
 
     render(<TestWrapper />);
 
-    expect(screen.getByText('Loading quotes...')).toBeInTheDocument();
+    expect(screen.getByText('Generating quotes...')).toBeInTheDocument();
   });
 
   it('shows error message when quote fetching fails', () => {

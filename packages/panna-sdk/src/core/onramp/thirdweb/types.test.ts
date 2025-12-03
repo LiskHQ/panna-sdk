@@ -1,5 +1,5 @@
-import type { PannaClient } from '../client';
-import { DEFAULT_CURRENCY } from '../defaults';
+import type { PannaClient } from '../../client';
+import { DEFAULT_CURRENCY } from '../../defaults';
 import type {
   OnrampStatus,
   OnrampTransaction,

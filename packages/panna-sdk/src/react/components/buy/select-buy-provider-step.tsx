@@ -143,7 +143,7 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center gap-4 py-8">
             <Loader2Icon size={48} className="animate-spin" />
-            <Typography variant="muted">Loading quotes...</Typography>
+            <Typography variant="muted">Generating quotes...</Typography>
           </div>
         ) : quoteError ? (
           <div className="flex items-center justify-center py-8">
