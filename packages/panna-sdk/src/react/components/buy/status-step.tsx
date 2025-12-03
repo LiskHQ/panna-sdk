@@ -18,9 +18,10 @@ import { Typography } from '../ui/typography';
  * - Expired
  * Created and pending states are handled in the processing step
  */
-// TODO: Add Cancelled status component when design is ready
 export function StatusStep() {
-  const { stepData } = useDialogStepper<{ status: OnrampMoneySessionStatus }>();
+  const { stepData } = useDialogStepper<{
+    status: Omit<OnrampMoneySessionStatus, 'created' | 'pending'>;
+  }>();
 
   if (stepData?.status === OnrampMoneySessionStatusEnum.Failed) {
     return <ErrorStatus />;
@@ -28,6 +29,10 @@ export function StatusStep() {
 
   if (stepData?.status === OnrampMoneySessionStatusEnum.Expired) {
     return <ExpiredStatus />;
+  }
+
+  if (stepData?.status === OnrampMoneySessionStatusEnum.Cancelled) {
+    return <CancelledStatus />;
   }
 
   return <SuccessStatus />;
@@ -92,7 +97,7 @@ function ErrorStatus() {
       />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Something went wrong</Typography>
-        <Typography variant="muted">No funds were moved</Typography>
+        <Typography variant="muted">No funds were moved.</Typography>
       </div>
       <Button type="button" className="w-full" onClick={handleRetry}>
         Try again
@@ -117,8 +122,30 @@ function ExpiredStatus() {
       />
       <div className="flex flex-col items-center gap-2">
         <Typography variant="large">Session expired</Typography>
-        <Typography variant="muted">No funds were moved</Typography>
+        <Typography variant="muted">No funds were moved.</Typography>
       </div>
+      <Button type="button" className="w-full" onClick={handleRetry}>
+        Try again
+      </Button>
+    </div>
+  );
+}
+
+function CancelledStatus() {
+  const { prev } = useDialogStepper();
+
+  const handleRetry = () => {
+    prev();
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-6">
+      <Typography variant="h4">Transaction cancelled</Typography>
+      <CircleXIcon
+        className="h-20 w-20 stroke-[#FF6366] stroke-1"
+        aria-label="Session cancelled"
+      />
+      <Typography variant="muted">No funds were moved.</Typography>
       <Button type="button" className="w-full" onClick={handleRetry}>
         Try again
       </Button>
