@@ -1,3 +1,4 @@
+import { CRYPTO_AMOUNT_FIXED_DIGITS, FIAT_AMOUNT_FIXED_DIGITS } from '@/consts';
 import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance } from '@/mocks/token-balances';
@@ -97,10 +98,14 @@ function TokenItem({ token }: TokenItemProps) {
       <div className="flex flex-col justify-center text-right">
         <Typography variant="small">
           {getCurrencySymbol(token.fiatBalance.currency)}
-          {Number(Math.floor(token.fiatBalance.amount * 100) / 100).toFixed(2)}
+          {Number(Math.floor(token.fiatBalance.amount * 100) / 100).toFixed(
+            FIAT_AMOUNT_FIXED_DIGITS
+          )}
         </Typography>
         <Typography variant="muted">
-          {Number(token.tokenBalance.displayValue).toFixed(6)}
+          {Number(token.tokenBalance.displayValue).toFixed(
+            CRYPTO_AMOUNT_FIXED_DIGITS
+          )}
         </Typography>
       </div>
     </div>

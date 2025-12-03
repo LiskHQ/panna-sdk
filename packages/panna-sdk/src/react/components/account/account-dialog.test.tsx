@@ -72,7 +72,7 @@ jest.mock('@dicebear/collection', () => ({
 }));
 jest.mock('@dicebear/core', () => ({
   createAvatar: jest.fn().mockReturnValue({
-    toDataUri: jest.fn().mockResolvedValue('data:image/png;base64,avatar')
+    toDataUri: jest.fn().mockReturnValue('data:image/png;base64,avatar')
   })
 }));
 

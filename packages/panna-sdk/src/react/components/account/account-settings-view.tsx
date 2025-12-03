@@ -28,7 +28,6 @@ export function AccountSettingsView() {
     }
   };
 
-  console.log({ userProfiles });
   // Extract email, phone and social from profiles
   const emailProfile = userProfiles?.find(
     (profile) => profile.type === 'email'
