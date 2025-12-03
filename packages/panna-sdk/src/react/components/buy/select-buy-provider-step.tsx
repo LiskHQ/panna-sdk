@@ -43,10 +43,10 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   // Get available providers for the country
   const availableProviders = useMemo(() => {
     if (!country?.code) return [];
-    const supportedCountries = ONRAMP_SUPPORTED_COUNTRIES.filter(
-      (c) => c.code === country.code
-    );
-    if (supportedCountries.length === 0) return [];
+    const supportedCountries = new Set(
+      ONRAMP_SUPPORTED_COUNTRIES.map((c) => c.code)
+    ).has(country.code);
+    if (!supportedCountries) return [];
     try {
       return getOnrampProviders(country.code);
     } catch {

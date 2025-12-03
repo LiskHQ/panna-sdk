@@ -27,32 +27,34 @@ export const COUNTRIES: Country[] = iso3166
   .filter((country): country is Country => country !== null)
   .sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically by name
 
+const ONRAMP_SUPPORTED_COUNTRY_CODES = [
+  'AT', // Austria
+  'BE', // Belgium
+  'BG', // Bulgaria
+  'CZ', // Czech Republic
+  'DK', // Denmark
+  'EE', // Estonia
+  'FI', // Finland
+  'FR', // France
+  'DE', // Germany
+  'HU', // Hungary
+  'IE', // Ireland
+  'IT', // Italy
+  'LV', // Latvia
+  'LT', // Lithuania
+  'LU', // Luxembourg
+  'NL', // Netherlands
+  'NO', // Norway
+  'PL', // Poland
+  'PT', // Portugal
+  'RO', // Romania
+  'SK', // Slovakia
+  'ES', // Spain
+  'SE', // Sweden
+  'CH', // Switzerland
+  'GB' // United Kingdom
+];
+
 export const ONRAMP_SUPPORTED_COUNTRIES = COUNTRIES.filter((country) =>
-  [
-    'Austria',
-    'Belgium',
-    'Bulgaria',
-    'Czech Republic',
-    'Denmark',
-    'Estonia',
-    'Finland',
-    'France',
-    'Germany',
-    'Hungary',
-    'Ireland',
-    'Italy',
-    'Latvia',
-    'Lithuania',
-    'Luxembourg',
-    'Netherlands',
-    'Norway',
-    'Poland',
-    'Portugal',
-    'Romania',
-    'Slovakia',
-    'Spain',
-    'Sweden',
-    'Switzerland',
-    'United Kingdom'
-  ].includes(country.name)
+  ONRAMP_SUPPORTED_COUNTRY_CODES.includes(country.code)
 );
