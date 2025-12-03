@@ -8,6 +8,12 @@ import { useDialogStepper } from '../ui/dialog-stepper';
 import type { BuyFormData } from './schema';
 import { SelectBuyProviderStep } from './select-buy-provider-step';
 
+jest.mock('@/consts', () => ({
+  CRYPTO_AMOUNT_FIXED_DIGITS: 6,
+  FIAT_AMOUNT_FIXED_DIGITS: 2,
+  ONRAMP_SUPPORTED_COUNTRIES: [{ code: 'US', name: 'United States' }]
+}));
+
 jest.mock('../../hooks', () => ({
   useOnrampQuotes: jest.fn(),
   usePanna: jest.fn()
@@ -148,7 +154,13 @@ describe('SelectBuyProviderStep', () => {
   it('shows message when no providers are available', () => {
     mockGetOnrampProviders.mockReturnValue([]);
 
-    render(<TestWrapper />);
+    render(
+      <TestWrapper
+        defaultValues={{
+          country: { code: 'JP', name: 'Japan', flag: '🇯🇵' }
+        }}
+      />
+    );
 
     expect(
       screen.getByText('No providers available for this country')

@@ -2,7 +2,11 @@ import { Loader2Icon } from 'lucide-react';
 import { useMemo } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { PROVIDERS } from 'src/core/onramp/constants';
-import { CRYPTO_AMOUNT_FIXED_DIGITS, FIAT_AMOUNT_FIXED_DIGITS } from '@/consts';
+import {
+  CRYPTO_AMOUNT_FIXED_DIGITS,
+  FIAT_AMOUNT_FIXED_DIGITS,
+  ONRAMP_SUPPORTED_COUNTRIES
+} from '@/consts';
 import { DEFAULT_CHAIN, DEFAULT_COUNTRY_CODE } from '../../../core';
 import { getOnrampProviders } from '../../../core/onramp';
 import { useOnrampQuotes, usePanna } from '../../hooks';
@@ -39,6 +43,10 @@ export function SelectBuyProviderStep({ form }: SelectBuyProviderStepProps) {
   // Get available providers for the country
   const availableProviders = useMemo(() => {
     if (!country?.code) return [];
+    const supportedCountries = new Set(
+      ONRAMP_SUPPORTED_COUNTRIES.map((c) => c.code)
+    ).has(country.code);
+    if (!supportedCountries) return [];
     try {
       return getOnrampProviders(country.code);
     } catch {
