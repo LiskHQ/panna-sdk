@@ -189,7 +189,7 @@ function renderActivityNameOrSymbol(activity: Activity) {
       );
     case TokenERC.ERC721:
     case TokenERC.ERC1155:
-      return <Typography variant="muted">Collectible</Typography>;
+      return <Typography variant="muted" />;
     default:
       console.warn(
         `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
@@ -203,7 +203,7 @@ function renderActivityFiatValue(activity: Activity) {
   const amount = activity.amount as EtherAmount | ERC20Amount | ERC1155Amount;
 
   if (!amount.fiatValue) {
-    return <Typography variant="small">Free</Typography>;
+    return <Typography variant="small">Collectible</Typography>;
   }
 
   return (
@@ -226,9 +226,7 @@ export function ActivityItem({ activity }: ActivityItemProps) {
       </header>
       <div className="flex flex-col justify-center text-right">
         {renderActivityFiatValue(activity)}
-        <Typography variant="small">
-          {renderActivityNameOrSymbol(activity)}
-        </Typography>
+        {renderActivityNameOrSymbol(activity)}
       </div>
     </section>
   );
