@@ -222,12 +222,36 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   };
 
   /**
+   * Wait for user profiles to be loaded before retrieving social info
+   * Polls for up to 5 seconds, checking every 200ms
+   */
+  const waitForSocialInfo = async (): Promise<SocialAuthData | null> => {
+    const maxAttempts = 25; // 5 seconds / 200ms = 25 attempts
+    const delayMs = 200;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const socialInfo = getSocialInfo();
+
+      if (socialInfo) {
+        return socialInfo;
+      }
+
+      // Wait before next attempt
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+
+    // Timeout: profiles not loaded
+    return null;
+  };
+
+  /**
    * Handle wallet onConnect event
-   * Polls for SIWE authentication before sending the event
+   * Waits for user profiles to load before sending the event
    */
   const handleOnConnect = async (address: string) => {
     try {
-      const socialInfo = getSocialInfo();
+      // Wait for social info to be available (with timeout)
+      const socialInfo = await waitForSocialInfo();
 
       await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
         social: socialInfo || undefined
