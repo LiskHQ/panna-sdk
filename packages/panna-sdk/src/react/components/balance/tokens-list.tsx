@@ -1,8 +1,8 @@
-import { currencyMap } from '@/consts/currencies';
 import { useActiveAccount } from '@/hooks';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance } from '@/mocks/token-balances';
 import { cn } from '@/utils';
+import { getCurrencySymbol } from '@/utils/countries';
 import { Skeleton } from '../ui/skeleton';
 import { Typography } from '../ui/typography';
 
@@ -99,7 +99,7 @@ function TokenItem({ token }: TokenItemProps) {
           {Number(token.tokenBalance.displayValue).toFixed(6)}
         </Typography>
         <Typography variant="muted">
-          {currencyMap[token.fiatBalance.currency]}
+          {getCurrencySymbol(token.fiatBalance.currency)}
           {Number(Math.floor(token.fiatBalance.amount * 100) / 100).toFixed(2)}
         </Typography>
       </div>
