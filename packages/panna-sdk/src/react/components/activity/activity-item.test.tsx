@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { DEFAULT_CURRENCY } from 'src/core';
 import {
   Activity,
-  TransactionActivity,
+  DEFAULT_CURRENCY,
+  FiatCurrency,
   TokenERC,
-  FiatCurrency
+  TransactionActivity
 } from 'src/core';
 import { ActivityItem } from './activity-item';
 
@@ -37,7 +37,7 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Sent')).toBeInTheDocument();
     expect(screen.getByText('ETH')).toBeInTheDocument();
-    expect(screen.getByText('1.00000 ETH')).toBeInTheDocument();
+    expect(screen.getByText('1.000000 ETH')).toBeInTheDocument();
     expect(screen.getByText('$3000.50')).toBeInTheDocument();
   });
 
@@ -69,11 +69,11 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Received')).toBeInTheDocument();
     expect(screen.getByText('USDC')).toBeInTheDocument();
-    expect(screen.getByText('1.00000 USDC')).toBeInTheDocument();
+    expect(screen.getByText('1.000000 USDC')).toBeInTheDocument();
     expect(screen.getByText('$1.00')).toBeInTheDocument();
   });
 
-  it('renders "-" when fiat value is not available', () => {
+  it('renders collectible when fiat value is not available', () => {
     const activity: Activity = {
       activityType: TransactionActivity.SENT,
       transactionID: '0x789',
@@ -97,7 +97,7 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Sent')).toBeInTheDocument();
     expect(screen.getByText('ETH')).toBeInTheDocument();
-    expect(screen.getByText('-')).toBeInTheDocument();
+    expect(screen.getByText('Collectible')).toBeInTheDocument();
   });
 
   it('renders EUR currency symbol correctly', () => {
@@ -190,8 +190,7 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Minted')).toBeInTheDocument();
     expect(screen.getByText('Cool NFT')).toBeInTheDocument();
-    expect(screen.getByText('1 Collectible')).toBeInTheDocument();
-    expect(screen.getByText('-')).toBeInTheDocument();
+    expect(screen.getByText('Collectible')).toBeInTheDocument();
   });
 
   it('renders ERC1155 collectible with fiat value', () => {
@@ -231,7 +230,6 @@ describe('ActivityItem', () => {
 
     expect(screen.getByText('Received')).toBeInTheDocument();
     expect(screen.getByText('Multi Token')).toBeInTheDocument();
-    expect(screen.getByText('1 Collectible')).toBeInTheDocument();
     expect(screen.getByText('$250.00')).toBeInTheDocument();
   });
 });

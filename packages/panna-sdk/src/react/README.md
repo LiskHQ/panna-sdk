@@ -101,18 +101,13 @@ function Component({ country, token }: { country: Country; token: Token }) {
 
 Constants and configuration for tokens, countries, and currencies.
 
-**Key Constants:** tokenConfig, COUNTRIES, currencyMap
+**Key Constants:** tokenConfig, COUNTRIES
 
 ```tsx
-import { tokenConfig, currencyMap } from 'panna-sdk';
+import { tokenConfig, COUNTRIES } from 'panna-sdk';
 
 const liskTokens = tokenConfig[1135];
-
-return (
-  <Typography variant="muted">
-    {currencyMap[amount.fiatValue.currency]}
-  </Typography>
-)
+const usCountry = COUNTRIES.find((c) => c.code === 'US');
 ```
 
 [→ View Documentation](./consts/README.md)

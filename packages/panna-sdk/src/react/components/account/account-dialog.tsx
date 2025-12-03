@@ -1,3 +1,5 @@
+import { glass } from '@dicebear/collection';
+import { createAvatar } from '@dicebear/core';
 import {
   ArrowLeftIcon,
   SendIcon,
@@ -7,7 +9,6 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { DEFAULT_CURRENCY } from 'src/core';
-import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
@@ -62,6 +63,12 @@ export function AccountDialog({ address }: AccountDialogProps) {
       address,
       currency: DEFAULT_CURRENCY
     });
+
+  const avatar = createAvatar(glass, {
+    seed: address,
+    size: 40,
+    radius: 50
+  }).toDataUri();
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab as AccountDialogTab);
@@ -315,7 +322,9 @@ export function AccountDialog({ address }: AccountDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">{truncateAddress(address)}</Button>
+        <Button variant="ghost" className="rounded-full p-0">
+          <img src={avatar} alt="User Avatar" />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogDescription className="sr-only">
