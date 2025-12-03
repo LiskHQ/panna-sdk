@@ -21,6 +21,9 @@ import { AccountEventType } from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import { getOrRefreshSiweToken } from '../utils/auth';
 
+const PROFILE_POLL_MAX_ATTEMPTS = 25; // 5 seconds / 200ms = 25 attempts
+const PROFILE_POLL_INTERVAL_MS = 200;
+
 export type AccountEventContextType = {
   sendAccountEvent: (
     eventType: AccountEventPayload['eventType'],
@@ -224,20 +227,33 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   /**
    * Wait for user profiles to be loaded before retrieving social info
    * Polls for up to 5 seconds, checking every 200ms
+   * @param signal - Optional AbortSignal to cancel the polling
    */
-  const waitForSocialInfo = async (): Promise<SocialAuthData | null> => {
-    const maxAttempts = 25; // 5 seconds / 200ms = 25 attempts
-    const delayMs = 200;
+  const waitForSocialInfo = async (
+    signal?: AbortSignal
+  ): Promise<SocialAuthData | null> => {
+    for (let attempt = 0; attempt < PROFILE_POLL_MAX_ATTEMPTS; attempt++) {
+      // Check if polling was aborted
+      if (signal?.aborted) {
+        return null;
+      }
 
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
       const socialInfo = getSocialInfo();
 
       if (socialInfo) {
         return socialInfo;
       }
 
-      // Wait before next attempt
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      // Wait before next attempt, but check for abort after delay
+      await new Promise((resolve) => {
+        const timeoutId = setTimeout(resolve, PROFILE_POLL_INTERVAL_MS);
+
+        // If signal is aborted during the delay, clear the timeout and resolve immediately
+        signal?.addEventListener('abort', () => {
+          clearTimeout(timeoutId);
+          resolve(undefined);
+        });
+      });
     }
 
     // Timeout: profiles not loaded
@@ -247,11 +263,17 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   /**
    * Handle wallet onConnect event
    * Waits for user profiles to load before sending the event
+   * @param signal - Optional AbortSignal to cancel the operation
    */
-  const handleOnConnect = async (address: string) => {
+  const handleOnConnect = async (address: string, signal?: AbortSignal) => {
     try {
       // Wait for social info to be available (with timeout)
-      const socialInfo = await waitForSocialInfo();
+      const socialInfo = await waitForSocialInfo(signal);
+
+      // Don't send event if operation was aborted
+      if (signal?.aborted) {
+        return;
+      }
 
       await sendAccountEvent(AccountEventType.ON_CONNECT, address, {
         social: socialInfo || undefined
@@ -292,13 +314,15 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
   /**
    * Monitor wallet state changes to detect connection/disconnection events
    * Uses Thirdweb's built-in state management instead of custom auth state
+   * Implements cleanup to prevent memory leaks from ongoing polling operations
    */
   useEffect(() => {
+    const abortController = new AbortController();
     const previousAddress = previousAddressRef.current;
 
     if (userAddress && !previousAddress) {
       // User connected
-      handleOnConnect(userAddress);
+      handleOnConnect(userAddress, abortController.signal);
     } else if (!userAddress && previousAddress) {
       // User disconnected
       handleDisconnect(previousAddress);
@@ -313,6 +337,11 @@ export function AccountEventProvider({ children }: AccountEventProviderProps) {
 
     // Update the reference
     previousAddressRef.current = userAddress;
+
+    // Cleanup: abort any ongoing polling operations when component unmounts or userAddress changes
+    return () => {
+      abortController.abort();
+    };
   }, [userAddress]);
 
   const contextValue: AccountEventContextType = {
