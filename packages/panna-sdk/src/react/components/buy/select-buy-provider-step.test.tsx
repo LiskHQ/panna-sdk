@@ -154,7 +154,13 @@ describe('SelectBuyProviderStep', () => {
   it('shows message when no providers are available', () => {
     mockGetOnrampProviders.mockReturnValue([]);
 
-    render(<TestWrapper />);
+    render(
+      <TestWrapper
+        defaultValues={{
+          country: { code: 'JP', name: 'Japan', flag: '🇯🇵' }
+        }}
+      />
+    );
 
     expect(
       screen.getByText('No providers available for this country')
