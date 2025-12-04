@@ -1,6 +1,6 @@
 {
   "name": "panna-sdk",
-  "version": "0.2.0-beta.1",
+  "version": "0.3.0-beta.0",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
