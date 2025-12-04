@@ -1,7 +1,7 @@
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { UseFormReturn } from 'react-hook-form';
 import { FiatCurrency } from 'src/core';
-import { currencyMap } from '@/consts/currencies';
+import { getCurrencySymbol } from '@/utils/countries';
 import { Button } from '../ui/button';
 import { DialogHeader } from '../ui/dialog';
 import { useDialogStepper } from '../ui/dialog-stepper';
@@ -33,7 +33,7 @@ export function SendSummaryStep({ form }: SendSummaryStepProps) {
           {renderCryptoAmount()}
         </Typography>
         <Typography variant="muted">
-          ~{currencyMap[currency]}
+          ~{getCurrencySymbol(currency)}
           {form.getValues('fiatAmount')}
         </Typography>
       </div>

@@ -1,4 +1,4 @@
-import { CheckIcon, ChevronRightIcon } from 'lucide-react';
+import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useSupportedTokens } from '../../hooks';
@@ -74,7 +74,7 @@ export function SelectBuyTokenStep({ form }: SelectBuyTokenStepProps) {
                         'Select asset'
                       )}
                     </span>
-                    <ChevronRightIcon className="opacity-50" />
+                    <ChevronDownIcon className="opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent

@@ -4,7 +4,6 @@ import { EcosystemId } from 'src/core';
 import { ecosystemWallet } from 'thirdweb/wallets';
 import { useDialog, useLogin, usePanna } from '@/hooks';
 import { getEnvironmentChain } from '@/utils';
-import { handleSiweAuth } from '@/utils/auth';
 import { getErrorMessage } from '@/utils/get-error-message';
 import {
   DialogClose,
@@ -52,11 +51,6 @@ export function SocialLoginPendingDialog() {
     });
 
     if (wallet) {
-      // Automatically perform SIWE authentication in the background
-      await handleSiweAuth(wallet, {
-        chainId: getEnvironmentChain().id as number
-      });
-
       onClose?.();
     }
   };

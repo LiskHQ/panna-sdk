@@ -1,14 +1,17 @@
 import type { Account } from 'thirdweb/wallets';
-import { pannaApiService } from '../util/api-service';
+import Cookies from 'universal-cookie';
+import { PannaApiService } from '../util/api-service';
 import type {
-  AuthChallengeRequest,
   AuthChallengeReply,
+  AuthChallengeRequest,
   AuthVerifyRequest,
   LoginPayload
 } from '../util/types';
 
+const defaultTokenExpiryBufferSecs = 60;
+
 /**
- * LocalStorage keys for SIWE authentication
+ * Cookie keys for SIWE authentication
  */
 const STORAGE_KEYS = {
   AUTH_TOKEN: 'panna_auth_token',
@@ -35,6 +38,18 @@ export type LoginParams = {
 };
 
 /**
+ * Configuration options for SiweAuth
+ */
+export type SiweAuthOptions = {
+  /**
+   * Buffer time in seconds before token expiry to consider token as expired.
+   * This ensures tokens are refreshed before they actually expire.
+   * @default 60
+   */
+  tokenExpiryBufferSecs?: number;
+};
+
+/**
  * SIWE authentication service for Panna
  * Implements the Sign-In with Ethereum flow using Panna API
  */
@@ -43,14 +58,27 @@ export class SiweAuth {
   private userAddress: string | null = null;
   private tokenExpiresAt: number | null = null;
   private lastChallenge: AuthChallengeReply | null = null;
+  private pannaApiService: PannaApiService;
+  private cookies: Cookies;
+  private tokenExpiryBufferSecs: number;
 
-  constructor() {
-    // Load existing auth data from localStorage on initialization
+  constructor(pannaApiService: PannaApiService, options: SiweAuthOptions = {}) {
+    this.tokenExpiryBufferSecs =
+      options.tokenExpiryBufferSecs ?? defaultTokenExpiryBufferSecs;
+    this.pannaApiService = pannaApiService;
+    // Cookie configuration for auth token storage
+    // Using sameSite: 'strict' for CSRF protection, and secure: true to require HTTPS.
+    this.cookies = new Cookies(null, {
+      path: '/',
+      secure: true,
+      sameSite: 'strict'
+    });
+
+    // Load existing auth data from cookies on initialization
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const storedAddress = localStorage.getItem(STORAGE_KEYS.USER_ADDRESS);
-      const storedExpiry = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
-
+      const storedToken = this.cookies.get(STORAGE_KEYS.AUTH_TOKEN);
+      const storedAddress = this.cookies.get(STORAGE_KEYS.USER_ADDRESS);
+      const storedExpiry = this.cookies.get(STORAGE_KEYS.TOKEN_EXPIRY);
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
         this.userAddress = storedAddress;
@@ -73,7 +101,7 @@ export class SiweAuth {
     try {
       // Get challenge from Panna API
       const challenge: AuthChallengeReply =
-        await pannaApiService.getAuthChallenge(challengeRequest);
+        await this.pannaApiService.getAuthChallenge(challengeRequest);
 
       // Store the challenge for later use in verification
       this.lastChallenge = challenge;
@@ -151,7 +179,7 @@ export class SiweAuth {
       };
 
       // Verify with Panna API
-      const authResult = await pannaApiService.verifyAuth(verifyRequest);
+      const authResult = await this.pannaApiService.verifyAuth(verifyRequest);
 
       if (authResult.token) {
         // Store auth token and user address
@@ -164,12 +192,12 @@ export class SiweAuth {
         this.tokenExpiresAt =
           authResult.expiresAt || authResult.expiresIn || null;
 
-        // Store in localStorage for persistence (if available)
+        // Store in cookies for persistence (if available)
         if (typeof window !== 'undefined') {
-          localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, authResult.token);
-          localStorage.setItem(STORAGE_KEYS.USER_ADDRESS, authResult.address);
+          this.cookies.set(STORAGE_KEYS.AUTH_TOKEN, authResult.token);
+          this.cookies.set(STORAGE_KEYS.USER_ADDRESS, authResult.address);
           if (this.tokenExpiresAt) {
-            localStorage.setItem(
+            this.cookies.set(
               STORAGE_KEYS.TOKEN_EXPIRY,
               this.tokenExpiresAt.toString()
             );
@@ -202,11 +230,11 @@ export class SiweAuth {
       return !this.isTokenExpired();
     }
 
-    // Check localStorage (if available)
+    // Check cookies (if available)
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      const storedAddress = localStorage.getItem(STORAGE_KEYS.USER_ADDRESS);
-      const storedExpiry = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
+      const storedToken = this.cookies.get(STORAGE_KEYS.AUTH_TOKEN);
+      const storedAddress = this.cookies.get(STORAGE_KEYS.USER_ADDRESS);
+      const storedExpiry = this.cookies.get(STORAGE_KEYS.TOKEN_EXPIRY);
 
       if (storedToken && storedAddress) {
         this.authToken = storedToken;
@@ -235,11 +263,10 @@ export class SiweAuth {
       return true;
     }
 
-    // expiresIn is a Unix timestamp in seconds
+    // expiresAt is a Unix timestamp in seconds
+    // Use configured buffer time to refresh tokens before they actually expire
     const now = Math.floor(Date.now() / 1000);
-    const bufferTime = 60; // Add 60 second buffer to refresh before actual expiry
-
-    return now >= this.tokenExpiresAt - bufferTime;
+    return now >= this.tokenExpiresAt - this.tokenExpiryBufferSecs;
   }
 
   /**
@@ -290,82 +317,11 @@ export class SiweAuth {
     this.tokenExpiresAt = null;
     this.lastChallenge = null;
 
-    // Clear localStorage (if available)
+    // Clear cookies (if available)
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER_ADDRESS);
-      localStorage.removeItem(STORAGE_KEYS.TOKEN_EXPIRY);
+      this.cookies.remove(STORAGE_KEYS.AUTH_TOKEN);
+      this.cookies.remove(STORAGE_KEYS.USER_ADDRESS);
+      this.cookies.remove(STORAGE_KEYS.TOKEN_EXPIRY);
     }
   }
-}
-
-/**
- * Default instance of SIWE auth service
- */
-export const siweAuth = new SiweAuth();
-
-/**
- * Helper function to generate a SIWE login payload
- * Compatible with thirdweb's auth flow
- */
-export async function generateSiwePayload(
-  params: GeneratePayloadParams
-): Promise<LoginPayload> {
-  return siweAuth.generatePayload(params);
-}
-
-/**
- * Helper function to login a user with SIWE
- * Compatible with thirdweb's auth flow
- */
-export async function siweLogin(params: LoginParams): Promise<boolean> {
-  return siweAuth.login(params);
-}
-
-/**
- * Helper function to check if user is logged in with SIWE
- * Compatible with thirdweb's auth flow
- */
-export function isSiweLoggedIn(): boolean {
-  return siweAuth.isLoggedIn();
-}
-
-/**
- * Helper function to get current SIWE user
- * Compatible with thirdweb's auth flow
- */
-export function getSiweUser(): string | null {
-  return siweAuth.getUser();
-}
-
-/**
- * Helper function to get current SIWE auth token
- * Compatible with thirdweb's auth flow
- * Note: This does not check expiry
- */
-export async function getSiweAuthToken(): Promise<string | null> {
-  return siweAuth.getAuthToken();
-}
-
-/**
- * Helper function to get a valid (non-expired) SIWE auth token
- * Returns null if token is expired or not available
- */
-export async function getValidSiweAuthToken(): Promise<string | null> {
-  return siweAuth.getValidAuthToken();
-}
-
-/**
- * Helper function to check if the current SIWE auth token is expired
- */
-export function isSiweTokenExpired(): boolean {
-  return siweAuth.isTokenExpired();
-}
-
-/**
- * Helper function to logout SIWE user
- * Compatible with thirdweb's auth flow
- */
-export function siweLogout(): void {
-  return siweAuth.logout();
 }

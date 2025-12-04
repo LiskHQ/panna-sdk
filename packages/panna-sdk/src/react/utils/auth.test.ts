@@ -1,10 +1,8 @@
 import { Wallet } from 'thirdweb/wallets';
-import {
-  generateSiwePayload,
-  siweLogin,
-  getValidSiweAuthToken,
-  isSiweTokenExpired
-} from '../../core/auth';
+import { SiweAuth } from '../../core/auth';
+import { PannaClient } from '../../core/client';
+import { PannaApiService } from '../../core/util/api-service';
+import { usePanna } from '../hooks/use-panna';
 import {
   buildSiweMessage,
   handleSiweAuth,
@@ -13,22 +11,28 @@ import {
 
 // Mock the core auth functions
 jest.mock('../../core/auth', () => ({
-  generateSiwePayload: jest.fn(),
-  siweLogin: jest.fn(),
-  getValidSiweAuthToken: jest.fn(),
-  isSiweTokenExpired: jest.fn()
+  SiweAuth: jest.fn()
 }));
 
-const mockGenerateSiwePayload = generateSiwePayload as jest.MockedFunction<
-  typeof generateSiwePayload
->;
-const mockSiweLogin = siweLogin as jest.MockedFunction<typeof siweLogin>;
-const mockGetValidSiweAuthToken = getValidSiweAuthToken as jest.MockedFunction<
-  typeof getValidSiweAuthToken
->;
-const mockIsSiweTokenExpired = isSiweTokenExpired as jest.MockedFunction<
-  typeof isSiweTokenExpired
->;
+// Mock usePanna hook
+jest.mock('../hooks/use-panna', () => ({
+  usePanna: jest.fn()
+}));
+
+const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
+
+// Create mock SiweAuth instance
+const mockSiweAuth = {
+  generatePayload: jest.fn(),
+  login: jest.fn(),
+  isLoggedIn: jest.fn(),
+  isTokenExpired: jest.fn(),
+  getUser: jest.fn(),
+  getAuthToken: jest.fn(),
+  getValidAuthToken: jest.fn(),
+  getTokenExpiry: jest.fn(),
+  logout: jest.fn()
+};
 
 describe('Auth Utilities', () => {
   beforeEach(() => {
@@ -36,6 +40,21 @@ describe('Auth Utilities', () => {
     jest.spyOn(console, 'warn').mockImplementation();
     jest.spyOn(console, 'error').mockImplementation();
     jest.spyOn(console, 'log').mockImplementation();
+
+    // Reset and clear mockSiweAuth methods to avoid test pollution
+    mockSiweAuth.generatePayload.mockReset().mockClear();
+    mockSiweAuth.login.mockReset().mockClear();
+    mockSiweAuth.isTokenExpired.mockReset().mockClear();
+    mockSiweAuth.getValidAuthToken.mockReset().mockClear();
+
+    // Setup usePanna mock to return siweAuth
+    mockUsePanna.mockReturnValue({
+      client: {} as unknown as PannaClient,
+      partnerId: 'test-partner',
+      chainId: '4202',
+      pannaApiService: {} as unknown as PannaApiService,
+      siweAuth: mockSiweAuth as unknown as SiweAuth
+    });
   });
 
   afterEach(() => {
@@ -132,7 +151,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
     } as unknown as Wallet;
 
     it('should successfully authenticate with valid wallet and account', async () => {
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -143,16 +162,19 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(true);
+      mockSiweAuth.login.mockResolvedValue(true);
 
-      const result = await handleSiweAuth(mockWallet);
+      const result = await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(result).toBe(true);
-      expect(mockGenerateSiwePayload).toHaveBeenCalledWith({
+      expect(mockSiweAuth.generatePayload).toHaveBeenCalledWith({
         address: mockAccount.address
       });
       expect(mockAccount.signMessage).toHaveBeenCalled();
-      expect(mockSiweLogin).toHaveBeenCalledWith({
+      expect(mockSiweAuth.login).toHaveBeenCalledWith({
         payload: expect.any(Object),
         signature: '0xsignature',
         account: mockAccount,
@@ -161,7 +183,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should pass chainId to signMessage when provided', async () => {
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -172,9 +194,11 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(true);
+      mockSiweAuth.login.mockResolvedValue(true);
 
-      await handleSiweAuth(mockWallet, { chainId: 4202 });
+      await handleSiweAuth(mockSiweAuth as unknown as SiweAuth, mockWallet, {
+        chainId: 4202
+      });
 
       expect(mockAccount.signMessage).toHaveBeenCalledWith({
         message: expect.any(String),
@@ -188,14 +212,17 @@ Issued At: 2024-01-01T00:00:00.000Z`
         getConfig: jest.fn()
       } as unknown as Wallet;
 
-      const result = await handleSiweAuth(walletNoAccount);
+      const result = await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        walletNoAccount
+      );
 
       expect(result).toBe(false);
-      expect(mockGenerateSiwePayload).not.toHaveBeenCalled();
+      expect(mockSiweAuth.generatePayload).not.toHaveBeenCalled();
     });
 
     it('should return false when SIWE login fails', async () => {
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -206,16 +233,19 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(false);
+      mockSiweAuth.login.mockResolvedValue(false);
 
-      const result = await handleSiweAuth(mockWallet);
+      const result = await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(result).toBe(false);
       expect(console.warn).toHaveBeenCalledWith('SIWE authentication failed');
     });
 
     it('should handle signature errors gracefully', async () => {
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -227,7 +257,10 @@ Issued At: 2024-01-01T00:00:00.000Z`
 
       mockAccount.signMessage.mockRejectedValue(new Error('User rejected'));
 
-      const result = await handleSiweAuth(mockWallet);
+      const result = await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(result).toBe(false);
       expect(console.error).toHaveBeenCalledWith(
@@ -237,9 +270,14 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should handle 401 errors without treating as fatal', async () => {
-      mockGenerateSiwePayload.mockRejectedValue(new Error('401 Unauthorized'));
+      mockSiweAuth.generatePayload.mockRejectedValue(
+        new Error('401 Unauthorized')
+      );
 
-      const result = await handleSiweAuth(mockWallet);
+      const result = await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(result).toBe(false);
       expect(console.warn).toHaveBeenCalledWith(
@@ -255,7 +293,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
           .mockReturnValue({ smartAccount: { chain: { id: 4202 } } })
       } as unknown as Wallet;
 
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -266,11 +304,14 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(true);
+      mockSiweAuth.login.mockResolvedValue(true);
 
-      await handleSiweAuth(walletWithSmartAccount);
+      await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        walletWithSmartAccount
+      );
 
-      expect(mockSiweLogin).toHaveBeenCalledWith(
+      expect(mockSiweAuth.login).toHaveBeenCalledWith(
         expect.objectContaining({
           isSafeWallet: true
         })
@@ -283,7 +324,7 @@ Issued At: 2024-01-01T00:00:00.000Z`
         getConfig: jest.fn().mockReturnValue({})
       } as unknown as Wallet;
 
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -294,11 +335,14 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(true);
+      mockSiweAuth.login.mockResolvedValue(true);
 
-      await handleSiweAuth(walletWithoutSmartAccount);
+      await handleSiweAuth(
+        mockSiweAuth as unknown as SiweAuth,
+        walletWithoutSmartAccount
+      );
 
-      expect(mockSiweLogin).toHaveBeenCalledWith(
+      expect(mockSiweAuth.login).toHaveBeenCalledWith(
         expect.objectContaining({
           isSafeWallet: false
         })
@@ -318,22 +362,25 @@ Issued At: 2024-01-01T00:00:00.000Z`
     } as unknown as Wallet;
 
     it('should return valid token immediately if available', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue('valid-token-123');
+      mockSiweAuth.getValidAuthToken.mockResolvedValue('valid-token-123');
 
-      const result = await getOrRefreshSiweToken(mockWallet);
+      const result = await getOrRefreshSiweToken(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(result).toBe('valid-token-123');
-      expect(mockGenerateSiwePayload).not.toHaveBeenCalled();
+      expect(mockSiweAuth.generatePayload).not.toHaveBeenCalled();
     });
 
     it('should attempt re-authentication when no valid token and wallet provided', async () => {
-      mockGetValidSiweAuthToken
+      mockSiweAuth.getValidAuthToken
         .mockResolvedValueOnce(null) // First call - no valid token
         .mockResolvedValueOnce('new-token-456'); // After re-auth
 
-      mockIsSiweTokenExpired.mockReturnValue(true);
+      mockSiweAuth.isTokenExpired.mockReturnValue(true);
 
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -344,9 +391,13 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(true);
+      mockSiweAuth.login.mockResolvedValue(true);
 
-      const result = await getOrRefreshSiweToken(mockWallet, { chainId: 4202 });
+      const result = await getOrRefreshSiweToken(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet,
+        { chainId: 4202 }
+      );
 
       expect(result).toBe('new-token-456');
       expect(console.log).toHaveBeenCalledWith(
@@ -355,10 +406,12 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should return null when re-authentication fails', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue(null);
-      mockIsSiweTokenExpired.mockReturnValue(true);
+      mockSiweAuth.getValidAuthToken
+        .mockResolvedValueOnce(null) // No valid token initially
+        .mockResolvedValueOnce(null); // Still no token after failed re-auth
+      mockSiweAuth.isTokenExpired.mockReturnValue(true);
 
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -369,9 +422,12 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(false);
+      mockSiweAuth.login.mockResolvedValue(false);
 
-      const result = await getOrRefreshSiweToken(mockWallet);
+      const result = await getOrRefreshSiweToken(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(result).toBeNull();
       expect(console.warn).toHaveBeenCalledWith(
@@ -380,22 +436,24 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should return null when no wallet provided and no valid token', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue(null);
+      mockSiweAuth.getValidAuthToken.mockResolvedValue(null);
 
-      const result = await getOrRefreshSiweToken();
+      const result = await getOrRefreshSiweToken(
+        mockSiweAuth as unknown as SiweAuth
+      );
 
       expect(result).toBeNull();
-      expect(mockGenerateSiwePayload).not.toHaveBeenCalled();
+      expect(mockSiweAuth.generatePayload).not.toHaveBeenCalled();
     });
 
     it('should not log expired message when token is missing (not expired)', async () => {
-      mockGetValidSiweAuthToken
+      mockSiweAuth.getValidAuthToken
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce('new-token');
 
-      mockIsSiweTokenExpired.mockReturnValue(false);
+      mockSiweAuth.isTokenExpired.mockReturnValue(false);
 
-      mockGenerateSiwePayload.mockResolvedValue({
+      mockSiweAuth.generatePayload.mockResolvedValue({
         domain: 'panna-app.lisk.com',
         address: '0x1234567890123456789012345678901234567890',
         uri: 'https://panna-app.lisk.com',
@@ -406,9 +464,12 @@ Issued At: 2024-01-01T00:00:00.000Z`
       });
 
       mockAccount.signMessage.mockResolvedValue('0xsignature');
-      mockSiweLogin.mockResolvedValue(true);
+      mockSiweAuth.login.mockResolvedValue(true);
 
-      await getOrRefreshSiweToken(mockWallet);
+      await getOrRefreshSiweToken(
+        mockSiweAuth as unknown as SiweAuth,
+        mockWallet
+      );
 
       expect(console.log).not.toHaveBeenCalledWith(
         expect.stringContaining('expired')
@@ -416,15 +477,20 @@ Issued At: 2024-01-01T00:00:00.000Z`
     });
 
     it('should handle missing account in wallet during re-auth', async () => {
-      mockGetValidSiweAuthToken.mockResolvedValue(null);
-      mockIsSiweTokenExpired.mockReturnValue(true);
+      mockSiweAuth.getValidAuthToken
+        .mockResolvedValueOnce(null) // No valid token initially
+        .mockResolvedValueOnce(null); // Still no token after failed re-auth
+      mockSiweAuth.isTokenExpired.mockReturnValue(true);
 
       const walletNoAccount = {
         getAccount: jest.fn().mockReturnValue(null),
         getConfig: jest.fn()
       } as unknown as Wallet;
 
-      const result = await getOrRefreshSiweToken(walletNoAccount);
+      const result = await getOrRefreshSiweToken(
+        mockSiweAuth as unknown as SiweAuth,
+        walletNoAccount
+      );
 
       expect(result).toBeNull();
       // Should warn about re-authentication failure (which includes the no account case)

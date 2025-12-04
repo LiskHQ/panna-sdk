@@ -5,7 +5,7 @@ import React from 'react';
 import { SmartAccountOptions } from 'thirdweb/dist/types/wallets/smart/types';
 import { useActiveAccount, useActiveWallet, useProfiles } from 'thirdweb/react';
 import { Account, Profile, SmartWalletOptions, Wallet } from 'thirdweb/wallets';
-import { pannaApiService, AccountEventType } from '../../core/util';
+import { AccountEventType } from '../../core/util';
 import { usePanna } from '../hooks/use-panna';
 import {
   AccountEventProvider,
@@ -60,10 +60,6 @@ const mockUseActiveWallet = useActiveWallet as jest.MockedFunction<
 >;
 const mockUseProfiles = useProfiles as jest.MockedFunction<typeof useProfiles>;
 const mockUsePanna = usePanna as jest.MockedFunction<typeof usePanna>;
-const mockSendAccountEvent =
-  pannaApiService.sendAccountEvent as jest.MockedFunction<
-    typeof pannaApiService.sendAccountEvent
-  >;
 
 // Test consumer component
 const TestConsumer: React.FC = () => {
@@ -130,9 +126,31 @@ const mockUserProfiles = [
   }
 ];
 
+const mockApiService = {
+  sendAccountEvent: jest.fn()
+};
+
+// Reference to the mock function for test assertions
+const mockSendAccountEvent = mockApiService.sendAccountEvent;
+
+const mockSiweAuth = {
+  generatePayload: jest.fn(),
+  login: jest.fn(),
+  isLoggedIn: jest.fn(),
+  isTokenExpired: jest.fn(),
+  getUser: jest.fn(),
+  getAuthToken: jest.fn(),
+  getValidAuthToken: jest.fn(),
+  getTokenExpiry: jest.fn(),
+  logout: jest.fn()
+};
+
 const mockPannaContext = {
   client: { clientId: 'test-client' },
-  partnerId: '123e4567-e89b-12d3-a456-426614174000'
+  partnerId: '123e4567-e89b-12d3-a456-426614174000',
+  chainId: '4202',
+  pannaApiService: mockApiService,
+  siweAuth: mockSiweAuth
 };
 
 describe('AccountEventProvider', () => {

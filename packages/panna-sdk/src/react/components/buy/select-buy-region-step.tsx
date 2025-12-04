@@ -1,12 +1,12 @@
 import { CheckIcon, ChevronDownIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_COUNTRY_CODE } from 'src/core';
 import type { Country } from '../../types/country.types';
 import {
   COUNTRIES_SORTED,
-  getCountryByCode,
-  detectUserCountry
+  detectUserCountry,
+  getCountryByCode
 } from '../../utils';
 import { Button } from '../ui/button';
 import {
@@ -37,6 +37,14 @@ type SelectBuyRegionStepProps = {
 export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
   const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+
+  const countries = useMemo(() => {
+    if (!query) return COUNTRIES_SORTED;
+    return COUNTRIES_SORTED.filter((c) =>
+      c.name.toLowerCase().includes(query.toLowerCase())
+    );
+  }, [query]);
 
   // Auto-detect and set user's country on mount
   useEffect(() => {
@@ -98,11 +106,13 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
                       <CommandInput
                         placeholder="Search for a country..."
                         className="h-9"
+                        value={query}
+                        onValueChange={setQuery}
                       />
                       <CommandList className="max-h-[300px] overflow-y-auto">
                         <CommandEmpty>No country found.</CommandEmpty>
                         <CommandGroup>
-                          {COUNTRIES_SORTED.map((c) => (
+                          {countries.map((c) => (
                             <CommandItem
                               key={c.code}
                               value={c.name}

@@ -2,10 +2,10 @@ import { ArrowDownUpIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { type UseFormReturn } from 'react-hook-form';
 import { useActiveAccount } from 'thirdweb/react';
-import { currencyMap } from '@/consts/currencies';
 import { useTokenBalances } from '@/hooks/use-token-balances';
 import { TokenBalance, tokenIconMap } from '@/mocks/token-balances';
 import { renderCryptoAmount, renderFiatAmount } from '@/utils';
+import { getCurrencySymbol } from '@/utils/countries';
 import { Button } from '../ui/button';
 import {
   Command,
@@ -28,6 +28,10 @@ import { Input } from '../ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Typography } from '../ui/typography';
 import { SendFormData } from './schema';
+
+const MAX_AMOUNT_DIGITS = 15;
+const DIGIT_EXTRACTION_REGEX = /(\d+)/g;
+const AMOUNT_INPUT_REGEX = /^\d*\.?\d*$/;
 
 type SendSelectTokenStepProps = {
   form: UseFormReturn<SendFormData>;
@@ -279,8 +283,18 @@ export function SendSelectTokenStep({ form }: SendSelectTokenStepProps) {
                 }
                 onChange={(e) => {
                   const value = e.target.value;
-                  // Only allow digits and a single period
-                  if (/^\d*\.?\d*$/.test(value)) {
+
+                  // Count the number of digits
+                  const digits = value.match(DIGIT_EXTRACTION_REGEX);
+                  const numDigits = digits
+                    ? digits.reduce((a, c) => a + c.length, 0)
+                    : 0;
+
+                  // Only allow digits, single period, and max MAX_AMOUNT_DIGITS
+                  if (
+                    AMOUNT_INPUT_REGEX.test(value) &&
+                    numDigits <= MAX_AMOUNT_DIGITS
+                  ) {
                     field.onChange(value);
                   }
                 }}
@@ -340,7 +354,7 @@ function TokenItem({ tokenData, withSelect = false }: TokenItemProps) {
           {Number(tokenData.tokenBalance.displayValue).toFixed(6)}
         </Typography>
         <Typography variant="muted">
-          {currencyMap[tokenData.fiatBalance.currency]}
+          {getCurrencySymbol(tokenData.fiatBalance.currency)}
           {Number(Math.floor(tokenData.fiatBalance.amount * 100) / 100).toFixed(
             2
           )}
@@ -378,7 +392,7 @@ function AmountDisplay({
             <>
               {secondaryInput === 'crypto'
                 ? `${secondaryAmount} ${tokenInfo.token.symbol}`
-                : `${currencyMap[tokenInfo.fiatBalance.currency]}${secondaryAmount}`}
+                : `${getCurrencySymbol(tokenInfo.fiatBalance.currency)}${secondaryAmount}`}
             </>
           )}
         </Typography>

@@ -5,12 +5,11 @@ Constants and configuration data including token configurations, country lists, 
 ## Quick Start
 
 ```tsx
-import { tokenConfig, COUNTRIES, currencyMap } from 'panna-sdk';
+import { tokenConfig, COUNTRIES } from 'panna-sdk';
 
 function App() {
   const liskTokens = tokenConfig[1135];
   const countries = COUNTRIES;
-  const usdSymbol = currencyMap.USD;
 
   return <div>App content...</div>;
 }
@@ -36,7 +35,7 @@ const liskSepoliaTokens = tokenConfig[4202];
 
 Tokens for Lisk mainnet (chain ID: 1135).
 
-**Includes:** LSK, ETH, USDT, USDC.e, vpLSK
+**Includes:** LSK, ETH, USDT, USDC.e
 
 ```tsx
 import { liskTokenConfig } from 'panna-sdk';
@@ -76,20 +75,6 @@ function CountryPicker() {
     </select>
   );
 }
-```
-
-## Currency Constants
-
-### currencyMap
-
-Currency codes to symbols mapping.
-
-```tsx
-import { currencyMap } from 'panna-sdk';
-
-const usdSymbol = currencyMap.USD; // "$"
-const eurSymbol = currencyMap.EUR; // "€"
-const gbpSymbol = currencyMap.GBP; // "£"
 ```
 
 ## Usage Examples
@@ -142,8 +127,10 @@ function CountrySelector() {
 
 ### Currency Symbol Display
 
+For currency symbol display, use `getCurrencySymbol()` from the utils module:
+
 ```tsx
-import { currencyMap, getCurrencyForCountry } from 'panna-sdk';
+import { getCurrencySymbol, getCurrencyForCountry } from 'panna-sdk';
 
 type Props = {
   countryCode: string;
@@ -152,7 +139,7 @@ type Props = {
 
 function LocalizedPrice({ countryCode, amount }: Props) {
   const currency = getCurrencyForCountry(countryCode);
-  const symbol = currencyMap[currency] || '$';
+  const symbol = getCurrencySymbol(currency);
 
   return (
     <div>
@@ -163,6 +150,8 @@ function LocalizedPrice({ countryCode, amount }: Props) {
   );
 }
 ```
+
+See **[Utils](../utils/README.md)** for more information about currency utilities.
 
 ## Custom Token Configuration
 

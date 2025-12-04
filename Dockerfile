@@ -11,7 +11,7 @@ RUN apk add --no-cache libc6-compat
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable && \
-    corepack use pnpm
+    corepack prepare pnpm --activate
 
 ## Stage 3
 
@@ -24,6 +24,10 @@ ARG NEXT_PUBLIC_PARTNER_ID=""
 ENV NEXT_PUBLIC_PARTNER_ID=${NEXT_PUBLIC_PARTNER_ID}
 ARG NEXT_PUBLIC_CHAIN_ID=""
 ENV NEXT_PUBLIC_CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID}
+ARG NEXT_PUBLIC_ENABLE_DEV_MODE=false
+ENV NEXT_PUBLIC_ENABLE_DEV_MODE=${NEXT_PUBLIC_ENABLE_DEV_MODE}
+ARG NEXT_PUBLIC_PANNA_API_URL=""
+ENV NEXT_PUBLIC_PANNA_API_URL=${NEXT_PUBLIC_PANNA_API_URL}
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile && \
     pnpm --recursive build
 
