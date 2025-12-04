@@ -1,3 +1,5 @@
+import { glass } from '@dicebear/collection';
+import { createAvatar } from '@dicebear/core';
 import {
   ArrowLeftIcon,
   SendIcon,
@@ -7,14 +9,13 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { DEFAULT_CURRENCY } from 'src/core';
-import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { ActivityList } from '../activity/activity-list';
 import { TokensList } from '../balance/tokens-list';
 import { BuyForm } from '../buy/buy-form';
 import { CollectiblesList } from '../collectibles/collectibles-list';
 import { SendCollectibleForm } from '../collectibles/send-collectible-form';
-import { SendForm } from '../send/send-form';
+import { SendDialogStepperData, SendForm } from '../send/send-form';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -53,15 +54,21 @@ export function AccountDialog({ address }: AccountDialogProps) {
   );
   const buyStepperRef = useRef<DialogStepperContextValue | null>(null);
   const [sendStepperContext, setSendStepperContext] =
-    useState<DialogStepperContextValue | null>(null);
+    useState<DialogStepperContextValue<SendDialogStepperData> | null>(null);
   const [sendCollectibleStepperContext, setSendCollectibleStepperContext] =
-    useState<DialogStepperContextValue | null>(null);
+    useState<DialogStepperContextValue<SendDialogStepperData> | null>(null);
 
   const { data: balanceUsd = 0, isLoading: isLoadingUsdBalance } =
     useTotalFiatBalance({
       address,
       currency: DEFAULT_CURRENCY
     });
+
+  const avatar = createAvatar(glass, {
+    seed: address,
+    size: 40,
+    radius: 50
+  }).toDataUri();
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab as AccountDialogTab);
@@ -243,7 +250,6 @@ export function AccountDialog({ address }: AccountDialogProps) {
                 variant="outline"
                 className="flex-1"
                 onClick={() => setActiveView(AccountViewEnum.Buy)}
-                disabled
               >
                 <TagIcon />
                 Buy
@@ -316,7 +322,9 @@ export function AccountDialog({ address }: AccountDialogProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline">{truncateAddress(address)}</Button>
+        <Button variant="ghost" className="rounded-full p-0">
+          <img src={avatar} alt="User Avatar" />
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogDescription className="sr-only">

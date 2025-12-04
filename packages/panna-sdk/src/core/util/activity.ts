@@ -185,7 +185,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         currency: 'USD'
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-15T12:34:56.000Z'
  * //   }, {
  * //     activityType: 'Received',
  * //     transactionID: '0x...',
@@ -205,7 +206,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         currency: 'USD'
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-15T10:20:30.000Z'
  * //   }, {
  * //     activityType: 'Received',
  * //     transactionID: '0x...',
@@ -226,7 +228,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         }
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-14T15:45:12.000Z'
  * //   }, {
  * //     activityType: 'Minted',
  * //     transactionID: '0x...',
@@ -248,7 +251,8 @@ export const getBaseInternalTransactionsRequestUrl = (
  * //         }
  * //       }
  * //     },
- * //     status: 'ok'
+ * //     status: 'ok',
+ * //     timestamp: '2025-10-13T08:15:30.000Z'
  * //   }],
  * //   metadata: { count: 10, offset: 0, limit: 10, hasNextPage: true }
  * // }
@@ -376,7 +380,7 @@ export const getActivitiesByAddress = async function (
     console.warn('Failed to fetch token prices:', error);
   }
 
-  const activities: Activity[] = preProcessedActivities
+  const mappedActivities: Activity[] = preProcessedActivities
     .map((tx) => {
       const transactionID = tx.hash;
       const status = tx.result;
@@ -590,7 +594,8 @@ export const getActivitiesByAddress = async function (
           activityType,
           transactionID,
           amount,
-          status
+          status,
+          timestamp: tx.timestamp
         };
         return activity;
       } catch (err) {
@@ -601,13 +606,21 @@ export const getActivitiesByAddress = async function (
       }
     })
     .filter((e) => e !== null)
-    .slice(offset, offset + limit);
+    .filter(
+      (currentEntry, currentIndex, originalSortedArray) =>
+        currentIndex ===
+        originalSortedArray.findIndex(
+          (t) => t?.transactionID === currentEntry?.transactionID
+        )
+    );
+
+  const activities = mappedActivities.slice(offset, offset + limit);
 
   const metadata: ActivityMetadata = {
     count: activities.length,
     offset,
     limit,
-    hasNextPage: preProcessedActivities.length >= offset + limit
+    hasNextPage: mappedActivities.length >= offset + limit
   };
 
   const result: GetActivitiesByAddressResult = { activities, metadata };

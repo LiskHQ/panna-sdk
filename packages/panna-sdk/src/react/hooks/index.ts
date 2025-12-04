@@ -1,7 +1,6 @@
 export {
   // Connection Management hooks
   useConnect as useLogin,
-  useDisconnect as useLogout,
   useAutoConnect as useAutoLogin,
   useConnectedWallets as useConnectedAccounts,
   useActiveAccount,
@@ -25,11 +24,13 @@ export {
 } from 'thirdweb/react';
 
 export { usePanna } from './use-panna';
+export { useLogout } from './use-logout';
 export { useActivities } from './use-activities';
 export { useCollectibles } from './use-collectibles';
 export { useTokenBalances } from './use-token-balances';
 export { useSupportedTokens } from './use-supported-tokens';
-export { useBuyWithFiatQuotes } from './use-buy-with-fiat-quotes';
+export { useOnrampQuotes } from './use-onramp-quotes';
+export { useCreateOnrampSession } from './use-create-onramp-session';
 export { useDialog } from './use-dialog';
 export {
   DEFAULT_STALE_TIME,
@@ -40,3 +41,4 @@ export {
 } from './constants';
 export { useTotalFiatBalance } from './use-total-fiat-balance';
 export { useFiatToCrypto } from './use-fiat-to-crypto';
+export { useOnrampSessionStatus } from './use-onramp-session-status';

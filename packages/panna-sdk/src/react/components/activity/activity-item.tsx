@@ -1,4 +1,4 @@
-import { ArrowDownIcon, SendIcon, StarIcon, RepeatIcon } from 'lucide-react';
+import { ArrowDownIcon, RepeatIcon, SendIcon, StarIcon } from 'lucide-react';
 import {
   Activity,
   ERC1155Amount,
@@ -9,11 +9,10 @@ import {
   TransactionActivity,
   TransactionAmount
 } from 'src/core';
-import { currencyMap } from '@/consts/currencies';
+import { CRYPTO_AMOUNT_FIXED_DIGITS, FIAT_AMOUNT_FIXED_DIGITS } from '@/consts';
 import { tokenIconMap } from '@/mocks/token-balances';
+import { getCurrencySymbol } from '@/utils/countries';
 import { Typography } from '../ui/typography';
-
-const DECIMAL_PLACES = 5;
 
 type ActivityItemProps = {
   activity: Activity;
@@ -170,28 +169,27 @@ function renderActivityNameOrSymbol(activity: Activity) {
   switch (activity.amount.type) {
     case TokenERC.ETH:
       return (
-        <Typography variant="small">
+        <Typography variant="muted">
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
-          ).toFixed(DECIMAL_PLACES)}{' '}
+          ).toFixed(CRYPTO_AMOUNT_FIXED_DIGITS)}{' '}
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
     case TokenERC.ERC20:
       return (
-        <Typography variant="small">
+        <Typography variant="muted">
           {(
             Number(activity.amount.value) /
             10 ** activity.amount.tokenInfo?.decimals
-          ).toFixed(DECIMAL_PLACES)}{' '}
+          ).toFixed(CRYPTO_AMOUNT_FIXED_DIGITS)}{' '}
           {activity.amount.tokenInfo?.symbol}
         </Typography>
       );
     case TokenERC.ERC721:
-      return <Typography variant="small">1 Collectible</Typography>;
     case TokenERC.ERC1155:
-      return <Typography variant="small">1 Collectible</Typography>;
+      return <Typography variant="muted" />;
     default:
       console.warn(
         `Unsupported activity type: ${(activity.amount as TransactionAmount).type}`,
@@ -205,13 +203,13 @@ function renderActivityFiatValue(activity: Activity) {
   const amount = activity.amount as EtherAmount | ERC20Amount | ERC1155Amount;
 
   if (!amount.fiatValue) {
-    return <Typography variant="muted">-</Typography>;
+    return <Typography variant="small">Collectible</Typography>;
   }
 
   return (
-    <Typography variant="muted">
-      {currencyMap[amount.fiatValue.currency]}
-      {amount.fiatValue.amount.toFixed(2)}
+    <Typography variant="small">
+      {getCurrencySymbol(amount.fiatValue.currency)}
+      {amount.fiatValue.amount.toFixed(FIAT_AMOUNT_FIXED_DIGITS)}
     </Typography>
   );
 }
@@ -227,10 +225,8 @@ export function ActivityItem({ activity }: ActivityItemProps) {
         </div>
       </header>
       <div className="flex flex-col justify-center text-right">
-        <Typography variant="small">
-          {renderActivityNameOrSymbol(activity)}
-        </Typography>
         {renderActivityFiatValue(activity)}
+        {renderActivityNameOrSymbol(activity)}
       </div>
     </section>
   );

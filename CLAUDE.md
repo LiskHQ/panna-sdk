@@ -2,6 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Development Workflow
+
+**IMPORTANT**: Before committing any code changes, you MUST run both tests and lint checks. All checks must pass before code is considered complete.
+
+### Required Pre-Commit Checks
+
+```bash
+pnpm format     # Must format the entire monorepo
+pnpm lint       # Must pass - Lint entire monorepo
+pnpm test       # Must pass - Run all tests
+```
+
+These commands are **not optional**. Every code change must:
+
+1. Have all existing tests passing
+2. Have zero lint errors
+3. Include new tests for new functionality
+4. Follow the code style guidelines below
+
 ## Build & Test Commands
 
 ```bash

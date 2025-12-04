@@ -6388,6 +6388,7 @@ export const getActivitiesByAddress = {
             value: '70000000000000'
           },
           status: 'success',
+          timestamp: '2025-01-14T15:36:17.000000Z',
           transactionID:
             '0x3dc796c0ac01958eccb6036c5690643e3730f03bc3f9416cc55051366d16f737'
         },
@@ -6406,6 +6407,7 @@ export const getActivitiesByAddress = {
             value: '8000000000000'
           },
           status: 'success',
+          timestamp: '2025-01-14T15:33:37.000000Z',
           transactionID:
             '0x97b41ed9540bdb247b0f52501c3990cf376874a05adff0a76cef23602cc580d5'
         },
@@ -6424,6 +6426,7 @@ export const getActivitiesByAddress = {
             value: '1000310000000000'
           },
           status: 'success',
+          timestamp: '2025-01-14T15:28:25.000000Z',
           transactionID:
             '0x7957c0323b7fed9da521ab09ac0d4d81ff2ddeaa89a1a7b75738ed23a95769fd'
         },
@@ -6442,6 +6445,7 @@ export const getActivitiesByAddress = {
             value: '1'
           },
           status: 'success',
+          timestamp: '2025-01-14T15:11:03.000000Z',
           transactionID:
             '0x3e50f83636069d59795f0604ed8f2983a1c8dd2ae0f563337486b2362258def8'
         },
@@ -6460,6 +6464,7 @@ export const getActivitiesByAddress = {
             value: '1000000000'
           },
           status: 'success',
+          timestamp: '2024-12-23T10:11:49.000000Z',
           transactionID:
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
@@ -6478,6 +6483,7 @@ export const getActivitiesByAddress = {
             value: '1000000000'
           },
           status: 'success',
+          timestamp: '2024-12-23T10:06:51.000000Z',
           transactionID:
             '0x210b5c866acf8e2fa873cb6d678b5dbb7c08f1a3e0c188b11f284fa16996fe16'
         },
@@ -6496,6 +6502,7 @@ export const getActivitiesByAddress = {
             value: '0'
           },
           status: 'success',
+          timestamp: '2024-12-04T10:06:33.000000Z',
           transactionID:
             '0x055ab631e36bae1c152edb323351f3cc217e465939eb25504675d8201196782e'
         },
@@ -6514,6 +6521,7 @@ export const getActivitiesByAddress = {
             value: '2000000000000000000'
           },
           status: 'success',
+          timestamp: '2024-05-22T08:31:35.000000Z',
           transactionID:
             '0x426e9555a435cef173103d817b63a86cf8a96888bcc6fc47e405fff608e08d1e'
         },
@@ -6532,6 +6540,7 @@ export const getActivitiesByAddress = {
             value: '2000000000000000000'
           },
           status: 'success',
+          timestamp: '2024-05-21T21:26:07.000000Z',
           transactionID:
             '0xa23002e5f8a63d472dc364e470f2092f93da70f5631adbbaef758666e9052412'
         }
@@ -7397,6 +7406,7 @@ export const getActivitiesByAddress = {
             value: '1000000000'
           },
           status: 'success',
+          timestamp: '2024-12-23T10:11:49.000000Z',
           transactionID:
             '0x2d2582e386500baaa828b823797e6e012675f675339c7330b9eb2fd2033c4cef'
         },
@@ -7415,6 +7425,7 @@ export const getActivitiesByAddress = {
             value: '1000000000'
           },
           status: 'success',
+          timestamp: '2024-12-23T10:06:51.000000Z',
           transactionID:
             '0x210b5c866acf8e2fa873cb6d678b5dbb7c08f1a3e0c188b11f284fa16996fe16'
         },
@@ -7433,6 +7444,7 @@ export const getActivitiesByAddress = {
             value: '0'
           },
           status: 'success',
+          timestamp: '2024-12-04T10:06:33.000000Z',
           transactionID:
             '0x055ab631e36bae1c152edb323351f3cc217e465939eb25504675d8201196782e'
         },
@@ -7451,6 +7463,7 @@ export const getActivitiesByAddress = {
             value: '2000000000000000000'
           },
           status: 'success',
+          timestamp: '2024-05-22T08:31:35.000000Z',
           transactionID:
             '0x426e9555a435cef173103d817b63a86cf8a96888bcc6fc47e405fff608e08d1e'
         }
