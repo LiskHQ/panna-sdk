@@ -1,3 +1,5 @@
+import { CookiesProvider } from 'react-cookie';
+import { defaultCookieOptions } from '@/consts/cookies';
 import { useActiveAccount } from '@/hooks';
 import { AccountDialog } from '../account/account-dialog';
 import { AccountViewProvider } from '../account/account-view-provider';
@@ -64,7 +66,9 @@ export function ConnectButton({
     <>
       {account?.address ? (
         <AccountViewProvider>
-          <AccountDialog address={account.address} />
+          <CookiesProvider defaultSetOptions={defaultCookieOptions}>
+            <AccountDialog address={account.address} />
+          </CookiesProvider>
         </AccountViewProvider>
       ) : (
         <LoginButton
