@@ -1,4 +1,5 @@
-import { COUNTRIES_SORTED } from '../../utils';
+import type { Country } from '../../types/country.types';
+import { COUNTRIES_SORTED, getCountryByCode } from '../../utils';
 
 /**
  * Tests for the country search filtering logic used in SelectBuyRegionStep.
@@ -17,6 +18,43 @@ const filterCountries = (query: string) => {
   return COUNTRIES_SORTED.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase())
   );
+};
+
+/**
+ * The cookie logic used in SelectBuyRegionStep for storing/retrieving
+ * the user's country selection.
+ */
+const COOKIE_NAME = 'panna_user_country';
+
+type CookieData = {
+  [COOKIE_NAME]?: Country;
+};
+
+// Logic for determining whether to set/update the cookie
+const shouldSetCookie = (
+  cookieData: CookieData,
+  selectedCountry: Country | undefined
+): boolean => {
+  if (!selectedCountry) return false;
+  if (!cookieData[COOKIE_NAME]?.code) return true;
+  return cookieData[COOKIE_NAME].code !== selectedCountry.code;
+};
+
+// Logic for getting initial country from cookie or defaults
+const getInitialCountry = (
+  cookieData: CookieData,
+  detectedCountryCode: string | null,
+  defaultCountryCode: string
+): Country | undefined => {
+  // Priority: cookie > detected > default > first available
+  if (cookieData[COOKIE_NAME]?.code) {
+    return getCountryByCode(cookieData[COOKIE_NAME].code) ?? undefined;
+  }
+  if (detectedCountryCode) {
+    const detected = getCountryByCode(detectedCountryCode);
+    if (detected) return detected;
+  }
+  return getCountryByCode(defaultCountryCode) ?? COUNTRIES_SORTED[0];
 };
 
 describe('SelectBuyRegionStep country search filtering', () => {
@@ -87,5 +125,72 @@ describe('SelectBuyRegionStep country search filtering', () => {
     const result = filterCountries('king');
 
     expect(result.some((c) => c.name === 'United Kingdom')).toBe(true);
+  });
+});
+
+describe('SelectBuyRegionStep cookie logic', () => {
+  const germany = getCountryByCode('DE')!;
+  const france = getCountryByCode('FR')!;
+  const usa = getCountryByCode('US')!;
+
+  describe('shouldSetCookie', () => {
+    it('returns false when selectedCountry is undefined', () => {
+      const cookieData: CookieData = {};
+      expect(shouldSetCookie(cookieData, undefined)).toBe(false);
+    });
+
+    it('returns true when cookie is empty and country is selected', () => {
+      const cookieData: CookieData = {};
+      expect(shouldSetCookie(cookieData, germany)).toBe(true);
+    });
+
+    it('returns true when selected country differs from cookie', () => {
+      const cookieData: CookieData = { panna_user_country: germany };
+      expect(shouldSetCookie(cookieData, france)).toBe(true);
+    });
+
+    it('returns false when selected country matches cookie', () => {
+      const cookieData: CookieData = { panna_user_country: germany };
+      expect(shouldSetCookie(cookieData, germany)).toBe(false);
+    });
+  });
+
+  describe('getInitialCountry', () => {
+    it('returns country from cookie when available', () => {
+      const cookieData: CookieData = { panna_user_country: germany };
+      const result = getInitialCountry(cookieData, 'FR', 'US');
+      expect(result?.code).toBe('DE');
+    });
+
+    it('returns detected country when cookie is empty', () => {
+      const cookieData: CookieData = {};
+      const result = getInitialCountry(cookieData, 'FR', 'US');
+      expect(result?.code).toBe('FR');
+    });
+
+    it('returns default country when cookie and detected are empty', () => {
+      const cookieData: CookieData = {};
+      const result = getInitialCountry(cookieData, null, 'US');
+      expect(result?.code).toBe('US');
+    });
+
+    it('returns first available country when all else fails', () => {
+      const cookieData: CookieData = {};
+      // Use invalid codes that won't match any country
+      const result = getInitialCountry(cookieData, null, 'INVALID');
+      expect(result).toBe(COUNTRIES_SORTED[0]);
+    });
+
+    it('prioritizes cookie over detected country', () => {
+      const cookieData: CookieData = { panna_user_country: usa };
+      const result = getInitialCountry(cookieData, 'DE', 'FR');
+      expect(result?.code).toBe('US');
+    });
+
+    it('prioritizes detected country over default', () => {
+      const cookieData: CookieData = {};
+      const result = getInitialCountry(cookieData, 'DE', 'US');
+      expect(result?.code).toBe('DE');
+    });
   });
 });
