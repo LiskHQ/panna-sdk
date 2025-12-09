@@ -63,28 +63,32 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
         ? getCountryByCode(detectedCountryCode)
         : null;
 
-      // Set default country: detected > US > first available
+      // Set default country: cookie > detected > US > first available
       const defaultCountry =
         detectedCountry ||
         getCountryByCode(DEFAULT_COUNTRY_CODE) ||
         COUNTRIES_SORTED[0];
       if (cookie.panna_user_country?.code) {
-        form.setValue(
-          'country',
-          getCountryByCode(cookie.panna_user_country.code)!
-        );
+        const cookieCountry = getCountryByCode(cookie.panna_user_country.code);
+        if (cookieCountry) {
+          form.setValue('country', cookieCountry);
+        } else if (defaultCountry) {
+          form.setValue('country', defaultCountry);
+        }
       } else if (defaultCountry) {
         form.setValue('country', defaultCountry);
       }
     }
-  }, [form]);
+  }, [form, cookie.panna_user_country]);
 
-  const handleCountrySelect = () => {
+  const handleCountrySubmit = () => {
+    const selectedCountry = form.getValues('country');
+    if (!selectedCountry) return;
     if (
       !cookie.panna_user_country?.code ||
-      cookie.panna_user_country.code !== form.getValues('country')?.code
+      cookie.panna_user_country.code !== selectedCountry.code
     ) {
-      setCookie('panna_user_country', form.getValues('country')!);
+      setCookie('panna_user_country', selectedCountry);
     }
     next();
   };
@@ -165,7 +169,7 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
       />
       <Button
         type="button"
-        onClick={handleCountrySelect}
+        onClick={handleCountrySubmit}
         disabled={!form.watch('country')}
       >
         Next
