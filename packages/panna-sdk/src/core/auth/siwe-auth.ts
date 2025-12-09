@@ -1,6 +1,6 @@
 import type { Account } from 'thirdweb/wallets';
 import Cookies from 'universal-cookie';
-import { defaultCookieOptions } from '../../react/consts/cookies';
+import { defaultCookieOptions } from '../consts/cookies';
 import { PannaApiService } from '../util/api-service';
 import type {
   AuthChallengeReply,

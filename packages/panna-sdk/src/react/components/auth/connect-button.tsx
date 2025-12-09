@@ -1,6 +1,6 @@
 import { CookiesProvider } from 'react-cookie';
-import { defaultCookieOptions } from '@/consts/cookies';
 import { useActiveAccount } from '@/hooks';
+import { defaultCookieOptions } from '../../../core/consts/cookies';
 import { AccountDialog } from '../account/account-dialog';
 import { AccountViewProvider } from '../account/account-view-provider';
 import { LoginButton } from './login-button';
