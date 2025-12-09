@@ -35,7 +35,7 @@ type SelectBuyRegionStepProps = {
   form: UseFormReturn<BuyFormData>;
 };
 
-type CookieDataTypes = {
+type CookieMap = {
   panna_user_country: Country;
 };
 
@@ -43,9 +43,9 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
   const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [cookie, setCookie] = useCookies<'panna_user_country', CookieDataTypes>(
-    ['panna_user_country']
-  );
+  const [cookie, setCookie] = useCookies<'panna_user_country', CookieMap>([
+    'panna_user_country'
+  ]);
 
   const countries = useMemo(() => {
     if (!query) return COUNTRIES_SORTED;
@@ -63,7 +63,7 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
         ? getCountryByCode(detectedCountryCode)
         : null;
 
-      // Set default country: cookie > detected > US > first available
+      // Set default country: cookie > (detected > US > first available)
       const defaultCountry =
         detectedCountry ||
         getCountryByCode(DEFAULT_COUNTRY_CODE) ||
@@ -79,7 +79,7 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
         form.setValue('country', defaultCountry);
       }
     }
-  }, [form, cookie.panna_user_country]);
+  }, [form, cookie.panna_user_country?.code]);
 
   const handleCountrySubmit = () => {
     const selectedCountry = form.getValues('country');
