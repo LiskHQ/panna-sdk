@@ -320,7 +320,13 @@ export function AccountDialog({ address }: AccountDialogProps) {
   };
 
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={(open) => {
+        if (!open) {
+          setActiveView(AccountViewEnum.Main);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="ghost" className="rounded-full p-0">
           <img src={avatar} alt="User Avatar" />
