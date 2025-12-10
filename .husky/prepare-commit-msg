@@ -2,6 +2,11 @@
 
 # .husky/prepare-commit-msg
 
+# Load environment variables from .env file if it exists
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 COMMIT_MSG_FILE=$1
 COMMIT_SOURCE=$2
 
