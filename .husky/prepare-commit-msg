@@ -2,9 +2,16 @@
 
 # .husky/prepare-commit-msg
 
+if ! command -v jq &> /dev/null; then
+    echo "Warning: jq is required for AI commit message generation but is not installed" >&2
+    exit 0
+fi
+
 # Load environment variables from .env file if it exists
 if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+    set -a
+    source .env
+    set +a
 fi
 
 COMMIT_MSG_FILE=$1
@@ -67,6 +74,11 @@ Output ONLY the commit message, no explanations or markdown.
 
 EOF
 
+if [ -z "$ANTHROPIC_API_KEY" ]; then
+    echo "Warning: ANTHROPIC_API_KEY not set, skipping AI commit message generation" >&2
+    exit 0
+fi
+
 PROMPT="$PROMPT
 
 Changed files:
@@ -88,8 +100,19 @@ RESPONSE=$(curl -s https://api.anthropic.com/v1/messages \
             messages: [{role: "user", content: $prompt}]
         }')")
 
-# Extract the message text
+# Extract the message text from the API response
 MESSAGE=$(echo "$RESPONSE" | jq -r '.content[0].text // empty')
+
+# Check if extraction succeeded
+if [ -z "$MESSAGE" ]; then
+    echo "Warning: Failed to generate commit message from Claude API" >&2
+    # Check for error in RESPONSE
+    ERROR=$(echo "$RESPONSE" | jq -r '.error.message // empty')
+    if [ -n "$ERROR" ]; then
+        echo "API Error: $ERROR" >&2
+    fi
+    exit 0
+fi
 
 if [ -n "$MESSAGE" ]; then
     # Write generated message, keep any existing content below
