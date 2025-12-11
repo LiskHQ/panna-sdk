@@ -1,5 +1,6 @@
 import { CheckIcon, ChevronDownIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useCookies } from 'react-cookie';
 import type { UseFormReturn } from 'react-hook-form';
 import { DEFAULT_COUNTRY_CODE } from 'src/core';
 import type { Country } from '../../types/country.types';
@@ -34,10 +35,17 @@ type SelectBuyRegionStepProps = {
   form: UseFormReturn<BuyFormData>;
 };
 
+type CookieMap = {
+  panna_user_country: Country;
+};
+
 export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
   const { next } = useDialogStepper();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [cookie, setCookie] = useCookies<'panna_user_country', CookieMap>([
+    'panna_user_country'
+  ]);
 
   const countries = useMemo(() => {
     if (!query) return COUNTRIES_SORTED;
@@ -55,16 +63,35 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
         ? getCountryByCode(detectedCountryCode)
         : null;
 
-      // Set default country: detected > US > first available
+      // Set default country: cookie > (detected > US > first available)
       const defaultCountry =
         detectedCountry ||
         getCountryByCode(DEFAULT_COUNTRY_CODE) ||
         COUNTRIES_SORTED[0];
-      if (defaultCountry) {
+      if (cookie.panna_user_country?.code) {
+        const cookieCountry = getCountryByCode(cookie.panna_user_country.code);
+        if (cookieCountry) {
+          form.setValue('country', cookieCountry);
+        } else if (defaultCountry) {
+          form.setValue('country', defaultCountry);
+        }
+      } else if (defaultCountry) {
         form.setValue('country', defaultCountry);
       }
     }
-  }, [form]);
+  }, [form, cookie.panna_user_country?.code]);
+
+  const handleCountrySubmit = () => {
+    const selectedCountry = form.getValues('country');
+    if (!selectedCountry) return;
+    if (
+      !cookie.panna_user_country?.code ||
+      cookie.panna_user_country.code !== selectedCountry.code
+    ) {
+      setCookie('panna_user_country', selectedCountry);
+    }
+    next();
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -142,7 +169,7 @@ export function SelectBuyRegionStep({ form }: SelectBuyRegionStepProps) {
       />
       <Button
         type="button"
-        onClick={() => next()}
+        onClick={handleCountrySubmit}
         disabled={!form.watch('country')}
       >
         Next

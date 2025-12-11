@@ -259,6 +259,9 @@ importers:
       react:
         specifier: '>=18.0.0'
         version: 19.1.0
+      react-cookie:
+        specifier: ^8.0.1
+        version: 8.0.1(@types/react@19.1.8)(react@19.1.0)
       react-dom:
         specifier: '>=18.0.0'
         version: 19.1.0(react@19.1.0)
@@ -3591,6 +3594,14 @@ packages:
       {
         integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==
       }
+
+  '@types/hoist-non-react-statics@3.3.7':
+    resolution:
+      {
+        integrity: sha512-PQTyIulDkIDro8P+IHbKCsw7U2xxBYflVzW/FgWdCAePD9xGSidgA76/GeJ6lBKoblyhf9pBY763gbrN+1dI8g==
+      }
+    peerDependencies:
+      '@types/react': '*'
 
   '@types/istanbul-lib-coverage@2.0.6':
     resolution:
@@ -9040,6 +9051,14 @@ packages:
         integrity: sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg==
       }
 
+  react-cookie@8.0.1:
+    resolution:
+      {
+        integrity: sha512-QNdAd0MLuAiDiLcDU/2s/eyKmmfMHtjPUKJ2dZ/5CcQ9QKUium4B3o61/haq6PQl/YWFqC5PO8GvxeHKhy3GFA==
+      }
+    peerDependencies:
+      react: '>= 16.3.0'
+
   react-dom@19.1.0:
     resolution:
       {
@@ -12960,6 +12979,11 @@ snapshots:
   '@types/graceful-fs@4.1.9':
     dependencies:
       '@types/node': 20.19.8
+
+  '@types/hoist-non-react-statics@3.3.7(@types/react@19.1.8)':
+    dependencies:
+      '@types/react': 19.1.8
+      hoist-non-react-statics: 3.3.2
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 
@@ -16937,6 +16961,15 @@ snapshots:
     dependencies:
       defu: 6.1.4
       destr: 2.0.5
+
+  react-cookie@8.0.1(@types/react@19.1.8)(react@19.1.0):
+    dependencies:
+      '@types/hoist-non-react-statics': 3.3.7(@types/react@19.1.8)
+      hoist-non-react-statics: 3.3.2
+      react: 19.1.0
+      universal-cookie: 8.0.1
+    transitivePeerDependencies:
+      - '@types/react'
 
   react-dom@19.1.0(react@19.1.0):
     dependencies:

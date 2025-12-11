@@ -1,5 +1,6 @@
 import type { Account } from 'thirdweb/wallets';
 import Cookies from 'universal-cookie';
+import { authCookieOptions } from '../consts/cookies';
 import { PannaApiService } from '../util/api-service';
 import type {
   AuthChallengeReply,
@@ -68,11 +69,7 @@ export class SiweAuth {
     this.pannaApiService = pannaApiService;
     // Cookie configuration for auth token storage
     // Using sameSite: 'strict' for CSRF protection, and secure: true to require HTTPS.
-    this.cookies = new Cookies(null, {
-      path: '/',
-      secure: true,
-      sameSite: 'strict'
-    });
+    this.cookies = new Cookies(null, authCookieOptions);
 
     // Load existing auth data from cookies on initialization
     if (typeof window !== 'undefined') {
