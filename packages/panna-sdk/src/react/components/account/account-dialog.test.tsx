@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { FiatCurrency } from 'src/core';
-import { truncateAddress } from '@/utils/address';
 import { useTotalFiatBalance } from '../../hooks';
 import { BuyFormProps, StepperRefProvider } from '../buy/buy-form';
 import { SendCollectibleFormProps } from '../collectibles/send-collectible-form';
@@ -68,6 +67,15 @@ jest.mock('./account-screens-provider', () => ({
   )
 }));
 
+jest.mock('@dicebear/collection', () => ({
+  glass: {}
+}));
+jest.mock('@dicebear/core', () => ({
+  createAvatar: jest.fn().mockReturnValue({
+    toDataUri: jest.fn().mockReturnValue('data:image/png;base64,avatar')
+  })
+}));
+
 const AccountDialogWrapper = ({ address }: { address: string }) => (
   <AccountViewProvider>
     <AccountDialog address={address} />
@@ -78,7 +86,6 @@ describe('AccountDialog', () => {
   const mockAddress = '0x1234567890abcdef';
 
   beforeEach(() => {
-    (truncateAddress as jest.Mock).mockReturnValue('0x1234...cdef');
     (useTotalFiatBalance as jest.Mock).mockReturnValue({
       data: 1234.56,
       isLoading: false
@@ -89,18 +96,15 @@ describe('AccountDialog', () => {
     jest.clearAllMocks();
   });
 
-  it('renders dialog trigger with truncated address', () => {
+  it('renders dialog trigger with account avatar', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
-    expect(
-      screen.getByRole('button', { name: '0x1234...cdef' })
-    ).toBeInTheDocument();
-    expect(truncateAddress).toHaveBeenCalledWith(mockAddress);
+    expect(screen.getByAltText('User Avatar')).toBeInTheDocument();
   });
 
   it('displays total balance in USD when dialog is opened', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
 
     expect(screen.getByText('$1234.56')).toBeInTheDocument();
     expect(screen.getByText('Total value')).toBeInTheDocument();
@@ -114,7 +118,7 @@ describe('AccountDialog', () => {
 
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
 
     expect(screen.getByText('...')).toBeInTheDocument();
   });
@@ -122,7 +126,7 @@ describe('AccountDialog', () => {
   it('navigates to settings view when settings icon is clicked', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
 
     const settingsButton = screen.getByTestId('open-settings');
     fireEvent.click(settingsButton);
@@ -134,7 +138,7 @@ describe('AccountDialog', () => {
   it('navigates back from settings to main view', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
 
     // Go to settings
     const settingsButton = screen.getByTestId('open-settings');
@@ -150,7 +154,7 @@ describe('AccountDialog', () => {
   it('navigates to send form when send button is clicked', async () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
 
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
 
@@ -160,7 +164,7 @@ describe('AccountDialog', () => {
   it('closes send form and returns to main view', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
     fireEvent.click(screen.getByRole('button', { name: /send/i }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Close Send' }));
@@ -180,7 +184,7 @@ describe('AccountDialog', () => {
   it('renders accessibility description', () => {
     render(<AccountDialogWrapper address={mockAddress} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '0x1234...cdef' }));
+    fireEvent.click(screen.getByAltText('User Avatar'));
 
     expect(
       screen.getByText('Select account views and manage your account settings.')
