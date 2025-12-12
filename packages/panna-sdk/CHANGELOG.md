@@ -1,5 +1,11 @@
 # panna-sdk
 
+## 0.3.0-beta.1
+
+### Patch Changes
+
+- Bumps nextjs and react versions to mitigate security vulnerability
+
 ## 0.3.0-beta.0
 
 ### Minor Changes
