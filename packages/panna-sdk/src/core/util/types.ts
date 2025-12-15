@@ -171,6 +171,34 @@ export enum FiatCurrency {
   ZMW = 'ZMW' // Zambian Kwacha
 }
 
+export enum FiatLimitsEnum {
+  ONRAMP = 'onramp',
+  OFFRAMP = 'offramp',
+  BOTH = 'both'
+}
+
+export type FiatLimitsParams =
+  (typeof FiatLimitsEnum)[keyof typeof FiatLimitsEnum];
+
+export type FiatLimitsData = Partial<{
+  onramp: {
+    [key in FiatCurrency]: {
+      min: number;
+      max: number;
+    };
+  };
+  offramp: {
+    [key in FiatCurrency]: {
+      min: number;
+      max: number;
+    };
+  };
+}>;
+
+export type FiatLimitsResponse = FiatLimitsData & {
+  success: boolean;
+};
+
 // Parameters for getting fiat price
 export interface GetFiatPriceParams {
   client: PannaClient;

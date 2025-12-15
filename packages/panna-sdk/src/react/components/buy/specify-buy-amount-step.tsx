@@ -1,11 +1,19 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { DEFAULT_COUNTRY_CODE, type FiatCurrency } from 'src/core';
+import {
+  DEFAULT_COUNTRY_CODE,
+  FiatLimitsEnum,
+  type FiatCurrency
+} from 'src/core';
+import { z } from 'zod';
+import { useFiatCurrencyLimits } from '@/hooks/use-fiat-currency-limits';
+import '@/utils/amount';
 import { useFiatToCrypto, useSupportedTokens } from '../../hooks';
 import {
-  getEnvironmentChain,
+  formatWithCommas,
   getCurrencyForCountry,
-  getCurrencySymbol
+  getCurrencySymbol,
+  getEnvironmentChain
 } from '../../utils';
 import { Button } from '../ui/button';
 import { DialogHeader, DialogTitle } from '../ui/dialog';
@@ -36,6 +44,44 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
   // Input state for decimal handling
   const [inputValue, setInputValue] = useState(fiatAmount?.toString() || '');
   const [isFocused, setIsFocused] = useState(false);
+  const {
+    isLoading: isFiatLimitsLoading,
+    isError: isFiatLimitsError,
+    data: fiatLimits
+  } = useFiatCurrencyLimits(FiatLimitsEnum.ONRAMP);
+  const minFiatLimit = fiatLimits?.onramp?.[currencyCode as FiatCurrency]?.min;
+  const maxFiatLimit = fiatLimits?.onramp?.[currencyCode as FiatCurrency]?.max;
+
+  // Dynamic validation schema based on API limits
+  const fiatAmountSchema = useMemo(() => {
+    let baseSchema = z
+      .number()
+      .gt(0, { message: 'Amount must be greater than 0' });
+
+    // Only apply min/max validation if limits are loaded
+    if (
+      !isFiatLimitsLoading &&
+      !isFiatLimitsError &&
+      minFiatLimit &&
+      maxFiatLimit
+    ) {
+      baseSchema = baseSchema
+        .min(minFiatLimit, {
+          message: `Minimum amount is ${currencySymbol}${formatWithCommas(minFiatLimit)}`
+        })
+        .max(maxFiatLimit, {
+          message: `Maximum amount is ${currencySymbol}${formatWithCommas(maxFiatLimit)}`
+        });
+    }
+
+    return baseSchema.optional();
+  }, [
+    minFiatLimit,
+    maxFiatLimit,
+    isFiatLimitsLoading,
+    isFiatLimitsError,
+    currencySymbol
+  ]);
 
   // Sync from form value when input is not focused
   // This handles: preset buttons, normalization on blur
@@ -103,6 +149,22 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
     }
   };
 
+  const handleFormSubmit = () => {
+    const amount = form.getValues('fiatAmount');
+    const result = fiatAmountSchema.safeParse(amount);
+
+    if (!result.success) {
+      form.setError('fiatAmount', {
+        type: 'manual',
+        message: result.error.errors[0].message
+      });
+      return;
+    }
+
+    form.clearErrors('fiatAmount');
+    next();
+  };
+
   return (
     <div className="flex flex-col items-center gap-6">
       <DialogHeader className="items-center gap-0">
@@ -152,24 +214,40 @@ export function SpecifyBuyAmountStep({ form }: SpecifyBuyAmountStepProps) {
         )}
       />
       <div className="flex gap-3">
-        {[25, 50, 100].map((value) => (
-          <Button
-            key={value}
-            type="button"
-            variant={
-              form.watch('fiatAmount') === value ? 'default' : 'secondary'
-            }
-            onClick={() => form.setValue('fiatAmount', value)}
-          >
-            {currencySymbol}
-            {value}
-          </Button>
-        ))}
+        {isFiatLimitsLoading
+          ? 'Loading...'
+          : isFiatLimitsError
+            ? [25, 50, 100].map((value) => (
+                <Button
+                  key={value}
+                  type="button"
+                  variant={
+                    form.watch('fiatAmount') === value ? 'default' : 'secondary'
+                  }
+                  onClick={() => form.setValue('fiatAmount', value)}
+                >
+                  {currencySymbol}
+                  {value}
+                </Button>
+              ))
+            : [minFiatLimit!, minFiatLimit! * 2, maxFiatLimit!].map((value) => (
+                <Button
+                  key={value}
+                  type="button"
+                  variant={
+                    form.watch('fiatAmount') === value ? 'default' : 'secondary'
+                  }
+                  onClick={() => form.setValue('fiatAmount', value)}
+                >
+                  {currencySymbol}
+                  {formatWithCommas(value)}
+                </Button>
+              ))}
       </div>
       <Button
         type="button"
         className="w-full"
-        onClick={() => next()}
+        onClick={handleFormSubmit}
         disabled={!form.watch('fiatAmount') || form.watch('fiatAmount')! <= 0}
       >
         Next
