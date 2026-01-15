@@ -3,7 +3,7 @@
   "tag": "beta",
   "initialVersions": {
     "example-app": "0.1.0",
-    "panna-sdk": "0.2.0-alpha.0"
+    "panna-sdk": "0.2.0"
   },
-  "changesets": ["social-cars-smash", "stale-pandas-rush", "wet-schools-raise"]
+  "changesets": ["clean-areas-exist", "thick-bats-kiss"]
 }
