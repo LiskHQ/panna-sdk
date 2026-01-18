@@ -3,3 +3,4 @@ export * from './utils';
 export * from './countries';
 export * from './address';
 export * from './query-utils';
+export * from './amount';

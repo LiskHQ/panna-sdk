@@ -13,6 +13,11 @@ import {
   type AuthChallengeRequest,
   type AuthVerifyReply,
   type AuthVerifyRequest,
+  FiatCurrency,
+  type FiatLimitsData,
+  FiatLimitsEnum,
+  type FiatLimitsParams,
+  type FiatLimitsResponse,
   type OnrampQuoteRequest,
   type OnrampQuoteResponse,
   type OnrampSessionRequest,
@@ -65,6 +70,35 @@ const isValidSessionData = (
       data.expires_at
   );
 };
+
+const createMockFiatLimitsData = (limitType: string): FiatLimitsData => ({
+  ...(limitType === FiatLimitsEnum.ONRAMP &&
+    ({
+      onramp: {
+        [FiatCurrency.USD]: {
+          min: 10,
+          max: 1000
+        },
+        [FiatCurrency.EUR]: {
+          min: 10,
+          max: 900
+        }
+      }
+    } as FiatLimitsData)),
+  ...(limitType === FiatLimitsEnum.OFFRAMP &&
+    ({
+      offramp: {
+        [FiatCurrency.USD]: {
+          min: 5,
+          max: 800
+        },
+        [FiatCurrency.EUR]: {
+          min: 5,
+          max: 700
+        }
+      }
+    } as FiatLimitsData))
+});
 
 /**
  * API service for sending account events to the Panna app.
@@ -520,6 +554,67 @@ export class PannaApiService {
       return payload.data;
     } catch (error) {
       console.error('Failed to create onramp session with Panna API:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch fiat-to-crypto onramp quote data
+   * @param request - The onramp quote request payload
+   * @param authToken - JWT authentication token
+   * @returns Promise resolving to the quote data
+   */
+  public async getFiatCurrencyLimits(
+    request: FiatLimitsParams,
+    authToken: string
+  ): Promise<FiatLimitsData> {
+    const { baseUrl, isMockMode } = this.config;
+
+    if (!baseUrl) {
+      throw new Error('Panna API base URL is not configured.');
+    }
+
+    const url = `${baseUrl}/onramp/limits?type=${request}`;
+
+    if (!authToken) {
+      throw new Error(
+        'Authentication token is required to fetch onramp quotes.'
+      );
+    }
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${authToken}`
+    };
+
+    if (isMockMode) {
+      return createMockFiatLimitsData(request);
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Panna API fiat limit failed: ${response.status} ${response.statusText} - ${errorText}`
+        );
+      }
+
+      const payload: FiatLimitsResponse = await response.json();
+
+      if (!payload.success) {
+        throw new Error(
+          'Panna API fiat limit response marked as unsuccessful.'
+        );
+      }
+
+      return payload;
+    } catch (error) {
+      console.error('Failed to fetch fiat limit from Panna API:', error);
       throw error;
     }
   }
